@@ -3,17 +3,27 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B533138C26ECB7FD007C94BF /* Server.swift in Sources */ = {isa = PBXBuildFile; fileRef = B533138B26ECB7FD007C94BF /* Server.swift */; };
+		B533138E26ECB82C007C94BF /* ServerTaskTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B533138D26ECB82C007C94BF /* ServerTaskTypes.swift */; };
+		B533139026ECB887007C94BF /* Server.Remote.swift in Sources */ = {isa = PBXBuildFile; fileRef = B533138F26ECB887007C94BF /* Server.Remote.swift */; };
 		B54CAB8326ECB76400781A3A /* ConveyTestApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54CAB8226ECB76400781A3A /* ConveyTestApp.swift */; };
 		B54CAB8526ECB76400781A3A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54CAB8426ECB76400781A3A /* ContentView.swift */; };
 		B54CAB8726ECB76400781A3A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B54CAB8626ECB76400781A3A /* Assets.xcassets */; };
 		B54CAB8A26ECB76400781A3A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B54CAB8926ECB76400781A3A /* Preview Assets.xcassets */; };
+		B54CAB9426ECB99F00781A3A /* Suite in Frameworks */ = {isa = PBXBuildFile; productRef = B54CAB9326ECB99F00781A3A /* Suite */; };
+		B54CAB9626ECBB2A00781A3A /* ServerTask+Run.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54CAB9526ECBB2A00781A3A /* ServerTask+Run.swift */; };
+		B54CAB9B26ECC08E00781A3A /* ServerTask+Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54CAB9A26ECC08E00781A3A /* ServerTask+Request.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B533138726ECB7A2007C94BF /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		B533138B26ECB7FD007C94BF /* Server.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Server.swift; sourceTree = "<group>"; };
+		B533138D26ECB82C007C94BF /* ServerTaskTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerTaskTypes.swift; sourceTree = "<group>"; };
+		B533138F26ECB887007C94BF /* Server.Remote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Server.Remote.swift; sourceTree = "<group>"; };
 		B54CAB7F26ECB76400781A3A /* ConveyTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ConveyTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B54CAB8226ECB76400781A3A /* ConveyTestApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConveyTestApp.swift; sourceTree = "<group>"; };
 		B54CAB8426ECB76400781A3A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -21,6 +31,9 @@
 		B54CAB8926ECB76400781A3A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B54CAB8B26ECB76400781A3A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B54CAB8C26ECB76400781A3A /* ConveyTest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ConveyTest.entitlements; sourceTree = "<group>"; };
+		B54CAB9526ECBB2A00781A3A /* ServerTask+Run.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerTask+Run.swift"; sourceTree = "<group>"; };
+		B54CAB9726ECBB7C00781A3A /* Suite */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Suite; path = ../Suite; sourceTree = "<group>"; };
+		B54CAB9A26ECC08E00781A3A /* ServerTask+Request.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerTask+Request.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -28,15 +41,39 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B54CAB9426ECB99F00781A3A /* Suite in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B533138926ECB7FD007C94BF /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				B533138A26ECB7FD007C94BF /* Convey */,
+			);
+			path = Source;
+			sourceTree = "<group>";
+		};
+		B533138A26ECB7FD007C94BF /* Convey */ = {
+			isa = PBXGroup;
+			children = (
+				B533138B26ECB7FD007C94BF /* Server.swift */,
+				B533138F26ECB887007C94BF /* Server.Remote.swift */,
+				B533138D26ECB82C007C94BF /* ServerTaskTypes.swift */,
+				B54CAB9526ECBB2A00781A3A /* ServerTask+Run.swift */,
+				B54CAB9A26ECC08E00781A3A /* ServerTask+Request.swift */,
+			);
+			path = Convey;
+			sourceTree = "<group>";
+		};
 		B54CAB7626ECB76400781A3A = {
 			isa = PBXGroup;
 			children = (
+				B54CAB9726ECBB7C00781A3A /* Suite */,
+				B533138726ECB7A2007C94BF /* Package.swift */,
+				B533138926ECB7FD007C94BF /* Source */,
 				B54CAB8126ECB76400781A3A /* ConveyTest */,
 				B54CAB8026ECB76400781A3A /* Products */,
 			);
@@ -87,6 +124,9 @@
 			dependencies = (
 			);
 			name = ConveyTest;
+			packageProductDependencies = (
+				B54CAB9326ECB99F00781A3A /* Suite */,
+			);
 			productName = ConveyTest;
 			productReference = B54CAB7F26ECB76400781A3A /* ConveyTest.app */;
 			productType = "com.apple.product-type.application";
@@ -114,6 +154,9 @@
 				Base,
 			);
 			mainGroup = B54CAB7626ECB76400781A3A;
+			packageReferences = (
+				B54CAB9226ECB99F00781A3A /* XCRemoteSwiftPackageReference "Suite" */,
+			);
 			productRefGroup = B54CAB8026ECB76400781A3A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -141,6 +184,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				B54CAB8526ECB76400781A3A /* ContentView.swift in Sources */,
+				B533138E26ECB82C007C94BF /* ServerTaskTypes.swift in Sources */,
+				B54CAB9626ECBB2A00781A3A /* ServerTask+Run.swift in Sources */,
+				B533138C26ECB7FD007C94BF /* Server.swift in Sources */,
+				B533139026ECB887007C94BF /* Server.Remote.swift in Sources */,
+				B54CAB9B26ECC08E00781A3A /* ServerTask+Request.swift in Sources */,
 				B54CAB8326ECB76400781A3A /* ConveyTestApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -333,6 +381,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B54CAB9226ECB99F00781A3A /* XCRemoteSwiftPackageReference "Suite" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/bengottlieb/Suite.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.10.92;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B54CAB9326ECB99F00781A3A /* Suite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B54CAB9226ECB99F00781A3A /* XCRemoteSwiftPackageReference "Suite" */;
+			productName = Suite;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B54CAB7726ECB76400781A3A /* Project object */;
 }

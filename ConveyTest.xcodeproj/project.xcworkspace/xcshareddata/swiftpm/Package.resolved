@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Suite",
+        "repositoryURL": "https://github.com/bengottlieb/Suite.git",
+        "state": {
+          "branch": null,
+          "revision": "4ab74a17d46af77cf9e9c6a4b36fc307012faf3e",
+          "version": "0.10.92"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
