@@ -37,9 +37,15 @@ public extension ServerTask {
 	}
 	
 	var url: URL {
-		if let custom = self as? CustomURLTask, let customURL = custom.customURL { return customURL }
-		
-		return server.url(forPath: path)
+		let base = (self as? CustomURLTask)?.customURL ?? server.url(forPath: path)
+		if let parameters = (self as? ParamaterizedTask)?.parameters {
+			var components = URLComponents(url: base, resolvingAgainstBaseURL: true)
+			
+			components?.queryItems = parameters.map { URLQueryItem(name: $0.key, value: $0.value) }
+			if let newURL = components?.url { return newURL }
+		}
+
+		return base
 	}
 	
 
