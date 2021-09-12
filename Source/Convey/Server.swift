@@ -5,8 +5,7 @@
 //  Created by Ben Gottlieb on 9/11/21.
 //
 
-import Foundation
-import Combine
+import Suite
 
 open class Server: NSObject, ObservableObject {
 	public static let instance = Server()
@@ -14,14 +13,14 @@ open class Server: NSObject, ObservableObject {
 	
 	@Published public var remote: Remote!
 	
-	public var baseURL: URL { remote.url }
-	public var session: URLSession!
-	public var isReady = CurrentValueSubject<Bool, Never>(false)
-	public var recentServerError: Error? { didSet { self.objectWillChange.send() }}
-	public var showCloudProblem = false
-	public var defaultEncoder = JSONEncoder()
-	public var defaultDecoder = JSONDecoder()
-	public var defaultHeaders: [String: String] = [
+	open var baseURL: URL { remote.url }
+	open var session: URLSession!
+	open var isReady = CurrentValueSubject<Bool, Never>(false)
+	open var recentServerError: Error? { didSet { self.objectWillChange.sendOnMain() }}
+	open var showCloudProblem = false
+	open var defaultEncoder = JSONEncoder()
+	open var defaultDecoder = JSONDecoder()
+	open var defaultHeaders: [String: String] = [
 		"Content-Type": "application/json",
 		"Accept": "*"
 	]
