@@ -17,7 +17,7 @@ let package = Package(
 				targets: ["Convey"]),
 	 ],
 	 dependencies: [
-		.package(url: "https://github.com/bengottlieb/Suite.git", from: "0.10.92"),
+		.package(url: "https://github.com/bengottlieb/Suite.git", from: "0.10.93"),
 	 ],
 	 targets: [
 		  // Targets are the basic building blocks of a package. A target can define a module or a test suite.
