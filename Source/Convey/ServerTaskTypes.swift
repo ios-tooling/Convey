@@ -7,6 +7,8 @@
 
 import Suite
 
+public typealias PreviewClosure = (Data, HTTPURLResponse) -> Void
+
 public protocol ServerTask {
 	var path: String { get }
 }

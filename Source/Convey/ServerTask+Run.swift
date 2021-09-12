@@ -8,27 +8,28 @@
 import Suite
 
 public extension PayloadDownloadingTask {
-	func download() -> AnyPublisher<DownloadPayload, HTTPError> {
-		fetch()
+	func download(decoder: JSONDecoder? = nil, preview: PreviewClosure?) -> AnyPublisher<DownloadPayload, HTTPError> {
+		fetch(decoder: decoder, preview: preview)
 	}
 }
 
 public extension ServerTask {
 	var server: Server { Server.instance }
 	
-	func fetch<Payload: Decodable>(decoder: JSONDecoder? = nil) -> AnyPublisher<Payload, HTTPError> {
-		run()
+	func fetch<Payload: Decodable>(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<Payload, HTTPError> {
+		run(preview: preview)
 			.decode(type: Payload.self, decoder: decoder ?? server.defaultDecoder)
 			.mapError { HTTPError(url, $0) }
 			.eraseToAnyPublisher()
 	}
 	
-	func run() -> AnyPublisher<Data, HTTPError> {
+	func run(preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
 		buildRequest()
 			.mapError { HTTPError.other($0) }
 			.flatMap { (request: URLRequest) -> AnyPublisher<Data, HTTPError> in
 				server.session.dataTaskPublisher(for: request)
 					.assumeHTTP()
+					.map { data in preview?(data.data, data.response); return data }
 					.preprocess(using: self)
 					.responseData()
 					.eraseToAnyPublisher()

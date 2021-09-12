@@ -8,14 +8,14 @@
 import Suite
 
 public extension PayloadDownloadingTask where Self: PayloadUploadingTask {
-	func upload() -> AnyPublisher<DownloadPayload, HTTPError> {
-		fetch()
+	func upload(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<DownloadPayload, HTTPError> {
+		fetch(decoder: decoder, preview: preview)
 	}
 }
 
 public extension PayloadUploadingTask {
-	func upload() -> AnyPublisher<Data, HTTPError> {
-		run()
+	func upload(preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
+		run(preview: preview)
 	}
 
 	var uploadData: Data? {
