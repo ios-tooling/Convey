@@ -14,8 +14,14 @@ public extension PayloadDownloadingTask where Self: PayloadUploadingTask {
 }
 
 public extension PayloadUploadingTask {
-	func upload(preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
+	func uploadAndDownload(preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
 		run(caching: .skipLocal, preview: preview)
+	}
+
+	func upload(preview: PreviewClosure? = nil) -> AnyPublisher<Int, HTTPError> {
+		submit(caching: .skipLocal, preview: preview)
+			.map { $0.response.statusCode }
+			.eraseToAnyPublisher()
 	}
 
 	var uploadData: Data? {

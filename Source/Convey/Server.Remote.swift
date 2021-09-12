@@ -9,11 +9,13 @@ import Foundation
 
 public extension Server {
 	struct Remote {
-		let name: String?
-		let url: URL
+		public let name: String?
+		public let url: URL
+		public let shortName: String?
 		
-		init(name: String? = nil, url: URL) {
+		public init(_ url: URL, name: String? = nil, shortName: String? = nil) {
 			self.name = name
+			self.shortName = shortName
 			self.url = url
 		}
 	}

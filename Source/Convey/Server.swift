@@ -8,16 +8,13 @@
 import Suite
 
 open class Server: NSObject, ObservableObject {
-	public static let instance = Server()
-	
-	
+	public static var serverInstance: Server!
 	@Published public var remote: Remote!
 	
 	open var baseURL: URL { remote.url }
 	open var session: URLSession!
 	open var isReady = CurrentValueSubject<Bool, Never>(false)
 	open var recentServerError: Error? { didSet { self.objectWillChange.sendOnMain() }}
-	open var showCloudProblem = false
 	open var defaultEncoder = JSONEncoder()
 	open var defaultDecoder = JSONDecoder()
 	open var defaultHeaders: [String: String] = [
@@ -25,13 +22,14 @@ open class Server: NSObject, ObservableObject {
 		"Accept": "*"
 	]
 	
-	override init() {
+	public override init() {
 		super.init()
 		let config = URLSessionConfiguration.default
 		config.allowsCellularAccess = true
 		config.allowsConstrainedNetworkAccess = true
 		
 		session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
+		Self.serverInstance = self
 	}
 
 	open func standardHeaders() -> [String: String] {
