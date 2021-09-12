@@ -26,6 +26,11 @@ public extension ServerTask {
 		var request = URLRequest(url: url)
 		
 		request.httpMethod = httpMethod
+		if let dataProvider = self as? DataUploadingTask {
+			if request.httpMethod == "GET" { request.httpMethod = "POST" }
+			request.httpBody = dataProvider.uploadData
+		}
+		request.allHTTPHeaderFields = server.standardHeaders()
 		
 		return request
 	}

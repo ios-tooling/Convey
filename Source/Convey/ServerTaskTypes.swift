@@ -15,7 +15,7 @@ public protocol ParamaterizedTask: ServerTask {
 	var parameters: [String: String]? { get }
 }
 
-public protocol PayloadReturningTask: ServerTask {
+public protocol PayloadDownloadingTask: ServerTask {
 	associatedtype DownloadPayload: Decodable
 }
 
@@ -27,8 +27,17 @@ public protocol CustomURLRequestTask: ServerTask {
 	var customURLRequest: AnyPublisher<URLRequest?, Error> { get }
 }
 
-public protocol PayloadUploadingTask: ServerTask {
+public protocol PayloadUploadingTask: DataUploadingTask {
 	associatedtype UploadPayload: Encodable
+	var uploadPayload: UploadPayload? { get }
+}
+
+public protocol DataUploadingTask: ServerTask {
+	var uploadData: Data? { get }
+}
+
+public protocol CustomJSONEncoderTask: ServerTask {
+	var jsonEncoder: JSONEncoder? { get }
 }
 
 public protocol CustomHTTPMethodTask: ServerTask {

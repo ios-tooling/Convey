@@ -7,7 +7,7 @@
 
 import Suite
 
-public extension PayloadReturningTask {
+public extension PayloadDownloadingTask {
 	func download() -> AnyPublisher<DownloadPayload, HTTPError> {
 		fetch()
 	}

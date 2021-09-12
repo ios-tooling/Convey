@@ -19,7 +19,12 @@ open class Server: NSObject, ObservableObject {
 	public var isReady = CurrentValueSubject<Bool, Never>(false)
 	public var recentServerError: Error? { didSet { self.objectWillChange.send() }}
 	public var showCloudProblem = false
+	public var defaultEncoder = JSONEncoder()
 	public var defaultDecoder = JSONDecoder()
+	public var defaultHeaders: [String: String] = [
+		"Content-Type": "application/json",
+		"Accept": "*"
+	]
 	
 	override init() {
 		super.init()
@@ -30,8 +35,16 @@ open class Server: NSObject, ObservableObject {
 		session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
 	}
 
+	open func standardHeaders() -> [String: String] {
+		defaultHeaders
+	}
+
 	open func url(forPath path: String) -> URL {
 		baseURL.appendingPathComponent(path)
+	}
+
+	open func handle(error: Error, from task: ServerTask) {
+		print("Error: \(error) from \(task)")
 	}
 }
 
