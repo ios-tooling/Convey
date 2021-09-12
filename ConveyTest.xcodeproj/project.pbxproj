@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B500800B26ED7AFE004E1E31 /* UploadingTasks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B500800A26ED7AFE004E1E31 /* UploadingTasks.swift */; };
+		B500800B26ED7AFE004E1E31 /* ServerTask+Upload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B500800A26ED7AFE004E1E31 /* ServerTask+Upload.swift */; };
 		B533138C26ECB7FD007C94BF /* Server.swift in Sources */ = {isa = PBXBuildFile; fileRef = B533138B26ECB7FD007C94BF /* Server.swift */; };
 		B533138E26ECB82C007C94BF /* ServerTaskTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B533138D26ECB82C007C94BF /* ServerTaskTypes.swift */; };
 		B533139026ECB887007C94BF /* Server.Remote.swift in Sources */ = {isa = PBXBuildFile; fileRef = B533138F26ECB887007C94BF /* Server.Remote.swift */; };
@@ -21,7 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		B500800A26ED7AFE004E1E31 /* UploadingTasks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadingTasks.swift; sourceTree = "<group>"; };
+		B500800A26ED7AFE004E1E31 /* ServerTask+Upload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerTask+Upload.swift"; sourceTree = "<group>"; };
 		B533138726ECB7A2007C94BF /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		B533138B26ECB7FD007C94BF /* Server.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Server.swift; sourceTree = "<group>"; };
 		B533138D26ECB82C007C94BF /* ServerTaskTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerTaskTypes.swift; sourceTree = "<group>"; };
@@ -66,7 +66,7 @@
 				B533138D26ECB82C007C94BF /* ServerTaskTypes.swift */,
 				B54CAB9526ECBB2A00781A3A /* ServerTask+Run.swift */,
 				B54CAB9A26ECC08E00781A3A /* ServerTask+Request.swift */,
-				B500800A26ED7AFE004E1E31 /* UploadingTasks.swift */,
+				B500800A26ED7AFE004E1E31 /* ServerTask+Upload.swift */,
 			);
 			path = Convey;
 			sourceTree = "<group>";
@@ -191,7 +191,7 @@
 				B54CAB9626ECBB2A00781A3A /* ServerTask+Run.swift in Sources */,
 				B533138C26ECB7FD007C94BF /* Server.swift in Sources */,
 				B533139026ECB887007C94BF /* Server.Remote.swift in Sources */,
-				B500800B26ED7AFE004E1E31 /* UploadingTasks.swift in Sources */,
+				B500800B26ED7AFE004E1E31 /* ServerTask+Upload.swift in Sources */,
 				B54CAB9B26ECC08E00781A3A /* ServerTask+Request.swift in Sources */,
 				B54CAB8326ECB76400781A3A /* ConveyTestApp.swift in Sources */,
 			);

@@ -9,13 +9,13 @@ import Suite
 
 public extension PayloadDownloadingTask where Self: PayloadUploadingTask {
 	func upload(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<DownloadPayload, HTTPError> {
-		fetch(decoder: decoder, preview: preview)
+		fetch(caching: .skipLocal, decoder: decoder, preview: preview)
 	}
 }
 
 public extension PayloadUploadingTask {
 	func upload(preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
-		run(preview: preview)
+		run(caching: .skipLocal, preview: preview)
 	}
 
 	var uploadData: Data? {

@@ -50,6 +50,7 @@ public protocol PreprocessingTask: ServerTask {
 	func preprocess(data: Data, response: HTTPURLResponse) -> HTTPError?
 }
 
+public protocol ServerCachableTask { }
 public protocol ServerGETTask { }
 public protocol ServerPUTTask { }
 public protocol ServerPOSTTask { }
