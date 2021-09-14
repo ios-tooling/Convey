@@ -11,6 +11,7 @@ public typealias PreviewClosure = (Data, HTTPURLResponse) -> Void
 
 public protocol ServerTask {
 	var path: String { get }
+	func postprocess(data: Data, response: HTTPURLResponse)
 }
 
 public protocol ParamaterizedTask: ServerTask {
@@ -19,6 +20,7 @@ public protocol ParamaterizedTask: ServerTask {
 
 public protocol PayloadDownloadingTask: ServerTask {
 	associatedtype DownloadPayload: Decodable
+	func postprocess(payload: DownloadPayload)
 }
 
 public protocol CustomURLTask: ServerTask {
@@ -38,16 +40,16 @@ public protocol DataUploadingTask: ServerTask {
 	var uploadData: Data? { get }
 }
 
+public protocol JSONUploadingTask: DataUploadingTask {
+	var uploadJSON: [String: Any]? { get }
+}
+
 public protocol CustomJSONEncoderTask: ServerTask {
 	var jsonEncoder: JSONEncoder? { get }
 }
 
 public protocol CustomHTTPMethodTask: ServerTask {
 	var customHTTPMethod: String { get }
-}
-
-public protocol PreprocessingTask: ServerTask {
-	func preprocess(data: Data, response: HTTPURLResponse) -> HTTPError?
 }
 
 public protocol ServerCacheableTask { }

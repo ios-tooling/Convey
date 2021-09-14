@@ -8,8 +8,14 @@
 import Suite
 
 public extension PayloadDownloadingTask {
+	func postprocess(payload: DownloadPayload) { }
 	func download(caching: CachePolicy = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<DownloadPayload, HTTPError> {
 		fetch(caching: caching, decoder: decoder, preview: preview)
+			.map { (payload: DownloadPayload) -> DownloadPayload in
+				postprocess(payload: payload)
+				return payload
+			}
+			.eraseToAnyPublisher()
 	}
 	
 	func cachedPayload(decoder: JSONDecoder? = nil) -> DownloadPayload? {
@@ -29,6 +35,8 @@ public extension PayloadDownloadingTask {
 public extension ServerTask {
 	var server: Server { Server.serverInstance }
 	
+	func postprocess(data: Data, response: HTTPURLResponse) { }
+
 	func fetch<Payload: Decodable>(caching: CachePolicy = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<Payload, HTTPError> {
 		run(caching: caching, preview: preview)
 			.decode(type: Payload.self, decoder: decoder ?? server.defaultDecoder)
@@ -61,8 +69,11 @@ public extension ServerTask {
 			.mapError { HTTPError.other($0) }
 			.flatMap { (request: URLRequest) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> in
 				server.data(for: request)
-					.map { data in preview?(data.data, data.response); return data }
-					.preprocess(using: self)
+					.map { data in
+						preview?(data.data, data.response);
+						postprocess(data: data.data, response: data.response)
+						return data
+					}
 					.eraseToAnyPublisher()
 			}
 			.eraseToAnyPublisher()
@@ -82,19 +93,5 @@ public extension ServerTask {
 
 	var cachedData: Data? {
 		DataCache.instance.cachedValue(for: url)
-	}
-
-}
-
-public extension Publisher where Output == (data: Data, response: HTTPURLResponse), Failure == HTTPError {
-	func preprocess(using task: ServerTask) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> {
-		tryMap { data, response in
-			if let custom = task as? PreprocessingTask, let error = custom.preprocess(data: data, response: response) {
-				throw error
-			}
-			return (data, response)
-		}
-		.mapError { HTTPError(task.url, $0) }
-		.eraseToAnyPublisher()
 	}
 }

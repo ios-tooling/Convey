@@ -13,6 +13,19 @@ public extension PayloadDownloadingTask where Self: PayloadUploadingTask {
 	}
 }
 
+extension JSONUploadingTask {
+	public var uploadData: Data? {
+		do {
+			guard let json = uploadJSON else { return nil }
+			return try JSONSerialization.data(withJSONObject: json, options: [])
+		} catch {
+			print("Error preparing upload: \(error)")
+			return nil
+		}
+	}
+}
+
+
 public extension PayloadUploadingTask {
 	func uploadAndDownload(preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
 		run(caching: .skipLocal, preview: preview)
