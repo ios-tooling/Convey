@@ -7,7 +7,7 @@
 
 import Suite
 
-public extension PayloadDownloadingTask where Self: PayloadUploadingTask {
+public extension PayloadDownloadingTask where Self: DataUploadingTask {
 	func upload(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<DownloadPayload, HTTPError> {
 		fetch(caching: .skipLocal, decoder: decoder, preview: preview)
 	}
@@ -25,18 +25,15 @@ extension JSONUploadingTask {
 	}
 }
 
-
-public extension PayloadUploadingTask {
-	func uploadAndDownload(preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
-		run(caching: .skipLocal, preview: preview)
-	}
-
+public extension DataUploadingTask {
 	func upload(preview: PreviewClosure? = nil) -> AnyPublisher<Int, HTTPError> {
 		submit(caching: .skipLocal, preview: preview)
 			.map { $0.response.statusCode }
 			.eraseToAnyPublisher()
 	}
+}
 
+public extension PayloadUploadingTask {
 	var uploadData: Data? {
 		guard let payload = uploadPayload else { return nil }
 		let encoder = (self as? CustomJSONEncoderTask)?.jsonEncoder ?? server.defaultEncoder
