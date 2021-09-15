@@ -28,23 +28,26 @@ public extension PayloadDownloadingTask {
 			logg("Local fetch failed for \(DownloadPayload.self) \(url)\n\n \(error)\n\n\(String(data: data, encoding: .utf8) ?? "--")")
 			return nil
 		}
-
 	}
 }
 
 public extension ServerTask {
 	var server: Server { Server.serverInstance }
-	
+
+	func send(caching: CachePolicy = .skipLocal, preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
+		run(caching: caching, preview: preview)
+	}
+
 	func postprocess(data: Data, response: HTTPURLResponse) { }
 
-	func fetch<Payload: Decodable>(caching: CachePolicy = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<Payload, HTTPError> {
+	internal func fetch<Payload: Decodable>(caching: CachePolicy = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<Payload, HTTPError> {
 		run(caching: caching, preview: preview)
 			.decode(type: Payload.self, decoder: decoder ?? server.defaultDecoder)
 			.mapError { HTTPError(url, $0) }
 			.eraseToAnyPublisher()
 	}
 
-	func run(caching: CachePolicy = .skipLocal, preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
+	internal func run(caching: CachePolicy = .skipLocal, preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
 		if caching == .skipRemote, self is ServerCacheableTask {
 			if let data = DataCache.instance.cachedValue(for: url) {
 				return Just(data).setFailureType(to: HTTPError.self).eraseToAnyPublisher()
@@ -64,13 +67,17 @@ public extension ServerTask {
 		
 	}
 	
-	func submit(caching: CachePolicy = .skipLocal, preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> {
+	internal func submit(caching: CachePolicy = .skipLocal, preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> {
+		let startedAt = Date()
+		
 		return buildRequest()
+			.map { preLog(startedAt: startedAt, request: $0); return $0 }
 			.mapError { HTTPError.other($0) }
 			.flatMap { (request: URLRequest) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> in
 				server.data(for: request)
 					.map { data in
-						preview?(data.data, data.response);
+						postLog(startedAt: startedAt, request: request, data: data.data, response: data.response)
+						preview?(data.data, data.response)
 						postprocess(data: data.data, response: data.response)
 						return data
 					}

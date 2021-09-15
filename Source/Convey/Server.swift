@@ -17,6 +17,9 @@ open class Server: NSObject, ObservableObject {
 	open var recentServerError: Error? { didSet { self.objectWillChange.sendOnMain() }}
 	open var defaultEncoder = JSONEncoder()
 	open var defaultDecoder = JSONDecoder()
+	open var logDirectory: URL?
+	open var maxLoggedDataSize = 1024 * 1024 * 10
+	open var launchedAt = Date()
 	open var defaultHeaders: [String: String] = [
 		"Content-Type": "application/json",
 		"Accept": "*"
