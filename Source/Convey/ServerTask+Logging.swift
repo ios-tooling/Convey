@@ -18,7 +18,7 @@ extension Server {
 extension ServerTask {
 	func logFilename(for date: Date) -> String {
 		let timestamp = date.timeIntervalSince(server.launchedAt)
-		return "\(date.localTimeString(date: .none, time: .abbr)); \(timestamp) - \(type(of: self)).txt"
+		return "\(date.localTimeString(date: .none, time: .abbr).replacingOccurrences(of: ":", with: "᠄ ")); \(timestamp.string(decimalPlaces: 6, padded: true)) - \(type(of: self)).txt"
 	}
 	
 	func preLog(startedAt: Date, request: URLRequest) {
@@ -32,7 +32,9 @@ extension ServerTask {
 		guard let url = server.setupLoggingDirectory()?.appendingPathComponent(logFilename(for: startedAt)) else { return }
 		try? FileManager.default.removeItem(at: url)
 
-		var output = request.descriptionData
+		var output = "Started at: \(startedAt.localTimeString(date: .short, time: .short)), took: \(abs(startedAt.timeIntervalSinceNow)) s\n".data(using: .utf8) ?? Data()
+		output += request.descriptionData
+		
 		if let responseData = response?.descriptionData {
 			output += "\n\n⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗\n\n".data(using: .utf8) ?? Data()
 			output += responseData

@@ -25,6 +25,10 @@ open class Server: NSObject, ObservableObject {
 		"Accept": "*"
 	]
 	
+	public func clearLogs() {
+		if let dir = logDirectory { try? FileManager.default.removeItem(at: dir) }
+	}
+	
 	public override init() {
 		super.init()
 		let config = URLSessionConfiguration.default

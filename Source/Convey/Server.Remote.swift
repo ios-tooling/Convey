@@ -8,13 +8,16 @@
 import Foundation
 
 public extension Server {
-	struct Remote: Identifiable, Hashable {
+	struct Remote: Identifiable, Hashable, Equatable {
 		public let name: String?
 		public let url: URL
 		public let shortName: String?
 		public var id: URL { url }
 		public func hash(into hasher: inout Hasher) {
 			hasher.combine(url)
+		}
+		public static func ==(lhs: Remote, rhs: Remote) -> Bool {
+			lhs.url == rhs.url
 		}
 
 		public init(_ url: URL, name: String? = nil, shortName: String? = nil) {
