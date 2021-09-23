@@ -12,6 +12,7 @@ public typealias PreviewClosure = (Data, HTTPURLResponse) -> Void
 public protocol ServerTask {
 	var path: String { get }
 	func postprocess(data: Data, response: HTTPURLResponse)
+	var httpMethod: String { get }
 }
 
 public protocol ParamaterizedTask: ServerTask {

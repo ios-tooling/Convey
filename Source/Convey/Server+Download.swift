@@ -14,6 +14,9 @@ public extension Server {
 	
 	func data(for request: URLRequest) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> {
 		session.dataTaskPublisher(for: request)
+			.map { data, response in
+				return (data, response)
+			}
 			.assumeHTTP()
 			.eraseToAnyPublisher()
 		
