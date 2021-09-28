@@ -6,11 +6,15 @@
 //
 
 import SwiftUI
+import Suite
 
 struct ContentView: View {
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+		 VStack() {
+			 NetworkIndicator()
+			 Text("Hello, world!")
+		 }
+		.padding()
     }
 }
 
@@ -18,4 +22,12 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
     }
+}
+
+struct NetworkIndicator: View {
+	@ObservedObject var reachability = Reachability.instance
+	
+	var body: some View {
+		Text(reachability.connection.description)
+	}
 }

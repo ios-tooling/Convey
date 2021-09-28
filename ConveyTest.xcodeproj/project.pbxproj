@@ -19,6 +19,7 @@
 		B54CAB9426ECB99F00781A3A /* Suite in Frameworks */ = {isa = PBXBuildFile; productRef = B54CAB9326ECB99F00781A3A /* Suite */; };
 		B54CAB9626ECBB2A00781A3A /* ServerTask+Run.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54CAB9526ECBB2A00781A3A /* ServerTask+Run.swift */; };
 		B54CAB9B26ECC08E00781A3A /* ServerTask+Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54CAB9A26ECC08E00781A3A /* ServerTask+Request.swift */; };
+		B5C39C0127031EF9008D9C86 /* ServerTask+Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C39C0027031EF9008D9C86 /* ServerTask+Logging.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		B54CAB9526ECBB2A00781A3A /* ServerTask+Run.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerTask+Run.swift"; sourceTree = "<group>"; };
 		B54CAB9726ECBB7C00781A3A /* Suite */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Suite; path = ../Suite; sourceTree = "<group>"; };
 		B54CAB9A26ECC08E00781A3A /* ServerTask+Request.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerTask+Request.swift"; sourceTree = "<group>"; };
+		B5C39C0027031EF9008D9C86 /* ServerTask+Logging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+Logging.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +71,7 @@
 				B533138D26ECB82C007C94BF /* ServerTaskTypes.swift */,
 				B54CAB9526ECBB2A00781A3A /* ServerTask+Run.swift */,
 				B54CAB9A26ECC08E00781A3A /* ServerTask+Request.swift */,
+				B5C39C0027031EF9008D9C86 /* ServerTask+Logging.swift */,
 				B500800A26ED7AFE004E1E31 /* ServerTask+Upload.swift */,
 			);
 			path = Convey;
@@ -196,6 +199,7 @@
 				B533138C26ECB7FD007C94BF /* Server.swift in Sources */,
 				B533139026ECB887007C94BF /* Server.Remote.swift in Sources */,
 				B500800B26ED7AFE004E1E31 /* ServerTask+Upload.swift in Sources */,
+				B5C39C0127031EF9008D9C86 /* ServerTask+Logging.swift in Sources */,
 				B54CAB9B26ECC08E00781A3A /* ServerTask+Request.swift in Sources */,
 				B54CAB8326ECB76400781A3A /* ConveyTestApp.swift in Sources */,
 			);
