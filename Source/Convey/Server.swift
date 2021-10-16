@@ -18,24 +18,41 @@ open class Server: NSObject, ObservableObject {
 	open var defaultEncoder = JSONEncoder()
 	open var defaultDecoder = JSONDecoder()
 	open var logDirectory: URL?
+	open var configuration = URLSessionConfiguration.default
+	public var userAgent: String? { didSet { updateUserAgentHeader() }}
 	open var maxLoggedDataSize = 1024 * 1024 * 10
 	open var launchedAt = Date()
-	open var defaultHeaders: [String: String] = [
+	private var defaultHeaders: [String: String] = [
 		"Content-Type": "application/json",
 		"Accept": "*"
 	]
 	
+	public var defaultUserAgent: String {
+		"\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)/\(Gestalt.rawDeviceType)/CFNetwork/1325.0.1 Darwin/21.1.0"
+	}
 	public func clearLogs() {
 		if let dir = logDirectory { try? FileManager.default.removeItem(at: dir) }
+	}
+
+	public func setStandardHeaders(_ headers: [String: String]) {
+		self.defaultHeaders = headers
+		updateUserAgentHeader()
+	}
+
+	func updateUserAgentHeader() {
+		if let agent = userAgent {
+			defaultHeaders["User-Agent"] = agent
+		} else {
+			defaultHeaders.removeValue(forKey: "User-Agent")
+		}
 	}
 	
 	public override init() {
 		super.init()
-		let config = URLSessionConfiguration.default
-		config.allowsCellularAccess = true
-		config.allowsConstrainedNetworkAccess = true
+		configuration.allowsCellularAccess = true
+		configuration.allowsConstrainedNetworkAccess = true
 		
-		session = URLSession(configuration: config, delegate: self, delegateQueue: nil)
+		session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
 		Self.serverInstance = self
 	}
 
