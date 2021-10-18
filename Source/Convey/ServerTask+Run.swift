@@ -20,7 +20,7 @@ public extension PayloadDownloadingTask {
 	
 	func cachedPayload(decoder: JSONDecoder? = nil) -> DownloadPayload? {
 		guard let data = cachedData else { return nil }
-		let decoder = decoder ?? Server.serverInstance.defaultDecoder
+		let decoder = decoder ?? server.defaultDecoder
 		
 		do {
 			return try decoder.decode(DownloadPayload.self, from: data)

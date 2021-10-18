@@ -13,6 +13,7 @@ public protocol ServerTask {
 	var path: String { get }
 	func postprocess(data: Data, response: HTTPURLResponse)
 	var httpMethod: String { get }
+	var server: Server { get }
 }
 
 public protocol ParamaterizedTask: ServerTask {
