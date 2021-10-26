@@ -22,6 +22,9 @@ extension ServerTask {
 	}
 	
 	func preLog(startedAt: Date, request: URLRequest) {
+		if self is EchoingTask {
+			print(" ====================== Echoing Request \(type(of: self)) ======================\n \(request)\n============================================")
+		}
 		guard let url = server.setupLoggingDirectory()?.appendingPathComponent(logFilename(for: startedAt)) else { return }
 		
 		let data = request.descriptionData
@@ -29,9 +32,20 @@ extension ServerTask {
 	}
 	
 	func postLog(startedAt: Date, request: URLRequest, data: Data?, response: URLResponse?) {
-		guard let url = server.setupLoggingDirectory()?.appendingPathComponent(logFilename(for: startedAt)) else { return }
+		guard let url = server.setupLoggingDirectory()?.appendingPathComponent(logFilename(for: startedAt)) else {
+			if self is EchoingTask { print(loggingOutput(startedAt: startedAt, request: request, data: data, response: response).stringValue ?? "unable to stringify response") }
+			return
+		}
 		try? FileManager.default.removeItem(at: url)
 
+		let output = loggingOutput(startedAt: startedAt, request: request, data: data, response: response)
+		if self is EchoingTask {
+			print("====================== Echoing Response \(type(of: self)) ======================\n \(String(data: output, encoding: .utf8) ?? "unable to stringify response")\n======================")
+		}
+		try? output.write(to: url)
+	}
+	
+	func loggingOutput(startedAt: Date, request: URLRequest, data: Data?, response: URLResponse?) -> Data {
 		var output = "Started at: \(startedAt.localTimeString(date: .short, time: .short)), took: \(abs(startedAt.timeIntervalSinceNow)) s\n".data(using: .utf8) ?? Data()
 		output += request.descriptionData
 		
@@ -51,8 +65,7 @@ extension ServerTask {
 				output += body
 			}
 		}
-		
-		try? output.write(to: url)
+		return output
 	}
 }
 

@@ -54,6 +54,8 @@ public protocol CustomHTTPMethodTask: ServerTask {
 	var customHTTPMethod: String { get }
 }
 
+public protocol EchoingTask: ServerTask { }
+
 public protocol ServerCacheableTask { }
 public protocol ServerGETTask { }
 public protocol ServerPUTTask { }
