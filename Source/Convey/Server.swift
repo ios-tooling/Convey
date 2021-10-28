@@ -6,6 +6,8 @@
 //
 
 import Suite
+import Combine
+import Foundation
 
 open class Server: NSObject, ObservableObject {
 	public static var serverInstance: Server!
@@ -37,6 +39,10 @@ open class Server: NSObject, ObservableObject {
 	public func setStandardHeaders(_ headers: [String: String]) {
 		self.defaultHeaders = headers
 		updateUserAgentHeader()
+	}
+	
+	open func preflight(_ task: ServerTask, request: URLRequest) -> AnyPublisher<URLRequest, Error> {
+		Just(request).setFailureType(to: Error.self).eraseToAnyPublisher()
 	}
 
 	func updateUserAgentHeader() {

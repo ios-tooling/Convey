@@ -71,6 +71,7 @@ public extension ServerTask {
 		let startedAt = Date()
 		
 		return buildRequest()
+			.flatMap { request in server.preflight(self, request: request) }
 			.map { preLog(startedAt: startedAt, request: $0); return $0 }
 			.mapError { HTTPError.other($0) }
 			.flatMap { (request: URLRequest) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> in
