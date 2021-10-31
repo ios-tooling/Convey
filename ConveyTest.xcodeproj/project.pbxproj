@@ -9,8 +9,25 @@
 /* Begin PBXBuildFile section */
 		B500800B26ED7AFE004E1E31 /* ServerTask+Upload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B500800A26ED7AFE004E1E31 /* ServerTask+Upload.swift */; };
 		B50B5BE826EE78E40097F29E /* Server+Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50B5BE726EE78E40097F29E /* Server+Download.swift */; };
+		B52831CF272D56B2001EC82E /* ServerTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52831CE272D56B2001EC82E /* ServerTask.swift */; };
+		B52831D1272D56E1001EC82E /* ServerTask+Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52831D0272D56E1001EC82E /* ServerTask+Async.swift */; };
+		B52831D9272EA13F001EC82E /* ConveyTest_iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52831D8272EA13F001EC82E /* ConveyTest_iOSApp.swift */; };
+		B52831DB272EA13F001EC82E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52831DA272EA13F001EC82E /* ContentView.swift */; };
+		B52831DD272EA140001EC82E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B52831DC272EA140001EC82E /* Assets.xcassets */; };
+		B52831E0272EA140001EC82E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B52831DF272EA140001EC82E /* Preview Assets.xcassets */; };
+		B52831E4272EA153001EC82E /* ServerTask+Upload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B500800A26ED7AFE004E1E31 /* ServerTask+Upload.swift */; };
+		B52831E5272EA153001EC82E /* Server+Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50B5BE726EE78E40097F29E /* Server+Download.swift */; };
+		B52831E6272EA153001EC82E /* Server.Remote.swift in Sources */ = {isa = PBXBuildFile; fileRef = B533138F26ECB887007C94BF /* Server.Remote.swift */; };
+		B52831E7272EA153001EC82E /* ServerTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52831CE272D56B2001EC82E /* ServerTask.swift */; };
+		B52831E8272EA153001EC82E /* ServerTask+Run.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54CAB9526ECBB2A00781A3A /* ServerTask+Run.swift */; };
+		B52831E9272EA153001EC82E /* ServerTask+Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54CAB9A26ECC08E00781A3A /* ServerTask+Request.swift */; };
+		B52831EA272EA153001EC82E /* ServerTask+Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C39C0027031EF9008D9C86 /* ServerTask+Logging.swift */; };
+		B52831EB272EA153001EC82E /* Server.swift in Sources */ = {isa = PBXBuildFile; fileRef = B533138B26ECB7FD007C94BF /* Server.swift */; };
+		B52831EC272EA153001EC82E /* ServerTask+Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52831D0272D56E1001EC82E /* ServerTask+Async.swift */; };
+		B52831EF272EA17F001EC82E /* Suite in Frameworks */ = {isa = PBXBuildFile; productRef = B52831EE272EA17F001EC82E /* Suite */; };
+		B52831F1272EA4EA001EC82E /* ServerTask+AsyncUpload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52831F0272EA4EA001EC82E /* ServerTask+AsyncUpload.swift */; };
+		B52831F2272EA4EA001EC82E /* ServerTask+AsyncUpload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52831F0272EA4EA001EC82E /* ServerTask+AsyncUpload.swift */; };
 		B533138C26ECB7FD007C94BF /* Server.swift in Sources */ = {isa = PBXBuildFile; fileRef = B533138B26ECB7FD007C94BF /* Server.swift */; };
-		B533138E26ECB82C007C94BF /* ServerTaskTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B533138D26ECB82C007C94BF /* ServerTaskTypes.swift */; };
 		B533139026ECB887007C94BF /* Server.Remote.swift in Sources */ = {isa = PBXBuildFile; fileRef = B533138F26ECB887007C94BF /* Server.Remote.swift */; };
 		B54CAB8326ECB76400781A3A /* ConveyTestApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54CAB8226ECB76400781A3A /* ConveyTestApp.swift */; };
 		B54CAB8526ECB76400781A3A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54CAB8426ECB76400781A3A /* ContentView.swift */; };
@@ -25,9 +42,16 @@
 /* Begin PBXFileReference section */
 		B500800A26ED7AFE004E1E31 /* ServerTask+Upload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerTask+Upload.swift"; sourceTree = "<group>"; };
 		B50B5BE726EE78E40097F29E /* Server+Download.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Server+Download.swift"; sourceTree = "<group>"; };
+		B52831CE272D56B2001EC82E /* ServerTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerTask.swift; sourceTree = "<group>"; };
+		B52831D0272D56E1001EC82E /* ServerTask+Async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerTask+Async.swift"; sourceTree = "<group>"; };
+		B52831D6272EA13F001EC82E /* ConveyTest_iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ConveyTest_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B52831D8272EA13F001EC82E /* ConveyTest_iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConveyTest_iOSApp.swift; sourceTree = "<group>"; };
+		B52831DA272EA13F001EC82E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B52831DC272EA140001EC82E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B52831DF272EA140001EC82E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		B52831F0272EA4EA001EC82E /* ServerTask+AsyncUpload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerTask+AsyncUpload.swift"; sourceTree = "<group>"; };
 		B533138726ECB7A2007C94BF /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		B533138B26ECB7FD007C94BF /* Server.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Server.swift; sourceTree = "<group>"; };
-		B533138D26ECB82C007C94BF /* ServerTaskTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerTaskTypes.swift; sourceTree = "<group>"; };
 		B533138F26ECB887007C94BF /* Server.Remote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Server.Remote.swift; sourceTree = "<group>"; };
 		B54CAB7F26ECB76400781A3A /* ConveyTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ConveyTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B54CAB8226ECB76400781A3A /* ConveyTestApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConveyTestApp.swift; sourceTree = "<group>"; };
@@ -43,6 +67,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		B52831D3272EA13F001EC82E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B52831EF272EA17F001EC82E /* Suite in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B54CAB7C26ECB76400781A3A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -54,6 +86,32 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B52831D7272EA13F001EC82E /* ConveyTest_iOS */ = {
+			isa = PBXGroup;
+			children = (
+				B52831D8272EA13F001EC82E /* ConveyTest_iOSApp.swift */,
+				B52831DA272EA13F001EC82E /* ContentView.swift */,
+				B52831DC272EA140001EC82E /* Assets.xcassets */,
+				B52831DE272EA140001EC82E /* Preview Content */,
+			);
+			path = ConveyTest_iOS;
+			sourceTree = "<group>";
+		};
+		B52831DE272EA140001EC82E /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				B52831DF272EA140001EC82E /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		B52831ED272EA17F001EC82E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		B533138926ECB7FD007C94BF /* Source */ = {
 			isa = PBXGroup;
 			children = (
@@ -67,12 +125,14 @@
 			children = (
 				B533138B26ECB7FD007C94BF /* Server.swift */,
 				B533138F26ECB887007C94BF /* Server.Remote.swift */,
+				B52831CE272D56B2001EC82E /* ServerTask.swift */,
 				B50B5BE726EE78E40097F29E /* Server+Download.swift */,
-				B533138D26ECB82C007C94BF /* ServerTaskTypes.swift */,
 				B54CAB9526ECBB2A00781A3A /* ServerTask+Run.swift */,
 				B54CAB9A26ECC08E00781A3A /* ServerTask+Request.swift */,
 				B5C39C0027031EF9008D9C86 /* ServerTask+Logging.swift */,
 				B500800A26ED7AFE004E1E31 /* ServerTask+Upload.swift */,
+				B52831F0272EA4EA001EC82E /* ServerTask+AsyncUpload.swift */,
+				B52831D0272D56E1001EC82E /* ServerTask+Async.swift */,
 			);
 			path = Convey;
 			sourceTree = "<group>";
@@ -84,7 +144,9 @@
 				B533138726ECB7A2007C94BF /* Package.swift */,
 				B533138926ECB7FD007C94BF /* Source */,
 				B54CAB8126ECB76400781A3A /* ConveyTest */,
+				B52831D7272EA13F001EC82E /* ConveyTest_iOS */,
 				B54CAB8026ECB76400781A3A /* Products */,
+				B52831ED272EA17F001EC82E /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -92,6 +154,7 @@
 			isa = PBXGroup;
 			children = (
 				B54CAB7F26ECB76400781A3A /* ConveyTest.app */,
+				B52831D6272EA13F001EC82E /* ConveyTest_iOS.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -120,6 +183,26 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		B52831D5272EA13F001EC82E /* ConveyTest_iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B52831E3272EA140001EC82E /* Build configuration list for PBXNativeTarget "ConveyTest_iOS" */;
+			buildPhases = (
+				B52831D2272EA13F001EC82E /* Sources */,
+				B52831D3272EA13F001EC82E /* Frameworks */,
+				B52831D4272EA13F001EC82E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ConveyTest_iOS;
+			packageProductDependencies = (
+				B52831EE272EA17F001EC82E /* Suite */,
+			);
+			productName = ConveyTest_iOS;
+			productReference = B52831D6272EA13F001EC82E /* ConveyTest_iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
 		B54CAB7E26ECB76400781A3A /* ConveyTest */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = B54CAB8F26ECB76400781A3A /* Build configuration list for PBXNativeTarget "ConveyTest" */;
@@ -146,9 +229,12 @@
 		B54CAB7726ECB76400781A3A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1250;
-				LastUpgradeCheck = 1250;
+				LastSwiftUpdateCheck = 1300;
+				LastUpgradeCheck = 1300;
 				TargetAttributes = {
+					B52831D5272EA13F001EC82E = {
+						CreatedOnToolsVersion = 13.0;
+					};
 					B54CAB7E26ECB76400781A3A = {
 						CreatedOnToolsVersion = 12.5;
 					};
@@ -171,11 +257,21 @@
 			projectRoot = "";
 			targets = (
 				B54CAB7E26ECB76400781A3A /* ConveyTest */,
+				B52831D5272EA13F001EC82E /* ConveyTest_iOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		B52831D4272EA13F001EC82E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B52831E0272EA140001EC82E /* Preview Assets.xcassets in Resources */,
+				B52831DD272EA140001EC82E /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B54CAB7D26ECB76400781A3A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -188,13 +284,34 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		B52831D2272EA13F001EC82E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B52831EB272EA153001EC82E /* Server.swift in Sources */,
+				B52831DB272EA13F001EC82E /* ContentView.swift in Sources */,
+				B52831EC272EA153001EC82E /* ServerTask+Async.swift in Sources */,
+				B52831F2272EA4EA001EC82E /* ServerTask+AsyncUpload.swift in Sources */,
+				B52831E9272EA153001EC82E /* ServerTask+Request.swift in Sources */,
+				B52831E8272EA153001EC82E /* ServerTask+Run.swift in Sources */,
+				B52831D9272EA13F001EC82E /* ConveyTest_iOSApp.swift in Sources */,
+				B52831E5272EA153001EC82E /* Server+Download.swift in Sources */,
+				B52831E7272EA153001EC82E /* ServerTask.swift in Sources */,
+				B52831E6272EA153001EC82E /* Server.Remote.swift in Sources */,
+				B52831EA272EA153001EC82E /* ServerTask+Logging.swift in Sources */,
+				B52831E4272EA153001EC82E /* ServerTask+Upload.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B54CAB7B26ECB76400781A3A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				B54CAB8526ECB76400781A3A /* ContentView.swift in Sources */,
+				B52831CF272D56B2001EC82E /* ServerTask.swift in Sources */,
+				B52831D1272D56E1001EC82E /* ServerTask+Async.swift in Sources */,
+				B52831F1272EA4EA001EC82E /* ServerTask+AsyncUpload.swift in Sources */,
 				B50B5BE826EE78E40097F29E /* Server+Download.swift in Sources */,
-				B533138E26ECB82C007C94BF /* ServerTaskTypes.swift in Sources */,
 				B54CAB9626ECBB2A00781A3A /* ServerTask+Run.swift in Sources */,
 				B533138C26ECB7FD007C94BF /* Server.swift in Sources */,
 				B533139026ECB887007C94BF /* Server.Remote.swift in Sources */,
@@ -208,6 +325,71 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		B52831E1272EA140001EC82E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"ConveyTest_iOS/Preview Content\"";
+				DEVELOPMENT_TEAM = YY6CWUX533;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.standalone.ConveyTest-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B52831E2272EA140001EC82E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"ConveyTest_iOS/Preview Content\"";
+				DEVELOPMENT_TEAM = YY6CWUX533;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.standalone.ConveyTest-iOS";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		B54CAB8D26ECB76400781A3A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -329,6 +511,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ConveyTest/ConveyTest.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"ConveyTest/Preview Content\"";
@@ -353,6 +536,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = ConveyTest/ConveyTest.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"ConveyTest/Preview Content\"";
@@ -374,6 +558,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		B52831E3272EA140001EC82E /* Build configuration list for PBXNativeTarget "ConveyTest_iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B52831E1272EA140001EC82E /* Debug */,
+				B52831E2272EA140001EC82E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		B54CAB7A26ECB76400781A3A /* Build configuration list for PBXProject "ConveyTest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -406,6 +599,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		B52831EE272EA17F001EC82E /* Suite */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Suite;
+		};
 		B54CAB9326ECB99F00781A3A /* Suite */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B54CAB9226ECB99F00781A3A /* XCRemoteSwiftPackageReference "Suite" */;
