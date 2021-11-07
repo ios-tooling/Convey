@@ -7,13 +7,13 @@
 
 import Suite
 
-@available(macOS 12.0.0, iOS 15.0, *)
+@available(macOS 12.0.0, iOS 15.0, watchOS 8.0, *)
 public protocol CustomAsyncURLRequestTask: ServerTask {
 	var customURLRequest: URLRequest { get async throws }
 }
 
 
-@available(macOS 12.0.0, iOS 15.0, *)
+@available(macOS 12.0.0, iOS 15.0, watchOS 8.0, *)
 public extension ServerTask {
 	internal func fetch<Payload: Decodable>(caching: CachePolicy = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> Payload {
 		let result = try await run(caching: caching, preview: preview)
