@@ -33,7 +33,7 @@ extension ServerTask {
 	
 	func postLog(startedAt: Date, request: URLRequest, data: Data?, response: URLResponse?) {
 		guard let url = server.setupLoggingDirectory()?.appendingPathComponent(logFilename(for: startedAt)) else {
-			if self is EchoingTask { print(loggingOutput(startedAt: startedAt, request: request, data: data, response: response).stringValue ?? "unable to stringify response") }
+			if self is EchoingTask { print(String(data: loggingOutput(startedAt: startedAt, request: request, data: data, response: response), encoding: .utf8) ?? "unable to stringify response") }
 			return
 		}
 		try? FileManager.default.removeItem(at: url)
