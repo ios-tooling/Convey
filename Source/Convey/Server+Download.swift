@@ -6,6 +6,7 @@
 //
 
 import Suite
+import Foundation
 
 public extension Server {
 	func data(for url: URL) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> {
@@ -23,7 +24,7 @@ public extension Server {
 	}
 }
 
-@available(macOS 12.0.0, iOS 15.0, watchOS 8.0, *)
+@available(macOS 12.1, iOS 15.0, watchOS 8.0, *)
 public extension Server {
 	func data(for url: URL) async throws -> (data: Data, response: HTTPURLResponse) {
 		try await data(for: URLRequest(url: url))
@@ -40,7 +41,7 @@ public extension Server {
 	}
 }
 
-@available(macOS 12.0.0, iOS 15.0, watchOS 8.0, *)
+@available(macOS 12.1, iOS 15.0, watchOS 8.0, *)
 extension URLSession {
 	func data(from request: URLRequest) async throws -> (data: Data, response: URLResponse) {
 		  try await withUnsafeThrowingContinuation { continuation in
