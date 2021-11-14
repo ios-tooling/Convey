@@ -14,6 +14,15 @@ public protocol CustomAsyncURLRequestTask: ServerTask {
 
 
 @available(macOS 12.1, iOS 15.0, watchOS 8.0, *)
+public extension PayloadDownloadingTask {
+	func download(caching: CachePolicy = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadPayload {
+		let result: DownloadPayload = try await fetch(caching: caching, decoder: decoder, preview: preview)
+		postprocess(payload: result)
+		return result
+	}
+}
+
+@available(macOS 12.1, iOS 15.0, watchOS 8.0, *)
 public extension ServerTask {
 	func send(caching: CachePolicy = .skipLocal, preview: PreviewClosure? = nil) async throws -> Data {
 		try await run(caching: caching, preview: preview)
