@@ -57,6 +57,21 @@ public extension ServerTask {
 		if let custom = self as? CustomAsyncURLRequestTask {
 			return try await custom.customURLRequest
 		}
+		
+		if let custom = self as? CustomURLRequestTask {
+			return try await withCheckedThrowingContinuation { continuation in
+				custom.customURLRequest
+					.onCompletion { result in
+						switch result {
+						case .failure(let err):
+							continuation.resume(throwing: err)
+							
+						case .success(let request):
+							continuation.resume(returning: request ?? defaultRequest())
+						}
+					}
+			}
+		}
 			
 		return defaultRequest()
 	}
