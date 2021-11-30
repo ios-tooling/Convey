@@ -20,6 +20,10 @@ public protocol ParamaterizedTask: ServerTask {
 	var parameters: [String: String]? { get }
 }
 
+public protocol FileBackedTask: ServerTask {
+	var fileURL: URL? { get }
+}
+
 public protocol PayloadDownloadingTask: ServerTask {
 	associatedtype DownloadPayload: Decodable
 	func postprocess(payload: DownloadPayload)

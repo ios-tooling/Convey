@@ -49,6 +49,9 @@ public extension ServerTask {
 			if error.isOffline, self is ServerCacheableTask {
 				return try await run(caching: .skipLocal, preview: preview)
 			}
+			if error.isOffline, self is FileBackedTask, let data = fileCachedData {
+				return data
+			}
 			throw error
 		}
 	}
@@ -83,6 +86,7 @@ public extension ServerTask {
 		preLog(startedAt: Date(), request: request)
 		
 		let result = try await server.data(for: request)
+		if self is FileBackedTask { self.fileCachedData = result.data }
 		postLog(startedAt: startedAt, request: request, data: result.data, response: result.response)
 		preview?(result.data, result.response)
 		postprocess(data: result.data, response: result.response)

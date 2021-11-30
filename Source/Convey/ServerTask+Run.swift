@@ -61,6 +61,9 @@ public extension ServerTask {
 				if error.isOffline, self is ServerCacheableTask {
 					return run(caching: .skipLocal, preview: preview)
 				}
+				if error.isOffline, self is FileBackedTask, let data = fileCachedData {
+					return Just(data).setFailureType(to: HTTPError.self).eraseToAnyPublisher()
+				}
 				return Fail(error: error).eraseToAnyPublisher()
 			}
 			.eraseToAnyPublisher()
@@ -77,6 +80,7 @@ public extension ServerTask {
 			.flatMap { (request: URLRequest) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> in
 				server.data(for: request)
 					.map { data in
+						if self is FileBackedTask { self.fileCachedData = data.data }
 						postLog(startedAt: startedAt, request: request, data: data.data, response: data.response)
 						preview?(data.data, data.response)
 						postprocess(data: data.data, response: data.response)
