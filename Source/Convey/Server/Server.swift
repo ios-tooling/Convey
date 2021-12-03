@@ -50,6 +50,9 @@ open class Server: NSObject, ObservableObject {
 		request
 	}
 
+	public static func setupDefault() {
+		_ = Server()
+	}
 
 	func updateUserAgentHeader() {
 		if let agent = userAgent {
