@@ -5,7 +5,7 @@
 //  Created by Ben Gottlieb on 9/15/21.
 //
 
-import Suite
+import Foundation
 
 extension Server {
 	func setupLoggingDirectory() -> URL? {

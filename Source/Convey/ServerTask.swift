@@ -5,7 +5,8 @@
 //  Created by Ben Gottlieb on 9/11/21.
 //
 
-import Suite
+import Combine
+import Foundation
 
 public typealias PreviewClosure = (Data, HTTPURLResponse) -> Void
 

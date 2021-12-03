@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Suite
+import Combine
 
 public extension ServerTask where Self: FileBackedTask & PayloadDownloadingTask {
 	func fileCachedDownload(using decoder: JSONDecoder? = nil) throws -> DownloadPayload? {
@@ -33,8 +33,7 @@ public extension ServerTask {
 				do {
 					try data.write(to: file)
 				} catch {
-					let message = "Failed to store backing file for \(self)"
-					logg(error: error, message)
+					print("Failed to store backing file for \(self), \(error)")
 				}
 			} else {
 				try? FileManager.default.removeItem(at: file)

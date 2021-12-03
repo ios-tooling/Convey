@@ -5,11 +5,14 @@
 //  Created by Ben Gottlieb on 9/11/21.
 //
 
-import Suite
+import Foundation
+import Combine
 
 public extension PayloadDownloadingTask where Self: DataUploadingTask {
-	func upload(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<DownloadPayload, HTTPError> {
+	func upload(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<DownloadPayload, Error> {
 		fetch(caching: .skipLocal, decoder: decoder, preview: preview)
+			.mapError { $0 as Error }
+			.eraseToAnyPublisher()
 	}
 }
 
@@ -26,9 +29,10 @@ extension JSONUploadingTask {
 }
 
 public extension DataUploadingTask {
-	func upload(preview: PreviewClosure? = nil) -> AnyPublisher<Int, HTTPError> {
+	func upload(preview: PreviewClosure? = nil) -> AnyPublisher<Int, Error> {
 		submit(caching: .skipLocal, preview: preview)
 			.map { $0.response.statusCode }
+			.mapError { $0 as Error }
 			.eraseToAnyPublisher()
 	}
 }

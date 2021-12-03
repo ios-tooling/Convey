@@ -5,7 +5,7 @@
 //  Created by Ben Gottlieb on 10/31/21.
 //
 
-import Suite
+import Foundation
 
 @available(macOS 12.1, iOS 15.0, watchOS 8.0, *)
 public extension PayloadDownloadingTask where Self: DataUploadingTask {
