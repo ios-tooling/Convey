@@ -9,7 +9,7 @@ import Suite
 
 public extension PayloadDownloadingTask {
 	func postprocess(payload: DownloadPayload) { }
-	func download(caching: CachePolicy = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<DownloadPayload, HTTPError> {
+	func download(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<DownloadPayload, HTTPError> {
 		fetch(caching: caching, decoder: decoder, preview: preview)
 			.map { (payload: DownloadPayload) -> DownloadPayload in
 				postprocess(payload: payload)
@@ -34,21 +34,21 @@ public extension PayloadDownloadingTask {
 public extension ServerTask {
 	var server: Server { Server.serverInstance }
 
-	func send(caching: CachePolicy = .skipLocal, preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
+	func send(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
 		run(caching: caching, preview: preview)
 	}
 
 	func postprocess(data: Data, response: HTTPURLResponse) { }
 
-	internal func fetch<Payload: Decodable>(caching: CachePolicy = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<Payload, HTTPError> {
+	internal func fetch<Payload: Decodable>(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<Payload, HTTPError> {
 		run(caching: caching, preview: preview)
 			.decode(type: Payload.self, decoder: decoder ?? server.defaultDecoder)
 			.mapError { HTTPError(url, $0) }
 			.eraseToAnyPublisher()
 	}
 
-	internal func run(caching: CachePolicy = .skipLocal, preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
-		if caching == .skipRemote, self is ServerCacheableTask {
+	internal func run(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
+		if caching == .returnCacheDataDontLoad, self is ServerCacheableTask {
 			if let data = DataCache.instance.cachedValue(for: url) {
 				return Just(data).setFailureType(to: HTTPError.self).eraseToAnyPublisher()
 			}
@@ -59,7 +59,7 @@ public extension ServerTask {
 			.responseData()
 			.catch { error -> AnyPublisher<Data, HTTPError> in
 				if error.isOffline, self is ServerCacheableTask {
-					return run(caching: .skipLocal, preview: preview)
+					return run(caching: .reloadIgnoringLocalCacheData, preview: preview)
 				}
 				if error.isOffline, self is FileBackedTask, let data = fileCachedData {
 					return Just(data).setFailureType(to: HTTPError.self).eraseToAnyPublisher()
@@ -70,7 +70,7 @@ public extension ServerTask {
 		
 	}
 	
-	internal func submit(caching: CachePolicy = .skipLocal, preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> {
+	internal func submit(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> {
 		let startedAt = Date()
 		
 		return buildRequest()
