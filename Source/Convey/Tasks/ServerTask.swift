@@ -17,7 +17,7 @@ public protocol ServerTask {
 	var server: Server { get }
 }
 
-public protocol ParamaterizedTask: ServerTask {
+public protocol ParameterizedTask: ServerTask {
 	var parameters: [String: String]? { get }
 }
 

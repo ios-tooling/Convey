@@ -93,7 +93,7 @@ public extension ServerTask {
 	
 	var url: URL {
 		let base = (self as? CustomURLTask)?.customURL ?? server.url(forPath: path)
-		if let parameters = (self as? ParamaterizedTask)?.parameters {
+		if let parameters = (self as? ParameterizedTask)?.parameters {
 			var components = URLComponents(url: base, resolvingAgainstBaseURL: true)
 			
 			components?.queryItems = parameters.map { URLQueryItem(name: $0.key, value: $0.value) }
