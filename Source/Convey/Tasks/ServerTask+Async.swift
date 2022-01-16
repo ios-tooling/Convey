@@ -7,13 +7,13 @@
 
 import Suite
 
-@available(macOS 12.1, iOS 15.0, watchOS 8.0, *)
+@available(macOS 11, iOS 13.0, watchOS 7.0, *)
 public protocol CustomAsyncURLRequestTask: ServerTask {
 	var customURLRequest: URLRequest { get async throws }
 }
 
 
-@available(macOS 12.1, iOS 15.0, watchOS 8.0, *)
+@available(macOS 11, iOS 13.0, watchOS 7.0, *)
 public extension PayloadDownloadingTask {
 	func download(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadPayload {
 		let result: DownloadPayload = try await fetch(caching: caching, decoder: decoder, preview: preview)
@@ -22,7 +22,7 @@ public extension PayloadDownloadingTask {
 	}
 }
 
-@available(macOS 12.1, iOS 15.0, watchOS 8.0, *)
+@available(macOS 11, iOS 13.0, watchOS 7.0, *)
 public extension ServerTask {
 	func send(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) async throws -> Data {
 		try await run(caching: caching, preview: preview)

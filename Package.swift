@@ -7,7 +7,7 @@ let package = Package(
 	 name: "Convey",
 	  platforms: [
 				  .macOS(.v11),
-				  .iOS(.v14),
+				  .iOS(.v13),
 				  .watchOS(.v6)
 			],
 	 products: [
