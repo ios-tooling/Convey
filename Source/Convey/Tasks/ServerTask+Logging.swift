@@ -112,7 +112,11 @@ public extension URLRequest {
 		var results = desc.data(using: .utf8) ?? Data()
 		if let body = bodyData {
 			results += "Payload ┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳\n\n".data(using: .utf8) ?? Data()
-			results.append(body)
+			if body.count < 1024 {
+				results.append(body)
+			} else {
+				results.append("\(body.count / 1024) k".data(using: .utf8) ?? Data())
+			}
 			results += "\n\n┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻┻\n".data(using: .utf8) ?? Data()
 		}
 		
