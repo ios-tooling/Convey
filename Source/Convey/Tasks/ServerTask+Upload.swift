@@ -10,16 +10,25 @@ import Combine
 
 public extension PayloadDownloadingTask where Self: DataUploadingTask {
 	func upload(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<DownloadPayload, Error> {
-		fetch(caching: .reloadIgnoringLocalCacheData, decoder: decoder, preview: preview)
+		requestPayload(caching: .reloadIgnoringLocalCacheData, decoder: decoder, preview: preview)
+			.mapError { $0 as Error }
+			.eraseToAnyPublisher()
+	}
+}
+
+public extension DataUploadingTask {
+	func upload(preview: PreviewClosure? = nil) -> AnyPublisher<Int, Error> {
+		internalRequestData(preview: preview)
+			.map { $0.response.statusCode }
 			.mapError { $0 as Error }
 			.eraseToAnyPublisher()
 	}
 }
 
 extension JSONUploadingTask {
-	public var uploadData: Data? {
+	public var dataToUpload: Data? {
 		do {
-			guard let json = uploadJSON else { return nil }
+			guard let json = jsonToUpload else { return nil }
 			return try JSONSerialization.data(withJSONObject: json, options: [])
 		} catch {
 			print("Error preparing upload: \(error)")
@@ -28,17 +37,8 @@ extension JSONUploadingTask {
 	}
 }
 
-public extension DataUploadingTask {
-	func upload(preview: PreviewClosure? = nil) -> AnyPublisher<Int, Error> {
-		submit(caching: .reloadIgnoringLocalCacheData, preview: preview)
-			.map { $0.response.statusCode }
-			.mapError { $0 as Error }
-			.eraseToAnyPublisher()
-	}
-}
-
 public extension PayloadUploadingTask {
-	var uploadData: Data? {
+	var dataToUpload: Data? {
 		guard let payload = uploadPayload else { return nil }
 		let encoder = (self as? CustomJSONEncoderTask)?.jsonEncoder ?? server.defaultEncoder
 		

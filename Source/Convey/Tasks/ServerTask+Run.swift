@@ -10,7 +10,7 @@ import Suite
 public extension PayloadDownloadingTask {
 	func postprocess(payload: DownloadPayload) { }
 	func download(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<DownloadPayload, HTTPError> {
-		fetch(caching: caching, decoder: decoder, preview: preview)
+		requestPayload(caching: caching, decoder: decoder, preview: preview)
 			.map { (payload: DownloadPayload) -> DownloadPayload in
 				postprocess(payload: payload)
 				return payload
@@ -25,7 +25,7 @@ public extension PayloadDownloadingTask {
 		do {
 			return try decoder.decode(DownloadPayload.self, from: data)
 		} catch {
-			logg("Local fetch failed for \(DownloadPayload.self) \(url)\n\n \(error)\n\n\(String(data: data, encoding: .utf8) ?? "--")")
+			logg("Local requestPayload failed for \(DownloadPayload.self) \(url)\n\n \(error)\n\n\(String(data: data, encoding: .utf8) ?? "--")")
 			return nil
 		}
 	}
@@ -34,20 +34,37 @@ public extension PayloadDownloadingTask {
 public extension ServerTask {
 	var server: Server { Server.serverInstance }
 
-	func send(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
-		run(caching: caching, preview: preview)
+	func downloadData(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
+		requestData(caching: caching, preview: preview)
 	}
 
 	func postprocess(data: Data, response: HTTPURLResponse) { }
+	var url: URL {
+		let base = (self as? CustomURLTask)?.customURL ?? server.url(forPath: path)
+		if let parameters = (self as? ParameterizedTask)?.parameters {
+			var components = URLComponents(url: base, resolvingAgainstBaseURL: true)
+			
+			components?.queryItems = parameters.map { URLQueryItem(name: $0.key, value: $0.value) }
+			if let newURL = components?.url { return newURL }
+		}
 
-	internal func fetch<Payload: Decodable>(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<Payload, HTTPError> {
-		run(caching: caching, preview: preview)
+		return base
+	}
+
+	var cachedData: Data? {
+		DataCache.instance.cachedValue(for: url)
+	}
+}
+
+extension ServerTask {
+	func requestPayload<Payload: Decodable>(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<Payload, HTTPError> {
+		requestData(caching: caching, preview: preview)
 			.decode(type: Payload.self, decoder: decoder ?? server.defaultDecoder)
 			.mapError { HTTPError(url, $0) }
 			.eraseToAnyPublisher()
 	}
 
-	internal func run(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
+	func requestData(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) -> AnyPublisher<Data, HTTPError> {
 		if caching == .returnCacheDataDontLoad, self is ServerCacheableTask {
 			if let data = DataCache.instance.cachedValue(for: url) {
 				return Just(data).setFailureType(to: HTTPError.self).eraseToAnyPublisher()
@@ -55,11 +72,11 @@ public extension ServerTask {
 			return Fail(error: HTTPError.offline).eraseToAnyPublisher()
 		}
 		
-		return submit(caching: caching, preview: preview)
+		return internalRequestData(preview: preview)
 			.responseData()
 			.catch { error -> AnyPublisher<Data, HTTPError> in
 				if error.isOffline, self is ServerCacheableTask {
-					return run(caching: .reloadIgnoringLocalCacheData, preview: preview)
+					return requestData(caching: .reloadIgnoringLocalCacheData, preview: preview)
 				}
 				if error.isOffline, self is FileBackedTask, let data = fileCachedData {
 					return Just(data).setFailureType(to: HTTPError.self).eraseToAnyPublisher()
@@ -70,7 +87,7 @@ public extension ServerTask {
 		
 	}
 	
-	internal func submit(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> {
+	func internalRequestData(preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> {
 		let startedAt = Date()
 		
 		return buildRequest()
@@ -89,21 +106,5 @@ public extension ServerTask {
 					.eraseToAnyPublisher()
 			}
 			.eraseToAnyPublisher()
-	}
-	
-	var url: URL {
-		let base = (self as? CustomURLTask)?.customURL ?? server.url(forPath: path)
-		if let parameters = (self as? ParameterizedTask)?.parameters {
-			var components = URLComponents(url: base, resolvingAgainstBaseURL: true)
-			
-			components?.queryItems = parameters.map { URLQueryItem(name: $0.key, value: $0.value) }
-			if let newURL = components?.url { return newURL }
-		}
-
-		return base
-	}
-
-	var cachedData: Data? {
-		DataCache.instance.cachedValue(for: url)
 	}
 }
