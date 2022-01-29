@@ -11,14 +11,13 @@
 		B52831DB272EA13F001EC82E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52831DA272EA13F001EC82E /* ContentView.swift */; };
 		B52831DD272EA140001EC82E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B52831DC272EA140001EC82E /* Assets.xcassets */; };
 		B52831E0272EA140001EC82E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B52831DF272EA140001EC82E /* Preview Assets.xcassets */; };
-		B52831EF272EA17F001EC82E /* Suite in Frameworks */ = {isa = PBXBuildFile; productRef = B52831EE272EA17F001EC82E /* Suite */; };
 		B54CAB8326ECB76400781A3A /* ConveyTestApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54CAB8226ECB76400781A3A /* ConveyTestApp.swift */; };
 		B54CAB8526ECB76400781A3A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54CAB8426ECB76400781A3A /* ContentView.swift */; };
 		B54CAB8726ECB76400781A3A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B54CAB8626ECB76400781A3A /* Assets.xcassets */; };
 		B54CAB8A26ECB76400781A3A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B54CAB8926ECB76400781A3A /* Preview Assets.xcassets */; };
 		B54CAB9426ECB99F00781A3A /* Suite in Frameworks */ = {isa = PBXBuildFile; productRef = B54CAB9326ECB99F00781A3A /* Suite */; };
-		B5AD1D79275A46E600BB342D /* ServerTask+AsyncUpload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D6D275A46E600BB342D /* ServerTask+AsyncUpload.swift */; };
-		B5AD1D7A275A46E600BB342D /* ServerTask+AsyncUpload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D6D275A46E600BB342D /* ServerTask+AsyncUpload.swift */; };
+		B5AD1D79275A46E600BB342D /* ServerTask+UploadAsync.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D6D275A46E600BB342D /* ServerTask+UploadAsync.swift */; };
+		B5AD1D7A275A46E600BB342D /* ServerTask+UploadAsync.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D6D275A46E600BB342D /* ServerTask+UploadAsync.swift */; };
 		B5AD1D7B275A46E600BB342D /* ServerTask+Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D6E275A46E600BB342D /* ServerTask+Logging.swift */; };
 		B5AD1D7C275A46E600BB342D /* ServerTask+Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D6E275A46E600BB342D /* ServerTask+Logging.swift */; };
 		B5AD1D7D275A46E600BB342D /* ServerTask+FileBacked.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D6F275A46E600BB342D /* ServerTask+FileBacked.swift */; };
@@ -31,14 +30,18 @@
 		B5AD1D84275A46E600BB342D /* ServerTask+Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D72275A46E600BB342D /* ServerTask+Request.swift */; };
 		B5AD1D85275A46E600BB342D /* ServerTask+Upload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D73275A46E600BB342D /* ServerTask+Upload.swift */; };
 		B5AD1D86275A46E600BB342D /* ServerTask+Upload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D73275A46E600BB342D /* ServerTask+Upload.swift */; };
-		B5AD1D87275A46E600BB342D /* ServerTask+Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D74275A46E600BB342D /* ServerTask+Async.swift */; };
-		B5AD1D88275A46E600BB342D /* ServerTask+Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D74275A46E600BB342D /* ServerTask+Async.swift */; };
+		B5AD1D87275A46E600BB342D /* ServerTask+RunAsync.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D74275A46E600BB342D /* ServerTask+RunAsync.swift */; };
+		B5AD1D88275A46E600BB342D /* ServerTask+RunAsync.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D74275A46E600BB342D /* ServerTask+RunAsync.swift */; };
 		B5AD1D89275A46E600BB342D /* Server.Remote.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D76275A46E600BB342D /* Server.Remote.swift */; };
 		B5AD1D8A275A46E600BB342D /* Server.Remote.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D76275A46E600BB342D /* Server.Remote.swift */; };
 		B5AD1D8B275A46E600BB342D /* Server+Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D77275A46E600BB342D /* Server+Download.swift */; };
 		B5AD1D8C275A46E600BB342D /* Server+Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D77275A46E600BB342D /* Server+Download.swift */; };
 		B5AD1D8D275A46E600BB342D /* Server.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D78275A46E600BB342D /* Server.swift */; };
 		B5AD1D8E275A46E600BB342D /* Server.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D78275A46E600BB342D /* Server.swift */; };
+		B5F1E0B127A555F7005E1CE1 /* ServerTask+Cancellable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1E0B027A555F7005E1CE1 /* ServerTask+Cancellable.swift */; };
+		B5F1E0B227A555F7005E1CE1 /* ServerTask+Cancellable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1E0B027A555F7005E1CE1 /* ServerTask+Cancellable.swift */; };
+		B5F1E0B427A55F89005E1CE1 /* URLResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1E0B327A55F89005E1CE1 /* URLResponse.swift */; };
+		B5F1E0B527A55F89005E1CE1 /* URLResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1E0B327A55F89005E1CE1 /* URLResponse.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -55,18 +58,19 @@
 		B54CAB8926ECB76400781A3A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B54CAB8B26ECB76400781A3A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B54CAB8C26ECB76400781A3A /* ConveyTest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ConveyTest.entitlements; sourceTree = "<group>"; };
-		B54CAB9726ECBB7C00781A3A /* Suite */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Suite; path = ../Suite; sourceTree = "<group>"; };
-		B5AD1D6D275A46E600BB342D /* ServerTask+AsyncUpload.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+AsyncUpload.swift"; sourceTree = "<group>"; };
+		B5AD1D6D275A46E600BB342D /* ServerTask+UploadAsync.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+UploadAsync.swift"; sourceTree = "<group>"; };
 		B5AD1D6E275A46E600BB342D /* ServerTask+Logging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+Logging.swift"; sourceTree = "<group>"; };
 		B5AD1D6F275A46E600BB342D /* ServerTask+FileBacked.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+FileBacked.swift"; sourceTree = "<group>"; };
 		B5AD1D70275A46E600BB342D /* ServerTask+Run.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+Run.swift"; sourceTree = "<group>"; };
 		B5AD1D71275A46E600BB342D /* ServerTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerTask.swift; sourceTree = "<group>"; };
 		B5AD1D72275A46E600BB342D /* ServerTask+Request.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+Request.swift"; sourceTree = "<group>"; };
 		B5AD1D73275A46E600BB342D /* ServerTask+Upload.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+Upload.swift"; sourceTree = "<group>"; };
-		B5AD1D74275A46E600BB342D /* ServerTask+Async.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+Async.swift"; sourceTree = "<group>"; };
+		B5AD1D74275A46E600BB342D /* ServerTask+RunAsync.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+RunAsync.swift"; sourceTree = "<group>"; };
 		B5AD1D76275A46E600BB342D /* Server.Remote.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Server.Remote.swift; sourceTree = "<group>"; };
 		B5AD1D77275A46E600BB342D /* Server+Download.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Server+Download.swift"; sourceTree = "<group>"; };
 		B5AD1D78275A46E600BB342D /* Server.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Server.swift; sourceTree = "<group>"; };
+		B5F1E0B027A555F7005E1CE1 /* ServerTask+Cancellable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerTask+Cancellable.swift"; sourceTree = "<group>"; };
+		B5F1E0B327A55F89005E1CE1 /* URLResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLResponse.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,7 +78,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B52831EF272EA17F001EC82E /* Suite in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,7 +121,6 @@
 		B54CAB7626ECB76400781A3A = {
 			isa = PBXGroup;
 			children = (
-				B54CAB9726ECBB7C00781A3A /* Suite */,
 				B533138726ECB7A2007C94BF /* Package.swift */,
 				B5AD1D6A275A46E600BB342D /* Source */,
 				B54CAB8126ECB76400781A3A /* ConveyTest */,
@@ -178,14 +180,16 @@
 		B5AD1D6C275A46E600BB342D /* Tasks */ = {
 			isa = PBXGroup;
 			children = (
-				B5AD1D6D275A46E600BB342D /* ServerTask+AsyncUpload.swift */,
 				B5AD1D6E275A46E600BB342D /* ServerTask+Logging.swift */,
 				B5AD1D6F275A46E600BB342D /* ServerTask+FileBacked.swift */,
-				B5AD1D70275A46E600BB342D /* ServerTask+Run.swift */,
+				B5F1E0B027A555F7005E1CE1 /* ServerTask+Cancellable.swift */,
 				B5AD1D71275A46E600BB342D /* ServerTask.swift */,
+				B5AD1D70275A46E600BB342D /* ServerTask+Run.swift */,
+				B5AD1D74275A46E600BB342D /* ServerTask+RunAsync.swift */,
+				B5F1E0B327A55F89005E1CE1 /* URLResponse.swift */,
 				B5AD1D72275A46E600BB342D /* ServerTask+Request.swift */,
 				B5AD1D73275A46E600BB342D /* ServerTask+Upload.swift */,
-				B5AD1D74275A46E600BB342D /* ServerTask+Async.swift */,
+				B5AD1D6D275A46E600BB342D /* ServerTask+UploadAsync.swift */,
 			);
 			path = Tasks;
 			sourceTree = "<group>";
@@ -217,7 +221,6 @@
 			);
 			name = ConveyTest_iOS;
 			packageProductDependencies = (
-				B52831EE272EA17F001EC82E /* Suite */,
 			);
 			productName = ConveyTest_iOS;
 			productReference = B52831D6272EA13F001EC82E /* ConveyTest_iOS.app */;
@@ -308,13 +311,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5F1E0B227A555F7005E1CE1 /* ServerTask+Cancellable.swift in Sources */,
 				B5AD1D82275A46E600BB342D /* ServerTask.swift in Sources */,
 				B5AD1D84275A46E600BB342D /* ServerTask+Request.swift in Sources */,
 				B5AD1D8A275A46E600BB342D /* Server.Remote.swift in Sources */,
-				B5AD1D7A275A46E600BB342D /* ServerTask+AsyncUpload.swift in Sources */,
+				B5AD1D7A275A46E600BB342D /* ServerTask+UploadAsync.swift in Sources */,
 				B52831DB272EA13F001EC82E /* ContentView.swift in Sources */,
-				B5AD1D88275A46E600BB342D /* ServerTask+Async.swift in Sources */,
+				B5AD1D88275A46E600BB342D /* ServerTask+RunAsync.swift in Sources */,
 				B52831D9272EA13F001EC82E /* ConveyTest_iOSApp.swift in Sources */,
+				B5F1E0B527A55F89005E1CE1 /* URLResponse.swift in Sources */,
 				B5AD1D7E275A46E600BB342D /* ServerTask+FileBacked.swift in Sources */,
 				B5AD1D7C275A46E600BB342D /* ServerTask+Logging.swift in Sources */,
 				B5AD1D80275A46E600BB342D /* ServerTask+Run.swift in Sources */,
@@ -328,13 +333,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5F1E0B127A555F7005E1CE1 /* ServerTask+Cancellable.swift in Sources */,
 				B5AD1D81275A46E600BB342D /* ServerTask.swift in Sources */,
 				B5AD1D83275A46E600BB342D /* ServerTask+Request.swift in Sources */,
 				B5AD1D89275A46E600BB342D /* Server.Remote.swift in Sources */,
-				B5AD1D79275A46E600BB342D /* ServerTask+AsyncUpload.swift in Sources */,
+				B5AD1D79275A46E600BB342D /* ServerTask+UploadAsync.swift in Sources */,
 				B54CAB8526ECB76400781A3A /* ContentView.swift in Sources */,
-				B5AD1D87275A46E600BB342D /* ServerTask+Async.swift in Sources */,
+				B5AD1D87275A46E600BB342D /* ServerTask+RunAsync.swift in Sources */,
 				B54CAB8326ECB76400781A3A /* ConveyTestApp.swift in Sources */,
+				B5F1E0B427A55F89005E1CE1 /* URLResponse.swift in Sources */,
 				B5AD1D7D275A46E600BB342D /* ServerTask+FileBacked.swift in Sources */,
 				B5AD1D7B275A46E600BB342D /* ServerTask+Logging.swift in Sources */,
 				B5AD1D7F275A46E600BB342D /* ServerTask+Run.swift in Sources */,
@@ -621,10 +628,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		B52831EE272EA17F001EC82E /* Suite */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Suite;
-		};
 		B54CAB9326ECB99F00781A3A /* Suite */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B54CAB9226ECB99F00781A3A /* XCRemoteSwiftPackageReference "Suite" */;

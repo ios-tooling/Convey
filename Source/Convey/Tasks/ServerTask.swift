@@ -25,11 +25,6 @@ public protocol FileBackedTask: ServerTask {
 	var fileURL: URL? { get }
 }
 
-public protocol PayloadDownloadingTask: ServerTask {
-	associatedtype DownloadPayload: Decodable
-	func postprocess(payload: DownloadPayload)
-}
-
 public protocol CustomURLTask: ServerTask {
 	var customURL: URL? { get }
 }
@@ -38,17 +33,12 @@ public protocol CustomURLRequestTask: ServerTask {
 	var customURLRequest: AnyPublisher<URLRequest?, Error> { get }
 }
 
-public protocol PayloadUploadingTask: DataUploadingTask {
-	associatedtype UploadPayload: Encodable
-	var uploadPayload: UploadPayload? { get }
-}
-
 public protocol DataUploadingTask: ServerTask {
-	var uploadData: Data? { get }
+	var dataToUpload: Data? { get }
 }
 
 public protocol JSONUploadingTask: DataUploadingTask {
-	var uploadJSON: [String: Any]? { get }
+	var jsonToUpload: [String: Any]? { get }
 }
 
 public protocol CustomJSONEncoderTask: ServerTask {
@@ -67,5 +57,17 @@ public protocol ServerPUTTask { }
 public protocol ServerPOSTTask { }
 public protocol ServerPATCHTask{ }
 public protocol ServerDELETETask { }
+
+
+// the protocols below all have associated types
+public protocol PayloadDownloadingTask: ServerTask {
+	associatedtype DownloadPayload: Decodable
+	func postprocess(payload: DownloadPayload)
+}
+
+public protocol PayloadUploadingTask: DataUploadingTask {
+	associatedtype UploadPayload: Encodable
+	var uploadPayload: UploadPayload? { get }
+}
 
 
