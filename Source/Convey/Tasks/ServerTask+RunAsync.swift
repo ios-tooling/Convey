@@ -17,8 +17,12 @@ public protocol CustomAsyncURLRequestTask: ServerTask {
 @available(macOS 11, iOS 13.0, watchOS 7.0, *)
 public extension PayloadDownloadingTask {
 	func download(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadPayload {
-		let result: DownloadPayload = try await requestPayload(caching: caching, decoder: decoder, preview: preview)
-		postprocess(payload: result)
+		try await downloadWithResponse().payload
+	}
+	
+	func downloadWithResponse(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> (payload: DownloadPayload, response: URLResponse) {
+		let result: (payload: DownloadPayload, response: URLResponse) = try await requestPayload(caching: caching, decoder: decoder, preview: preview)
+		postprocess(payload: result.payload)
 		return result
 	}
 }
@@ -26,6 +30,10 @@ public extension PayloadDownloadingTask {
 @available(macOS 11, iOS 13.0, watchOS 7.0, *)
 public extension ServerTask {
 	func downloadData(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) async throws -> Data {
+		try await downloadDataWithResponse(caching: caching, preview: preview).data
+	}
+
+	func downloadDataWithResponse(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) async throws -> (data: Data, response: URLResponse) {
 		try await requestData(caching: caching, preview: preview)
 	}
 
@@ -56,29 +64,29 @@ public extension ServerTask {
 
 @available(macOS 11, iOS 13.0, watchOS 7.0, *)
 extension ServerTask {
-	func requestPayload<Payload: Decodable>(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> Payload {
+	func requestPayload<Payload: Decodable>(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> (payload: Payload, response: URLResponse) {
 		let result = try await requestData(caching: caching, preview: preview)
 		let actualDecoder = decoder ?? server.defaultDecoder
-		let decoded = try actualDecoder.decode(Payload.self, from: result)
-		return decoded
+		let decoded = try actualDecoder.decode(Payload.self, from: result.data)
+		return (payload: decoded, response: result.response)
 	}
 
-	func requestData(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) async throws -> Data {
+	func requestData(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) async throws -> (data: Data, response: URLResponse) {
 		if caching == .returnCacheDataDontLoad, self is ServerCacheableTask {
 			if let data = DataCache.instance.cachedValue(for: url) {
-				return data
+				return (data: data, response: URLResponse(cachedFor: url, data: data))
 			}
 			throw HTTPError.offline
 		}
 
 		do {
-			return try await internalRequestData(preview: preview).data
+			return try await internalRequestData(preview: preview)
 		} catch {
 			if error.isOffline, self is ServerCacheableTask {
 				return try await requestData(caching: .reloadIgnoringLocalCacheData, preview: preview)
 			}
 			if error.isOffline, self is FileBackedTask, let data = fileCachedData {
-				return data
+				return (data: data, response: URLResponse(cachedFor: url, data: data))
 			}
 			throw error
 		}
