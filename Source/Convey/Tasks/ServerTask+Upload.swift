@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 public extension PayloadDownloadingTask where Self: DataUploadingTask {
-	func upload(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<DownloadPayload, Error> {
+	func upload(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<(payload: DownloadPayload, response: URLResponse), Error> {
 		requestPayload(caching: .reloadIgnoringLocalCacheData, decoder: decoder, preview: preview)
 			.mapError { $0 as Error }
 			.eraseToAnyPublisher()
@@ -19,7 +19,7 @@ public extension PayloadDownloadingTask where Self: DataUploadingTask {
 public extension DataUploadingTask {
 	func upload(preview: PreviewClosure? = nil) -> AnyPublisher<Int, Error> {
 		internalRequestData(preview: preview)
-			.map { $0.response.statusCode }
+			.map { ($0.response as? HTTPURLResponse)?.statusCode ?? 500 }
 			.mapError { $0 as Error }
 			.eraseToAnyPublisher()
 	}

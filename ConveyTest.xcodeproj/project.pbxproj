@@ -182,9 +182,9 @@
 			children = (
 				B5AD1D6E275A46E600BB342D /* ServerTask+Logging.swift */,
 				B5AD1D6F275A46E600BB342D /* ServerTask+FileBacked.swift */,
-				B5AD1D70275A46E600BB342D /* ServerTask+Run.swift */,
 				B5F1E0B027A555F7005E1CE1 /* ServerTask+Cancellable.swift */,
 				B5AD1D71275A46E600BB342D /* ServerTask.swift */,
+				B5AD1D70275A46E600BB342D /* ServerTask+Run.swift */,
 				B5AD1D74275A46E600BB342D /* ServerTask+RunAsync.swift */,
 				B5F1E0B327A55F89005E1CE1 /* URLResponse.swift */,
 				B5AD1D72275A46E600BB342D /* ServerTask+Request.swift */,
