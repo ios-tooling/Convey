@@ -11,6 +11,14 @@
 		B52831DB272EA13F001EC82E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52831DA272EA13F001EC82E /* ContentView.swift */; };
 		B52831DD272EA140001EC82E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B52831DC272EA140001EC82E /* Assets.xcassets */; };
 		B52831E0272EA140001EC82E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B52831DF272EA140001EC82E /* Preview Assets.xcassets */; };
+		B534F78F27A56EE3004F174C /* ServerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B534F78E27A56EE3004F174C /* ServerError.swift */; };
+		B534F79027A56EE3004F174C /* ServerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B534F78E27A56EE3004F174C /* ServerError.swift */; };
+		B534F79227A5740F004F174C /* ServerConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = B534F79127A5740E004F174C /* ServerConstants.swift */; };
+		B534F79327A5740F004F174C /* ServerConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = B534F79127A5740E004F174C /* ServerConstants.swift */; };
+		B534F79527A5791A004F174C /* URLSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B534F79427A5791A004F174C /* URLSession.swift */; };
+		B534F79627A5791A004F174C /* URLSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B534F79427A5791A004F174C /* URLSession.swift */; };
+		B534F79927A57975004F174C /* URLRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B534F79827A57975004F174C /* URLRequest.swift */; };
+		B534F79A27A57975004F174C /* URLRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B534F79827A57975004F174C /* URLRequest.swift */; };
 		B54CAB8326ECB76400781A3A /* ConveyTestApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54CAB8226ECB76400781A3A /* ConveyTestApp.swift */; };
 		B54CAB8526ECB76400781A3A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54CAB8426ECB76400781A3A /* ContentView.swift */; };
 		B54CAB8726ECB76400781A3A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B54CAB8626ECB76400781A3A /* Assets.xcassets */; };
@@ -38,8 +46,6 @@
 		B5AD1D8C275A46E600BB342D /* Server+Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D77275A46E600BB342D /* Server+Download.swift */; };
 		B5AD1D8D275A46E600BB342D /* Server.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D78275A46E600BB342D /* Server.swift */; };
 		B5AD1D8E275A46E600BB342D /* Server.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD1D78275A46E600BB342D /* Server.swift */; };
-		B5F1E0B127A555F7005E1CE1 /* ServerTask+Cancellable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1E0B027A555F7005E1CE1 /* ServerTask+Cancellable.swift */; };
-		B5F1E0B227A555F7005E1CE1 /* ServerTask+Cancellable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1E0B027A555F7005E1CE1 /* ServerTask+Cancellable.swift */; };
 		B5F1E0B427A55F89005E1CE1 /* URLResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1E0B327A55F89005E1CE1 /* URLResponse.swift */; };
 		B5F1E0B527A55F89005E1CE1 /* URLResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F1E0B327A55F89005E1CE1 /* URLResponse.swift */; };
 /* End PBXBuildFile section */
@@ -51,6 +57,10 @@
 		B52831DC272EA140001EC82E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B52831DF272EA140001EC82E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B533138726ECB7A2007C94BF /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		B534F78E27A56EE3004F174C /* ServerError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerError.swift; sourceTree = "<group>"; };
+		B534F79127A5740E004F174C /* ServerConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerConstants.swift; sourceTree = "<group>"; };
+		B534F79427A5791A004F174C /* URLSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSession.swift; sourceTree = "<group>"; };
+		B534F79827A57975004F174C /* URLRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLRequest.swift; sourceTree = "<group>"; };
 		B54CAB7F26ECB76400781A3A /* ConveyTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ConveyTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B54CAB8226ECB76400781A3A /* ConveyTestApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConveyTestApp.swift; sourceTree = "<group>"; };
 		B54CAB8426ECB76400781A3A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -69,7 +79,6 @@
 		B5AD1D76275A46E600BB342D /* Server.Remote.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Server.Remote.swift; sourceTree = "<group>"; };
 		B5AD1D77275A46E600BB342D /* Server+Download.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Server+Download.swift"; sourceTree = "<group>"; };
 		B5AD1D78275A46E600BB342D /* Server.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Server.swift; sourceTree = "<group>"; };
-		B5F1E0B027A555F7005E1CE1 /* ServerTask+Cancellable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ServerTask+Cancellable.swift"; sourceTree = "<group>"; };
 		B5F1E0B327A55F89005E1CE1 /* URLResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLResponse.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -116,6 +125,16 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B534F79727A57922004F174C /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				B5F1E0B327A55F89005E1CE1 /* URLResponse.swift */,
+				B534F79427A5791A004F174C /* URLSession.swift */,
+				B534F79827A57975004F174C /* URLRequest.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		B54CAB7626ECB76400781A3A = {
@@ -172,6 +191,7 @@
 			isa = PBXGroup;
 			children = (
 				B5AD1D6C275A46E600BB342D /* Tasks */,
+				B534F79727A57922004F174C /* Extensions */,
 				B5AD1D75275A46E600BB342D /* Server */,
 			);
 			path = Convey;
@@ -182,11 +202,9 @@
 			children = (
 				B5AD1D6E275A46E600BB342D /* ServerTask+Logging.swift */,
 				B5AD1D6F275A46E600BB342D /* ServerTask+FileBacked.swift */,
-				B5F1E0B027A555F7005E1CE1 /* ServerTask+Cancellable.swift */,
 				B5AD1D71275A46E600BB342D /* ServerTask.swift */,
 				B5AD1D70275A46E600BB342D /* ServerTask+Run.swift */,
 				B5AD1D74275A46E600BB342D /* ServerTask+RunAsync.swift */,
-				B5F1E0B327A55F89005E1CE1 /* URLResponse.swift */,
 				B5AD1D72275A46E600BB342D /* ServerTask+Request.swift */,
 				B5AD1D73275A46E600BB342D /* ServerTask+Upload.swift */,
 				B5AD1D6D275A46E600BB342D /* ServerTask+UploadAsync.swift */,
@@ -200,6 +218,8 @@
 				B5AD1D76275A46E600BB342D /* Server.Remote.swift */,
 				B5AD1D77275A46E600BB342D /* Server+Download.swift */,
 				B5AD1D78275A46E600BB342D /* Server.swift */,
+				B534F79127A5740E004F174C /* ServerConstants.swift */,
+				B534F78E27A56EE3004F174C /* ServerError.swift */,
 			);
 			path = Server;
 			sourceTree = "<group>";
@@ -311,19 +331,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5F1E0B227A555F7005E1CE1 /* ServerTask+Cancellable.swift in Sources */,
+				B534F79327A5740F004F174C /* ServerConstants.swift in Sources */,
 				B5AD1D82275A46E600BB342D /* ServerTask.swift in Sources */,
 				B5AD1D84275A46E600BB342D /* ServerTask+Request.swift in Sources */,
+				B534F79627A5791A004F174C /* URLSession.swift in Sources */,
 				B5AD1D8A275A46E600BB342D /* Server.Remote.swift in Sources */,
 				B5AD1D7A275A46E600BB342D /* ServerTask+UploadAsync.swift in Sources */,
 				B52831DB272EA13F001EC82E /* ContentView.swift in Sources */,
 				B5AD1D88275A46E600BB342D /* ServerTask+RunAsync.swift in Sources */,
 				B52831D9272EA13F001EC82E /* ConveyTest_iOSApp.swift in Sources */,
 				B5F1E0B527A55F89005E1CE1 /* URLResponse.swift in Sources */,
+				B534F79027A56EE3004F174C /* ServerError.swift in Sources */,
 				B5AD1D7E275A46E600BB342D /* ServerTask+FileBacked.swift in Sources */,
 				B5AD1D7C275A46E600BB342D /* ServerTask+Logging.swift in Sources */,
 				B5AD1D80275A46E600BB342D /* ServerTask+Run.swift in Sources */,
 				B5AD1D8C275A46E600BB342D /* Server+Download.swift in Sources */,
+				B534F79A27A57975004F174C /* URLRequest.swift in Sources */,
 				B5AD1D8E275A46E600BB342D /* Server.swift in Sources */,
 				B5AD1D86275A46E600BB342D /* ServerTask+Upload.swift in Sources */,
 			);
@@ -333,19 +356,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5F1E0B127A555F7005E1CE1 /* ServerTask+Cancellable.swift in Sources */,
+				B534F79227A5740F004F174C /* ServerConstants.swift in Sources */,
 				B5AD1D81275A46E600BB342D /* ServerTask.swift in Sources */,
 				B5AD1D83275A46E600BB342D /* ServerTask+Request.swift in Sources */,
+				B534F79527A5791A004F174C /* URLSession.swift in Sources */,
 				B5AD1D89275A46E600BB342D /* Server.Remote.swift in Sources */,
 				B5AD1D79275A46E600BB342D /* ServerTask+UploadAsync.swift in Sources */,
 				B54CAB8526ECB76400781A3A /* ContentView.swift in Sources */,
 				B5AD1D87275A46E600BB342D /* ServerTask+RunAsync.swift in Sources */,
 				B54CAB8326ECB76400781A3A /* ConveyTestApp.swift in Sources */,
 				B5F1E0B427A55F89005E1CE1 /* URLResponse.swift in Sources */,
+				B534F78F27A56EE3004F174C /* ServerError.swift in Sources */,
 				B5AD1D7D275A46E600BB342D /* ServerTask+FileBacked.swift in Sources */,
 				B5AD1D7B275A46E600BB342D /* ServerTask+Logging.swift in Sources */,
 				B5AD1D7F275A46E600BB342D /* ServerTask+Run.swift in Sources */,
 				B5AD1D8B275A46E600BB342D /* Server+Download.swift in Sources */,
+				B534F79927A57975004F174C /* URLRequest.swift in Sources */,
 				B5AD1D8D275A46E600BB342D /* Server.swift in Sources */,
 				B5AD1D85275A46E600BB342D /* ServerTask+Upload.swift in Sources */,
 			);

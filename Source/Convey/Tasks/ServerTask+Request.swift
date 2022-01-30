@@ -31,6 +31,9 @@ public extension ServerTask {
 			request.httpBody = dataProvider.dataToUpload
 		}
 		request.allHTTPHeaderFields = server.standardHeaders()
+		if let tagged = self as? TaggedTask {
+			request.addValue(tagged.requestTag, forHTTPHeaderField: ServerConstants.Headers.tag)
+		}
 		
 		return request
 	}

@@ -25,8 +25,8 @@ open class Server: NSObject, ObservableObject {
 	open var maxLoggedDataSize = 1024 * 1024 * 10
 	open var launchedAt = Date()
 	private var defaultHeaders: [String: String] = [
-		"Content-Type": "application/json",
-		"Accept": "*"
+		ServerConstants.Headers.contentType: "application/json",
+		ServerConstants.Headers.accept: "*"
 	]
 	
 	public var defaultUserAgent: String {
@@ -56,9 +56,9 @@ open class Server: NSObject, ObservableObject {
 
 	func updateUserAgentHeader() {
 		if let agent = userAgent {
-			defaultHeaders["User-Agent"] = agent
+			defaultHeaders[ServerConstants.Headers.userAgent] = agent
 		} else {
-			defaultHeaders.removeValue(forKey: "User-Agent")
+			defaultHeaders.removeValue(forKey: ServerConstants.Headers.userAgent)
 		}
 	}
 	

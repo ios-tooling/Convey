@@ -29,6 +29,10 @@ public protocol CustomURLTask: ServerTask {
 	var customURL: URL? { get }
 }
 
+public protocol TaggedTask: ServerTask {
+	var requestTag: String { get }
+}
+
 public protocol CustomURLRequestTask: ServerTask {
 	var customURLRequest: AnyPublisher<URLRequest?, Error> { get }
 }
