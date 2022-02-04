@@ -612,7 +612,7 @@
 /* Begin XCRemoteSwiftPackageReference section */
 		B54CAB9226ECB99F00781A3A /* XCRemoteSwiftPackageReference "Suite" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/bengottlieb/Suite.git";
+			repositoryURL = "https://github.com/DanielGartenberg/Suite.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.0.24;
