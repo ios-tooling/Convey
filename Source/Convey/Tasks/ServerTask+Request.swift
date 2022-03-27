@@ -35,6 +35,12 @@ public extension ServerTask {
 			request.addValue(tagged.requestTag, forHTTPHeaderField: ServerConstants.Headers.tag)
 		}
 		
+		if let additionalHeaders = (self as? CustomHTTPHeaders)?.customHTTPHeaders {
+			for (value, header) in additionalHeaders {
+				request.addValue(value, forHTTPHeaderField: header)
+			}
+		}
+		
 		return request
 	}
 

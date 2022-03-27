@@ -53,6 +53,10 @@ public protocol CustomHTTPMethodTask: ServerTask {
 	var customHTTPMethod: String { get }
 }
 
+public protocol CustomHTTPHeaders: ServerTask {
+	var customHTTPHeaders: [String: String] { get }
+}
+
 public protocol EchoingTask: ServerTask { }
 
 public protocol ServerCacheableTask { }
