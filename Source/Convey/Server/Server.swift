@@ -25,7 +25,6 @@ open class Server: NSObject, ObservableObject {
 	open var maxLoggedDataSize = 1024 * 1024 * 10
 	open var launchedAt = Date()
 	private var defaultHeaders: [String: String] = [
-		ServerConstants.Headers.contentType: "application/json",
 		ServerConstants.Headers.accept: "*"
 	]
 	
