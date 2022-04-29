@@ -70,9 +70,9 @@ open class Server: NSObject, ObservableObject {
 		Self.serverInstance = self
 	}
 
-	open func standardHeaders() -> [String: String] {
-		defaultHeaders
-	}
+    open func standardHeaders(for task: ServerTask) -> [String: String] {
+        defaultHeaders
+    }
 
 	open func url(forPath path: String) -> URL {
 		baseURL.appendingPathComponent(path)

@@ -37,7 +37,7 @@ public extension ServerTask {
 				}
 			}
 		}
-		request.allHTTPHeaderFields = server.standardHeaders()
+        request.allHTTPHeaderFields = server.standardHeaders(for: self)
 		if let tagged = self as? TaggedTask {
 			request.addValue(tagged.requestTag, forHTTPHeaderField: ServerConstants.Headers.tag)
 		}
