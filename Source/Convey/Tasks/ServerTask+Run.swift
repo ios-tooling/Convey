@@ -42,16 +42,11 @@ public extension ServerTask {
 	func postprocess(data: Data, response: HTTPURLResponse) { }
 	var url: URL {
 		let nonParameterized = (self as? CustomURLTask)?.customURL ?? server.url(forPath: path)
-		if let parameters = (self as? ParameterizedTask)?.parameters, let chrSet = (self as? ParameterizedTask)?.parameterCharacterSet, parameters.isNotEmpty {
-			var base = nonParameterized.absoluteString + "?"
+		if let parameters = (self as? ParameterizedTask)?.parameters, parameters.isNotEmpty {
+			var components = URLComponents(url: nonParameterized, resolvingAgainstBaseURL: true)
 			
-			for key in parameters.keys.sorted() {
-				guard let value = parameters[key] else { continue }
-				if base.last != "?" { base += "&" }
-				base += "\(key)=\(value.addingPercentEncoding(withAllowedCharacters: chrSet) ?? value)"
-			}
-			
-			return URL(string: base) ?? nonParameterized
+			components?.queryItems = parameters.map { URLQueryItem(name: $0.key, value: $0.value) }
+			if let newURL = components?.url { return newURL }
 		}
 
 		return nonParameterized
@@ -60,10 +55,6 @@ public extension ServerTask {
 	var cachedData: Data? {
 		DataCache.instance.cachedValue(for: url)
 	}
-}
-
-public extension ParameterizedTask {
-	var parameterCharacterSet: CharacterSet { .urlQueryAllowed }
 }
 
 extension ServerTask {

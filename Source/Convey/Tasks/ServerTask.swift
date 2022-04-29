@@ -19,7 +19,6 @@ public protocol ServerTask {
 
 public protocol ParameterizedTask: ServerTask {
 	var parameters: [String: String]? { get }
-	var parameterCharacterSet: CharacterSet { get }
 }
 
 public protocol FileBackedTask: ServerTask {
