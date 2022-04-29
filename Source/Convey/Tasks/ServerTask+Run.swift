@@ -62,7 +62,13 @@ extension ServerTask {
 		requestData(caching: caching, preview: preview)
 			.tryMap { (result: (data: Data, response: URLResponse)) -> (payload: Payload, response: URLResponse) in
 				let dec = decoder ?? server.defaultDecoder
-				return (payload: try dec.decode(Payload.self, from: result.data), response: result.response)
+                
+                do {
+                    return (payload: try dec.decode(Payload.self, from: result.data), response: result.response)
+                } catch {
+                    print("Error when decoding \(Payload.self) in \(self): \(error)")
+                    throw error
+                }
 			}
 			.mapError { HTTPError(url, $0) }
 			.eraseToAnyPublisher()

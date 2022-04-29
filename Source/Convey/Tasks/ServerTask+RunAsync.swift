@@ -67,8 +67,13 @@ extension ServerTask {
 	func requestPayload<Payload: Decodable>(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> (payload: Payload, response: URLResponse) {
 		let result = try await requestData(caching: caching, preview: preview)
 		let actualDecoder = decoder ?? server.defaultDecoder
-		let decoded = try actualDecoder.decode(Payload.self, from: result.data)
-		return (payload: decoded, response: result.response)
+        do {
+            let decoded = try actualDecoder.decode(Payload.self, from: result.data)
+            return (payload: decoded, response: result.response)
+        } catch {
+            print("Error when decoding \(Payload.self) in \(self): \(error)")
+            throw error
+        }
 	}
 
 	func requestData(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) async throws -> (data: Data, response: URLResponse) {
