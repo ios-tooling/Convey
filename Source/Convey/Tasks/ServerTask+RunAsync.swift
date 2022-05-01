@@ -108,6 +108,11 @@ extension ServerTask {
 		postLog(startedAt: startedAt, request: request, data: result.data, response: result.response)
 		preview?(result.data, result.response)
 		postprocess(data: result.data, response: result.response)
+        
+        if result.data.isEmpty, result.response.statusCode >= 400 {
+            throw HTTPError.serverError(request.url, result.response.statusCode, result.data)
+        }
+        
 		return result
 	}
 
