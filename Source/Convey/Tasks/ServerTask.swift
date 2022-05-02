@@ -41,7 +41,9 @@ public protocol DataUploadingTask: ServerTask {
 	var dataToUpload: Data? { get }
 }
 
-public protocol JSONUploadingTask: DataUploadingTask {
+public protocol JSONPayloadTask: ServerTask { }
+
+public protocol JSONUploadingTask: DataUploadingTask, JSONPayloadTask {
 	var jsonToUpload: [String: Any]? { get }
 }
 
@@ -73,7 +75,7 @@ public protocol PayloadDownloadingTask: ServerTask {
 	func postprocess(payload: DownloadPayload)
 }
 
-public protocol PayloadUploadingTask: DataUploadingTask {
+public protocol PayloadUploadingTask: DataUploadingTask, JSONPayloadTask {
 	associatedtype UploadPayload: Encodable
 	var uploadPayload: UploadPayload? { get }
 }

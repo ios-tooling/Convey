@@ -30,7 +30,7 @@ public extension ServerTask {
 			if request.httpMethod == "GET" { request.httpMethod = "POST" }
 			request.httpBody = dataProvider.dataToUpload
 			if request.allHTTPHeaderFields?[ServerConstants.Headers.contentType] == nil {
-				if self is JSONUploadingTask {
+				if self is JSONPayloadTask {
 					request.addValue("application/json", forHTTPHeaderField: ServerConstants.Headers.contentType)
 				} else {
 					request.addValue("text/plain", forHTTPHeaderField: ServerConstants.Headers.contentType)
