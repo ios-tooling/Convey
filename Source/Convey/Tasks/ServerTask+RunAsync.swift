@@ -71,7 +71,7 @@ extension ServerTask {
             let decoded = try actualDecoder.decode(Payload.self, from: result.data)
             return (payload: decoded, response: result.response)
         } catch {
-            print("Error when decoding \(Payload.self) in \(self): \(error)")
+			  print("Error when decoding \(Payload.self) in \(self), \(String(data: result.data, encoding: .utf8) ?? "--unparseable--"): \(error)")
             throw error
         }
 	}

@@ -66,7 +66,7 @@ extension ServerTask {
                 do {
                     return (payload: try dec.decode(Payload.self, from: result.data), response: result.response)
                 } catch {
-                    print("Error when decoding \(Payload.self) in \(self): \(error)")
+                    print("Error when decoding \(Payload.self) in \(self), \(String(data: result.data, encoding: .utf8) ?? "--unparseable--"): \(error)")
                     throw error
                 }
 			}
