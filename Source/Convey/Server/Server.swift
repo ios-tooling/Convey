@@ -81,6 +81,10 @@ open class Server: NSObject, ObservableObject {
 	open func handle(error: Error, from task: ServerTask) {
 		print("Error: \(error) from \(task)")
 	}
+    
+    open var reportConnectionError: (Int, String?) -> Void = { code, description in
+        print("Connection error: \(code): \(description ?? "Unparseable error")")
+    }
 }
 
 extension Server: URLSessionDelegate {
