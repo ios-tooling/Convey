@@ -24,7 +24,7 @@ public extension PayloadDownloadingTask {
 @available(macOS 11, iOS 13.0, watchOS 7.0, *)
 public extension ServerTask where Self: ServerDELETETask {
     func delete() async throws {
-        try await self.downloadData()
+        _ = try await self.downloadData()
     }
 }
 
