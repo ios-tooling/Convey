@@ -28,9 +28,25 @@ public extension ServerTask {
 		request.httpMethod = httpMethod
 		if let dataProvider = self as? DataUploadingTask {
 			if request.httpMethod == "GET" { request.httpMethod = "POST" }
-			request.httpBody = dataProvider.uploadData
+			request.httpBody = dataProvider.dataToUpload
+			if request.allHTTPHeaderFields?[ServerConstants.Headers.contentType] == nil {
+				if self is JSONPayloadTask {
+					request.addValue("application/json", forHTTPHeaderField: ServerConstants.Headers.contentType)
+				} else {
+					request.addValue("text/plain", forHTTPHeaderField: ServerConstants.Headers.contentType)
+				}
+			}
 		}
-		request.allHTTPHeaderFields = server.standardHeaders()
+        request.allHTTPHeaderFields = server.standardHeaders(for: self)
+		if let tagged = self as? TaggedTask {
+			request.addValue(tagged.requestTag, forHTTPHeaderField: ServerConstants.Headers.tag)
+		}
+		
+		if let additionalHeaders = (self as? CustomHTTPHeaders)?.customHTTPHeaders {
+			for (value, header) in additionalHeaders {
+				request.addValue(value, forHTTPHeaderField: header)
+			}
+		}
 		
 		return request
 	}

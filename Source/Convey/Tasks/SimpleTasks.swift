@@ -13,7 +13,7 @@ public struct SimplePOSTTask: ServerPOSTTask, CustomURLRequestTask, DataUploadin
 	
 	let payloadString: String
 	let url: URL
-	public var uploadData: Data? { payloadString.data(using: .utf8) }
+	public var dataToUpload: Data? { payloadString.data(using: .utf8) }
 	
 	public var customURLRequest: AnyPublisher<URLRequest?, Error> {
 		var request = URLRequest(url: url)

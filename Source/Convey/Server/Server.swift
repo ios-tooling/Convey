@@ -25,8 +25,7 @@ open class Server: NSObject, ObservableObject {
 	open var maxLoggedDataSize = 1024 * 1024 * 10
 	open var launchedAt = Date()
 	private var defaultHeaders: [String: String] = [
-		"Content-Type": "application/json",
-		"Accept": "*"
+		ServerConstants.Headers.accept: "*"
 	]
 	
 	public var defaultUserAgent: String {
@@ -56,9 +55,9 @@ open class Server: NSObject, ObservableObject {
 
 	func updateUserAgentHeader() {
 		if let agent = userAgent {
-			defaultHeaders["User-Agent"] = agent
+			defaultHeaders[ServerConstants.Headers.userAgent] = agent
 		} else {
-			defaultHeaders.removeValue(forKey: "User-Agent")
+			defaultHeaders.removeValue(forKey: ServerConstants.Headers.userAgent)
 		}
 	}
 	
@@ -71,9 +70,9 @@ open class Server: NSObject, ObservableObject {
 		Self.serverInstance = self
 	}
 
-	open func standardHeaders() -> [String: String] {
-		defaultHeaders
-	}
+    open func standardHeaders(for task: ServerTask) -> [String: String] {
+        defaultHeaders
+    }
 
 	open func url(forPath path: String) -> URL {
 		baseURL.appendingPathComponent(path)
@@ -82,6 +81,10 @@ open class Server: NSObject, ObservableObject {
 	open func handle(error: Error, from task: ServerTask) {
 		print("Error: \(error) from \(task)")
 	}
+    
+    open var reportConnectionError: (Int, String?) -> Void = { code, description in
+        print("Connection error: \(code): \(description ?? "Unparseable error")")
+    }
 }
 
 extension Server: URLSessionDelegate {

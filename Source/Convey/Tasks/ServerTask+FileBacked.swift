@@ -12,7 +12,12 @@ public extension ServerTask where Self: FileBackedTask & PayloadDownloadingTask 
 	func fileCachedDownload(using decoder: JSONDecoder? = nil) throws -> DownloadPayload? {
 		guard let data = fileCachedData else { return nil }
 		let decoder = decoder ?? server.defaultDecoder
-		return try decoder.decode(DownloadPayload.self, from: data)
+        do {
+            return try decoder.decode(DownloadPayload.self, from: data)
+        } catch {
+            print("Error when decoding \(DownloadPayload.self) in \(self): \(error)")
+            throw error
+        }
 	}
 }
 
