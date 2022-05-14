@@ -34,7 +34,11 @@ public protocol TaggedTask: ServerTask {
 }
 
 public protocol CustomURLRequestTask: ServerTask {
-	var customURLRequest: AnyPublisher<URLRequest?, Error> { get }
+    var customURLRequest: AnyPublisher<URLRequest?, Error> { get }
+}
+
+public protocol CustomAsyncURLRequestTask: ServerTask {
+    var customURLRequest: URLRequest { get async throws }
 }
 
 public protocol DataUploadingTask: ServerTask {

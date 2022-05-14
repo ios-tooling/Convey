@@ -9,12 +9,6 @@ import Suite
 import Foundation
 
 @available(macOS 11, iOS 13.0, watchOS 7.0, *)
-public protocol CustomAsyncURLRequestTask: ServerTask {
-	var customURLRequest: URLRequest { get async throws }
-}
-
-
-@available(macOS 11, iOS 13.0, watchOS 7.0, *)
 public extension PayloadDownloadingTask {
 	func download(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadPayload {
 		try await downloadWithResponse().payload
@@ -25,6 +19,13 @@ public extension PayloadDownloadingTask {
 		postprocess(payload: result.payload)
 		return result
 	}
+}
+
+@available(macOS 11, iOS 13.0, watchOS 7.0, *)
+public extension ServerTask where Self: ServerDELETETask {
+    func delete() async throws {
+        try await self.downloadData()
+    }
 }
 
 @available(macOS 11, iOS 13.0, watchOS 7.0, *)
