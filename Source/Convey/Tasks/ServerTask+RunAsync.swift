@@ -112,7 +112,7 @@ extension ServerTask {
         
         if result.response.statusCode / 100 != 2 {
             server.reportConnectionError(result.response.statusCode, String(data: result.data, encoding: .utf8))
-            if result.data.isEmpty {
+			   if result.data.isEmpty || (result.response.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
                 throw HTTPError.serverError(request.url, result.response.statusCode, result.data)
             }
         }

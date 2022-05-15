@@ -20,6 +20,7 @@ open class Server: NSObject, ObservableObject {
 	open var defaultEncoder = JSONEncoder()
 	open var defaultDecoder = JSONDecoder()
 	open var logDirectory: URL?
+	open var reportBadHTTPStatusAsError = true
 	open var configuration = URLSessionConfiguration.default
 	public var userAgent: String? { didSet { updateUserAgentHeader() }}
 	open var maxLoggedDataSize = 1024 * 1024 * 10
@@ -90,5 +91,15 @@ open class Server: NSObject, ObservableObject {
 extension Server: URLSessionDelegate {
 	public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
 		completionHandler(.useCredential, challenge.proposedCredential)
+	}
+}
+
+public extension Int {
+	var isHTTPError: Bool {
+		(self / 100) > 3
+	}
+	
+	var isHTTPSuccess: Bool {
+		(self / 100) == 2
 	}
 }
