@@ -5,7 +5,6 @@
 //  Created by Ben Gottlieb on 9/11/21.
 //
 
-import Suite
 import Combine
 import Foundation
 
@@ -16,7 +15,7 @@ open class Server: NSObject, ObservableObject {
 	open var baseURL: URL { remote.url }
 	open var session: URLSession!
 	open var isReady = CurrentValueSubject<Bool, Never>(false)
-	open var recentServerError: Error? { didSet { self.objectWillChange.sendOnMain() }}
+   open var recentServerError: Error? { didSet { Task { await MainActor.run { self.objectWillChange.send() }} }}
 	open var defaultEncoder = JSONEncoder()
 	open var defaultDecoder = JSONDecoder()
 	open var logDirectory: URL?
@@ -30,7 +29,7 @@ open class Server: NSObject, ObservableObject {
 	]
 	
 	public var defaultUserAgent: String {
-		"\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)/\(Gestalt.rawDeviceType)/CFNetwork/1325.0.1 Darwin/21.1.0"
+      "\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)/\(Device.rawDeviceType)/CFNetwork/1325.0.1 Darwin/21.1.0"
 	}
 	public func clearLogs() {
 		if let dir = logDirectory { try? FileManager.default.removeItem(at: dir) }
@@ -83,8 +82,8 @@ open class Server: NSObject, ObservableObject {
 		print("Error: \(error) from \(task)")
 	}
     
-    open var reportConnectionError: (Int, String?) -> Void = { code, description in
-        print("\(type(of: self)) Connection error: \(code): \(description ?? "Unparseable error")")
+    open var reportConnectionError: (ServerTask, Int, String?) -> Void = { task, code, description in
+        print("\(type(of: task)) Connection error: \(code): \(description ?? "Unparseable error")")
     }
 }
 

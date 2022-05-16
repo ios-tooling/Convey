@@ -5,8 +5,8 @@
 //  Created by Ben Gottlieb on 10/30/21.
 //
 
-import Suite
 import Foundation
+import Combine
 
 @available(macOS 11, iOS 13.0, watchOS 7.0, *)
 public extension PayloadDownloadingTask {
@@ -24,7 +24,7 @@ public extension PayloadDownloadingTask {
 @available(macOS 11, iOS 13.0, watchOS 7.0, *)
 public extension ServerTask where Self: ServerDELETETask {
     func delete() async throws {
-        try await self.downloadData()
+        _ = try await self.downloadData()
     }
 }
 
@@ -44,18 +44,21 @@ public extension ServerTask {
 		}
 		
 		if let custom = self as? CustomURLRequestTask {
-			return try await withCheckedThrowingContinuation { continuation in
-				custom.customURLRequest
-					.onCompletion { result in
-						switch result {
-						case .failure(let err):
-							continuation.resume(throwing: err)
-							
-						case .success(let request):
-							continuation.resume(returning: request ?? defaultRequest())
-						}
-					}
+            var cancellable: AnyCancellable?
+			let request = try await withCheckedThrowingContinuation { continuation in
+                cancellable = custom.customURLRequest
+                    .sink(receiveCompletion: { result in
+                        switch result {
+                        case .failure(let error): continuation.resume(throwing: error)
+                        case .finished: break
+                        }
+                    }, receiveValue: { request in
+                        continuation.resume(returning: request)
+                    })
 			}
+            
+            if cancellable != nil { cancellable = nil }
+            if let request = request { return request }
 		}
 			
 		return defaultRequest()
@@ -111,7 +114,7 @@ extension ServerTask {
 		postprocess(data: result.data, response: result.response)
         
         if result.response.statusCode / 100 != 2 {
-            server.reportConnectionError(result.response.statusCode, String(data: result.data, encoding: .utf8))
+            server.reportConnectionError(self, result.response.statusCode, String(data: result.data, encoding: .utf8))
 			   if result.data.isEmpty || (result.response.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
                 throw HTTPError.serverError(request.url, result.response.statusCode, result.data)
             }

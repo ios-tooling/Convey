@@ -18,7 +18,11 @@ extension Server {
 extension ServerTask {
 	func logFilename(for date: Date) -> String {
 		let timestamp = date.timeIntervalSince(server.launchedAt)
-		return "\(date.localTimeString(date: .none, time: .abbr).replacingOccurrences(of: ":", with: "᠄ ")); \(timestamp.string(decimalPlaces: 6, padded: true)) - \(type(of: self)).txt"
+        let name = "\(Int(timestamp)).txt"
+        if #available(iOS 15, macOS 12, watchOS 8, tvOS 15.0, *) {
+            return "\(date.formatted(date: .numeric, time: .shortened).replacingOccurrences(of: ":", with: "᠄ ")); \(name)"
+        }
+        return name
 	}
 	
 	func preLog(startedAt: Date, request: URLRequest) {
@@ -46,7 +50,7 @@ extension ServerTask {
 	}
 	
 	func loggingOutput(startedAt: Date, request: URLRequest, data: Data?, response: URLResponse?) -> Data {
-		var output = "Started at: \(startedAt.localTimeString(date: .short, time: .short)), took: \(abs(startedAt.timeIntervalSinceNow)) s\n".data(using: .utf8) ?? Data()
+        var output = "Started at: \(startedAt.timeLabel), took: \(abs(startedAt.timeIntervalSinceNow)) s\n".data(using: .utf8) ?? Data()
 		output += request.descriptionData
 		
 		if let responseData = response?.descriptionData {
@@ -142,4 +146,14 @@ public extension URLRequest {
 		
 		return result
 	}
+}
+
+extension Date {
+    var timeLabel: String {
+        if #available(iOS 15, macOS 12, watchOS 8, tvOS 15.0, *) {
+            return self.formatted()
+        }
+        
+        return self.description
+    }
 }

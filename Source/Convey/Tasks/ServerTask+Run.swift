@@ -5,8 +5,8 @@
 //  Created by Ben Gottlieb on 9/11/21.
 //
 
-import Suite
 import Foundation
+import Combine
 
 public extension PayloadDownloadingTask {
 	func postprocess(payload: DownloadPayload) { }
@@ -26,7 +26,7 @@ public extension PayloadDownloadingTask {
 		do {
 			return try decoder.decode(DownloadPayload.self, from: data)
 		} catch {
-			logg("Local requestPayload failed for \(DownloadPayload.self) \(url)\n\n \(error)\n\n\(String(data: data, encoding: .utf8) ?? "--")")
+			print("Local requestPayload failed for \(DownloadPayload.self) \(url)\n\n \(error)\n\n\(String(data: data, encoding: .utf8) ?? "--")")
 			return nil
 		}
 	}
@@ -42,7 +42,7 @@ public extension ServerTask {
 	func postprocess(data: Data, response: HTTPURLResponse) { }
 	var url: URL {
 		let nonParameterized = (self as? CustomURLTask)?.customURL ?? server.url(forPath: path)
-		if let parameters = (self as? ParameterizedTask)?.parameters, parameters.isNotEmpty {
+		if let parameters = (self as? ParameterizedTask)?.parameters, !parameters.isEmpty {
 			var components = URLComponents(url: nonParameterized, resolvingAgainstBaseURL: true)
 			
 			components?.queryItems = parameters.map { URLQueryItem(name: $0.key, value: $0.value) }

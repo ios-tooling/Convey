@@ -5,8 +5,8 @@
 //  Created by Ben Gottlieb on 9/12/21.
 //
 
-import Suite
 import Foundation
+import Combine
 
 public extension Server {
 	func data(for url: URL) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> {
