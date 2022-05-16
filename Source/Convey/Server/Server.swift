@@ -84,7 +84,7 @@ open class Server: NSObject, ObservableObject {
 	}
     
     open var reportConnectionError: (Int, String?) -> Void = { code, description in
-        print("Connection error: \(code): \(description ?? "Unparseable error")")
+        print("\(type(of: self)) Connection error: \(code): \(description ?? "Unparseable error")")
     }
 }
 
