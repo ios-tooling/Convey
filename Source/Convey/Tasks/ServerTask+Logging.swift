@@ -26,7 +26,7 @@ extension ServerTask {
 	}
 	
 	func preLog(startedAt: Date, request: URLRequest) {
-		if self is EchoingTask {
+		if self.isEchoing {
 			print(" ====================== Echoing Request \(type(of: self)) ======================\n \(request)\n============================================")
 		}
 		guard let url = server.setupLoggingDirectory()?.appendingPathComponent(logFilename(for: startedAt)) else { return }
@@ -37,13 +37,13 @@ extension ServerTask {
 	
 	func postLog(startedAt: Date, request: URLRequest, data: Data?, response: URLResponse?) {
 		guard let url = server.setupLoggingDirectory()?.appendingPathComponent(logFilename(for: startedAt)) else {
-			if self is EchoingTask { print(String(data: loggingOutput(startedAt: startedAt, request: request, data: data, response: response), encoding: .utf8) ?? "unable to stringify response") }
+			if self.isEchoing { print(String(data: loggingOutput(startedAt: startedAt, request: request, data: data, response: response), encoding: .utf8) ?? "unable to stringify response") }
 			return
 		}
 		try? FileManager.default.removeItem(at: url)
 
 		let output = loggingOutput(startedAt: startedAt, request: request, data: data, response: response)
-		if self is EchoingTask {
+		if self.isEchoing {
 			print("====================== Echoing Response \(type(of: self)) ======================\n \(String(data: output, encoding: .utf8) ?? "unable to stringify response")\n======================")
 		}
 		try? output.write(to: url)

@@ -48,7 +48,7 @@ open class Server: NSObject, ObservableObject {
 	open func preflight(_ task: ServerTask, request: URLRequest) async throws -> URLRequest {
 		request
 	}
-
+	
 	public static func setupDefault() {
 		_ = Server()
 	}
