@@ -74,8 +74,8 @@ open class Server: NSObject, ObservableObject {
         defaultHeaders
     }
 
-	open func url(forPath path: String) -> URL {
-		baseURL.appendingPathComponent(path)
+	open func url(forTask task: ServerTask) -> URL {
+		baseURL.appendingPathComponent(task.path)
 	}
 
 	open func handle(error: Error, from task: ServerTask) {

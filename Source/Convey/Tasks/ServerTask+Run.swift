@@ -41,7 +41,7 @@ public extension ServerTask {
 
 	func postprocess(data: Data, response: HTTPURLResponse) { }
 	var url: URL {
-		let nonParameterized = (self as? CustomURLTask)?.customURL ?? server.url(forPath: path)
+		let nonParameterized = (self as? CustomURLTask)?.customURL ?? server.url(forTask: self)
 		if let parameters = (self as? ParameterizedTask)?.parameters, !parameters.isEmpty {
 			var components = URLComponents(url: nonParameterized, resolvingAgainstBaseURL: true)
 			
