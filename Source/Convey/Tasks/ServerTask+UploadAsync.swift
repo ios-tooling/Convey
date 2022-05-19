@@ -13,8 +13,8 @@ public extension PayloadDownloadingTask where Self: DataUploadingTask {
 		try await uploadWithResponse(decoder: decoder, preview: preview).payload
 	}
 
-	func uploadWithResponse(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> (payload: DownloadPayload, response: URLResponse) {
-        let result: (payload: DownloadPayload, response: URLResponse) = try await requestPayload(caching: .reloadIgnoringLocalCacheData, decoder: decoder, preview: preview)
+    func uploadWithResponse(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> (payload: DownloadPayload, response: URLResponse, data: Data?) {
+        let result: (payload: DownloadPayload, response: URLResponse, data: Data?) = try await requestPayload(caching: .reloadIgnoringLocalCacheData, decoder: decoder, preview: preview)
         postprocess(payload: result.payload)
         return result
 	}

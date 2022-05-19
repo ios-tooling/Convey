@@ -14,8 +14,8 @@ public extension PayloadDownloadingTask {
 		try await downloadWithResponse().payload
 	}
 	
-	func downloadWithResponse(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> (payload: DownloadPayload, response: URLResponse) {
-		let result: (payload: DownloadPayload, response: URLResponse) = try await requestPayload(caching: caching, decoder: decoder, preview: preview)
+    func downloadWithResponse(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> (payload: DownloadPayload, response: URLResponse, data: Data?) {
+        let result: (payload: DownloadPayload, response: URLResponse, data: Data?) = try await requestPayload(caching: caching, decoder: decoder, preview: preview)
 		postprocess(payload: result.payload)
 		return result
 	}
@@ -68,12 +68,12 @@ public extension ServerTask {
 
 @available(macOS 11, iOS 13.0, watchOS 7.0, *)
 extension ServerTask {
-	func requestPayload<Payload: Decodable>(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> (payload: Payload, response: URLResponse) {
+    func requestPayload<Payload: Decodable>(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> (payload: Payload, response: URLResponse, data: Data?) {
 		let result = try await requestData(caching: caching, preview: preview)
 		let actualDecoder = decoder ?? server.defaultDecoder
         do {
             let decoded = try actualDecoder.decode(Payload.self, from: result.data)
-            return (payload: decoded, response: result.response)
+            return (payload: decoded, response: result.response, data: result.data)
         } catch {
 			  print("Error when decoding \(Payload.self) in \(self), \(String(data: result.data, encoding: .utf8) ?? "--unparseable--"): \(error)")
             throw error
