@@ -150,10 +150,12 @@ public extension URLRequest {
 
 extension Date {
     var timeLabel: String {
-        if #available(iOS 15, macOS 12, watchOS 8, tvOS 15.0, *) {
-            return self.formatted()
-        }
+        let time = timeIntervalSinceReferenceDate
+        let milliseconds = Int(time * 1000) % 1000
+        let seconds = Int(time) % 60
+        let minutes = (Int(time) / 60) % 60
+        let hours = (Int(time) / 3600) % 24
         
-        return self.description
+        return String(format: "%d:%02d:%02d.%d", hours, minutes, seconds, milliseconds)
     }
 }

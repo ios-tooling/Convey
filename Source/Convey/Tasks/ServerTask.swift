@@ -88,7 +88,11 @@ public protocol PayloadUploadingTask: DataUploadingTask, JSONPayloadTask {
 	var uploadPayload: UploadPayload? { get }
 }
 
+public protocol PreFlightTask: ServerTask {
+    func preFlight() async throws
+}
+
 public protocol PostFlightTask: ServerTask {
-	func postFlight() async throws
+    func postFlight() async throws
 }
 

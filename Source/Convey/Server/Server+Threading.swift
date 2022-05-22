@@ -9,6 +9,16 @@ import Foundation
 
 typealias EmptyContinuation = UnsafeContinuation<Void, Never>
 
+extension Server {
+    func wait(forThread threadName: String) async {
+        await threadManager.wait(forThread: threadName)
+    }
+
+    func stopWaiting(forThread threadName: String) async {
+        await threadManager.stopWaiting(forThread: threadName)
+    }
+}
+
 actor ThreadManager {
 	var continuations: [String: [EmptyContinuation]] = [:]
 	var active: [String: Bool] = [:]

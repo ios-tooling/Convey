@@ -27,7 +27,7 @@ open class Server: NSObject, ObservableObject {
 	private var defaultHeaders: [String: String] = [
 		ServerConstants.Headers.accept: "*"
 	]
-	private let threadManager = ThreadManager()
+	let threadManager = ThreadManager()
 	
 	public var defaultUserAgent: String {
 		"\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)/\(Device.rawDeviceType)/CFNetwork/1325.0.1 Darwin/21.1.0"
@@ -85,14 +85,6 @@ open class Server: NSObject, ObservableObject {
 	
 	open var reportConnectionError: (ServerTask, Int, String?) -> Void = { task, code, description in
 		print("\(type(of: task)) Connection error: \(code): \(description ?? "Unparseable error")")
-	}
-	
-	func wait(forThread threadName: String) async {
-		await threadManager.wait(forThread: threadName)
-	}
-
-	func stopWaiting(forThread threadName: String) async {
-		await threadManager.stopWaiting(forThread: threadName)
 	}
 }
 

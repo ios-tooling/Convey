@@ -105,6 +105,7 @@ extension ServerTask {
 		if let threadName = (self as? ThreadedServerTask)?.threadName { await server.wait(forThread: threadName) }
 		
 		let startedAt = Date()
+        try await (self as? PreFlightTask)?.preFlight()
 		var request = try await buildRequest()
 		request = try await server.preflight(self, request: request)
 		preLog(startedAt: Date(), request: request)
