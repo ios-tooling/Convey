@@ -36,7 +36,7 @@ struct SampleHTTPBinPOST: ServerTask, ServerPOSTTask, DataUploadingTask, Threade
 		}
 	}
 	
-	func postFlight() async {
-		try? await Task.sleep(nanoseconds: 1_000_000_000)
+	func postFlight() async throws {
+		try await Task.sleep(nanoseconds: 1_000_000_000)
 	}
 }
