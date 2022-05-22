@@ -15,7 +15,7 @@ open class Server: NSObject, ObservableObject {
 	open var baseURL: URL { remote.url }
 	open var session: URLSession!
 	open var isReady = CurrentValueSubject<Bool, Never>(false)
-   open var recentServerError: Error? { didSet { Task { await MainActor.run { self.objectWillChange.send() }} }}
+	open var recentServerError: Error? { didSet { Task { await MainActor.run { self.objectWillChange.send() }} }}
 	open var defaultEncoder = JSONEncoder()
 	open var defaultDecoder = JSONDecoder()
 	open var logDirectory: URL?
@@ -27,14 +27,15 @@ open class Server: NSObject, ObservableObject {
 	private var defaultHeaders: [String: String] = [
 		ServerConstants.Headers.accept: "*"
 	]
+	private let threadManager = ThreadManager()
 	
 	public var defaultUserAgent: String {
-      "\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)/\(Device.rawDeviceType)/CFNetwork/1325.0.1 Darwin/21.1.0"
+		"\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)/\(Device.rawDeviceType)/CFNetwork/1325.0.1 Darwin/21.1.0"
 	}
 	public func clearLogs() {
 		if let dir = logDirectory { try? FileManager.default.removeItem(at: dir) }
 	}
-
+	
 	public func setStandardHeaders(_ headers: [String: String]) {
 		self.defaultHeaders = headers
 		updateUserAgentHeader()
@@ -52,7 +53,7 @@ open class Server: NSObject, ObservableObject {
 	public static func setupDefault() {
 		_ = Server()
 	}
-
+	
 	func updateUserAgentHeader() {
 		if let agent = userAgent {
 			defaultHeaders[ServerConstants.Headers.userAgent] = agent
@@ -69,22 +70,30 @@ open class Server: NSObject, ObservableObject {
 		session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
 		Self.serverInstance = self
 	}
-
-    open func standardHeaders(for task: ServerTask) -> [String: String] {
-        defaultHeaders
-    }
-
+	
+	open func standardHeaders(for task: ServerTask) -> [String: String] {
+		defaultHeaders
+	}
+	
 	open func url(forTask task: ServerTask) -> URL {
 		baseURL.appendingPathComponent(task.path)
 	}
-
+	
 	open func handle(error: Error, from task: ServerTask) {
 		print("Error: \(error) from \(task)")
 	}
-    
-    open var reportConnectionError: (ServerTask, Int, String?) -> Void = { task, code, description in
-        print("\(type(of: task)) Connection error: \(code): \(description ?? "Unparseable error")")
-    }
+	
+	open var reportConnectionError: (ServerTask, Int, String?) -> Void = { task, code, description in
+		print("\(type(of: task)) Connection error: \(code): \(description ?? "Unparseable error")")
+	}
+	
+	func wait(forThread threadName: String) async {
+		await threadManager.wait(forThread: threadName)
+	}
+
+	func stopWaiting(forThread threadName: String) async {
+		await threadManager.stopWaiting(forThread: threadName)
+	}
 }
 
 extension Server: URLSessionDelegate {

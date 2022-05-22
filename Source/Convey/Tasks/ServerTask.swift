@@ -66,11 +66,15 @@ public protocol CustomHTTPHeaders: ServerTask {
 public protocol EchoingTask: ServerTask { }
 
 public protocol ServerCacheableTask { }
-public protocol ServerGETTask { }
-public protocol ServerPUTTask { }
-public protocol ServerPOSTTask { }
-public protocol ServerPATCHTask{ }
-public protocol ServerDELETETask { }
+public protocol ServerGETTask: ServerTask { }
+public protocol ServerPUTTask: ServerTask { }
+public protocol ServerPOSTTask: ServerTask { }
+public protocol ServerPATCHTask: ServerTask { }
+public protocol ServerDELETETask: ServerTask { }
+
+public protocol ThreadedServerTask: ServerTask {
+	var threadName: String? { get }
+}
 
 
 // the protocols below all have associated types

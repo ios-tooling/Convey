@@ -102,6 +102,8 @@ extension ServerTask {
 	}
 	
 	func internalRequestData(preview: PreviewClosure? = nil) async throws -> (data: Data, response: HTTPURLResponse) {
+		if let threadName = (self as? ThreadedServerTask)?.threadName { await server.wait(forThread: threadName) }
+		
 		let startedAt = Date()
 		var request = try await buildRequest()
 		request = try await server.preflight(self, request: request)
@@ -112,15 +114,14 @@ extension ServerTask {
 		postLog(startedAt: startedAt, request: request, data: result.data, response: result.response)
 		preview?(result.data, result.response)
 		postprocess(data: result.data, response: result.response)
-        
-        if result.response.statusCode / 100 != 2 {
+			if result.response.statusCode / 100 != 2 {
             server.reportConnectionError(self, result.response.statusCode, String(data: result.data, encoding: .utf8))
 			   if result.data.isEmpty || (result.response.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
                 throw HTTPError.serverError(request.url, result.response.statusCode, result.data)
             }
         }
         
-        
+		if let threadName = (self as? ThreadedServerTask)?.threadName { await server.stopWaiting(forThread: threadName) }
 		return result
 	}
 

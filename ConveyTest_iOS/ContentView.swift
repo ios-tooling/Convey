@@ -18,6 +18,10 @@ struct ContentView: View {
 			if let image = image {
 				Image(uiImage: image)
 			}
+			
+			Button("Async Test") {
+				asyncTest()
+			}
 		}
 		.task {
 			do {
@@ -29,6 +33,14 @@ struct ContentView: View {
 			
 		}
 	}
+	
+	func asyncTest() {
+		for i in 0..<30 {
+			Task.detached {
+				try? await SampleHTTPBinPOST(index: i).upload()
+			}
+		}
+	}
 }
 
 struct ContentView_Previews: PreviewProvider {
@@ -36,3 +48,4 @@ struct ContentView_Previews: PreviewProvider {
 		ContentView()
 	}
 }
+
