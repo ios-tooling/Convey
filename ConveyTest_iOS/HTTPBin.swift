@@ -16,7 +16,7 @@ class HTTPBinServer: Server {
 	}
 }
 
-struct SampleHTTPBinPOST: ServerTask, ServerPOSTTask, DataUploadingTask, ThreadedServerTask {
+struct SampleHTTPBinPOST: ServerTask, ServerPOSTTask, DataUploadingTask, ThreadedServerTask, PostFlightTask {
 	var path: String = "post"
 	var dataToUpload: Data?
 	var server: Server { HTTPBinServer.instance }
@@ -34,5 +34,9 @@ struct SampleHTTPBinPOST: ServerTask, ServerPOSTTask, DataUploadingTask, Threade
 		} catch {
 			print("Failed to decode json")
 		}
+	}
+	
+	func postFlight() async {
+		try? await Task.sleep(nanoseconds: 1_000_000_000)
 	}
 }

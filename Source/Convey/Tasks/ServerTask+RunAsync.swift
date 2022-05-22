@@ -120,7 +120,8 @@ extension ServerTask {
                 throw HTTPError.serverError(request.url, result.response.statusCode, result.data)
             }
         }
-        
+		
+		await (self as? PostFlightTask)?.postFlight()
 		if let threadName = (self as? ThreadedServerTask)?.threadName { await server.stopWaiting(forThread: threadName) }
 		return result
 	}
