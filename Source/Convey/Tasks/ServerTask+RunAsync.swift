@@ -82,7 +82,7 @@ extension ServerTask {
 
 	func requestData(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) async throws -> (data: Data, response: URLResponse) {
 		if caching == .returnCacheDataDontLoad, self is ServerCacheableTask {
-			if let data = DataCache.instance.cachedValue(for: url) {
+			if let data = cachedData {
 				return (data: data, response: URLResponse(cachedFor: url, data: data))
 			}
 			throw HTTPError.offline

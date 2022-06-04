@@ -10,7 +10,7 @@ import Foundation
 
 open class Server: NSObject, ObservableObject {
 	public static var serverInstance: Server!
-	@Published public var remote: Remote!
+	@Published public var remote: Remote = Remote(URL(string: "about://")!)
 	
 	open var baseURL: URL { remote.url }
 	open var session: URLSession!

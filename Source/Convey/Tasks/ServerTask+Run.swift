@@ -53,7 +53,7 @@ public extension ServerTask {
 	}
 
 	var cachedData: Data? {
-		DataCache.instance.cachedValue(for: url)
+		DataCache.instance.fetchLocal(for: url)
 	}
 }
 
@@ -76,7 +76,7 @@ extension ServerTask {
 
 	func requestData(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: URLResponse), HTTPError> {
 		if caching == .returnCacheDataDontLoad, self is ServerCacheableTask {
-			if let data = DataCache.instance.cachedValue(for: url) {
+			if let data = cachedData {
 				return Just((data: data, response: URLResponse(cachedFor: url, data: data))).setFailureType(to: HTTPError.self).eraseToAnyPublisher()
 			}
 			return Fail(error: HTTPError.offline).eraseToAnyPublisher()

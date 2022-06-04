@@ -31,7 +31,7 @@ public struct SimplePOSTTask: ServerPOSTTask, CustomURLRequestTask, DataUploadin
 public struct SimpleGETTask: ServerGETTask, CustomURLRequestTask {
 	public var path = ""
 	
-	let url: URL
+	var url: URL
 	
 	public var customURLRequest: AnyPublisher<URLRequest?, Error> {
 		Just(URLRequest(url: url)).setFailureType(to: Error.self).eraseToAnyPublisher()

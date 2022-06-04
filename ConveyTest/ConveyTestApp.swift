@@ -9,6 +9,10 @@ import SwiftUI
 
 @main
 struct ConveyTestApp: App {
+	init() {
+		Server.serverInstance = Server()
+	}
+
     var body: some Scene {
         WindowGroup {
             ContentView()
