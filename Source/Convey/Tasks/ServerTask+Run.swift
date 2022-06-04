@@ -10,7 +10,7 @@ import Combine
 
 public extension PayloadDownloadingTask {
 	func postprocess(payload: DownloadPayload) { }
-	func download(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<(payload: DownloadPayload, response: URLResponse), HTTPError> {
+	func download(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<(payload: DownloadPayload, response: URLResponse), HTTPError> {
 		requestPayload(caching: caching, decoder: decoder, preview: preview)
 			.map { (payload: (payload: DownloadPayload, response: URLResponse)) -> (payload: DownloadPayload, response: URLResponse) in
 				postprocess(payload: payload.payload)
@@ -35,7 +35,7 @@ public extension PayloadDownloadingTask {
 public extension ServerTask {
 	var server: Server { Server.serverInstance }
 
-	func downloadData(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: URLResponse), HTTPError> {
+	func downloadData(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: URLResponse), HTTPError> {
 		requestData(caching: caching, preview: preview)
 	}
 
@@ -58,7 +58,7 @@ public extension ServerTask {
 }
 
 extension ServerTask {
-	func requestPayload<Payload: Decodable>(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<(payload: Payload, response: URLResponse), HTTPError> {
+	func requestPayload<Payload: Decodable>(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<(payload: Payload, response: URLResponse), HTTPError> {
 		requestData(caching: caching, preview: preview)
 			.tryMap { (result: (data: Data, response: URLResponse)) -> (payload: Payload, response: URLResponse) in
 				let dec = decoder ?? server.defaultDecoder
@@ -74,8 +74,8 @@ extension ServerTask {
 			.eraseToAnyPublisher()
 	}
 
-	func requestData(caching: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData, preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: URLResponse), HTTPError> {
-		if caching == .returnCacheDataDontLoad, self is ServerCacheableTask {
+	func requestData(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: URLResponse), HTTPError> {
+		if caching == .localOnly, self is ServerCacheableTask {
 			if let data = cachedData {
 				return Just((data: data, response: URLResponse(cachedFor: url, data: data))).setFailureType(to: HTTPError.self).eraseToAnyPublisher()
 			}
@@ -85,7 +85,7 @@ extension ServerTask {
 		return internalRequestData(preview: preview)
 			.catch { error -> AnyPublisher<(data: Data, response: URLResponse), HTTPError> in
 				if error.isOffline, self is ServerCacheableTask {
-					return requestData(caching: .reloadIgnoringLocalCacheData, preview: preview)
+					return requestData(caching: .skipLocal, preview: preview)
 				}
 				if error.isOffline, self is FileBackedTask, let data = fileCachedData {
 					return Just((data: data, response: URLResponse(cachedFor: url, data: data))).setFailureType(to: HTTPError.self).eraseToAnyPublisher()

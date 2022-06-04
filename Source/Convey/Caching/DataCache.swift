@@ -16,7 +16,7 @@ public class DataCache {
 		let url = task.url
 
 		switch caching {
-		case .none, .never:
+		case .skipLocal, .never:
 			return try await download(using: task, caching: caching, location: location)
 			
 		case .localFirst:
@@ -66,7 +66,7 @@ public class DataCache {
 }
 
 extension DataCache {
-	public enum Caching: Equatable { case none, localFirst, localIfNewer(Date), localOnly, never }
+	public enum Caching: Equatable { case skipLocal, localFirst, localIfNewer(Date), localOnly, never }
 	public enum CacheLocation { case `default`, keyed(String), fixed(URL), grouped(String, String?)
 		func location(of url: URL, relativeTo parent: URL) -> URL {
 			switch self {

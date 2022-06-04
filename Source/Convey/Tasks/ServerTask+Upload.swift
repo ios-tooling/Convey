@@ -10,7 +10,7 @@ import Combine
 
 public extension PayloadDownloadingTask where Self: DataUploadingTask {
 	func upload(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) -> AnyPublisher<(payload: DownloadPayload, response: URLResponse), Error> {
-		requestPayload(caching: .reloadIgnoringLocalCacheData, decoder: decoder, preview: preview)
+		requestPayload(caching: .skipLocal, decoder: decoder, preview: preview)
 			.mapError { $0 as Error }
 			.eraseToAnyPublisher()
 	}
