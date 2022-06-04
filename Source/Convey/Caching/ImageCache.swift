@@ -34,12 +34,18 @@ public actor ImageCache {
 		
 		if let image = PlatformImage(data: data) {
 			if caching == .never { return image }
-			inMemoryImages[key] = InMemoryImage(image: image, size: data.count, createdAt: Date(), key: key)
+			inMemoryImages[key] = InMemoryImage(image: image, size: data.count, createdAt: Date(), key: key, group: location.group)
 			
 			prune()
 			return image
 		}
 		return nil
+	}
+	
+	public func prune(location: DataCache.CacheLocation) {
+		for image in inMemoryImages.values.filter({ $0.group == location.group }) {
+			inMemoryImages.removeValue(forKey: image.key)
+		}
 	}
 	
 	public func fetch(from url: URL, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default) async throws -> PlatformImage? {
@@ -71,6 +77,7 @@ extension ImageCache {
 		let size: Int
 		let createdAt: Date
 		let key: String
+		let group: String?
 		
 		var age: TimeInterval { abs(createdAt.timeIntervalSinceNow) }
 	}

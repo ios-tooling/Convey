@@ -34,6 +34,11 @@ struct ContentView: View {
 				Text("Total cache size: \(totalSize)")
 				if fetching { ProgressView() }
 			}
+			
+			AsyncButton("Clear Cache") {
+				await ImageCache.instance.prune(location: .grouped("images", nil))
+				totalSize = await imageCache.fetchTotalSize()
+			}
 		}
 		.onTapGesture() {
 			Task { await fetchNewImage() }
@@ -49,7 +54,7 @@ struct ContentView: View {
 		let key = "\(index)"
 		index += 1
 		let url = URL("https://source.unsplash.com/user/c_v_r/500x500")
-		image = try? await imageCache.fetch(from: url, caching: .localFirst, location: .keyed(key))
+		image = try? await imageCache.fetch(from: url, caching: .localFirst, location: .grouped("images", key))
 		totalSize = await imageCache.fetchTotalSize()
 		fetching = false
 	}

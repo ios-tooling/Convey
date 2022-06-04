@@ -53,7 +53,7 @@ public extension ServerTask {
 	}
 
 	var cachedData: Data? {
-		DataCache.instance.fetchLocal(for: url)
+		DataCache.instance.fetchLocal(for: url)?.data
 	}
 }
 
