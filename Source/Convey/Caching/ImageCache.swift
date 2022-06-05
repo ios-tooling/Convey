@@ -21,7 +21,7 @@ public actor ImageCache {
 	
 	var inMemoryImages: [String: InMemoryImage] = [:]
 	var currentSizeLimit: Int? = 1_000_000 * 100
-	var totalSize: Int { inMemoryImages.values.map { $0.size }.sum() }
+    var totalSize: Int { inMemoryImages.values.map { $0.size }.reduce(0) { $0 + $1 } }
 
 	public func setCacheLimit(_ limit: Int) { currentSizeLimit = limit }
 	public func fetchTotalSize() -> Int { totalSize }
