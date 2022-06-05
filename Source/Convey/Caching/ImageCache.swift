@@ -21,7 +21,7 @@ public actor ImageCache {
 	
 	var inMemoryImages: [String: InMemoryImage] = [:]
 	var currentSizeLimit: Int? = 1_000_000 * 100
-    var totalSize: Int { inMemoryImages.values.map { $0.size }.reduce(0) { $0 + $1 } }
+	var totalSize: Int { inMemoryImages.values.map { $0.size }.reduce(0) { $0 + $1 } }
 
 	public func setCacheLimit(_ limit: Int) { currentSizeLimit = limit }
 	public func fetchTotalSize() -> Int { totalSize }
@@ -42,16 +42,25 @@ public actor ImageCache {
 		return nil
 	}
 	
-	public func prune(location: DataCache.CacheLocation) {
-		for image in inMemoryImages.values.filter({ $0.group == location.group }) {
-			inMemoryImages.removeValue(forKey: image.key)
-		}
+	func fetchLocal(for url: URL, location: DataCache.CacheLocation = .default) -> PlatformImage? {
+		let key = location.key(for: url)
+		if let cached = inMemoryImages[key] { return cached.image }
+
+		guard let data = DataCache.instance.fetchLocal(for: url, location: location) else { return nil }
+		
+		return PlatformImage(data: data.data)
 	}
 	
 	public func fetch(from url: URL, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default) async throws -> PlatformImage? {
 		try await fetch(using: SimpleGETTask(url: url), caching: caching, location: location)
 	}
 
+	public func prune(location: DataCache.CacheLocation) {
+		for image in inMemoryImages.values.filter({ $0.group == location.group }) {
+			inMemoryImages.removeValue(forKey: image.key)
+		}
+	}
+	
 	public func prune(maxSize: Int? = nil, maxAge: TimeInterval? = nil) {
 		let all = inMemoryImages.values.sorted { $0.createdAt > $1.createdAt }
 		
