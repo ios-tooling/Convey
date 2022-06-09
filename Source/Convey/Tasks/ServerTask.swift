@@ -15,6 +15,7 @@ public protocol ServerTask {
 	func postprocess(data: Data, response: HTTPURLResponse)
 	var httpMethod: String { get }
 	var server: Server { get }
+    var url: URL { get }
 }
 
 public protocol ParameterizedTask: ServerTask {

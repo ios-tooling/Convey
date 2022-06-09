@@ -12,7 +12,7 @@ public struct SimplePOSTTask: ServerPOSTTask, CustomURLRequestTask, DataUploadin
 	public var path = ""
 	
 	let payloadString: String
-	let url: URL
+	public let url: URL
 	public var dataToUpload: Data? { payloadString.data(using: .utf8) }
 	
 	public var customURLRequest: AnyPublisher<URLRequest?, Error> {
@@ -31,7 +31,7 @@ public struct SimplePOSTTask: ServerPOSTTask, CustomURLRequestTask, DataUploadin
 public struct SimpleGETTask: ServerGETTask, CustomURLRequestTask {
 	public var path = ""
 	
-	var url: URL
+	public var url: URL
 	
 	public var customURLRequest: AnyPublisher<URLRequest?, Error> {
 		Just(URLRequest(url: url)).setFailureType(to: Error.self).eraseToAnyPublisher()
