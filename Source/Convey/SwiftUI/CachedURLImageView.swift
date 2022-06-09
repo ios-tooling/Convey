@@ -1,5 +1,5 @@
 //
-//  CachedURLImageView.swift
+//  CachedURLImage.swift
 //  
 //
 //  Created by Ben Gottlieb on 6/5/22.
@@ -9,7 +9,7 @@ import SwiftUI
 
 @available(iOS 15.0, watchOS 8.0, macOS 12.0, *)
 @MainActor
-public struct CachedURLImageView: View {
+public struct CachedURLImage: View {
 	let placeholder: Image?
 	let imageURL: URL?
 	let contentMode: ContentMode
@@ -77,6 +77,6 @@ public struct CachedURLImageView: View {
 @available(iOS 15.0, watchOS 8.0, macOS 12.0, *)
 struct SwiftUIView_Previews: PreviewProvider {
     static var previews: some View {
-		 CachedURLImageView(url: URL(string: "https://apod.nasa.gov/apod/image/2205/EclipseRays_Bouvier_1638.jpg"))
+		 CachedURLImage(url: URL(string: "https://apod.nasa.gov/apod/image/2205/EclipseRays_Bouvier_1638.jpg"))
     }
 }

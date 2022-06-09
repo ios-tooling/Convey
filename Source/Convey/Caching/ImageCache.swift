@@ -28,7 +28,9 @@ public actor ImageCache {
 	public func fetch<FetchTask: ServerTask>(using task: FetchTask, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default) async throws -> PlatformImage? {
 		
 		let key = location.key(for: task.url)
-		if let cached = inMemoryImages[key] { return cached.image }
+        if let cachedImage = inMemoryImages[key]?.image {
+            return cachedImage
+        }
 		
 		guard let data = try await DataCache.instance.fetch(using: task, caching: caching, location: location) else { return nil }
 		
@@ -44,11 +46,14 @@ public actor ImageCache {
 	
 	func fetchLocal(for url: URL, location: DataCache.CacheLocation = .default) -> PlatformImage? {
 		let key = location.key(for: url)
-		if let cached = inMemoryImages[key] { return cached.image }
+		if let cached = inMemoryImages[key] {
+            return cached.image
+        }
 
 		guard let data = DataCache.instance.fetchLocal(for: url, location: location) else { return nil }
 		
-		return PlatformImage(data: data.data)
+		let image = PlatformImage(data: data.data)
+        return image
 	}
 	
 	public func fetch(from url: URL, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default) async throws -> PlatformImage? {
