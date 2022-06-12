@@ -23,6 +23,7 @@ open class Server: NSObject, ObservableObject {
 	open var configuration = URLSessionConfiguration.default
 	public var userAgent: String? { didSet { updateUserAgentHeader() }}
 	open var maxLoggedDataSize = 1024 * 1024 * 10
+	open var maxLoggedUploadSize = 1024 * 2
 	open var launchedAt = Date()
 	private var defaultHeaders: [String: String] = [
 		ServerConstants.Headers.accept: "*"

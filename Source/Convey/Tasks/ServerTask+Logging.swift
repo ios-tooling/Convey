@@ -31,7 +31,7 @@ extension ServerTask {
 		}
 		guard let url = server.setupLoggingDirectory()?.appendingPathComponent(logFilename(for: startedAt)) else { return }
 		
-		let data = request.descriptionData
+		let data = request.descriptionData(maxUploadSize: server.maxLoggedUploadSize)
 		try? data.write(to: url)
 	}
 	
@@ -51,7 +51,7 @@ extension ServerTask {
 	
 	func loggingOutput(startedAt: Date, request: URLRequest, data: Data?, response: URLResponse?) -> Data {
         var output = "Started at: \(startedAt.timeLabel), took: \(abs(startedAt.timeIntervalSinceNow)) s\n".data(using: .utf8) ?? Data()
-		output += request.descriptionData
+		output += request.descriptionData(maxUploadSize: server.maxLoggedUploadSize)
 		
 		if let responseData = response?.descriptionData {
 			output += "\n\n⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗\n\n".data(using: .utf8) ?? Data()
@@ -100,7 +100,7 @@ public extension URLResponse {
 }
 
 public extension URLRequest {
-	var descriptionData: Data {
+	func descriptionData(maxUploadSize: Int) -> Data {
 		let desc = detailedDescription(includingBody: false) + "\n"
 		var bodyData = httpBody
 		
@@ -116,7 +116,7 @@ public extension URLRequest {
 		var results = desc.data(using: .utf8) ?? Data()
 		if let body = bodyData {
 			results += "Payload ┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳┳\n\n".data(using: .utf8) ?? Data()
-			if body.count < 1024 {
+			if body.count < maxUploadSize {
 				results.append(body)
 			} else {
 				results.append("\(body.count / 1024) k".data(using: .utf8) ?? Data())
