@@ -23,6 +23,7 @@ public actor ImageCache {
 	var currentSizeLimit: Int? = 1_000_000 * 100
 	var totalSize: Int { inMemoryImages.values.map { $0.size }.reduce(0) { $0 + $1 } }
 
+	public func setCacheRoot(_ root: URL) { cachesDirectory = root }
 	public func setCacheLimit(_ limit: Int) { currentSizeLimit = limit }
 	public func fetchTotalSize() -> Int { totalSize }
 	public func fetch<FetchTask: ServerTask>(using task: FetchTask, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default) async throws -> PlatformImage? {

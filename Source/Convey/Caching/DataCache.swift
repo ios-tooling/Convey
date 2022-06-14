@@ -11,6 +11,7 @@ public class DataCache {
 	public static let instance = DataCache()
 	public var cachesDirectory = URL.systemDirectoryURL(which: .cachesDirectory)!
 
+	public func setCacheRoot(_ root: URL) { cachesDirectory = root }
 	public func fetch<FetchTask: ServerTask>(using task: FetchTask, caching: Caching = .localFirst, location: CacheLocation = .default) async throws -> Data? {
 		try await fetchDataAndCache(using: task, caching: caching, location: location)?.data
 	}
