@@ -68,7 +68,7 @@ public class DataCache {
 		return DataAndLocalCache(data: data, url: nil)
 	}
 	
-	func fetchLocal(for url: URL, location: CacheLocation = .default, newerThan: Date? = nil) -> DataAndLocalCache? {
+	public func fetchLocal(for url: URL, location: CacheLocation = .default, newerThan: Date? = nil) -> DataAndLocalCache? {
 		let localURL = location.location(of: url, relativeTo: cachesDirectory)
 
 		if !FileManager.default.fileExists(atPath: localURL.path) { return nil }
@@ -84,9 +84,9 @@ public class DataCache {
 		return DataAndLocalCache(data: data, url: localURL)
 	}
 	
-	struct DataAndLocalCache {
-		let data: Data
-		let url: URL?
+	public struct DataAndLocalCache {
+		public let data: Data
+		public let url: URL?
 	}
 }
 
