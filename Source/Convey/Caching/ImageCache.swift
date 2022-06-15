@@ -15,13 +15,16 @@
 	public typealias PlatformImage = UIImage
 #endif
 
-public actor ImageCache {
+public class ImageCache {
 	public static let instance = ImageCache()
 	public var cachesDirectory = URL.systemDirectoryURL(which: .cachesDirectory)!.appendingPathComponent("images")
 	
 	var inMemoryImages: [String: InMemoryImage] = [:]
+	let queue = DispatchQueue(label: "ImageCache-inMemoryImages")
 	var currentSizeLimit: Int? = 1_000_000 * 100
-	var totalSize: Int { inMemoryImages.values.map { $0.size }.reduce(0) { $0 + $1 } }
+	var totalSize: Int {
+		queue.sync { inMemoryImages.values.map { $0.size }.reduce(0) { $0 + $1 } }
+	}
 
 	public func setCacheRoot(_ root: URL) { cachesDirectory = root }
 	public func setCacheLimit(_ limit: Int) { currentSizeLimit = limit }
@@ -29,7 +32,7 @@ public actor ImageCache {
 	public func fetch<FetchTask: ServerTask>(using task: FetchTask, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default) async throws -> PlatformImage? {
 		
 		let key = location.key(for: task.url)
-        if let cachedImage = inMemoryImages[key]?.image {
+		if let cachedImage = queue.sync(execute: { inMemoryImages[key]?.image }) {
             return cachedImage
         }
 		
@@ -37,7 +40,7 @@ public actor ImageCache {
 		
 		if let image = PlatformImage(data: data) {
 			if caching == .never { return image }
-			inMemoryImages[key] = InMemoryImage(image: image, size: data.count, createdAt: Date(), key: key, group: location.group)
+			queue.sync { inMemoryImages[key] = InMemoryImage(image: image, size: data.count, createdAt: Date(), key: key, group: location.group) }
 			
 			prune()
 			return image
@@ -47,7 +50,7 @@ public actor ImageCache {
 	
 	func fetchLocal(for url: URL, location: DataCache.CacheLocation = .default) -> PlatformImage? {
 		let key = location.key(for: url)
-		if let cached = inMemoryImages[key] {
+		if let cached = queue.sync(execute: { inMemoryImages[key] }) {
             return cached.image
         }
 
@@ -62,24 +65,28 @@ public actor ImageCache {
 	}
 
 	public func prune(location: DataCache.CacheLocation) {
-		for image in inMemoryImages.values.filter({ $0.group == location.group }) {
-			inMemoryImages.removeValue(forKey: image.key)
+		queue.sync {
+			for image in inMemoryImages.values.filter({ $0.group == location.group }) {
+				inMemoryImages.removeValue(forKey: image.key)
+			}
 		}
 	}
 	
 	public func prune(maxSize: Int? = nil, maxAge: TimeInterval? = nil) {
-		let all = inMemoryImages.values.sorted { $0.createdAt > $1.createdAt }
-		
-		if let age = maxAge {
-			for image in all {
-				if image.age > age { inMemoryImages.removeValue(forKey: image.key) }
-			}
-		} else if let size = maxSize ?? currentSizeLimit {
-			var total = 0
+		queue.sync {
+			let all = inMemoryImages.values.sorted { $0.createdAt > $1.createdAt }
 			
-			for image in all {
-				if total > size { inMemoryImages.removeValue(forKey: image.key) }
-				total += image.size
+			if let age = maxAge {
+				for image in all {
+					if image.age > age { inMemoryImages.removeValue(forKey: image.key) }
+				}
+			} else if let size = maxSize ?? currentSizeLimit {
+				var total = 0
+				
+				for image in all {
+					if total > size { inMemoryImages.removeValue(forKey: image.key) }
+					total += image.size
+				}
 			}
 		}
 	}
