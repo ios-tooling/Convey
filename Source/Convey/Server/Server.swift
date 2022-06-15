@@ -85,7 +85,7 @@ open class Server: NSObject, ObservableObject {
 	}
 	
 	open var reportConnectionError: (ServerTask, Int, String?) -> Void = { task, code, description in
-		print("\(type(of: task)) Connection error: \(code): \(description ?? "Unparseable error")")
+        print("\(type(of: task)), \(task.url) Connection error: \(code): \(description ?? "Unparseable error")")
 	}
 }
 
