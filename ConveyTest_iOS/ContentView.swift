@@ -10,6 +10,7 @@ import Suite
 
 struct ContentView: View {
 	@State var image: UIImage?
+	@State var showBig = false
 	var body: some View {
 		VStack() {
 			Text("Hello, world!")
@@ -22,6 +23,14 @@ struct ContentView: View {
 			Button("Async Test") {
 				asyncTest()
 			}
+			
+			if showBig {
+				CachedURLImage(url: URL(string: "https://www.learningcontainer.com/bfd_download/large-sample-image-file-download-for-testing/"))
+					.frame(height: 200)
+
+				Text("Cache count: \(ImageCache.instance.cacheCount())")
+			}
+			Button("Show Big") { showBig.toggle() }
 		}
 		.task {
 			do {

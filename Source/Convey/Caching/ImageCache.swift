@@ -15,15 +15,17 @@
 	public typealias PlatformImage = UIImage
 #endif
 
-public class ImageCache {
+import Combine
+
+public actor ImageCache {
 	public static let instance = ImageCache()
 	public var cachesDirectory = URL.systemDirectoryURL(which: .cachesDirectory)!.appendingPathComponent("images")
 	
-	var inMemoryImages: [String: InMemoryImage] = [:]
-	let queue = DispatchQueue(label: "ImageCache-inMemoryImages")
+	nonisolated let inMemoryImages = CurrentValueSubject<[String: InMemoryImage], Never>([:])
+	
 	var currentSizeLimit: Int? = 1_000_000 * 100
 	var totalSize: Int {
-		queue.sync { inMemoryImages.values.map { $0.size }.reduce(0) { $0 + $1 } }
+		inMemoryImages.value.values.map { $0.size }.reduce(0) { $0 + $1 }
 	}
 
 	public func setCacheRoot(_ root: URL) { cachesDirectory = root }
@@ -32,7 +34,7 @@ public class ImageCache {
 	public func fetch<FetchTask: ServerTask>(using task: FetchTask, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default) async throws -> PlatformImage? {
 		
 		let key = location.key(for: task.url)
-		if let cachedImage = queue.sync(execute: { inMemoryImages[key]?.image }) {
+		if let cachedImage = inMemoryImages.value[key]?.image {
             return cachedImage
         }
 		
@@ -40,24 +42,32 @@ public class ImageCache {
 		
 		if let image = PlatformImage(data: data) {
 			if caching == .never { return image }
-			queue.sync { inMemoryImages[key] = InMemoryImage(image: image, size: data.count, createdAt: Date(), key: key, group: location.group) }
-			
+			updateCache(for: key, with: InMemoryImage(image: image, size: data.count, createdAt: Date(), key: key, group: location.group))
 			prune()
 			return image
 		}
 		return nil
 	}
 	
-	func fetchLocal(for url: URL, location: DataCache.CacheLocation = .default) -> PlatformImage? {
+	nonisolated func cacheCount() -> Int { inMemoryImages.value.count }
+	nonisolated func fetchLocal(for url: URL, location: DataCache.CacheLocation = .default) -> PlatformImage? {
 		let key = location.key(for: url)
-		if let cached = queue.sync(execute: { inMemoryImages[key] }) {
-            return cached.image
-        }
-
+		if let cached = inMemoryImages.value[key] { return cached.image }
+		
 		guard let data = DataCache.instance.fetchLocal(for: url, location: location) else { return nil }
 		
-		let image = PlatformImage(data: data.data)
-        return image
+		if let image = PlatformImage(data: data.data) {
+			updateCache(for: key, with: InMemoryImage(image: image, size: data.data.count, createdAt: Date(), key: key, group: location.group))
+			return image
+		}
+		return nil
+	}
+	
+	nonisolated func updateCache(for key: String, with image: InMemoryImage) {
+		var cache = inMemoryImages.value
+		cache[key] = image
+		inMemoryImages.send(cache)
+
 	}
 	
 	public func fetch(from url: URL, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default) async throws -> PlatformImage? {
@@ -65,30 +75,30 @@ public class ImageCache {
 	}
 
 	public func prune(location: DataCache.CacheLocation) {
-		queue.sync {
-			for image in inMemoryImages.values.filter({ $0.group == location.group }) {
-				inMemoryImages.removeValue(forKey: image.key)
-			}
+		var cache = inMemoryImages.value
+		for image in inMemoryImages.value.values.filter({ $0.group == location.group }) {
+			cache.removeValue(forKey: image.key)
 		}
+		inMemoryImages.send(cache)
 	}
 	
 	public func prune(maxSize: Int? = nil, maxAge: TimeInterval? = nil) {
-		queue.sync {
-			let all = inMemoryImages.values.sorted { $0.createdAt > $1.createdAt }
+		var cache = inMemoryImages.value
+		let all = cache.values.sorted { $0.createdAt > $1.createdAt }
+		
+		if let age = maxAge {
+			for image in all {
+				if image.age > age { cache.removeValue(forKey: image.key) }
+			}
+		} else if let size = maxSize ?? currentSizeLimit {
+			var total = 0
 			
-			if let age = maxAge {
-				for image in all {
-					if image.age > age { inMemoryImages.removeValue(forKey: image.key) }
-				}
-			} else if let size = maxSize ?? currentSizeLimit {
-				var total = 0
-				
-				for image in all {
-					if total > size { inMemoryImages.removeValue(forKey: image.key) }
-					total += image.size
-				}
+			for image in all {
+				if total > size { cache.removeValue(forKey: image.key) }
+				total += image.size
 			}
 		}
+		inMemoryImages.send(cache)
 	}
 
 }
