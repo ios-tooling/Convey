@@ -11,17 +11,7 @@ var echoingTypeNames: [String] = []
 
 extension ServerTask {
 	var isEchoing: Bool {
-		if self is EchoingTask { return true }
-		
-		let typeName = "\(type(of: self))"
-		return echoingTypeNames.contains(typeName)
-	}
-
-	static func echoes() {
-		let typeName = "\(self)"
-		if !echoingTypeNames.contains(typeName) {
-			echoingTypeNames.append(typeName)
-		}
+		ConveyTaskManager.instance.shouldEcho(self)
 	}
 
 }

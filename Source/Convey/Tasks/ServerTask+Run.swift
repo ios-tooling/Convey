@@ -99,6 +99,7 @@ extension ServerTask {
 	func internalRequestData(preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: URLResponse), HTTPError> {
 		let startedAt = Date()
 		
+		ConveyTaskManager.instance.record(task: self)
 		return buildRequest()
 			.flatMap { request in server.preflight(self, request: request) }
 			.map { preLog(startedAt: startedAt, request: $0); return $0 }

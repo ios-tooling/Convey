@@ -104,6 +104,8 @@ extension ServerTask {
 	func internalRequestData(preview: PreviewClosure? = nil) async throws -> (data: Data, response: HTTPURLResponse) {
 		if let threadName = (self as? ThreadedServerTask)?.threadName { await server.wait(forThread: threadName) }
 		
+		ConveyTaskManager.instance.record(task: self)
+
 		let startedAt = Date()
         try await (self as? PreFlightTask)?.preFlight()
 		var request = try await buildRequest()
