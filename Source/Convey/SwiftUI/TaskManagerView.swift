@@ -19,8 +19,10 @@ public struct TaskManagerView: View {
 				 Text("Alpha").tag(ConveyTaskManager.Sort.alpha)
 				 Text("Count").tag(ConveyTaskManager.Sort.count)
 				 Text("Size").tag(ConveyTaskManager.Sort.size)
+				 Text("Date").tag(ConveyTaskManager.Sort.recent)
 			 }
 			 .pickerStyle(.segmented)
+			 .padding()
 			 
 			 List(manager.types.indices, id: \.self) { index in
 				 TaskTypeRow(taskType: $manager.types[index])
@@ -39,6 +41,17 @@ public struct TaskManagerView: View {
 		@Binding var taskType: ConveyTaskManager.TaskType
 		
 		var body: some View {
+			Group {
+				if taskType.hasStoredResults {
+					NavigationLink(destination: TaskResultsListView(taskType: taskType)) { rowContent }
+				} else {
+					rowContent
+				}
+			}
+			.id(taskType.taskName)
+		}
+		
+		var rowContent: some View {
 			HStack(spacing: 20) {
 				VStack(spacing: 0) {
 					Toggle("", isOn: $taskType.echo).labelsHidden()
@@ -50,13 +63,14 @@ public struct TaskManagerView: View {
 					Text(taskType.name)
 						.font(.body)
 					Text("This run: \(taskType.thisRunBytesString) (\(taskType.thisRunCount))")
-						.font(.caption)
 					Text("Total: \(taskType.totalBytesString) (\(taskType.totalCount))")
-						.font(.caption)
+					if let recent = taskType.mostRecent {
+						Text("Recent: \(recent.timeString)")
+					}
 				}
+				.font(.caption)
 				Spacer()
 			}
-			.id(taskType.taskName)
 		}
 	}
 }
@@ -66,4 +80,15 @@ struct TaskManagerView_Previews: PreviewProvider {
     static var previews: some View {
 		 TaskManagerView()
     }
+}
+
+@available(watchOS, unavailable)
+fileprivate extension Date {
+	var timeString: String {
+		if #available(iOS 15.0, watchOS 8.0, *) {
+			return formatted(date: .omitted, time: .complete)
+		} else {
+			return description
+		}
+	}
 }

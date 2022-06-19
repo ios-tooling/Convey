@@ -11,14 +11,16 @@ import UIKit
 public class ConveyTaskManager: NSObject, ObservableObject {
 	public static let instance = ConveyTaskManager()
 	public var enabled = false { didSet { setup() }}
-	public var directory = URL.systemDirectoryURL(which: .cachesDirectory)!
+	public var directory = URL.systemDirectoryURL(which: .cachesDirectory)!.appendingPathComponent("convey_tasks")
 	public var multitargetLogging = false
-	
+	public var storeResults = true
+
 	var sort = ConveyTaskManager.Sort.alpha { didSet {
 		updateSort()
 		objectWillChange.send()
 	}}
 	
+	var queue = DispatchQueue(label: "ConveyTaskManager")
 	private override init() {
 		super.init()
 		if !enabled { return }
@@ -28,7 +30,6 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	func setup() {
 		if enabled {
 			loadTypes(resetting: true)
-			NotificationCenter.default.addObserver(self, selector: #selector(willResignActive), name: .init(rawValue: "UIApplicationWillResignActiveNotification"), object: nil)
 		}
 	}
 	
@@ -38,24 +39,22 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		return types[index].echo
 	}
 	
-	@objc func willResignActive() {
-		saveTypes()
-	}
-	
 	public func resetAll() {
 		for i in types.indices {
 			types[i].totalCount = 0
-			types[i].thisRunCount = 0
+			types[i].dates = []
 			types[i].totalBytes = 0
 			types[i].thisRunBytes = 0
+			types[i].clearStoredFiles()
 		}
 		objectWillChange.send()
 	}
 
 	public func resetCurrent() {
 		for i in types.indices {
-			types[i].thisRunCount = 0
+			types[i].dates = []
 			types[i].thisRunBytes = 0
+			types[i].clearStoredFiles()
 		}
 		objectWillChange.send()
 	}
@@ -84,28 +83,33 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		return types.firstIndex(where: { $0.taskName == name })
 	}
 	
-	func begin(task: ServerTask) {
+	func begin(task: ServerTask, startedAt date: Date) {
 		if !enabled { return }
 		if multitargetLogging { loadTypes(resetting: false) }
-		if let index = index(of: task) {
-			types[index].thisRunCount += 1
-			types[index].totalCount += 1
-		} else {
-			let name = String(describing: type(of: task))
-			var newTask = TaskType(taskName: name)
-			newTask.echo = task is EchoingTask
-			types.append(newTask)
+		queue.async {
+			if let index = self.index(of: task) {
+				self.types[index].dates.append(date)
+				self.types[index].totalCount += 1
+			} else {
+				let name = String(describing: type(of: task))
+				var newTask = TaskType(taskName: name)
+				newTask.echo = task is EchoingTask
+				self.types.append(newTask)
+			}
+			self.updateSort()
+			if self.multitargetLogging { self.saveTypes() }
 		}
-		updateSort()
-		if multitargetLogging { saveTypes() }
 	}
 	
-	func complete(task: ServerTask, bytes: Int) {
+	func complete(task: ServerTask, bytes: Data, startedAt: Date) {
 		if multitargetLogging { loadTypes(resetting: false) }
-		if let index = index(of: task) {
-			types[index].thisRunBytes += Int64(bytes)
-			types[index].totalBytes += Int64(bytes)
-			if multitargetLogging { saveTypes() }
+		queue.async {
+			if let index = self.index(of: task) {
+				self.types[index].thisRunBytes += Int64(bytes.count)
+				self.types[index].totalBytes += Int64(bytes.count)
+				if self.multitargetLogging { self.saveTypes() }
+				if self.storeResults { self.types[index].store(results: bytes, from: startedAt) }
+			}
 		}
 	}
 	
@@ -114,36 +118,11 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		case .alpha: types.sort { $0.taskName < $1.taskName }
 		case .count: types.sort { $0.thisRunCount > $1.thisRunCount }
 		case .size: types.sort { $0.thisRunBytes > $1.thisRunBytes }
+		case .recent: types.sort { ($0.mostRecent ?? .distantPast) > ($1.mostRecent ?? .distantPast) }
 		}
 	}
 }
 
 extension ConveyTaskManager {
-	enum Sort: String { case alpha, count, size }
-	struct TaskType: Codable, Equatable, Identifiable {
-		var id: String { taskName }
-		let taskName: String
-		var totalCount = 1
-		var thisRunCount = 1
-		var totalBytes: Int64 = 0
-		var thisRunBytes: Int64 = 0
-		var echo = false
-		
-		var thisRunBytesString: String {
-			ByteCountFormatter().string(fromByteCount: thisRunBytes)
-		}
-		
-		var totalBytesString: String {
-			ByteCountFormatter().string(fromByteCount: totalBytes)
-		}
-		
-		var name: String {
-			for suffix in ["Task", "Request"] {
-				if taskName.hasSuffix(suffix) {
-					return String(taskName.dropLast(suffix.count))
-				}
-			}
-			return taskName
-		}
-	}
+	enum Sort: String { case alpha, count, size, recent }
 }

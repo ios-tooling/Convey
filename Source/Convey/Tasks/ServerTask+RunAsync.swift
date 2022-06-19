@@ -103,17 +103,17 @@ extension ServerTask {
 	
 	func internalRequestData(preview: PreviewClosure? = nil) async throws -> (data: Data, response: HTTPURLResponse) {
 		if let threadName = (self as? ThreadedServerTask)?.threadName { await server.wait(forThread: threadName) }
-		
-		ConveyTaskManager.instance.begin(task: self)
-
 		let startedAt = Date()
+
+		ConveyTaskManager.instance.begin(task: self, startedAt: startedAt)
+
         try await (self as? PreFlightTask)?.preFlight()
 		var request = try await buildRequest()
 		request = try await server.preflight(self, request: request)
 		preLog(startedAt: Date(), request: request)
 		
 		let result = try await server.data(for: request)
-		ConveyTaskManager.instance.complete(task: self, bytes: result.data.count)
+		ConveyTaskManager.instance.complete(task: self, bytes: result.data, startedAt: startedAt)
 		if self is FileBackedTask { self.fileCachedData = result.data }
 		postLog(startedAt: startedAt, request: request, data: result.data, response: result.response)
 		preview?(result.data, result.response)
