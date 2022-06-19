@@ -10,8 +10,14 @@ import UIKit
 
 public class ConveyTaskManager: NSObject, ObservableObject {
 	public static let instance = ConveyTaskManager()
-	public var enabled = true { didSet { setup() }}
+	public var enabled = false { didSet { setup() }}
 	public var directory = URL.systemDirectoryURL(which: .cachesDirectory)!
+	public var multitargetLogging = false
+	
+	var sort = ConveyTaskManager.Sort.alpha { didSet {
+		updateSort()
+		objectWillChange.send()
+	}}
 	
 	private override init() {
 		super.init()
@@ -21,8 +27,8 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	
 	func setup() {
 		if enabled {
-			loadTypes()
-			NotificationCenter.default.addObserver(self, selector: #selector(willResignActive), name: UIApplication.willResignActiveNotification, object: nil)
+			loadTypes(resetting: true)
+			NotificationCenter.default.addObserver(self, selector: #selector(willResignActive), name: .init(rawValue: "UIApplicationWillResignActiveNotification"), object: nil)
 		}
 	}
 	
@@ -40,6 +46,8 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		for i in types.indices {
 			types[i].totalCount = 0
 			types[i].thisRunCount = 0
+			types[i].totalBytes = 0
+			types[i].thisRunBytes = 0
 		}
 		objectWillChange.send()
 	}
@@ -47,6 +55,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	public func resetCurrent() {
 		for i in types.indices {
 			types[i].thisRunCount = 0
+			types[i].thisRunBytes = 0
 		}
 		objectWillChange.send()
 	}
@@ -63,11 +72,11 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		}
 	}
 	
-	func loadTypes() {
+	func loadTypes(resetting: Bool) {
 		guard let data = try? Data(contentsOf: typesURL) else { return }
 		
 		types = (try? JSONDecoder().decode([TaskType].self, from: data)) ?? []
-		resetCurrent()
+		if resetting { resetCurrent() }
 	}
 	
 	func index(of task: ServerTask) -> Int? {
@@ -75,8 +84,9 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		return types.firstIndex(where: { $0.taskName == name })
 	}
 	
-	func record(task: ServerTask) {
+	func begin(task: ServerTask) {
 		if !enabled { return }
+		if multitargetLogging { loadTypes(resetting: false) }
 		if let index = index(of: task) {
 			types[index].thisRunCount += 1
 			types[index].totalCount += 1
@@ -86,14 +96,54 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 			newTask.echo = task is EchoingTask
 			types.append(newTask)
 		}
-		objectWillChange.send()
+		updateSort()
+		if multitargetLogging { saveTypes() }
 	}
 	
+	func complete(task: ServerTask, bytes: Int) {
+		if multitargetLogging { loadTypes(resetting: false) }
+		if let index = index(of: task) {
+			types[index].thisRunBytes += Int64(bytes)
+			types[index].totalBytes += Int64(bytes)
+			if multitargetLogging { saveTypes() }
+		}
+	}
+	
+	func updateSort() {
+		switch sort {
+		case .alpha: types.sort { $0.taskName < $1.taskName }
+		case .count: types.sort { $0.thisRunCount > $1.thisRunCount }
+		case .size: types.sort { $0.thisRunBytes > $1.thisRunBytes }
+		}
+	}
+}
+
+extension ConveyTaskManager {
+	enum Sort: String { case alpha, count, size }
 	struct TaskType: Codable, Equatable, Identifiable {
 		var id: String { taskName }
 		let taskName: String
 		var totalCount = 1
 		var thisRunCount = 1
+		var totalBytes: Int64 = 0
+		var thisRunBytes: Int64 = 0
 		var echo = false
+		
+		var thisRunBytesString: String {
+			ByteCountFormatter().string(fromByteCount: thisRunBytes)
+		}
+		
+		var totalBytesString: String {
+			ByteCountFormatter().string(fromByteCount: totalBytes)
+		}
+		
+		var name: String {
+			for suffix in ["Task", "Request"] {
+				if taskName.hasSuffix(suffix) {
+					return String(taskName.dropLast(suffix.count))
+				}
+			}
+			return taskName
+		}
 	}
 }

@@ -104,7 +104,7 @@ extension ServerTask {
 	func internalRequestData(preview: PreviewClosure? = nil) async throws -> (data: Data, response: HTTPURLResponse) {
 		if let threadName = (self as? ThreadedServerTask)?.threadName { await server.wait(forThread: threadName) }
 		
-		ConveyTaskManager.instance.record(task: self)
+		ConveyTaskManager.instance.begin(task: self)
 
 		let startedAt = Date()
         try await (self as? PreFlightTask)?.preFlight()
@@ -113,6 +113,7 @@ extension ServerTask {
 		preLog(startedAt: Date(), request: request)
 		
 		let result = try await server.data(for: request)
+		ConveyTaskManager.instance.complete(task: self, bytes: result.data.count)
 		if self is FileBackedTask { self.fileCachedData = result.data }
 		postLog(startedAt: startedAt, request: request, data: result.data, response: result.response)
 		preview?(result.data, result.response)
