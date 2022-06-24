@@ -95,7 +95,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 			} else {
 				let name = String(describing: type(of: task))
 				var newTask = TaskType(taskName: name)
-				newTask.echo = task is EchoingTask
+				newTask.echo = task is EchoingTask || task.server.echoAll
 				echo = newTask.echo
 				self.types.append(newTask)
 			}

@@ -25,6 +25,7 @@ open class Server: NSObject, ObservableObject {
 	open var maxLoggedDataSize = 1024 * 1024 * 10
 	open var maxLoggedUploadSize = 1024 * 2
 	open var launchedAt = Date()
+	open var echoAll = false
 	private var defaultHeaders: [String: String] = [
 		ServerConstants.Headers.accept: "*"
 	]
