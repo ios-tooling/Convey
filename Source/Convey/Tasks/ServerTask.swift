@@ -18,9 +18,20 @@ public protocol ServerTask {
     var url: URL { get }
 }
 
-public protocol ParameterizedTask: ServerTask {
-	var parameters: [String: String]? { get }
+public protocol TaskURLParameters {
+	var isEmpty: Bool { get }
 }
+
+extension Dictionary: TaskURLParameters where Key == String, Value == String { }
+extension Array: TaskURLParameters where Element == URLQueryItem { }
+
+public protocol ParameterizedTask: ServerTask {
+	var parameters: TaskURLParameters? { get }
+}
+
+//public protocol QueryItemsTask: ServerTask {
+//	var queryItems: [URLQueryItem]? { get }
+//}
 
 public protocol FileBackedTask: ServerTask {
 	var fileURL: URL? { get }

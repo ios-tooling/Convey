@@ -45,7 +45,12 @@ public extension ServerTask {
 		if let parameters = (self as? ParameterizedTask)?.parameters, !parameters.isEmpty {
 			var components = URLComponents(url: nonParameterized, resolvingAgainstBaseURL: true)
 			
-			components?.queryItems = parameters.map { URLQueryItem(name: $0.key, value: $0.value) }
+			if let params = parameters as? [String: String] {
+				components?.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+			} else if let params = parameters as? [URLQueryItem] {
+				components?.queryItems = params
+			}
+
 			if let newURL = components?.url { return newURL }
 		}
 
