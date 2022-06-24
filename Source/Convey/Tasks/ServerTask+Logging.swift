@@ -35,19 +35,19 @@ extension ServerTask {
 		try? data.write(to: url)
 	}
 	
-	func postLog(startedAt: Date, request: URLRequest, data: Data?, response: URLResponse?) {
-		guard let url = server.setupLoggingDirectory()?.appendingPathComponent(logFilename(for: startedAt)) else {
-			if self.isEchoing { print(String(data: loggingOutput(startedAt: startedAt, request: request, data: data, response: response), encoding: .utf8) ?? "unable to stringify response") }
-			return
-		}
-		try? FileManager.default.removeItem(at: url)
-
-		let output = loggingOutput(startedAt: startedAt, request: request, data: data, response: response)
-		if self.isEchoing {
-			print("====================== Echoing Response \(type(of: self)) ======================\n \(String(data: output, encoding: .utf8) ?? "unable to stringify response")\n======================")
-		}
-		try? output.write(to: url)
-	}
+//	func postLog(startedAt: Date, request: URLRequest, data: Data?, response: URLResponse?) {
+//		guard let url = server.setupLoggingDirectory()?.appendingPathComponent(logFilename(for: startedAt)) else {
+//			if self.isEchoing { print(String(data: loggingOutput(startedAt: startedAt, request: request, data: data, response: response), encoding: .utf8) ?? "unable to stringify response") }
+//			return
+//		}
+//		try? FileManager.default.removeItem(at: url)
+//
+//		let output = loggingOutput(startedAt: startedAt, request: request, data: data, response: response)
+//		if self.isEchoing {
+//			print("====================== Echoing Response \(type(of: self)) ======================\n \(String(data: output, encoding: .utf8) ?? "unable to stringify response")\n======================")
+//		}
+//		try? output.write(to: url)
+//	}
 	
 	func loggingOutput(startedAt: Date, request: URLRequest, data: Data?, response: URLResponse?) -> Data {
         var output = "Started at: \(startedAt.timeLabel), took: \(abs(startedAt.timeIntervalSinceNow)) s\n".data(using: .utf8) ?? Data()

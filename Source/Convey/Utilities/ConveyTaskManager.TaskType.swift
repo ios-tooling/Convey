@@ -67,7 +67,7 @@ fileprivate extension Date {
 	var filename: String {
 		var text = description.replacingOccurrences(of: ":", with: "˸")
 		text = text.replacingOccurrences(of: "+0000", with: "")
-		text.append(".\(Int(self.timeIntervalSinceReferenceDate * 100000) % 100000)")
+		text.append(".\(Int(self.timeIntervalSinceReferenceDate * 100000) % 100000).txt")
 		return text
 	}
 }

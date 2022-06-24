@@ -83,32 +83,43 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		return types.firstIndex(where: { $0.taskName == name })
 	}
 	
-	func begin(task: ServerTask, startedAt date: Date) {
+	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) {
 		if !enabled { return }
 		if multitargetLogging { loadTypes(resetting: false) }
 		queue.async {
+			let echo: Bool
 			if let index = self.index(of: task) {
 				self.types[index].dates.append(date)
 				self.types[index].totalCount += 1
+				echo = self.types[index].echo
 			} else {
 				let name = String(describing: type(of: task))
 				var newTask = TaskType(taskName: name)
 				newTask.echo = task is EchoingTask
+				echo = newTask.echo
 				self.types.append(newTask)
+			}
+			if echo {
+				print("🌐↑ \(type(of: task)): \(request)\n")
 			}
 			self.updateSort()
 			if self.multitargetLogging { self.saveTypes() }
 		}
 	}
 	
-	func complete(task: ServerTask, bytes: Data, startedAt: Date) {
+	func complete(task: ServerTask, request: URLRequest, response: URLResponse, bytes: Data, startedAt: Date) {
 		if multitargetLogging { loadTypes(resetting: false) }
 		queue.async {
 			if let index = self.index(of: task) {
 				self.types[index].thisRunBytes += Int64(bytes.count)
 				self.types[index].totalBytes += Int64(bytes.count)
 				if self.multitargetLogging { self.saveTypes() }
-				if self.storeResults { self.types[index].store(results: bytes, from: startedAt) }
+				if self.types[index].echo {
+					let log = task.loggingOutput(startedAt: startedAt, request: request, data: bytes, response: response)
+					print("🌐⬇︎ \(type(of: task)) Response ======================\n \(String(data: log, encoding: .utf8) ?? "unable to stringify response")\n======================")
+					if self.storeResults {
+						self.types[index].store(results: log, from: startedAt) }
+				}
 			}
 		}
 	}

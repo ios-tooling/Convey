@@ -99,17 +99,19 @@ extension ServerTask {
 	func internalRequestData(preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: URLResponse), HTTPError> {
 		let startedAt = Date()
 		
-		ConveyTaskManager.instance.begin(task: self, startedAt: startedAt)
 		return buildRequest()
-			.flatMap { request in server.preflight(self, request: request) }
-			.map { preLog(startedAt: startedAt, request: $0); return $0 }
+			.flatMap { request -> AnyPublisher<URLRequest, Error> in
+				ConveyTaskManager.instance.begin(task: self, request: request, startedAt: startedAt)
+				return server.preflight(self, request: request)
+			}
+			//.map { preLog(startedAt: startedAt, request: $0); return $0 }
 			.mapError { HTTPError.other($0) }
 			.flatMap { (request: URLRequest) -> AnyPublisher<(data: Data, response: URLResponse), HTTPError> in
 				server.data(for: request)
 					.map { data in
-						ConveyTaskManager.instance.complete(task: self, bytes: data.data, startedAt: startedAt)
+						ConveyTaskManager.instance.complete(task: self, request: request, response: data.response, bytes: data.data, startedAt: startedAt)
 						if self is FileBackedTask { self.fileCachedData = data.data }
-						postLog(startedAt: startedAt, request: request, data: data.data, response: data.response)
+						//postLog(startedAt: startedAt, request: request, data: data.data, response: data.response)
 						preview?(data.data, data.response)
 						postprocess(data: data.data, response: data.response)
 						return data
