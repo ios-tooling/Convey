@@ -68,16 +68,36 @@ public class DataCache {
 		return DataAndLocalCache(data: data, url: nil)
 	}
 	
+	public func location(of url: URL, relativeTo location: CacheLocation = .default) -> URL {
+		location.location(of: url, relativeTo: cachesDirectory)
+	}
+	
+	public func replace(data: Data, for url: URL, location: CacheLocation) throws {
+		let localURL = self.location(of: url, relativeTo: location)
+		try? FileManager.default.removeItem(at: localURL)
+		try data.write(to: localURL)
+	}
+	
+	public func replace<Task: ServerTask>(data: Data, for task: Task, location: CacheLocation) throws {
+		try replace(data: data, for: task.url, location: location)
+	}
+	
+	public func hasCachedValue(for url: URL, location: CacheLocation = .default, newerThan: Date? = nil) -> Bool {
+		let localURL = self.location(of: url, relativeTo: location)
+		
+		if !FileManager.default.fileExists(atPath: localURL.path) { return false }
+		if let limit = newerThan {
+			guard let date = localURL.creationDate, date > limit else { return false }
+		}
+		return true
+	}
+	
 	public func fetchLocal(for url: URL, location: CacheLocation = .default, newerThan: Date? = nil) -> DataAndLocalCache? {
-		let localURL = location.location(of: url, relativeTo: cachesDirectory)
+		let localURL = self.location(of: url, relativeTo: location)
 
 		if !FileManager.default.fileExists(atPath: localURL.path) { return nil }
 		if let limit = newerThan {
-			guard
-				let attributes = try? FileManager.default.attributesOfItem(atPath: localURL.path),
-				let date = attributes[.creationDate] as? Date,
-				date > limit
-			else { return nil }
+			guard let date = localURL.creationDate, date > limit else { return nil}
 		}
 		
 		guard let data = try? Data(contentsOf: localURL) else { return nil }
@@ -157,3 +177,13 @@ extension DataCache {
 	}
 }
 
+extension URL {
+	var creationDate: Date? {
+		guard
+			isFileURL,
+			let attributes = try? FileManager.default.attributesOfItem(atPath: path),
+			let date = attributes[.creationDate] as? Date
+		else { return nil }
+		return date
+	}
+}

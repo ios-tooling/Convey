@@ -5,17 +5,15 @@
 //  Created by Ben Gottlieb on 6/4/22.
 //
 
+import Combine
+
 #if os(macOS)
 	import Cocoa
-
-	public typealias PlatformImage = NSImage
 #else
 	import UIKit
-
-	public typealias PlatformImage = UIImage
 #endif
 
-import Combine
+
 
 public actor ImageCache {
 	public static let instance = ImageCache()
@@ -31,7 +29,7 @@ public actor ImageCache {
 	public func setCacheRoot(_ root: URL) { cachesDirectory = root }
 	public func setCacheLimit(_ limit: Int) { currentSizeLimit = limit }
 	public func fetchTotalSize() -> Int { totalSize }
-	public func fetch<FetchTask: ServerTask>(using task: FetchTask, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default) async throws -> PlatformImage? {
+	public func fetch<FetchTask: ServerTask>(using task: FetchTask, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default, size: ImageSize? = nil) async throws -> PlatformImage? {
 		
 		let key = location.key(for: task.url)
 		if let cachedImage = inMemoryImages.value[key]?.image {
@@ -41,16 +39,20 @@ public actor ImageCache {
 		guard let data = try await DataCache.instance.fetch(using: task, caching: caching, location: location) else { return nil }
 		
 		if let image = PlatformImage(data: data) {
-			if caching == .never { return image }
-			updateCache(for: key, with: InMemoryImage(image: image, size: data.count, createdAt: Date(), key: key, group: location.group))
+			let resized = size?.resize(image) ?? image
+			if resized != image, let data = resized.data {
+				try? DataCache.instance.replace(data: data, for: task, location: location)
+			}
+			if caching == .never { return resized }
+			updateCache(for: key, with: InMemoryImage(image: resized, size: data.count, createdAt: Date(), key: key, group: location.group))
 			prune()
-			return image
+			return resized
 		}
 		return nil
 	}
 	
 	nonisolated func cacheCount() -> Int { inMemoryImages.value.count }
-	nonisolated func fetchLocal(for url: URL, location: DataCache.CacheLocation = .default) -> PlatformImage? {
+	public nonisolated func fetchLocal(for url: URL, location: DataCache.CacheLocation = .default, size: ImageSize? = nil) -> PlatformImage? {
 		let key = location.key(for: url)
 		if let cached = inMemoryImages.value[key] { return cached.image }
 		
@@ -63,6 +65,13 @@ public actor ImageCache {
 		return nil
 	}
 	
+	nonisolated public func hasCachedValue(for url: URL, location: DataCache.CacheLocation = .default, newerThan: Date? = nil) -> Bool {
+		let key = location.key(for: url)
+		if let _ = inMemoryImages.value[key] { return true }
+
+		return DataCache.instance.hasCachedValue(for: url, location: location, newerThan: newerThan)
+	}
+	
 	nonisolated func updateCache(for key: String, with image: InMemoryImage) {
 		var cache = inMemoryImages.value
 		cache[key] = image
@@ -70,8 +79,8 @@ public actor ImageCache {
 
 	}
 	
-	public func fetch(from url: URL, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default) async throws -> PlatformImage? {
-		try await fetch(using: SimpleGETTask(url: url), caching: caching, location: location)
+	public func fetch(from url: URL, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default, size: ImageSize? = nil) async throws -> PlatformImage? {
+		try await fetch(using: SimpleGETTask(url: url), caching: caching, location: location, size: size)
 	}
 
 	public func prune(location: DataCache.CacheLocation) {
