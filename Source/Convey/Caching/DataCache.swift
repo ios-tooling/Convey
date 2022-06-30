@@ -113,10 +113,11 @@ public class DataCache {
 extension DataCache {
 	public enum Caching: Equatable { case skipLocal, localFirst, localIfNewer(Date), localOnly, never }
 	public enum CacheLocation { case `default`, keyed(String), fixed(URL), grouped(String, String?)
-		func location(of url: URL, relativeTo parent: URL) -> URL {
+		func location(of url: URL, relativeTo parent: URL, extension ext: String? = nil) -> URL {
+			let pathExtension = (ext ?? url.cachePathExtension ?? "dat" )
 			switch self {
 			case .default:
-				return parent.appendingPathComponent(url.cacheKey + ".dat")
+				return parent.appendingPathComponent(url.cacheKey + "." + pathExtension)
 
 			case .keyed(let key):
 				return parent.appendingPathComponent(key)
@@ -125,7 +126,7 @@ extension DataCache {
 				return location
 				
 			case .grouped(let group, let key):
-				return parent.appendingPathComponent(group).appendingPathComponent(key ?? (url.cacheKey + ".dat"))
+				return parent.appendingPathComponent(group).appendingPathComponent(key ?? (url.cacheKey + "." + pathExtension))
 
 			}
 		}
@@ -146,10 +147,10 @@ extension DataCache {
 			}
 		}
 		
-		func key(for url: URL) -> String {
+		func key(for url: URL, suffix: String? = nil, extension ext: String = "dat") -> String {
 			switch self {
 			case .default:
-				return url.cacheKey
+				return url.cacheKey + (suffix ?? "") + "." + ext
 
 			case .keyed(let key):
 				return key
@@ -158,7 +159,7 @@ extension DataCache {
 				return url.cacheKey
 				
 			case .grouped(let group, let key):
-				return group + "/" + (key ?? (url.cacheKey + ".dat"))
+				return group + "/" + (key ?? (url.cacheKey + "." + ext))
 
 			}
 		}

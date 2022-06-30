@@ -16,6 +16,12 @@ import Cocoa
 public struct ImageSize {
 	public let size: CGSize
 	public let tolerance: Double
+	public var suffix: String {
+		if tolerance == 0 {
+			return "_(\(Int(size.width))x\(Int(size.height)))"
+		}
+		return "_(\(Int(size.width))x\(Int(size.height)))±\(Int(tolerance))"
+	}
 	
 	func matches(size check: CGSize) -> Bool {
 		check.width >= (size.width - tolerance) && check.width <= (size.width + tolerance) &&

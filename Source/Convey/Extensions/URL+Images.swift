@@ -5,8 +5,16 @@
 //  Created by Ben Gottlieb on 6/27/22.
 //
 
-#if !os(watchOS)
 import Foundation
+extension URL {
+	var cachePathExtension: String? {
+		let ext = pathExtension
+		if !ext.isEmpty { return ext }
+		return nil
+	}
+}
+
+#if !os(watchOS)
 import CoreGraphics
 import ImageIO
 
