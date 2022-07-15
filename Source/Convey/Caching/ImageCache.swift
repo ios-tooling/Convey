@@ -65,8 +65,9 @@ public actor ImageCache {
 		guard let data = DataCache.instance.fetchLocal(for: url, location: actualLocation) else { return nil }
 		
 		if let image = PlatformImage(data: data.data) {
-			updateCache(for: key, with: InMemoryImage(image: image, size: data.data.count, createdAt: Date(), key: key, group: location.group))
-			return image
+			let resized = size?.resize(image) ?? image
+			updateCache(for: key, with: InMemoryImage(image: resized, size: data.data.count, createdAt: Date(), key: key, group: location.group))
+			return resized
 		}
 		return nil
 	}
