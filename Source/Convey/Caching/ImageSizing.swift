@@ -23,6 +23,19 @@ public extension CGSize {
 }
 #endif
 
+extension CGSize {
+	var aspectRatio: CGFloat { width / height }
+	func scaled(within parent: CGSize) -> CGSize {
+		if aspectRatio < parent.aspectRatio {
+			return CGSize(width: parent.width * (aspectRatio / parent.aspectRatio), height: parent.height)
+		} else if aspectRatio < parent.aspectRatio {
+			return CGSize(width: parent.width, height: parent.height * (parent.aspectRatio / aspectRatio))
+		} else {
+			return parent
+		}
+	}
+}
+
 public struct ImageSize {
 	public let size: CGSize
 	public let tolerance: Double
@@ -53,9 +66,10 @@ extension ImageSize {
 extension ImageSize {
 	func resize(_ image: UIImage) -> UIImage? {
 		if matches(size: image.size) { return image }
+		let scaled = image.size.scaled(within: size)
 		#if os(iOS)
-			return UIGraphicsImageRenderer(size: size).image { ctx in
-				image.draw(in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
+			return UIGraphicsImageRenderer(size: scaled).image { ctx in
+				image.draw(in: CGRect(x: 0, y: 0, width: scaled.width, height: scaled.height))
 			}
 		#else
 			return image
