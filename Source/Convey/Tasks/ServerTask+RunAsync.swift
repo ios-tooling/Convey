@@ -8,14 +8,34 @@
 import Foundation
 import Combine
 
+public struct DownloadResult<Payload> {
+	public init(payload: Payload, response: HTTPURLResponse, data: Data?, fromCache: Bool) {
+		self.payload = payload
+		self.response = response
+		self.data = data
+		self.fromCache = fromCache
+	}
+	
+	public let payload: Payload
+	public let response: HTTPURLResponse
+	public let data: Data?
+	public let fromCache: Bool
+}
+
+public struct RawDownloadResult {
+	public let response: HTTPURLResponse
+	public let data: Data
+	public let fromCache: Bool
+}
+
 @available(macOS 11, iOS 13.0, watchOS 7.0, *)
 public extension PayloadDownloadingTask {
 	func download(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadPayload {
 		try await downloadWithResponse().payload
 	}
 	
-    func downloadWithResponse(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> (payload: DownloadPayload, response: URLResponse, data: Data?) {
-        let result: (payload: DownloadPayload, response: URLResponse, data: Data?) = try await requestPayload(caching: caching, decoder: decoder, preview: preview)
+	func downloadWithResponse(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadResult<DownloadPayload> {
+		let result: DownloadResult<DownloadPayload> = try await requestPayload(caching: caching, decoder: decoder, preview: preview)
 		postprocess(payload: result.payload)
 		return result
 	}
@@ -34,7 +54,7 @@ public extension ServerTask {
 		try await downloadDataWithResponse(caching: caching, preview: preview).data
 	}
 
-	func downloadDataWithResponse(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) async throws -> (data: Data, response: URLResponse) {
+	func downloadDataWithResponse(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) async throws -> RawDownloadResult {
 		try await requestData(caching: caching, preview: preview)
 	}
 
@@ -68,22 +88,22 @@ public extension ServerTask {
 
 @available(macOS 11, iOS 13.0, watchOS 7.0, *)
 extension ServerTask {
-    func requestPayload<Payload: Decodable>(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> (payload: Payload, response: URLResponse, data: Data?) {
+    func requestPayload<Payload: Decodable>(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadResult<Payload> {
 		let result = try await requestData(caching: caching, preview: preview)
 		let actualDecoder = decoder ?? server.defaultDecoder
         do {
             let decoded = try actualDecoder.decode(Payload.self, from: result.data)
-            return (payload: decoded, response: result.response, data: result.data)
+            return DownloadResult(payload: decoded, response: result.response, data: result.data, fromCache: false)
         } catch {
 			  print("Error when decoding \(Payload.self) in \(self), \(String(data: result.data, encoding: .utf8) ?? "--unparseable--"): \(error)")
             throw error
         }
 	}
 
-	func requestData(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) async throws -> (data: Data, response: URLResponse) {
+	func requestData(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) async throws -> RawDownloadResult {
 		if caching == .localOnly, self is ServerCacheableTask {
 			if let data = cachedData {
-				return (data: data, response: URLResponse(cachedFor: url, data: data))
+				return RawDownloadResult(response: HTTPURLResponse(cachedFor: url, data: data), data: data, fromCache: true)
 			}
 			throw HTTPError.offline
 		}
@@ -95,13 +115,13 @@ extension ServerTask {
 				return try await requestData(caching: .skipLocal, preview: preview)
 			}
 			if error.isOffline, self is FileBackedTask, let data = fileCachedData {
-				return (data: data, response: URLResponse(cachedFor: url, data: data))
+				return RawDownloadResult(response: HTTPURLResponse(cachedFor: url, data: data), data: data, fromCache: true)
 			}
 			throw error
 		}
 	}
 	
-	func internalRequestData(preview: PreviewClosure? = nil) async throws -> (data: Data, response: HTTPURLResponse) {
+	func internalRequestData(preview: PreviewClosure? = nil) async throws -> RawDownloadResult {
 		if let threadName = (self as? ThreadedServerTask)?.threadName { await server.wait(forThread: threadName) }
 		let startedAt = Date()
 
@@ -126,7 +146,7 @@ extension ServerTask {
 		
 		try await (self as? PostFlightTask)?.postFlight()
 		if let threadName = (self as? ThreadedServerTask)?.threadName { await server.stopWaiting(forThread: threadName) }
-		return result
+		return RawDownloadResult(response: result.response, data: result.data, fromCache: false)
 	}
 
 }

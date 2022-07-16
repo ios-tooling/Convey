@@ -27,7 +27,7 @@ open class Server: NSObject, ObservableObject {
 	open var launchedAt = Date()
 	open var echoAll = false
 	private var defaultHeaders: [String: String] = [
-		ServerConstants.Headers.accept: "*"
+		ServerConstants.Headers.accept: "*/*"
 	]
 	let threadManager = ThreadManager()
 	
