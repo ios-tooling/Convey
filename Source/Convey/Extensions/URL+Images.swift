@@ -19,7 +19,11 @@ import CoreGraphics
 import ImageIO
 
 extension URL {
-	private func resizedImage(maxDimension: CGFloat) -> CGImage? {
+	func resizedImage(maxSize: CGSize) -> CGImage? {
+		resizedImage(maxDimension: max(maxSize.width, maxSize.height))
+	}
+	
+	func resizedImage(maxDimension: CGFloat) -> CGImage? {
 		let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
 		let downsampleOptions =  [kCGImageSourceCreateThumbnailFromImageAlways: true,
 								  kCGImageSourceShouldCacheImmediately: true,

@@ -64,6 +64,12 @@ public actor ImageCache {
 		let actualLocation = self.location(for: url, current: location)
 		guard let data = DataCache.instance.fetchLocal(for: url, location: actualLocation) else { return nil }
 		
+		#if os(iOS)
+			if let url = data.url, let goalSize = size?.size, let resized = url.resizedImage(maxSize: goalSize) {
+				return PlatformImage(cgImage: resized)
+			}
+		#endif
+		
 		if let image = PlatformImage(data: data.data) {
 			let resized = size?.resize(image) ?? image
 			updateCache(for: key, with: InMemoryImage(image: resized, size: data.data.count, createdAt: Date(), key: key, group: location.group))
