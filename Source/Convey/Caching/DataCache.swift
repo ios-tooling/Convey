@@ -28,6 +28,11 @@ public class DataCache {
 		try await fetchCachedLocation(using: SimpleGETTask(url: url), caching: caching, location: location)
 	}
 	
+	public func clear() {
+		try? FileManager.default.removeItem(at: cachesDirectory)
+		try? FileManager.default.createDirectory(at: cachesDirectory, withIntermediateDirectories: true)
+	}
+
 	public func prune(location: CacheLocation) {
 		if let url = location.container(relativeTo: cachesDirectory) {
 			try? FileManager.default.removeItem(at: url)
