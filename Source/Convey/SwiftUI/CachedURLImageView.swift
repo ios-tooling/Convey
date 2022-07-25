@@ -15,6 +15,7 @@ public struct CachedURLImage: View {
 	let contentMode: ContentMode
 	var showURLs = false
 	let errorCallback: ((Error?) -> Void)?
+	let cacheLocation: DataCache.CacheLocation
 	@State var platformImage: PlatformImage?
 	@State var fetchedURL: URL?
 	let imageSize: ImageSize?
@@ -27,14 +28,15 @@ public struct CachedURLImage: View {
 #endif
 	}
 	
-	public init(url: URL?, contentMode: ContentMode = .fit, placeholder: Image? = nil, showURLs: Bool = false, size: ImageSize? = nil, errorCallback: ((Error?) -> Void)? = nil) {
+	public init(url: URL?, contentMode: ContentMode = .fit, placeholder: Image? = nil, showURLs: Bool = false, size: ImageSize? = nil, cache: DataCache.CacheLocation = .default, errorCallback: ((Error?) -> Void)? = nil) {
 		imageURL = url
 		self.contentMode = contentMode
 		self.placeholder = placeholder
 		self.errorCallback = errorCallback
+		self.cacheLocation = cache
 		self.showURLs = showURLs
 		self.imageSize = size
-		if let url = url, let local = ImageCache.instance.fetchLocal(for: url, size: size) {
+		if let url = url, let local = ImageCache.instance.fetchLocal(for: url, location: cache, size: size) {
 			_platformImage = State(initialValue: local)
 		}
 	}
@@ -76,14 +78,14 @@ public struct CachedURLImage: View {
 		}
 		.task() {
 			guard let url = imageURL, url != fetchedURL else { return }
-			if let image = ImageCache.instance.fetchLocal(for: url, size: imageSize) {
+			if let image = ImageCache.instance.fetchLocal(for: url, location: cacheLocation, size: imageSize) {
 				platformImage = image
 				fetchedURL = url
 			}
 			
 			if let imageURL = imageURL, platformImage == nil {
 				do {
-					platformImage = try await ImageCache.instance.fetch(from: imageURL, size: imageSize)
+					platformImage = try await ImageCache.instance.fetch(from: imageURL, location: cacheLocation, size: imageSize)
 					fetchedURL = url
 				} catch {
 					errorCallback?(error)
