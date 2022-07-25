@@ -30,6 +30,14 @@ public actor ImageCache {
 		inMemoryImages.value.values.map { $0.size }.reduce(0) { $0 + $1 }
 	}
 
+	public func clear(inMemory: Bool, onDisk: Bool) {
+		if inMemory { inMemoryImages.value = [:] }
+		if onDisk {
+			try? FileManager.default.removeItem(at: parentDirectory.value)
+			try? FileManager.default.createDirectory(at: parentDirectory.value, withIntermediateDirectories: true)
+		}
+	}
+
 	public func setCacheRoot(_ root: URL) { cachesDirectory = root }
 	public func setCacheLimit(_ limit: Int) { currentSizeLimit = limit }
 	public func fetchTotalSize() -> Int { totalSize }

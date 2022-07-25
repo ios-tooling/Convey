@@ -8,7 +8,7 @@
 import Foundation
 
 extension ConveyTaskManager {
-	struct TaskType: Codable, Equatable, Identifiable {
+	struct TaskType: Codable, Identifiable {
 		var id: String { taskName }
 		let taskName: String
 		var totalCount = 1
@@ -16,15 +16,28 @@ extension ConveyTaskManager {
 		var thisRunCount: Int { dates.count }
 		var totalBytes: Int64 = 0
 		var thisRunBytes: Int64 = 0
-		var echo = false
+		var manuallyEcho: Bool?
+		var compiledEcho = false
 		var mostRecent: Date? { dates.last }
+		var viewID: String { taskName + "\(String(describing: manuallyEcho))" }
 		
 		var hasStoredResults: Bool {
 			!storedURLs.isEmpty
 		}
 		
+		var shouldEcho: Bool {
+			get { manuallyEcho ?? compiledEcho }
+			set {
+				if newValue == compiledEcho {
+					manuallyEcho = nil
+				} else {
+					manuallyEcho = newValue
+				}
+			}
+		}
+		
 		func store(results: Data, from date: Date) {
-			if echo {
+			if shouldEcho {
 				print("Storing data for \(name) at \(date.filename)")
 				let typeURL = directory
 				try? FileManager.default.createDirectory(at: typeURL, withIntermediateDirectories: true)

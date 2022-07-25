@@ -30,6 +30,7 @@ public struct TaskManagerView: View {
 			 .listStyle(.plain)
 			
 			 HStack() {
+				 Button("All Off") { manager.turnAllOff() }.padding()
 				 Button("Reset All") { manager.resetAll() }.padding()
 				 Button("Reset Current") { manager.resetCurrent() }.padding()
 			 }
@@ -54,11 +55,12 @@ public struct TaskManagerView: View {
 		var rowContent: some View {
 			HStack(spacing: 20) {
 				VStack(spacing: 0) {
-					Toggle("", isOn: $taskType.echo).labelsHidden()
+					Toggle("", isOn: $taskType.shouldEcho).labelsHidden()
 					Text("echo")
 						.font(.caption)
 				}
-				
+				.opacity(taskType.manuallyEcho != nil ? 1 : 0.5)
+
 				VStack(alignment: .leading) {
 					Text(taskType.name)
 						.font(.body)

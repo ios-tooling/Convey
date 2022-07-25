@@ -15,6 +15,15 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	public var multitargetLogging = false
 	public var storeResults = true
 
+	let typesFilename = "convey_task_types.txt"
+	var types: [TaskType] = [] {
+		willSet { objectWillChange.send() }
+		didSet { saveTypes() }
+	}
+	
+	var typesURL: URL { directory.appendingPathComponent(typesFilename) }
+	func validateDirectories() { try? FileManager.default.createDirectory(at: typesURL.deletingLastPathComponent(), withIntermediateDirectories: true) }
+
 	var sort = ConveyTaskManager.Sort.alpha { didSet {
 		updateSort()
 		objectWillChange.send()
@@ -36,7 +45,18 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	func shouldEcho(_ task: ServerTask) -> Bool {
 		guard enabled, let index = index(of: task) else { return task is EchoingTask }
 		
-		return types[index].echo
+		return types[index].shouldEcho
+	}
+	
+	public func turnAllOff() {
+		for i in types.indices {
+			if types[i].compiledEcho || types[i].manuallyEcho == true {
+				types[i].manuallyEcho = false
+			} else if !types[i].compiledEcho || types[i].manuallyEcho == false {
+				types[i].manuallyEcho = nil
+			}
+		}
+		objectWillChange.send()
 	}
 	
 	public func resetAll() {
@@ -59,11 +79,6 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		objectWillChange.send()
 	}
 
-	let typesFilename = "convey_task_types.txt"
-	var types: [TaskType] = [] { didSet { saveTypes() }}
-	
-	var typesURL: URL { directory.appendingPathComponent(typesFilename) }
-	func validateDirectories() { try? FileManager.default.createDirectory(at: typesURL.deletingLastPathComponent(), withIntermediateDirectories: true) }
 	func saveTypes() {
 		validateDirectories()
 		if let data = try? JSONEncoder().encode(types) {
@@ -91,12 +106,12 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 			if let index = self.index(of: task) {
 				self.types[index].dates.append(date)
 				self.types[index].totalCount += 1
-				echo = self.types[index].echo
+				echo = self.types[index].shouldEcho
 			} else {
 				let name = String(describing: type(of: task))
 				var newTask = TaskType(taskName: name)
-				newTask.echo = task is EchoingTask || task.server.echoAll
-				echo = newTask.echo
+				newTask.compiledEcho = task is EchoingTask || task.server.echoAll
+				echo = newTask.shouldEcho
 				self.types.append(newTask)
 			}
 			if echo {
@@ -114,7 +129,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 				self.types[index].thisRunBytes += Int64(bytes.count)
 				self.types[index].totalBytes += Int64(bytes.count)
 				if self.multitargetLogging { self.saveTypes() }
-				if self.types[index].echo {
+				if self.types[index].shouldEcho {
 					let log = task.loggingOutput(startedAt: startedAt, request: request, data: bytes, response: response)
 					print("🌐⬇︎ \(type(of: task)) Response ======================\n \(String(data: log, encoding: .utf8) ?? "unable to stringify response")\n======================")
 					if self.storeResults {
