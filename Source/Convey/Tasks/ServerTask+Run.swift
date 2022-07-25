@@ -33,7 +33,7 @@ public extension PayloadDownloadingTask {
 }
 
 public extension ServerTask {
-	var server: Server { Server.serverInstance }
+	var server: Server { Server.serverInstance ?? Server.setupDefault() }
 
 	func downloadData(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: URLResponse), HTTPError> {
 		requestData(caching: caching, preview: preview)

@@ -56,12 +56,20 @@ public actor ImageCache {
 		return nil
 	}
 	
+	public func store(image: PlatformImage, for url: URL) {
+		if let data = image.data {
+			let location = self.location(for: url, current: .default, extension: "jpeg")
+			try? DataCache.instance.replace(data: data, for: url, location: location, extension: "jpg")
+		}
+	}
+	
 	nonisolated func cacheCount() -> Int { inMemoryImages.value.count }
-	public nonisolated func fetchLocal(for url: URL, location: DataCache.CacheLocation = .default, size: ImageSize? = nil) -> PlatformImage? {
-		let key = location.key(for: url, suffix: size?.suffix, extension: url.cachePathExtension ?? "jpeg")
+	public nonisolated func fetchLocal(for url: URL, location: DataCache.CacheLocation = .default, size: ImageSize? = nil, extension ext: String? = nil) -> PlatformImage? {
+		let cacheExtension = ext ?? url.cachePathExtension ?? "jpeg"
+		let key = location.key(for: url, suffix: size?.suffix, extension: cacheExtension)
 		if let cached = inMemoryImages.value[key] { return cached.image }
 		
-		let actualLocation = self.location(for: url, current: location)
+		let actualLocation = self.location(for: url, current: location, extension: cacheExtension)
 		guard let data = DataCache.instance.fetchLocal(for: url, location: actualLocation) else { return nil }
 		
 		#if os(iOS)
@@ -98,8 +106,8 @@ public actor ImageCache {
 
 	}
 	
-	nonisolated func location(for url: URL, current: DataCache.CacheLocation) -> DataCache.CacheLocation {
-		let pathExtension = url.cachePathExtension ?? "dat"
+	nonisolated func location(for url: URL, current: DataCache.CacheLocation, extension ext: String? = nil) -> DataCache.CacheLocation {
+		let pathExtension = ext ?? url.cachePathExtension ?? "dat"
 		switch current {
 		case .default:
 			return .fixed(parentDirectory.value.appendingPathComponent(url.cacheKey + "." + pathExtension))

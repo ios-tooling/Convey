@@ -52,8 +52,9 @@ open class Server: NSObject, ObservableObject {
 		request
 	}
 	
-	public static func setupDefault() {
+	public static func setupDefault() -> Server {
 		_ = Server()
+		return serverInstance
 	}
 	
 	func updateUserAgentHeader() {

@@ -20,7 +20,13 @@ extension URL {
 	}
 	
 	public var normalizedAbsoluteString: String {
-		if isFileURL { return path }
+		if isFileURL {
+			let components = path.components(separatedBy: "/")
+			if let index = components.firstIndex(of: "Application"), components.count > index + 2 {
+				return components.dropFirst(index + 2).joined(separator: "/")
+			}
+			return path
+		}
 		guard let components = URLComponents(url: self, resolvingAgainstBaseURL: true) else { return absoluteString }
 		
 		var result = (components.scheme ?? "https") + "//"

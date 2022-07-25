@@ -21,7 +21,8 @@ public class DataCache {
 	}
 
 	public func fetch(from url: URL, caching: Caching = .localFirst, location: CacheLocation = .default) async throws -> Data? {
-		try await fetch(using: SimpleGETTask(url: url), caching: caching, location: location)
+		if url.isFileURL { return try Data(contentsOf: url) }
+		return try await fetch(using: SimpleGETTask(url: url), caching: caching, location: location)
 	}
 
 	public func fetchCachedLocation(from url: URL, caching: Caching = .localFirst, location: CacheLocation = .default) async throws -> URL? {
@@ -68,13 +69,14 @@ public class DataCache {
 		return DataAndLocalCache(data: data, url: nil)
 	}
 	
-	public func location(of url: URL, relativeTo location: CacheLocation = .default) -> URL {
-		location.location(of: url, relativeTo: cachesDirectory)
+	public func location(of url: URL, relativeTo location: CacheLocation = .default, extension ext: String? = nil) -> URL {
+		location.location(of: url, relativeTo: cachesDirectory, extension: ext)
 	}
 	
-	public func replace(data: Data, for url: URL, location: CacheLocation) throws {
-		let localURL = self.location(of: url, relativeTo: location)
+	public func replace(data: Data, for url: URL, location: CacheLocation, extension ext: String? = nil) throws {
+		let localURL = self.location(of: url, relativeTo: location, extension: ext)
 		try? FileManager.default.removeItem(at: localURL)
+		try? FileManager.default.createDirectory(at: localURL.deletingLastPathComponent(), withIntermediateDirectories: true)
 		try data.write(to: localURL)
 	}
 	
