@@ -38,7 +38,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	
 	func setup() {
 		if enabled {
-			loadTypes(resetting: true)
+			Task { await loadTypes(resetting: true) }
 		}
 	}
 	
@@ -59,20 +59,15 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		objectWillChange.send()
 	}
 	
+	var areAllOff: Bool {
+		types.filter { $0.shouldEcho }.isEmpty
+	}
+	
 	public func resetAll() {
 		for i in types.indices {
 			types[i].totalCount = 0
 			types[i].dates = []
 			types[i].totalBytes = 0
-			types[i].thisRunBytes = 0
-			types[i].clearStoredFiles()
-		}
-		objectWillChange.send()
-	}
-
-	public func resetCurrent() {
-		for i in types.indices {
-			types[i].dates = []
 			types[i].thisRunBytes = 0
 			types[i].clearStoredFiles()
 		}
@@ -86,11 +81,14 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		}
 	}
 	
-	func loadTypes(resetting: Bool) {
+	func loadTypes(resetting: Bool) async {
 		guard let data = try? Data(contentsOf: typesURL) else { return }
 		
-		types = (try? JSONDecoder().decode([TaskType].self, from: data)) ?? []
-		if resetting { resetCurrent() }
+		var newTypes = (try? JSONDecoder().decode([TaskType].self, from: data)) ?? []
+		if resetting { newTypes.resetTaskTypes() }
+		await MainActor.run {
+			types = newTypes
+		}
 	}
 	
 	func index(of task: ServerTask) -> Int? {
@@ -98,9 +96,9 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		return types.firstIndex(where: { $0.taskName == name })
 	}
 	
-	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) {
+	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async {
 		if !enabled { return }
-		if multitargetLogging { loadTypes(resetting: false) }
+		if multitargetLogging { await loadTypes(resetting: false) }
 		queue.async {
 			let echo: Bool
 			if let index = self.index(of: task) {
@@ -122,8 +120,8 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		}
 	}
 	
-	func complete(task: ServerTask, request: URLRequest, response: URLResponse, bytes: Data, startedAt: Date) {
-		if multitargetLogging { loadTypes(resetting: false) }
+	func complete(task: ServerTask, request: URLRequest, response: URLResponse, bytes: Data, startedAt: Date) async {
+		if multitargetLogging { await loadTypes(resetting: false) }
 		queue.async {
 			if let index = self.index(of: task) {
 				self.types[index].thisRunBytes += Int64(bytes.count)
@@ -151,4 +149,14 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 
 extension ConveyTaskManager {
 	enum Sort: String { case alpha, count, size, recent }
+}
+
+extension Array where Element == ConveyTaskManager.TaskType {
+	mutating func resetTaskTypes() {
+		for i in indices {
+			self[i].dates = []
+			self[i].thisRunBytes = 0
+			self[i].clearStoredFiles()
+		}
+	}
 }

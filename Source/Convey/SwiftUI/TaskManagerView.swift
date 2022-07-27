@@ -31,8 +31,9 @@ public struct TaskManagerView: View {
 			
 			 HStack() {
 				 Button("All Off") { manager.turnAllOff() }.padding()
+					 .disabled(manager.areAllOff)
 				 Button("Reset All") { manager.resetAll() }.padding()
-				 Button("Reset Current") { manager.resetCurrent() }.padding()
+				 Button("Reset Current") { manager.types.resetTaskTypes() }.padding()
 			 }
 		 }
 		 .navigationBarTitle("Network Tasks")

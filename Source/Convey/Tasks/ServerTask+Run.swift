@@ -106,7 +106,7 @@ extension ServerTask {
 		
 		return buildRequest()
 			.flatMap { request -> AnyPublisher<URLRequest, Error> in
-				ConveyTaskManager.instance.begin(task: self, request: request, startedAt: startedAt)
+				Task { await ConveyTaskManager.instance.begin(task: self, request: request, startedAt: startedAt) }
 				return server.preflight(self, request: request)
 			}
 			//.map { preLog(startedAt: startedAt, request: $0); return $0 }
@@ -114,7 +114,7 @@ extension ServerTask {
 			.flatMap { (request: URLRequest) -> AnyPublisher<(data: Data, response: URLResponse), HTTPError> in
 				server.data(for: request)
 					.map { data in
-						ConveyTaskManager.instance.complete(task: self, request: request, response: data.response, bytes: data.data, startedAt: startedAt)
+						Task { await ConveyTaskManager.instance.complete(task: self, request: request, response: data.response, bytes: data.data, startedAt: startedAt) }
 						if self is FileBackedTask { self.fileCachedData = data.data }
 						//postLog(startedAt: startedAt, request: request, data: data.data, response: data.response)
 						preview?(data.data, data.response)

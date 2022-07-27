@@ -129,10 +129,10 @@ extension ServerTask {
 		var request = try await buildRequest()
 		request = try await server.preflight(self, request: request)
 		//preLog(startedAt: Date(), request: request)
-		ConveyTaskManager.instance.begin(task: self, request: request, startedAt: startedAt)
+		await ConveyTaskManager.instance.begin(task: self, request: request, startedAt: startedAt)
 
 		let result = try await server.data(for: request)
-		ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt)
+		await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt)
 		if self is FileBackedTask { self.fileCachedData = result.data }
 		//postLog(startedAt: startedAt, request: request, data: result.data, response: result.response)
 		preview?(result.data, result.response)
