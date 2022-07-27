@@ -86,8 +86,9 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		
 		var newTypes = (try? JSONDecoder().decode([TaskType].self, from: data)) ?? []
 		if resetting { newTypes.resetTaskTypes() }
+		let filtered = newTypes
 		await MainActor.run {
-			types = newTypes
+			types = filtered
 		}
 	}
 	
