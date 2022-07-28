@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+#if canImport(UIKit)
 @available(watchOS, unavailable)
 public struct TaskManagerView: View {
 	@ObservedObject private var manager = ConveyTaskManager.instance
@@ -95,3 +96,5 @@ fileprivate extension Date {
 		}
 	}
 }
+
+#endif

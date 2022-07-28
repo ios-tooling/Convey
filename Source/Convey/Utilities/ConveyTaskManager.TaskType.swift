@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+#if canImport(UIKit)
 extension ConveyTaskManager {
 	struct TaskType: Codable, Identifiable {
 		var id: String { taskName }
@@ -84,3 +84,4 @@ fileprivate extension Date {
 		return text
 	}
 }
+#endif

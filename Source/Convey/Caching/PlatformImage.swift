@@ -10,7 +10,7 @@
 
 	public typealias PlatformImage = NSImage
 
-	extension UIImage {
+	extension NSImage {
 		var data: Data? { nil }
 	}
 #else

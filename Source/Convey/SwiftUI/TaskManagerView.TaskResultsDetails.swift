@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+#if canImport(UIKit)
+
 @available(watchOS, unavailable)
 extension TaskManagerView {
 	struct TaskResultsDetails: View {
@@ -57,3 +59,5 @@ extension TaskManagerView {
 		}
 	}
 }
+
+#endif

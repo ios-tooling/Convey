@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+#if canImport(UIKit)
+
 @available(watchOS, unavailable)
 extension TaskManagerView {
 	struct TaskResultsListView: View {
@@ -31,3 +33,4 @@ extension TaskManagerView {
 		}
 	}
 }
+#endif
