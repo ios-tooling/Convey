@@ -7,7 +7,7 @@
 
 import Foundation
 
-@available(macOS 11, iOS 13.0, watchOS 7.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension URLSession {
 	func cancelTasks(with tags: [String]) async {
 		let allTasks = await allTasks

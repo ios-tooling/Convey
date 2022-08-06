@@ -47,7 +47,7 @@ open class Server: NSObject, ObservableObject {
 		Just(request).setFailureType(to: Error.self).eraseToAnyPublisher()
 	}
 	
-	@available(macOS 11, iOS 13.0, watchOS 7.0, *)
+	@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 	open func preflight(_ task: ServerTask, request: URLRequest) async throws -> URLRequest {
 		request
 	}

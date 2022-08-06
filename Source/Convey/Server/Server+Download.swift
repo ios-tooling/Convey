@@ -24,7 +24,7 @@ public extension Server {
 	}
 }
 
-@available(macOS 11, iOS 13.0, watchOS 7.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension Server {
 	func data(for url: URL) async throws -> (data: Data, response: HTTPURLResponse) {
 		try await data(for: URLRequest(url: url))

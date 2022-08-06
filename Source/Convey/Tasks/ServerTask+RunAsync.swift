@@ -28,7 +28,7 @@ public struct RawDownloadResult {
 	public let fromCache: Bool
 }
 
-@available(macOS 11, iOS 13.0, watchOS 7.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension PayloadDownloadingTask {
 	func download(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadPayload {
 		try await downloadWithResponse().payload
@@ -41,14 +41,14 @@ public extension PayloadDownloadingTask {
 	}
 }
 
-@available(macOS 11, iOS 13.0, watchOS 7.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension ServerTask where Self: ServerDELETETask {
     func delete() async throws {
         _ = try await self.downloadData()
     }
 }
 
-@available(macOS 11, iOS 13.0, watchOS 7.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension ServerTask {
 	func downloadData(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) async throws -> Data {
 		try await downloadDataWithResponse(caching: caching, preview: preview).data
@@ -86,7 +86,7 @@ public extension ServerTask {
 }
 
 
-@available(macOS 11, iOS 13.0, watchOS 7.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 extension ServerTask {
     func requestPayload<Payload: Decodable>(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadResult<Payload> {
 		let result = try await requestData(caching: caching, preview: preview)

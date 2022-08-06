@@ -7,7 +7,7 @@
 
 import Foundation
 
-@available(macOS 11, iOS 13.0, watchOS 7.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension PayloadDownloadingTask where Self: DataUploadingTask {
 	func upload(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadPayload {
 		try await uploadWithResponse(decoder: decoder, preview: preview).payload
@@ -20,7 +20,7 @@ public extension PayloadDownloadingTask where Self: DataUploadingTask {
 	}
 }
 
-@available(macOS 11, iOS 13.0, watchOS 7.0, *)
+@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension DataUploadingTask {
 	func upload(preview: PreviewClosure? = nil) async throws -> Int {
 		try await internalRequestData(preview: preview).response.statusCode
