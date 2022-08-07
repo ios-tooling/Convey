@@ -100,6 +100,12 @@ public class DataCache {
 	}
 	
 	public func fetchLocal(for url: URL, location: CacheLocation = .default, newerThan: Date? = nil) -> DataAndLocalCache? {
+		if url.isFileURL {
+			if let data = try? Data(contentsOf: url) {
+				return DataAndLocalCache(data: data, url: url)
+			}
+			return nil
+		}
 		let localURL = self.location(of: url, relativeTo: location)
 
 		if !FileManager.default.fileExists(atPath: localURL.path) { return nil }
