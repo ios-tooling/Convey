@@ -18,7 +18,9 @@ public struct CachedURLImage: View {
 	let cacheLocation: DataCache.CacheLocation
 	@State var platformImage: PlatformImage?
 	@State var fetchedURL: URL?
+	@State var localURL: URL?
 	let imageSize: ImageSize?
+	private var initialFetch: ImageCache.ImageInfo?
 	
 	func platformImage(named name: String) -> PlatformImage? {
 #if os(macOS)
@@ -36,8 +38,12 @@ public struct CachedURLImage: View {
 		self.cacheLocation = cache
 		self.showURLs = showURLs
 		self.imageSize = size
-		if let url = url, let local = ImageCache.instance.fetchLocal(for: url, location: cache, size: size) {
-			_platformImage = State(initialValue: local)
+		if let url = url {
+			initialFetch = ImageCache.instance.fetchLocalInfo(for: url, location: cache, size: size)
+			_localURL = State(initialValue: initialFetch?.localURL)
+			if let image = initialFetch?.image {
+				_platformImage = State(initialValue: image)
+			}
 		}
 	}
 	
@@ -63,17 +69,25 @@ public struct CachedURLImage: View {
 			}
 			if showURLs {
 				VStack() {
+					if let url = localURL {
+						Text(url.lastPathComponent)
+							.foregroundColor(platformImage == nil ? .red : .white)
+							.background(Color.black)
+					}
+
 					if let url = imageURL {
 						Text(url.absoluteString)
 							.foregroundColor(.orange)
 					}
 
-					if let location = fetchedURL {
-						Text(location.path)
-							.foregroundColor(.orange)
-					}
+//					if let location = fetchedURL {
+//						Text(location.path)
+//							.foregroundColor(.yellow)
+//					}
 				}
+				.font(.caption)
 				.padding()
+			//	.background(RoundedRectangle(cornerRadius: 5).fill(Color.black))
 			}
 		}
 		.task() {

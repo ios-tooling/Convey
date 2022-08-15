@@ -66,7 +66,7 @@ public class DataCache {
 		let data = try await task.downloadData()
 
 		if caching != .never {
-			let localURL = location.location(of: task.url, relativeTo: cachesDirectory)
+			let localURL = self.location(of: task.url, relativeTo: location) //location.location(of: task.url, relativeTo: cachesDirectory)
 			try? FileManager.default.createDirectory(at: localURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
 			try? data.write(to: localURL)
 			return DataAndLocalCache(data: data, url: localURL)
