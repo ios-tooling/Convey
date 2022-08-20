@@ -59,14 +59,16 @@ open class Server: NSObject, ObservableObject {
 			defaultHeaders.removeValue(forKey: ServerConstants.Headers.userAgent)
 		}
 	}
-	
-	public override init() {
+
+	public convenience override init() { self.init(asDefault: true) }
+
+	public init(asDefault: Bool = true) {
 		super.init()
 		configuration.allowsCellularAccess = true
 		configuration.allowsConstrainedNetworkAccess = true
 		
 		session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
-		Self.serverInstance = self
+		if asDefault { Self.serverInstance = self }
 	}
 	
 	open func standardHeaders(for task: ServerTask) -> [String: String] {

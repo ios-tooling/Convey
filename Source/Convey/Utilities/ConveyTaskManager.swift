@@ -10,6 +10,13 @@ import Foundation
 #if canImport(UIKit)
 import UIKit
 
+public extension ServerTask {
+	static var shouldEcho: Bool {
+		get { ConveyTaskManager.instance.shouldEcho(self) }
+		set { ConveyTaskManager.instance.task(self, shouldEcho: newValue) }
+	}
+}
+
 public class ConveyTaskManager: NSObject, ObservableObject {
 	public static let instance = ConveyTaskManager()
 	public var enabled = false { didSet { setup() }}
@@ -42,6 +49,34 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		if enabled {
 			Task { await loadTypes(resetting: true) }
 		}
+	}
+	
+	func shouldEcho(_ task: ServerTask.Type) -> Bool {
+		guard enabled, let index = index(of: task) else { return task.self is EchoingTask.Type }
+		return types[index].shouldEcho
+	}
+	
+	func task(_ task: ServerTask.Type, shouldEcho: Bool) {
+		guard enabled else { return }
+		
+		if let index = index(of: task) {
+			if shouldEcho {
+				types[index].manuallyEcho = true
+			} else {
+				if types[index].compiledEcho || types[index].manuallyEcho == true {
+					types[index].manuallyEcho = false
+				} else if !types[index].compiledEcho || types[index].manuallyEcho == false {
+					types[index].manuallyEcho = nil
+				}
+			}
+		} else {
+			let name = String(describing: task.self)
+			var newTask = TaskType(taskName: name)
+			newTask.manuallyEcho = shouldEcho
+			newTask.compiledEcho = task.self is EchoingTask.Type
+			self.types.append(newTask)
+		}
+		objectWillChange.send()
 	}
 	
 	func shouldEcho(_ task: ServerTask) -> Bool {
@@ -94,11 +129,13 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		}
 	}
 	
-	func index(of task: ServerTask) -> Int? {
-		let name = String(describing: type(of: task))
+	func index(of task: ServerTask.Type) -> Int? {
+		let name = String(describing: task.self)
 		return types.firstIndex(where: { $0.taskName == name })
 	}
 	
+	func index(of task: ServerTask) -> Int? { index(of: type(of: task) ) }
+
 	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async {
 		if !enabled { return }
 		if multitargetLogging { await loadTypes(resetting: false) }
