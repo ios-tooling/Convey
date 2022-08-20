@@ -87,7 +87,7 @@ extension ServerTask {
 			return Fail(error: HTTPError.offline).eraseToAnyPublisher()
 		}
 		
-		return internalRequestData(preview: preview)
+		return sendRequest(preview: preview)
 			.catch { error -> AnyPublisher<(data: Data, response: URLResponse), HTTPError> in
 				if error.isOffline, self is ServerCacheableTask {
 					return requestData(caching: .skipLocal, preview: preview)
@@ -101,7 +101,7 @@ extension ServerTask {
 		
 	}
 	
-	func internalRequestData(preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: URLResponse), HTTPError> {
+	func sendRequest(preview: PreviewClosure? = nil) -> AnyPublisher<(data: Data, response: URLResponse), HTTPError> {
 		let startedAt = Date()
 		
 		return buildRequest()

@@ -23,10 +23,10 @@ public extension PayloadDownloadingTask where Self: DataUploadingTask {
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension DataUploadingTask {
 	func upload(preview: PreviewClosure? = nil) async throws -> Int {
-		try await internalRequestData(preview: preview).response.statusCode
+		try await sendRequest(preview: preview).response.statusCode
 	}
 
 	func uploadWithResponse(preview: PreviewClosure? = nil) async throws -> URLResponse {
-		try await internalRequestData(preview: preview).response
+		try await sendRequest(preview: preview).response
 	}
 }

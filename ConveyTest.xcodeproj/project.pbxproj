@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B519EB1E28B0469B002F698C /* ConveyTaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B519EB1C28B0469B002F698C /* ConveyTaskManager.swift */; };
+		B519EB1F28B0469B002F698C /* ConveyTaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B519EB1C28B0469B002F698C /* ConveyTaskManager.swift */; };
+		B519EB2028B0469B002F698C /* ConveyTaskManager.TaskType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B519EB1D28B0469B002F698C /* ConveyTaskManager.TaskType.swift */; };
+		B519EB2128B0469B002F698C /* ConveyTaskManager.TaskType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B519EB1D28B0469B002F698C /* ConveyTaskManager.TaskType.swift */; };
+		B519EB2428B06060002F698C /* ImageSizing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B519EB2228B06060002F698C /* ImageSizing.swift */; };
+		B519EB2528B06060002F698C /* ImageSizing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B519EB2228B06060002F698C /* ImageSizing.swift */; };
+		B519EB2628B06060002F698C /* PlatformImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B519EB2328B06060002F698C /* PlatformImage.swift */; };
+		B519EB2728B06060002F698C /* PlatformImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B519EB2328B06060002F698C /* PlatformImage.swift */; };
+		B519EB2928B060FE002F698C /* URL+Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = B519EB2828B060FE002F698C /* URL+Images.swift */; };
+		B519EB2A28B060FE002F698C /* URL+Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = B519EB2828B060FE002F698C /* URL+Images.swift */; };
 		B52831D9272EA13F001EC82E /* ConveyTest_iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52831D8272EA13F001EC82E /* ConveyTest_iOSApp.swift */; };
 		B52831DB272EA13F001EC82E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52831DA272EA13F001EC82E /* ContentView.swift */; };
 		B52831DD272EA140001EC82E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B52831DC272EA140001EC82E /* Assets.xcassets */; };
@@ -79,6 +89,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B519EB1C28B0469B002F698C /* ConveyTaskManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConveyTaskManager.swift; sourceTree = "<group>"; };
+		B519EB1D28B0469B002F698C /* ConveyTaskManager.TaskType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConveyTaskManager.TaskType.swift; sourceTree = "<group>"; };
+		B519EB2228B06060002F698C /* ImageSizing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageSizing.swift; sourceTree = "<group>"; };
+		B519EB2328B06060002F698C /* PlatformImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlatformImage.swift; sourceTree = "<group>"; };
+		B519EB2828B060FE002F698C /* URL+Images.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "URL+Images.swift"; sourceTree = "<group>"; };
 		B52831D6272EA13F001EC82E /* ConveyTest_iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ConveyTest_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B52831D8272EA13F001EC82E /* ConveyTest_iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConveyTest_iOSApp.swift; sourceTree = "<group>"; };
 		B52831DA272EA13F001EC82E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -223,6 +238,7 @@
 				B529CE1B2859FA72000DDAEB /* URLResponse.swift */,
 				B529CE1C2859FA72000DDAEB /* MD5.swift */,
 				B529CE1D2859FA72000DDAEB /* URLSession.swift */,
+				B519EB2828B060FE002F698C /* URL+Images.swift */,
 				B529CE1E2859FA72000DDAEB /* URL.swift */,
 				B529CE1F2859FA72000DDAEB /* Bundle.swift */,
 			);
@@ -232,6 +248,8 @@
 		B529CE202859FA72000DDAEB /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				B519EB1C28B0469B002F698C /* ConveyTaskManager.swift */,
+				B519EB1D28B0469B002F698C /* ConveyTaskManager.TaskType.swift */,
 				B529CE212859FA72000DDAEB /* HTTPError.swift */,
 				B529CE222859FA72000DDAEB /* DeviceType.swift */,
 				B529CE232859FA72000DDAEB /* NetworkPublishers.swift */,
@@ -242,6 +260,8 @@
 		B529CE242859FA72000DDAEB /* Caching */ = {
 			isa = PBXGroup;
 			children = (
+				B519EB2228B06060002F698C /* ImageSizing.swift */,
+				B519EB2328B06060002F698C /* PlatformImage.swift */,
 				B529CE252859FA72000DDAEB /* ImageCache.swift */,
 				B529CE262859FA72000DDAEB /* DataCache.swift */,
 			);
@@ -417,16 +437,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				B529CE5E2859FA72000DDAEB /* ImageCache.swift in Sources */,
+				B519EB1F28B0469B002F698C /* ConveyTaskManager.swift in Sources */,
 				B52D9505283A408E002E7945 /* HTTPBin.swift in Sources */,
 				B529CE562859FA72000DDAEB /* Bundle.swift in Sources */,
 				B529CE362859FA72000DDAEB /* ServerTask+Echoing.swift in Sources */,
 				B529CE602859FA72000DDAEB /* DataCache.swift in Sources */,
+				B519EB2728B06060002F698C /* PlatformImage.swift in Sources */,
 				B529CE522859FA72000DDAEB /* URLSession.swift in Sources */,
 				B529CE462859FA72000DDAEB /* ServerConstants.swift in Sources */,
 				B529CE3C2859FA72000DDAEB /* ServerTask+RunAsync.swift in Sources */,
 				B529CE3E2859FA72000DDAEB /* Server.Remote.swift in Sources */,
 				B529CE382859FA72000DDAEB /* ServerTask+UploadAsync.swift in Sources */,
 				B52831DB272EA13F001EC82E /* ContentView.swift in Sources */,
+				B519EB2128B0469B002F698C /* ConveyTaskManager.TaskType.swift in Sources */,
+				B519EB2A28B060FE002F698C /* URL+Images.swift in Sources */,
 				B52831D9272EA13F001EC82E /* ConveyTest_iOSApp.swift in Sources */,
 				B529CE582859FA72000DDAEB /* HTTPError.swift in Sources */,
 				B529CE2C2859FA72000DDAEB /* ServerTask+FileBacked.swift in Sources */,
@@ -439,6 +463,7 @@
 				B529CE542859FA72000DDAEB /* URL.swift in Sources */,
 				B529CE302859FA72000DDAEB /* SimpleTasks.swift in Sources */,
 				B529CE502859FA72000DDAEB /* MD5.swift in Sources */,
+				B519EB2528B06060002F698C /* ImageSizing.swift in Sources */,
 				B529CE422859FA72000DDAEB /* ServerError.swift in Sources */,
 				B529CE402859FA72000DDAEB /* Server+Download.swift in Sources */,
 				B529CE2E2859FA72000DDAEB /* ServerTask+Run.swift in Sources */,
@@ -462,6 +487,7 @@
 				B529CE312859FA72000DDAEB /* ServerTask.swift in Sources */,
 				B529CE5B2859FA72000DDAEB /* NetworkPublishers.swift in Sources */,
 				B529CE4D2859FA72000DDAEB /* URLResponse.swift in Sources */,
+				B519EB2928B060FE002F698C /* URL+Images.swift in Sources */,
 				B529CE572859FA72000DDAEB /* HTTPError.swift in Sources */,
 				B529CE332859FA72000DDAEB /* ServerTask+Request.swift in Sources */,
 				B529CE412859FA72000DDAEB /* ServerError.swift in Sources */,
@@ -472,12 +498,16 @@
 				B529CE4F2859FA72000DDAEB /* MD5.swift in Sources */,
 				B529CE2B2859FA72000DDAEB /* ServerTask+FileBacked.swift in Sources */,
 				B529CE552859FA72000DDAEB /* Bundle.swift in Sources */,
+				B519EB2428B06060002F698C /* ImageSizing.swift in Sources */,
 				B529CE592859FA72000DDAEB /* DeviceType.swift in Sources */,
 				B529CE292859FA72000DDAEB /* ServerTask+Logging.swift in Sources */,
 				B529CE432859FA72000DDAEB /* Server+Threading.swift in Sources */,
+				B519EB1E28B0469B002F698C /* ConveyTaskManager.swift in Sources */,
+				B519EB2628B06060002F698C /* PlatformImage.swift in Sources */,
 				B529CE492859FA72000DDAEB /* URLRequest.swift in Sources */,
 				B529CE372859FA72000DDAEB /* ServerTask+UploadAsync.swift in Sources */,
 				B529CE352859FA72000DDAEB /* ServerTask+Echoing.swift in Sources */,
+				B519EB2028B0469B002F698C /* ConveyTaskManager.TaskType.swift in Sources */,
 				B529CE3F2859FA72000DDAEB /* Server+Download.swift in Sources */,
 				B54CAB8326ECB76400781A3A /* ConveyTestApp.swift in Sources */,
 				B529CE2F2859FA72000DDAEB /* SimpleTasks.swift in Sources */,

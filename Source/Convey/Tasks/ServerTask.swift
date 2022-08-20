@@ -108,3 +108,7 @@ public protocol PostFlightTask: ServerTask {
     func postFlight() async throws
 }
 
+public protocol RetryableTask: ServerTask {
+	func retryInterval(after error: Error, attemptNumber: Int) -> TimeInterval?
+}
+

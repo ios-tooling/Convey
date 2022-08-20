@@ -18,7 +18,7 @@ public extension PayloadDownloadingTask where Self: DataUploadingTask {
 
 public extension DataUploadingTask {
 	func upload(preview: PreviewClosure? = nil) -> AnyPublisher<Int, Error> {
-		internalRequestData(preview: preview)
+		sendRequest(preview: preview)
 			.map { ($0.response as? HTTPURLResponse)?.statusCode ?? 500 }
 			.mapError { $0 as Error }
 			.eraseToAnyPublisher()

@@ -109,7 +109,7 @@ extension ServerTask {
 		}
 
 		do {
-			return try await internalRequestData(preview: preview)
+			return try await sendRequest(preview: preview)
 		} catch {
 			if error.isOffline, self is ServerCacheableTask {
 				return try await requestData(caching: .skipLocal, preview: preview)
@@ -121,32 +121,45 @@ extension ServerTask {
 		}
 	}
 	
-	func internalRequestData(preview: PreviewClosure? = nil) async throws -> RawDownloadResult {
-		if let threadName = (self as? ThreadedServerTask)?.threadName { await server.wait(forThread: threadName) }
-		let startedAt = Date()
-
-		try await (self as? PreFlightTask)?.preFlight()
-		var request = try await buildRequest()
-		request = try await server.preflight(self, request: request)
-		//preLog(startedAt: Date(), request: request)
-		await ConveyTaskManager.instance.begin(task: self, request: request, startedAt: startedAt)
-
-		let result = try await server.data(for: request)
-		await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt)
-		if self is FileBackedTask { self.fileCachedData = result.data }
-		//postLog(startedAt: startedAt, request: request, data: result.data, response: result.response)
-		preview?(result.data, result.response)
-		postprocess(data: result.data, response: result.response)
-			if result.response.statusCode / 100 != 2 {
-            server.reportConnectionError(self, result.response.statusCode, String(data: result.data, encoding: .utf8))
-			   if result.data.isEmpty || (result.response.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
-                throw HTTPError.serverError(request.url, result.response.statusCode, result.data)
-            }
-        }
+	func sendRequest(preview: PreviewClosure? = nil) async throws -> RawDownloadResult {
+		var attemptCount = 1
 		
-		try await (self as? PostFlightTask)?.postFlight()
-		if let threadName = (self as? ThreadedServerTask)?.threadName { await server.stopWaiting(forThread: threadName) }
-		return RawDownloadResult(response: result.response, data: result.data, fromCache: false)
+		while true {
+			do {
+				if let threadName = (self as? ThreadedServerTask)?.threadName { await server.wait(forThread: threadName) }
+				let startedAt = Date()
+
+				try await (self as? PreFlightTask)?.preFlight()
+				var request = try await buildRequest()
+				request = try await server.preflight(self, request: request)
+				//preLog(startedAt: Date(), request: request)
+				await ConveyTaskManager.instance.begin(task: self, request: request, startedAt: startedAt)
+
+				let result = try await server.data(for: request)
+				await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt)
+				if self is FileBackedTask { self.fileCachedData = result.data }
+				//postLog(startedAt: startedAt, request: request, data: result.data, response: result.response)
+				preview?(result.data, result.response)
+				postprocess(data: result.data, response: result.response)
+					if result.response.statusCode / 100 != 2 {
+						server.reportConnectionError(self, result.response.statusCode, String(data: result.data, encoding: .utf8))
+						if result.data.isEmpty || (result.response.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
+							 throw HTTPError.serverError(request.url, result.response.statusCode, result.data)
+						}
+				  }
+				
+				try await (self as? PostFlightTask)?.postFlight()
+				if let threadName = (self as? ThreadedServerTask)?.threadName { await server.stopWaiting(forThread: threadName) }
+				return RawDownloadResult(response: result.response, data: result.data, fromCache: false)
+			} catch {
+				if let delay = (self as? RetryableTask)?.retryInterval(after: error, attemptNumber: attemptCount) {
+					attemptCount += 1
+					try await Task.sleep(nanoseconds: UInt64(delay) * 1_000_000_000)
+				} else {
+					throw error
+				}
+			}
+		}
 	}
 
 }
