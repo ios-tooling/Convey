@@ -62,25 +62,7 @@ public extension ServerTask {
 		if let custom = self as? CustomAsyncURLRequestTask {
 			return try await custom.customURLRequest
 		}
-		
-		if let custom = self as? CustomURLRequestTask {
-            var cancellable: AnyCancellable?
-			let request = try await withCheckedThrowingContinuation { continuation in
-                cancellable = custom.customURLRequest
-                    .sink(receiveCompletion: { result in
-                        switch result {
-                        case .failure(let error): continuation.resume(throwing: error)
-                        case .finished: break
-                        }
-                    }, receiveValue: { request in
-                        continuation.resume(returning: request)
-                    })
-			}
-            
-            if cancellable != nil { cancellable = nil }
-            if let request = request { return request }
-		}
-			
+
 		return defaultRequest()
 	}
 }

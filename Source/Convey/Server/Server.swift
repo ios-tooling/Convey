@@ -42,12 +42,7 @@ open class Server: NSObject, ObservableObject {
 		self.defaultHeaders = headers
 		updateUserAgentHeader()
 	}
-	
-	open func preflight(_ task: ServerTask, request: URLRequest) -> AnyPublisher<URLRequest, Error> {
-		Just(request).setFailureType(to: Error.self).eraseToAnyPublisher()
-	}
-	
-	@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
+
 	open func preflight(_ task: ServerTask, request: URLRequest) async throws -> URLRequest {
 		request
 	}

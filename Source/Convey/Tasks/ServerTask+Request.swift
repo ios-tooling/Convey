@@ -9,19 +9,6 @@ import Foundation
 import Combine
 
 public extension ServerTask {
-	func buildRequest() -> AnyPublisher<URLRequest, Error> {
-		if let custom = self as? CustomURLRequestTask {
-			return custom.customURLRequest
-				.map { req in
-					req ?? defaultRequest()
-				}
-				.eraseToAnyPublisher()
-		}
-			
-		let request = defaultRequest()
-		return Just(request).setFailureType(to: Error.self).eraseToAnyPublisher()
-	}
-	
 	func defaultRequest() -> URLRequest {
 		var request = URLRequest(url: url)
 		

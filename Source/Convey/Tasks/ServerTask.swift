@@ -15,7 +15,7 @@ public protocol ServerTask {
 	func postprocess(data: Data, response: HTTPURLResponse)
 	var httpMethod: String { get }
 	var server: Server { get }
-    var url: URL { get }
+	var url: URL { get }
 }
 
 public protocol TaskURLParameters {
@@ -43,10 +43,6 @@ public protocol CustomURLTask: ServerTask {
 
 public protocol TaggedTask: ServerTask {
 	var requestTag: String { get }
-}
-
-public protocol CustomURLRequestTask: ServerTask {
-    var customURLRequest: AnyPublisher<URLRequest?, Error> { get }
 }
 
 public protocol CustomAsyncURLRequestTask: ServerTask {

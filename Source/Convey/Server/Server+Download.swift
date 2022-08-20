@@ -8,22 +8,6 @@
 import Foundation
 import Combine
 
-public extension Server {
-	func data(for url: URL) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> {
-		data(for: URLRequest(url: url))
-	}
-	
-	func data(for request: URLRequest) -> AnyPublisher<(data: Data, response: HTTPURLResponse), HTTPError> {
-		session.dataTaskPublisher(for: request)
-			.map { data, response in
-				return (data, response)
-			}
-			.assumeHTTP()
-			.eraseToAnyPublisher()
-		
-	}
-}
-
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension Server {
 	func data(for url: URL) async throws -> (data: Data, response: HTTPURLResponse) {
