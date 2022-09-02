@@ -134,6 +134,8 @@ extension ServerTask {
 				if let threadName = (self as? ThreadedServerTask)?.threadName { await server.stopWaiting(forThread: threadName) }
 				return RawDownloadResult(response: result.response, data: result.data, fromCache: false)
 			} catch {
+				if let threadName = (self as? ThreadedServerTask)?.threadName { await server.stopWaiting(forThread: threadName) }
+
 				if let delay = (self as? RetryableTask)?.retryInterval(after: error, attemptNumber: attemptCount) {
 					attemptCount += 1
 					try await Task.sleep(nanoseconds: UInt64(delay) * 1_000_000_000)
