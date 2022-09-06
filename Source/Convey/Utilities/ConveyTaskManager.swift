@@ -27,6 +27,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	public var directory = URL.systemDirectoryURL(which: .cachesDirectory)!.appendingPathComponent("convey_tasks")
 	public var multitargetLogging = false
 	public var storeResults = true
+	public var shortLog = false
 
 	let typesFilename = "convey_task_types.txt"
 	var types: [TaskType] = [] {
@@ -168,6 +169,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	func index(of task: ServerTask) -> Int? { index(of: type(of: task) ) }
 
 	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async {
+		if shortLog { print("☎️ \(task)")}
 		if !enabled { return }
 		if multitargetLogging { await loadTypes(resetting: false) }
 		queue.async {
