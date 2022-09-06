@@ -9,6 +9,8 @@ import Foundation
 #if canImport(UIKit)
 extension ConveyTaskManager {
 	struct TaskType: Codable, Identifiable {
+		enum CodingKeys: String, CodingKey { case taskName, totalCount, dates, totalBytes, thisRunBytes, manuallyEcho, compiledEcho }
+		
 		var id: String { taskName }
 		let taskName: String
 		var totalCount = 1
@@ -17,6 +19,7 @@ extension ConveyTaskManager {
 		var totalBytes: Int64 = 0
 		var thisRunBytes: Int64 = 0
 		var manuallyEcho: Bool?
+		var thisRunOnlyEcho = false
 		var compiledEcho = false
 		var mostRecent: Date? { dates.last }
 		var viewID: String { taskName + "\(String(describing: manuallyEcho))" }
@@ -26,7 +29,7 @@ extension ConveyTaskManager {
 		}
 		
 		var shouldEcho: Bool {
-			get { manuallyEcho ?? compiledEcho }
+			get { thisRunOnlyEcho || (manuallyEcho ?? compiledEcho) }
 			set {
 				if newValue == compiledEcho {
 					manuallyEcho = nil

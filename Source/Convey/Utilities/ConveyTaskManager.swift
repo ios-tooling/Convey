@@ -7,6 +7,10 @@
 
 import Foundation
 
+#if canImport(Suite)
+import Suite
+#endif
+
 #if canImport(UIKit)
 import UIKit
 
@@ -47,7 +51,28 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	
 	func setup() {
 		if enabled {
-			Task { await loadTypes(resetting: true) }
+			Task {
+				await loadTypes(resetting: true)
+				#if canImport(Suite)
+					if CommandLine.bool(for: "conveyShortLog") { shortLog = true }
+					if let echos = CommandLine.string(for: "conveyEchos") {
+						print("Echoing: \(echos)")
+						for type in echos.components(separatedBy: ",") {
+							setShouldEcho(taskType: type)
+						}
+					}
+				#endif
+			}
+		}
+	}
+	
+	func setShouldEcho(taskType: String, on: Bool = true) {
+		if let index = index(of: taskType) {
+			types[index].thisRunOnlyEcho = on
+		} else {
+			var newTask = TaskType(taskName: taskType)
+			newTask.thisRunOnlyEcho = true
+			types.append(newTask)
 		}
 	}
 	
@@ -63,8 +88,9 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 			if shouldEcho {
 				types[index].manuallyEcho = true
 			} else {
-				if types[index].compiledEcho || types[index].manuallyEcho == true {
+				if types[index].compiledEcho || types[index].manuallyEcho == true || types[index].thisRunOnlyEcho {
 					types[index].manuallyEcho = false
+					types[index].thisRunOnlyEcho = false
 				} else if !types[index].compiledEcho || types[index].manuallyEcho == false {
 					types[index].manuallyEcho = nil
 				}
@@ -87,10 +113,11 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	
 	public func turnAllOff() {
 		for i in types.indices {
-			if types[i].compiledEcho || types[i].manuallyEcho == true {
+			if types[i].compiledEcho || types[i].manuallyEcho == true || types[i].thisRunOnlyEcho == true {
 				types[i].manuallyEcho = false
-			} else if !types[i].compiledEcho || types[i].manuallyEcho == false {
+			} else if !types[i].compiledEcho {
 				types[i].manuallyEcho = nil
+				types[i].thisRunOnlyEcho = false
 			}
 		}
 		objectWillChange.send()
@@ -131,7 +158,11 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	
 	func index(of task: ServerTask.Type) -> Int? {
 		let name = String(describing: task.self)
-		return types.firstIndex(where: { $0.taskName == name })
+		return index(of: name)
+	}
+	
+	func index(of taskName: String) -> Int? {
+		return types.firstIndex(where: { $0.taskName == taskName })
 	}
 	
 	func index(of task: ServerTask) -> Int? { index(of: type(of: task) ) }
