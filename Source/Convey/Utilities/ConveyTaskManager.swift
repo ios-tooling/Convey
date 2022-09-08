@@ -7,10 +7,6 @@
 
 import Foundation
 
-#if canImport(Suite)
-import Suite
-#endif
-
 #if canImport(UIKit)
 import UIKit
 
@@ -54,15 +50,13 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		if enabled {
 			Task {
 				await loadTypes(resetting: true)
-				#if canImport(Suite)
-					if CommandLine.bool(for: "conveyShortLog") { shortLog = true }
-					if let echos = CommandLine.string(for: "conveyEchos") {
-						print("Echoing: \(echos)")
-						for type in echos.components(separatedBy: ",") {
-							setShouldEcho(taskType: type)
-						}
+				if CommandLine.bool(for: "conveyShortLog") { shortLog = true }
+				if let echos = CommandLine.string(for: "conveyEchos") {
+					print("Echoing: \(echos)")
+					for type in echos.components(separatedBy: ",") {
+						setShouldEcho(taskType: type)
 					}
-				#endif
+				}
 			}
 		}
 	}
