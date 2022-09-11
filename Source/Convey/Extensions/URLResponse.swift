@@ -19,4 +19,10 @@ extension URLResponse {
 		}
 		return nil
 	}
+	
+	var didDownloadSuccessfully: Bool {
+		guard let http = self as? HTTPURLResponse else { return false }
+		
+		return http.statusCode / 100 == 2 || http.statusCode == 304
+	}
 }

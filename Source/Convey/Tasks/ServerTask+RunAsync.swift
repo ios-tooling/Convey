@@ -113,22 +113,28 @@ extension ServerTask {
 
 				try await (self as? PreFlightTask)?.preFlight()
 				var request = try await buildRequest()
-				print("Request: \(request.allHTTPHeaderFields)")
 				request = try await server.preflight(self, request: request)
-				print("Request: \(request.allHTTPHeaderFields)")
 				//preLog(startedAt: Date(), request: request)
 				await ConveyTaskManager.instance.begin(task: self, request: request, startedAt: startedAt)
 
-				let result = try await server.data(for: request)
+				var result = try await server.data(for: request)
 				await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt)
 				if self is FileBackedTask { self.fileCachedData = result.data }
+				
+				if result.response.statusCode == 304, let data = DataCache.instance.fetchLocal(for: url), !data.data.isEmpty {
+					
+					result.data = data.data
+					//= (data: data.data,
+						//		 response: HTTPURLResponse(url: url, statusCode: 200, httpVersion: "1.1", headerFields: result.response.allHeaderFields as? [String: String]) ?? result.response)
+				}
 				if self is ETagCachedTask, let tag = result.response.etag {
+					DataCache.instance.cache(data: result.data, for: url)
 					ETagStore.instance.store(etag: tag, for: url)
 				}
 				//postLog(startedAt: startedAt, request: request, data: result.data, response: result.response)
 				preview?(result.data, result.response)
 				postprocess(data: result.data, response: result.response)
-					if result.response.statusCode / 100 != 2 {
+					if !result.response.didDownloadSuccessfully {
 						server.reportConnectionError(self, result.response.statusCode, String(data: result.data, encoding: .utf8))
 						if result.data.isEmpty || (result.response.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
 							 throw HTTPError.serverError(request.url, result.response.statusCode, result.data)

@@ -37,7 +37,7 @@ public extension ServerTask {
 			}
 		}
 		
-		if self is ETagCachedTask, let etag = cachedEtag {
+		if self is ETagCachedTask, let etag = cachedEtag, DataCache.instance.hasCachedValue(for: url) {
 			request.addValue(etag, forHTTPHeaderField: "If-None-Match")
 		}
 		

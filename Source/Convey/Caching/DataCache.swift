@@ -62,13 +62,18 @@ public class DataCache {
 		}
 	}
 	
+	@discardableResult func cache(data: Data, for url: URL, location: CacheLocation = .default) -> URL {
+		let localURL = self.location(of: url, relativeTo: location) //location.location(of: task.url, relativeTo: cachesDirectory)
+		try? FileManager.default.createDirectory(at: localURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
+		try? data.write(to: localURL)
+		return localURL
+	}
+	
 	func download<Task: ServerTask>(using task: Task, caching: Caching, location: CacheLocation) async throws -> DataAndLocalCache {
 		let data = try await task.downloadData()
 
 		if caching != .never {
-			let localURL = self.location(of: task.url, relativeTo: location) //location.location(of: task.url, relativeTo: cachesDirectory)
-			try? FileManager.default.createDirectory(at: localURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
-			try? data.write(to: localURL)
+			let localURL = cache(data: data, for: task.url, location: location)
 			return DataAndLocalCache(data: data, url: localURL)
 		}
 		return DataAndLocalCache(data: data, url: nil)
@@ -93,6 +98,7 @@ public class DataCache {
 		let localURL = self.location(of: url, relativeTo: location)
 		
 		if !FileManager.default.fileExists(atPath: localURL.path) { return false }
+		guard let size = localURL.size, size > 0 else { return false }
 		if let limit = newerThan {
 			guard let date = localURL.creationDate, date > limit else { return false }
 		}
@@ -199,5 +205,14 @@ extension URL {
 			let date = attributes[.creationDate] as? Date
 		else { return nil }
 		return date
+	}
+	
+	var size: UInt64? {
+		guard
+			isFileURL,
+			let attributes = try? FileManager.default.attributesOfItem(atPath: path),
+			let size = attributes[.size] as? UInt64
+		else { return nil }
+		return size
 	}
 }

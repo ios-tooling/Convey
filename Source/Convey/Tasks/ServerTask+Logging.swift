@@ -50,7 +50,7 @@ extension ServerTask {
 //	}
 	
 	func loggingOutput(startedAt: Date, request: URLRequest, data: Data?, response: URLResponse?) -> Data {
-        var output = "Started at: \(startedAt.timeLabel), took: \(abs(startedAt.timeIntervalSinceNow)) s\n".data(using: .utf8) ?? Data()
+        var output = "Started at: \(startedAt.timeLabel), took: \(abs(startedAt.timeIntervalSinceNow))s\n".data(using: .utf8) ?? Data()
 		output += request.descriptionData(maxUploadSize: server.maxLoggedUploadSize)
 		
 		if let responseData = response?.descriptionData {
