@@ -9,6 +9,8 @@ import Foundation
 import Combine
 
 public extension ServerTask {
+	var cachedEtag: String? { ETagStore.instance.eTag(for: url) }
+	
 	func defaultRequest() -> URLRequest {
 		var request = URLRequest(url: url)
 		
@@ -24,7 +26,7 @@ public extension ServerTask {
 				}
 			}
 		}
-        request.allHTTPHeaderFields = server.standardHeaders(for: self)
+		request.allHTTPHeaderFields = server.standardHeaders(for: self)
 		if let tagged = self as? TaggedTask {
 			request.addValue(tagged.requestTag, forHTTPHeaderField: ServerConstants.Headers.tag)
 		}
@@ -33,6 +35,10 @@ public extension ServerTask {
 			for (value, header) in additionalHeaders {
 				request.addValue(value, forHTTPHeaderField: header)
 			}
+		}
+		
+		if self is ETagCachedTask, let etag = cachedEtag {
+			request.addValue(etag, forHTTPHeaderField: "If-None-Match")
 		}
 		
 		return request

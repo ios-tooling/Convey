@@ -113,13 +113,18 @@ extension ServerTask {
 
 				try await (self as? PreFlightTask)?.preFlight()
 				var request = try await buildRequest()
+				print("Request: \(request.allHTTPHeaderFields)")
 				request = try await server.preflight(self, request: request)
+				print("Request: \(request.allHTTPHeaderFields)")
 				//preLog(startedAt: Date(), request: request)
 				await ConveyTaskManager.instance.begin(task: self, request: request, startedAt: startedAt)
 
 				let result = try await server.data(for: request)
 				await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt)
 				if self is FileBackedTask { self.fileCachedData = result.data }
+				if self is ETagCachedTask, let tag = result.response.etag {
+					ETagStore.instance.store(etag: tag, for: url)
+				}
 				//postLog(startedAt: startedAt, request: request, data: result.data, response: result.response)
 				preview?(result.data, result.response)
 				postprocess(data: result.data, response: result.response)

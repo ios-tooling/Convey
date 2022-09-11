@@ -21,7 +21,10 @@ open class Server: NSObject, ObservableObject {
 	open var logDirectory: URL?
 	open var reportBadHTTPStatusAsError = true
 	open var configuration = URLSessionConfiguration.default
-	public var userAgent: String? { didSet { updateUserAgentHeader() }}
+	public var userAgent: String? { didSet {
+		updateUserAgentHeader()
+		print("User agent set to: \(userAgent ?? "--")")
+	}}
 	open var maxLoggedDataSize = 1024 * 1024 * 10
 	open var maxLoggedUploadSize = 1024 * 2
 	open var launchedAt = Date()

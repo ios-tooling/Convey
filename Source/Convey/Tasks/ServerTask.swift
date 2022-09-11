@@ -53,6 +53,10 @@ public protocol DataUploadingTask: ServerTask {
 	var dataToUpload: Data? { get }
 }
 
+public protocol ETagCachedTask: ServerGETTask {
+	
+}
+
 public protocol JSONPayloadTask: ServerTask { }
 
 public protocol JSONUploadingTask: DataUploadingTask, JSONPayloadTask {

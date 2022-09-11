@@ -136,6 +136,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	func saveTypes() {
 		validateDirectories()
 		if let data = try? JSONEncoder().encode(types) {
+			try? FileManager.default.removeItem(at: typesURL)
 			try? data.write(to: typesURL)
 		}
 	}
