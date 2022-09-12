@@ -188,7 +188,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		}
 	}
 	
-	func complete(task: ServerTask, request: URLRequest, response: HTTPURLResponse, bytes: Data, startedAt: Date) async {
+	func complete(task: ServerTask, request: URLRequest, response: HTTPURLResponse, bytes: Data, startedAt: Date, usingCache: Bool) async {
 		if multitargetLogging { await loadTypes(resetting: false) }
 		queue.async {
 			if let index = self.index(of: task) {
@@ -197,9 +197,14 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 				if self.multitargetLogging { self.saveTypes() }
 				if self.types[index].shouldEcho {
 					let log = task.loggingOutput(startedAt: startedAt, request: request, data: bytes, response: response)
-					print("🌐⬇︎ \(type(of: task)) Response ======================\n \(String(data: log, encoding: .utf8) ?? "unable to stringify response")\n======================")
-					if self.storeResults, response.statusCode / 100 == 2 {
-						self.types[index].store(results: log, from: startedAt) }
+					
+					if usingCache {
+						print("🌐⬇︎ \(type(of: task)): used cached response")
+					} else {
+						print("🌐⬇︎ \(type(of: task)) Response ======================\n \(String(data: log, encoding: .utf8) ?? "unable to stringify response")\n======================")
+						if self.storeResults, response.didDownloadSuccessfully {
+							self.types[index].store(results: log, from: startedAt) }
+					}
 				}
 			}
 		}

@@ -118,15 +118,14 @@ extension ServerTask {
 				await ConveyTaskManager.instance.begin(task: self, request: request, startedAt: startedAt)
 
 				var result = try await server.data(for: request)
-				await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt)
-				if self is FileBackedTask { self.fileCachedData = result.data }
-				
 				if result.response.statusCode == 304, let data = DataCache.instance.fetchLocal(for: url), !data.data.isEmpty {
-					
 					result.data = data.data
-					//= (data: data.data,
-						//		 response: HTTPURLResponse(url: url, statusCode: 200, httpVersion: "1.1", headerFields: result.response.allHeaderFields as? [String: String]) ?? result.response)
+					await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: true)
+				} else {
+					await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: true)
+					if self is FileBackedTask { self.fileCachedData = result.data }
 				}
+				
 				if self is ETagCachedTask, let tag = result.response.etag {
 					DataCache.instance.cache(data: result.data, for: url)
 					ETagStore.instance.store(etag: tag, for: url)
@@ -134,12 +133,12 @@ extension ServerTask {
 				//postLog(startedAt: startedAt, request: request, data: result.data, response: result.response)
 				preview?(result.data, result.response)
 				postprocess(data: result.data, response: result.response)
-					if !result.response.didDownloadSuccessfully {
-						server.reportConnectionError(self, result.response.statusCode, String(data: result.data, encoding: .utf8))
-						if result.data.isEmpty || (result.response.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
-							 throw HTTPError.serverError(request.url, result.response.statusCode, result.data)
-						}
-				  }
+				if !result.response.didDownloadSuccessfully {
+					server.reportConnectionError(self, result.response.statusCode, String(data: result.data, encoding: .utf8))
+					if result.data.isEmpty || (result.response.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
+						 throw HTTPError.serverError(request.url, result.response.statusCode, result.data)
+					}
+			  }
 				
 				try await (self as? PostFlightTask)?.postFlight()
 				if let threadName = (self as? ThreadedServerTask)?.threadName { await server.stopWaiting(forThread: threadName) }

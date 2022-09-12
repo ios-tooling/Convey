@@ -15,6 +15,7 @@ public extension ServerTask {
 		var request = URLRequest(url: url)
 		
 		request.httpMethod = httpMethod
+		request.cachePolicy = .reloadIgnoringLocalCacheData
 		if let dataProvider = self as? DataUploadingTask {
 			if request.httpMethod == "GET" { request.httpMethod = "POST" }
 			request.httpBody = dataProvider.dataToUpload
