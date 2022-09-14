@@ -122,7 +122,7 @@ extension ServerTask {
 					result.data = data.data
 					await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: true)
 				} else {
-					await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: true)
+					await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: false)
 					if self is FileBackedTask { self.fileCachedData = result.data }
 				}
 				
