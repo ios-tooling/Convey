@@ -93,6 +93,13 @@ open class Server: NSObject, ObservableObject {
 
 extension Server: URLSessionDelegate {
 	public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+		if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
+			if let serverTrust = challenge.protectionSpace.serverTrust {
+				let credential = URLCredential(trust: serverTrust)
+				completionHandler(URLSession.AuthChallengeDisposition.useCredential, credential)
+				return
+			}
+		}
 		completionHandler(.useCredential, challenge.proposedCredential)
 	}
 }
