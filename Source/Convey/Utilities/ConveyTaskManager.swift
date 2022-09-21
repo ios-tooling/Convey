@@ -239,7 +239,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	public static let instance = ConveyTaskManager()
 	
 	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async { }
-	func complete(task: ServerTask, request: URLRequest, response: URLResponse, bytes: Data, startedAt: Date) async { }
+	func complete(task: ServerTask, request: URLRequest, response: URLResponse, bytes: Data, startedAt: Date, usingCache: Bool) async { }
 }
 
 #endif
