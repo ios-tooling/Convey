@@ -10,8 +10,8 @@ import Foundation
 class HTTPBinServer: Server {
 	static let instance = HTTPBinServer()
 	
-	override init() {
-		super.init()
+	init() {
+		super.init(asDefault: true)
 		self.remote = Remote(URL("https://httpbin.org/"), name: "HTTPBin", shortName: "HTTPBin")
 	}
 }

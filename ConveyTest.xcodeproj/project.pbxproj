@@ -82,6 +82,8 @@
 		B54CAB8726ECB76400781A3A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B54CAB8626ECB76400781A3A /* Assets.xcassets */; };
 		B54CAB8A26ECB76400781A3A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B54CAB8926ECB76400781A3A /* Preview Assets.xcassets */; };
 		B54CAB9426ECB99F00781A3A /* Suite in Frameworks */ = {isa = PBXBuildFile; productRef = B54CAB9326ECB99F00781A3A /* Suite */; };
+		B5D79AF128DB14B40009B444 /* ETagStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D79AF028DB14B40009B444 /* ETagStore.swift */; };
+		B5D79AF228DB14B40009B444 /* ETagStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D79AF028DB14B40009B444 /* ETagStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -131,6 +133,7 @@
 		B54CAB8926ECB76400781A3A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B54CAB8B26ECB76400781A3A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B54CAB8C26ECB76400781A3A /* ConveyTest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ConveyTest.entitlements; sourceTree = "<group>"; };
+		B5D79AF028DB14B40009B444 /* ETagStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ETagStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -254,6 +257,7 @@
 			children = (
 				B519EB2228B06060002F698C /* ImageSizing.swift */,
 				B519EB2328B06060002F698C /* PlatformImage.swift */,
+				B5D79AF028DB14B40009B444 /* ETagStore.swift */,
 				B529CE252859FA72000DDAEB /* ImageCache.swift */,
 				B529CE262859FA72000DDAEB /* DataCache.swift */,
 			);
@@ -370,7 +374,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1300;
-				LastUpgradeCheck = 1300;
+				LastUpgradeCheck = 1400;
 				TargetAttributes = {
 					B52831D5272EA13F001EC82E = {
 						CreatedOnToolsVersion = 13.0;
@@ -428,6 +432,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5D79AF228DB14B40009B444 /* ETagStore.swift in Sources */,
 				B529CE5E2859FA72000DDAEB /* ImageCache.swift in Sources */,
 				B519EB1F28B0469B002F698C /* ConveyTaskManager.swift in Sources */,
 				B52D9505283A408E002E7945 /* HTTPBin.swift in Sources */,
@@ -478,6 +483,7 @@
 				B519EB2C28B06C8D002F698C /* ServerTask+Extension.swift in Sources */,
 				B519EB2928B060FE002F698C /* URL+Images.swift in Sources */,
 				B529CE572859FA72000DDAEB /* HTTPError.swift in Sources */,
+				B5D79AF128DB14B40009B444 /* ETagStore.swift in Sources */,
 				B529CE332859FA72000DDAEB /* ServerTask+Request.swift in Sources */,
 				B529CE412859FA72000DDAEB /* ServerError.swift in Sources */,
 				B54CAB8526ECB76400781A3A /* ContentView.swift in Sources */,
@@ -609,6 +615,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -670,6 +677,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -699,6 +707,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"ConveyTest/Preview Content\"";
 				DEVELOPMENT_TEAM = YY6CWUX533;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -724,6 +733,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"ConveyTest/Preview Content\"";
 				DEVELOPMENT_TEAM = YY6CWUX533;
 				ENABLE_HARDENED_RUNTIME = YES;
