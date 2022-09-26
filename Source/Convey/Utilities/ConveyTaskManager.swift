@@ -51,10 +51,12 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 			Task {
 				await loadTypes(resetting: true)
 				if CommandLine.bool(for: "conveyShortLog") { shortLog = true }
-				if let echos = CommandLine.string(for: "conveyEchos") {
+				if let echos = CommandLine.string(for: "conveyEcho") ?? CommandLine.string(for: "conveyEchos") {
 					print("Echoing: \(echos)")
 					for type in echos.components(separatedBy: ",") {
-						setShouldEcho(taskType: type)
+						let trimmed = type.trimmingCharacters(in: .whitespacesAndNewlines)
+						if trimmed.isEmpty { continue }
+						setShouldEcho(taskType: trimmed)
 					}
 				}
 			}
@@ -108,6 +110,10 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	
 	public func turnAllOff() {
 		for i in types.indices {
+			if types[i].name == "FetchUserProfile" {
+				print("dddf")
+			}
+
 			if types[i].compiledEcho || types[i].manuallyEcho == true || types[i].thisRunOnlyEcho == true {
 				types[i].manuallyEcho = false
 			} else if !types[i].compiledEcho {
@@ -128,9 +134,17 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 			types[i].dates = []
 			types[i].totalBytes = 0
 			types[i].thisRunBytes = 0
+			types[i].manuallyEcho = nil
 			types[i].clearStoredFiles()
 		}
 		objectWillChange.send()
+	}
+	
+	var canResetAll: Bool {
+		for type in types {
+			if type.manuallyEcho != nil { return true }
+		}
+		return false
 	}
 
 	func saveTypes() {
@@ -216,12 +230,17 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		case .count: types.sort { $0.thisRunCount > $1.thisRunCount }
 		case .size: types.sort { $0.thisRunBytes > $1.thisRunBytes }
 		case .recent: types.sort { ($0.mostRecent ?? .distantPast) > ($1.mostRecent ?? .distantPast) }
+		case .enabled: types.sort {
+			if $0.shouldEcho, !$1.shouldEcho { return true }
+			if $1.shouldEcho, !$0.shouldEcho { return false }
+			return $0.taskName < $1.taskName
+			}
 		}
 	}
 }
 
 extension ConveyTaskManager {
-	enum Sort: String { case alpha, count, size, recent }
+	enum Sort: String { case alpha, count, size, recent, enabled }
 }
 
 extension Array where Element == ConveyTaskManager.TaskType {

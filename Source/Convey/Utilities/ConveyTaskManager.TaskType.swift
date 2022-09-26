@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import SwiftUI
+
 #if canImport(UIKit)
 extension ConveyTaskManager {
 	struct TaskType: Codable, Identifiable {
@@ -22,19 +24,26 @@ extension ConveyTaskManager {
 		var thisRunOnlyEcho = false
 		var compiledEcho = false
 		var mostRecent: Date? { dates.last }
-		var viewID: String { taskName + "\(String(describing: manuallyEcho))" }
+		var viewID: String { taskName + String(describing: manuallyEcho) }
 		
 		var hasStoredResults: Bool {
 			!storedURLs.isEmpty
 		}
 		
 		var shouldEcho: Bool {
-			get { thisRunOnlyEcho || (manuallyEcho ?? compiledEcho) }
+			get {
+				if let manual = manuallyEcho { return manual }
+				return thisRunOnlyEcho || compiledEcho
+			}
 			set {
-				if newValue == compiledEcho {
-					manuallyEcho = nil
-				} else {
-					manuallyEcho = newValue
+				withAnimation {
+					if thisRunOnlyEcho {
+						manuallyEcho = newValue ? nil : false
+					} else if newValue == compiledEcho {
+						manuallyEcho = nil
+					} else {
+						manuallyEcho = newValue
+					}
 				}
 			}
 		}
@@ -68,16 +77,21 @@ extension ConveyTaskManager {
 		}
 		
 		var name: String {
-			for suffix in ["Task", "Request"] {
-				if taskName.hasSuffix(suffix) {
-					return String(taskName.dropLast(suffix.count))
-				}
-			}
-			return taskName
+			taskName.prettyConveyTaskName
 		}
 	}
 }
 
+extension String {
+	var prettyConveyTaskName: String {
+		for suffix in ["Task", "Request"] {
+			if hasSuffix(suffix) {
+				return String(dropLast(suffix.count))
+			}
+		}
+		return self
+	}
+}
 
 fileprivate extension Date {
 	var filename: String {

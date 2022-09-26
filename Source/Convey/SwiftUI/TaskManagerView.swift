@@ -21,6 +21,7 @@ public struct TaskManagerView: View {
 				 Text("Count").tag(ConveyTaskManager.Sort.count)
 				 Text("Size").tag(ConveyTaskManager.Sort.size)
 				 Text("Date").tag(ConveyTaskManager.Sort.recent)
+				 Text("On").tag(ConveyTaskManager.Sort.enabled)
 			 }
 			 .pickerStyle(.segmented)
 			 .padding()
@@ -34,6 +35,7 @@ public struct TaskManagerView: View {
 				 Button("All Off") { manager.turnAllOff() }.padding()
 					 .disabled(manager.areAllOff)
 				 Button("Reset All") { manager.resetAll() }.padding()
+					 .disabled(!manager.canResetAll)
 				 Button("Reset Current") { manager.types.resetTaskTypes() }.padding()
 			 }
 		 }
@@ -46,7 +48,10 @@ public struct TaskManagerView: View {
 		var body: some View {
 			Group {
 				if taskType.hasStoredResults {
-					NavigationLink(destination: TaskResultsListView(taskType: taskType)) { rowContent }
+					ZStack() {
+						NavigationLink(destination: TaskResultsListView(taskType: taskType)) { rowContent }.opacity(0.5)
+						rowContent
+					}
 				} else {
 					rowContent
 				}
@@ -57,11 +62,19 @@ public struct TaskManagerView: View {
 		var rowContent: some View {
 			HStack(spacing: 20) {
 				VStack(spacing: 0) {
-					Toggle("", isOn: $taskType.shouldEcho).labelsHidden()
-					Text("echo")
-						.font(.caption)
+					Button(action: { taskType.shouldEcho.toggle() }) {
+						Text("Echo")
+							.font(.system(size: 12, weight: .bold).smallCaps())
+							.padding(.vertical, 5)
+							.padding(.horizontal, 10)
+							.foregroundColor(taskType.shouldEcho ? .white : .blue)
+							.background(Capsule().fill(taskType.shouldEcho ? .blue : .white))
+							.overlay(Capsule().stroke(.blue))
+					}
+					.buttonStyle(.plain)
 				}
-				.opacity(taskType.manuallyEcho != nil ? 1 : 0.5)
+				.opacity((taskType.manuallyEcho != nil || taskType.thisRunOnlyEcho) ? 1 : 0.5)
+				.id(taskType.viewID)
 
 				VStack(alignment: .leading) {
 					Text(taskType.name)
