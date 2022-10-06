@@ -11,6 +11,7 @@ struct ServerConstants {
 	struct Headers {
 		static let contentType = "Content-Type"
 		static let accept = "Accept"
+		static let acceptEncoding = "Accept-Encoding"
 		static let tag = "X-Convey-RequestTag"
 		static let userAgent = "User-Agent"
 	}

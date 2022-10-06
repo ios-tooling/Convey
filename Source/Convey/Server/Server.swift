@@ -21,6 +21,7 @@ open class Server: NSObject, ObservableObject {
 	open var logDirectory: URL?
 	open var reportBadHTTPStatusAsError = true
 	open var configuration = URLSessionConfiguration.default
+	open var enableGZip = false
 	public var userAgent: String? { didSet {
 		updateUserAgentHeader()
 		print("User agent set to: \(userAgent ?? "--")")
@@ -75,7 +76,11 @@ open class Server: NSObject, ObservableObject {
 	}
 	
 	open func standardHeaders(for task: ServerTask) -> [String: String] {
-		defaultHeaders
+		var headers = defaultHeaders
+		if enableGZip {
+			headers[ServerConstants.Headers.acceptEncoding] = "gzip, deflate"
+		}
+		return headers
 	}
 	
 	open func url(forTask task: ServerTask) -> URL {
