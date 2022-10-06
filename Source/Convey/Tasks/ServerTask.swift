@@ -53,11 +53,9 @@ public protocol DataUploadingTask: ServerTask {
 	var dataToUpload: Data? { get }
 }
 
-public protocol ETagCachedTask: ServerGETTask {
-	
-}
-
+public protocol ETagCachedTask: ServerGETTask { }
 public protocol JSONPayloadTask: ServerTask { }
+public protocol GZipEncodedUploadingTask: DataUploadingTask { }
 
 public protocol JSONUploadingTask: DataUploadingTask, JSONPayloadTask {
 	var jsonToUpload: [String: Any]? { get }

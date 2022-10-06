@@ -18,7 +18,14 @@ public extension ServerTask {
 		request.cachePolicy = .reloadIgnoringLocalCacheData
 		if let dataProvider = self as? DataUploadingTask {
 			if request.httpMethod == "GET" { request.httpMethod = "POST" }
-			request.httpBody = dataProvider.dataToUpload
+			if var data = dataProvider.dataToUpload {
+				if self is GZipEncodedUploadingTask {
+					//let encodedString = data?.base64EncodedString()
+					let compressed = try? NSData(data: data).compressed(using: .zlib) as Data
+					data = compressed ?? data
+				}
+				request.httpBody = data
+			}
 			if request.allHTTPHeaderFields?[ServerConstants.Headers.contentType] == nil {
 				if self is JSONPayloadTask {
 					request.addValue("application/json", forHTTPHeaderField: ServerConstants.Headers.contentType)
