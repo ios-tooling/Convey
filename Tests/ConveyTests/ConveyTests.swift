@@ -8,13 +8,13 @@ final class ConveyTests: XCTestCase {
 		Server.setupDefault()
 	}
     func testGET() async throws {
-		 let data: Data = try await SimpleGETTask(url: URL(string: "https://apple.com")!).send()
-		 XCTAssert(data.isNotEmpty, "Failed to GET data")
+		 let data: Data = try await SimpleGETTask(url: URL(string: "https://apple.com")!).downloadData()
+		 XCTAssert(!data.isEmpty, "Failed to GET data")
     }
 	
 	func testPOST() async throws {
 		let payload = "Hello, Test!"
-		let data: Data = try await SimplePOSTTask(url: URL(string: "https://reqbin.com/echo/post/json")!, payload: payload).send()
+		let data: Data = try await SimplePOSTTask(url: URL(string: "https://reqbin.com/echo/post/json")!, payload: payload).uploadAndDownload()
 		let result = try JSONDecoder().decode(SimpleResponse.self, from: data)
 		XCTAssert(result.success == "true", "Failed to POST data")
 	}

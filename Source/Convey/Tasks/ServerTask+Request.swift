@@ -13,21 +13,25 @@ public extension ServerTask {
 	
 	func defaultRequest() -> URLRequest {
 		var request = URLRequest(url: url)
+		var isGzipped = self is GZipEncodedUploadingTask
 		
 		request.httpMethod = httpMethod
 		request.cachePolicy = .reloadIgnoringLocalCacheData
 		if let dataProvider = self as? DataUploadingTask {
 			if request.httpMethod == "GET" { request.httpMethod = "POST" }
 			if var data = dataProvider.dataToUpload {
-				if self is GZipEncodedUploadingTask {
-					//let encodedString = data?.base64EncodedString()
-					let compressed = try? NSData(data: data).compressed(using: .zlib) as Data
-					data = compressed ?? data
+				if isGzipped {
+					do {
+						data = try data.gzipped()
+					} catch {
+						print("Failed to gzip upload data: \(error)")
+						isGzipped = false
+					}
 				}
 				request.httpBody = data
 			}
 			if request.allHTTPHeaderFields?[ServerConstants.Headers.contentType] == nil {
-				if self is GZipEncodedUploadingTask {
+				if isGzipped {
 					request.addValue("gzip", forHTTPHeaderField: ServerConstants.Headers.contentEncoding)
 					request.addValue("application/gzip", forHTTPHeaderField: ServerConstants.Headers.contentType)
 				} else if self is JSONPayloadTask {
