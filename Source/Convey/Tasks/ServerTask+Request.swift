@@ -33,8 +33,9 @@ public extension ServerTask {
 			if request.allHTTPHeaderFields?[ServerConstants.Headers.contentType] == nil {
 				if isGzipped {
 					request.addValue("gzip", forHTTPHeaderField: ServerConstants.Headers.contentEncoding)
-					request.addValue("application/gzip", forHTTPHeaderField: ServerConstants.Headers.contentType)
-				} else if self is JSONPayloadTask {
+				}
+				
+				if self is JSONPayloadTask {
 					request.addValue("application/json", forHTTPHeaderField: ServerConstants.Headers.contentType)
 				} else {
 					request.addValue("text/plain", forHTTPHeaderField: ServerConstants.Headers.contentType)
