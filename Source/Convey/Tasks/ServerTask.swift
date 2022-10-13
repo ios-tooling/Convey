@@ -29,10 +29,6 @@ public protocol ParameterizedTask: ServerTask {
 	var parameters: TaskURLParameters? { get }
 }
 
-//public protocol QueryItemsTask: ServerTask {
-//	var queryItems: [URLQueryItem]? { get }
-//}
-
 public protocol FileBackedTask: ServerTask {
 	var fileURL: URL? { get }
 }
@@ -45,12 +41,17 @@ public protocol TaggedTask: ServerTask {
 	var requestTag: String { get }
 }
 
-public protocol CustomAsyncURLRequestTask: ServerTask {
+public protocol CustomURLRequestTask: ServerTask {
     var customURLRequest: URLRequest { get async throws }
 }
 
 public protocol DataUploadingTask: ServerTask {
 	var dataToUpload: Data? { get }
+}
+
+public protocol MIMEUploadingTask: DataUploadingTask {
+	var mimeBoundary: String { get }
+	var mimeFields: [MIMEMessageComponent]? { get }
 }
 
 public protocol ETagCachedTask: ServerGETTask { }

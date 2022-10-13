@@ -8,7 +8,20 @@
 import Foundation
 import Combine
 
-public struct SimplePOSTTask: ServerPOSTTask, CustomAsyncURLRequestTask, DataUploadingTask {
+public struct SimpleMIMETask: ServerPOSTTask, MIMEUploadingTask {
+	public var path = ""
+	public let url: URL
+	public let mimeFields: [MIMEMessageComponent]?
+	public let mimeBoundary: String
+	
+	public init(url: URL, components: [MIMEMessageComponent], boundary: String = .sampleMIMEBoundary) {
+		self.url = url
+		self.mimeFields = components
+		self.mimeBoundary = boundary
+	}
+}
+
+public struct SimplePOSTTask: ServerPOSTTask, CustomURLRequestTask, DataUploadingTask {
 	public var path = ""
 	
 	let payloadString: String
@@ -28,7 +41,7 @@ public struct SimplePOSTTask: ServerPOSTTask, CustomAsyncURLRequestTask, DataUpl
 	}
 }
 
-public struct SimpleGETTask: ServerGETTask, CustomAsyncURLRequestTask {
+public struct SimpleGETTask: ServerGETTask, CustomURLRequestTask {
 	public var path = ""
 	
 	public var url: URL

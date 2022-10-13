@@ -46,6 +46,9 @@ public extension ServerTask {
 		if let tagged = self as? TaggedTask {
 			request.addValue(tagged.requestTag, forHTTPHeaderField: ServerConstants.Headers.tag)
 		}
+		if let mime = self as? MIMEUploadingTask {
+			request.addValue("multipart/form-data; boundary=" + mime.mimeBoundary, forHTTPHeaderField: ServerConstants.Headers.contentEncoding)
+		}
 		
 		if let additionalHeaders = (self as? CustomHTTPHeaders)?.customHTTPHeaders {
 			for (value, header) in additionalHeaders {
@@ -54,7 +57,7 @@ public extension ServerTask {
 		}
 		
 		if self is ETagCachedTask, let etag = cachedEtag, DataCache.instance.hasCachedValue(for: url) {
-			request.addValue(etag, forHTTPHeaderField: "If-None-Match")
+			request.addValue(etag, forHTTPHeaderField: ServerConstants.Headers.ifNoneMatch)
 		}
 		
 		return request

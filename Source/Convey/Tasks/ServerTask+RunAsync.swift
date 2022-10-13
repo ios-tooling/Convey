@@ -59,7 +59,7 @@ public extension ServerTask {
 	}
 
 	func buildRequest() async throws -> URLRequest {
-		if let custom = self as? CustomAsyncURLRequestTask {
+		if let custom = self as? CustomURLRequestTask {
 			return try await custom.customURLRequest
 		}
 

@@ -15,5 +15,6 @@ struct ServerConstants {
 		static let acceptEncoding = "Accept-Encoding"
 		static let tag = "X-Convey-RequestTag"
 		static let userAgent = "User-Agent"
+		static let ifNoneMatch = "If-None-Match"
 	}
 }

@@ -12,6 +12,14 @@
 
 	extension NSImage {
 		var data: Data? { nil }
+		
+		func jpegData(compressionQuality: Double) -> Data? {
+			nil
+		}
+		
+		init(named: String) {
+			
+		}
 	}
 #else
 	import UIKit
