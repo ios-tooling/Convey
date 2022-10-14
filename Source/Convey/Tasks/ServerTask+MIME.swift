@@ -34,6 +34,7 @@ extension MIMEUploadingTask {
 	//	let contentType = "application/json;charset=utf-8"
 		
 		var data = Data()
+		data.append("Content-Type: multipart/form-data; boundary=\(boundary)" + lineBreak + lineBreak)
 		data.append(mimeBoundary + lineBreak)
 		
 		zip(fields, fields.indices).forEach { field, index in
