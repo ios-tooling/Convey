@@ -52,6 +52,7 @@ public protocol DataUploadingTask: ServerTask {
 public protocol MIMEUploadingTask: DataUploadingTask {
 	var mimeBoundary: String { get }
 	var mimeFields: [MIMEMessageComponent]? { get }
+	var base64EncodeBody: Bool { get }
 }
 
 public protocol ETagCachedTask: ServerGETTask { }

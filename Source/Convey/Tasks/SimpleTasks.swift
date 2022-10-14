@@ -11,6 +11,7 @@ import Combine
 public struct SimpleMIMETask: ServerPOSTTask, MIMEUploadingTask {
 	public var path = ""
 	public let url: URL
+	public let base64EncodeBody = true
 	public let mimeFields: [MIMEMessageComponent]?
 	public let mimeBoundary: String
 	

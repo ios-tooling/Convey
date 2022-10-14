@@ -26,7 +26,7 @@ fileprivate extension Data {
 fileprivate let lineBreak = "\r\n"
 
 extension MIMEUploadingTask {
-	public var dataToUpload: Data? { mimeData(base64Encoded: false) }
+	public var dataToUpload: Data? { mimeData(base64Encoded: base64EncodeBody) }
 	
 	public func mimeData(base64Encoded: Bool) -> Data? {
 		guard let fields = mimeFields else { return nil }
