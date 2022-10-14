@@ -28,6 +28,7 @@ public struct SimplePOSTTask: ServerPOSTTask, CustomURLRequestTask, DataUploadin
 	let payloadString: String
 	public let url: URL
 	public var dataToUpload: Data? { payloadString.data(using: .utf8) }
+	public var contentType: String? { "text/plain" }
 	
 	public var customURLRequest: URLRequest {
 		var request = URLRequest(url: url)

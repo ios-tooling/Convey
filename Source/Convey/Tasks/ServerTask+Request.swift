@@ -31,23 +31,17 @@ public extension ServerTask {
 				request.httpBody = data
 			}
 			if request.allHTTPHeaderFields?[ServerConstants.Headers.contentType] == nil {
+				if let type = dataProvider.contentType {
+					request.addValue(type, forHTTPHeaderField: ServerConstants.Headers.contentType)
+				}
 				if isGzipped {
 					request.addValue("gzip", forHTTPHeaderField: ServerConstants.Headers.contentEncoding)
-				}
-				
-				if self is JSONPayloadTask {
-					request.addValue("application/json", forHTTPHeaderField: ServerConstants.Headers.contentType)
-				} else {
-					request.addValue("text/plain", forHTTPHeaderField: ServerConstants.Headers.contentType)
 				}
 			}
 		}
 		request.allHTTPHeaderFields = server.standardHeaders(for: self)
 		if let tagged = self as? TaggedTask {
 			request.addValue(tagged.requestTag, forHTTPHeaderField: ServerConstants.Headers.tag)
-		}
-		if let mime = self as? MIMEUploadingTask {
-			request.addValue("multipart/form-data; boundary=" + mime.mimeBoundary, forHTTPHeaderField: ServerConstants.Headers.contentEncoding)
 		}
 		
 		if let additionalHeaders = (self as? CustomHTTPHeaders)?.customHTTPHeaders {

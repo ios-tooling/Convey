@@ -51,6 +51,7 @@ public extension PayloadDownloadingTask {
 }
 
 public extension JSONUploadingTask {
+	var contentType: String? { "application/json" }
 	var dataToUpload: Data? {
 		do {
 			guard let json = jsonToUpload else { return nil }
@@ -63,6 +64,7 @@ public extension JSONUploadingTask {
 }
 
 public extension PayloadUploadingTask {
+	var contentType: String? { "application/json" }
 	var dataToUpload: Data? {
 		guard let payload = uploadPayload else { return nil }
 		let encoder = (self as? CustomJSONEncoderTask)?.jsonEncoder ?? server.defaultEncoder

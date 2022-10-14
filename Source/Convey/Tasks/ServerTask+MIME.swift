@@ -27,14 +27,15 @@ fileprivate let lineBreak = "\r\n"
 
 extension MIMEUploadingTask {
 	public var dataToUpload: Data? { mimeData(base64Encoded: base64EncodeBody) }
-	
+	public var contentType: String? { "multipart/form-data;boundary=" + mimeBoundary }
+
 	public func mimeData(base64Encoded: Bool) -> Data? {
 		guard let fields = mimeFields else { return nil }
 		let boundary = mimeBoundary
 	//	let contentType = "application/json;charset=utf-8"
 		
 		var data = Data()
-		data.append("Content-Type: multipart/form-data; boundary=\(boundary)" + lineBreak + lineBreak)
+		data.append("Content-Type: multipart/form-data;boundary=\(boundary)" + lineBreak + lineBreak)
 		data.append(mimeBoundary + lineBreak)
 		
 		zip(fields, fields.indices).forEach { field, index in

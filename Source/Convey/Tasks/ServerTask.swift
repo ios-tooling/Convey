@@ -47,6 +47,7 @@ public protocol CustomURLRequestTask: ServerTask {
 
 public protocol DataUploadingTask: ServerTask {
 	var dataToUpload: Data? { get }
+	var contentType: String? { get }
 }
 
 public protocol MIMEUploadingTask: DataUploadingTask {
