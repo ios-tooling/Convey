@@ -8,7 +8,7 @@
 import Foundation
 
 public extension String {
-	static var sampleMIMEBoundary: String { "----------" + UUID().uuidString }
+	static var sampleMIMEBoundary: String { UUID().uuidString }
 }
 
 fileprivate extension String {
@@ -31,12 +31,12 @@ extension MIMEUploadingTask {
 
 	public func mimeData(base64Encoded: Bool) -> Data? {
 		guard let fields = mimeFields else { return nil }
-		let boundary = mimeBoundary
+		let boundary = "--" + mimeBoundary
 	//	let contentType = "application/json;charset=utf-8"
 		
 		var data = Data()
-		data.append("Content-Type: multipart/form-data;boundary=\(boundary)" + lineBreak + lineBreak)
-		data.append(mimeBoundary + lineBreak)
+		data.append("Content-Type: multipart/form-data;boundary=\(mimeBoundary)" + lineBreak + lineBreak)
+		data.append(boundary + lineBreak)
 		
 		zip(fields, fields.indices).forEach { field, index in
 			var text = ""
@@ -46,8 +46,10 @@ extension MIMEUploadingTask {
 			data.append(text)
 			
 			if !base64Encoded, let fieldData = field.dataContent {
+				data.append("Content-Transfer-Encoding: binary\(lineBreak)\(lineBreak)")
 				data.append(fieldData)
 			}
+			data.append(lineBreak)
 			if index != fields.indices.last { data.append(boundary + lineBreak) }
 		}
 		
@@ -66,14 +68,14 @@ public enum MIMEMessageComponent {
 		var result = ""
 		
 		result.append("Content-Disposition: \(disposition)\(lineBreak)")
-		result.append("Content-Type: \(contentType)\(lineBreak)\(lineBreak)")
+		result.append("Content-Type: \(contentType)\(lineBreak)")
 		if let text = textContent {
+			result.append(lineBreak)
 			result.append(text)
-			result.append(lineBreak)
 		} else if base64Encoded, let encodedData = dataContent?.base64EncodedString() {
-			result.append("Content-Transfer-Encoding: base64\(lineBreak)\(lineBreak)")
-			result.append(encodedData)
+			result.append("Content-Transfer-Encoding: base64\(lineBreak)")
 			result.append(lineBreak)
+			result.append(encodedData)
 		}
 		return result
 	}

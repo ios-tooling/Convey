@@ -33,8 +33,8 @@ final class MIMETests: XCTestCase {
 
 		 let task = SimpleMIMETask(url: URL(string: "http://test.com")!, components: components)
 		 
-		 let data = task.mimeData(base64Encoded: true)!
-		 let text = String(data: data, encoding: .utf8)!
+		 let data = task.mimeData(base64Encoded: false)!
+		 let text = String(data: data, encoding: .ascii)!
 		 print(text)
     }
 
