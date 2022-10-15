@@ -13,6 +13,7 @@ public extension URL {
 		case "txt", "text": return "application/text"
 		case "rtf": return "application/rtf"
 		case "jpg", "jpeg": return "image/jpeg"
+		case "md": return "public.plain-text"
 		case "png": return "image/png"
 		case "gif": return "image/gif"
 		case "pdf": return "application/pdf"
