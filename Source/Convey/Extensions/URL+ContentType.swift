@@ -10,8 +10,8 @@ import Foundation
 public extension URL {
 	var mimeContentType: String {
 		switch pathExtension.lowercased() {
-		case "txt", "text": return "application/text"
-		case "rtf": return "application/rtf"
+		case "txt", "text": return "text/plain"
+		case "rtf": return "text/rtf"
 		case "jpg", "jpeg": return "image/jpeg"
 		case "md": return "public.plain-text"
 		case "png": return "image/png"

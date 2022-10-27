@@ -27,7 +27,7 @@ open class Server: NSObject, ObservableObject {
 		print("User agent set to: \(userAgent ?? "--")")
 	}}
 	open var maxLoggedDataSize = 1024 * 1024 * 10
-	open var maxLoggedUploadSize = 1024 * 2
+	open var maxLoggedUploadSize = 1024 * 4
 	open var launchedAt = Date()
 	open var echoAll = false
 	private var defaultHeaders: [String: String] = [
