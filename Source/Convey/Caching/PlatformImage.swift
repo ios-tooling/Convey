@@ -16,10 +16,6 @@
 		func jpegData(compressionQuality: Double) -> Data? {
 			nil
 		}
-		
-		init(named: String) {
-			
-		}
 	}
 #else
 	import UIKit
