@@ -5,7 +5,7 @@ import XCTest
 @available(macOS 12.1, *)
 final class ConveyTests: XCTestCase {
 	class override func setUp() {
-		Server.setupDefault()
+		_ = Server.setupDefault()
 	}
     func testGET() async throws {
 		 let data: Data = try await SimpleGETTask(url: URL(string: "https://apple.com")!).downloadData()
