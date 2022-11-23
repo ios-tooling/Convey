@@ -7,9 +7,6 @@
 
 import Foundation
 
-#if canImport(UIKit)
-import UIKit
-
 public extension ServerTask {
 	static var shouldEcho: Bool {
 		get { ConveyTaskManager.instance.shouldEcho(self) }
@@ -252,14 +249,3 @@ extension Array where Element == ConveyTaskManager.TaskType {
 		}
 	}
 }
-
-#else
-public class ConveyTaskManager: NSObject, ObservableObject {
-	public static let instance = ConveyTaskManager()
-	
-	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async { }
-	func complete(task: ServerTask, request: URLRequest, response: URLResponse, bytes: Data, startedAt: Date, usingCache: Bool) async { }
-}
-
-#endif
-

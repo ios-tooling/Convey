@@ -8,7 +8,6 @@
 import Foundation
 import SwiftUI
 
-#if canImport(UIKit)
 extension ConveyTaskManager {
 	struct TaskType: Codable, Identifiable {
 		enum CodingKeys: String, CodingKey { case taskName, totalCount, dates, totalBytes, thisRunBytes, manuallyEcho, compiledEcho }
@@ -101,4 +100,3 @@ fileprivate extension Date {
 		return text
 	}
 }
-#endif
