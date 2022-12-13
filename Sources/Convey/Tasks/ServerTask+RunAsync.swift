@@ -82,7 +82,7 @@ extension ServerTask {
         }
 	}
 
-	func requestData(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) async throws -> RawDownloadResult {
+	public func requestData(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) async throws -> RawDownloadResult {
 		if caching == .localOnly, self is ServerCacheableTask {
 			if let data = cachedData {
 				return RawDownloadResult(response: HTTPURLResponse(cachedFor: url, data: data), data: data, fromCache: true)
