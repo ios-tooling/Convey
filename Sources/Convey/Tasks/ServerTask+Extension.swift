@@ -8,7 +8,7 @@
 import Foundation
 
 public extension ServerTask {
-	var server: Server { Server.serverInstance ?? Server.setupDefault() }
+	var server: Server { (self as? CustomServerTask)?.customServer ?? Server.serverInstance ?? Server.setupDefault() }
 
 	func postprocess(data: Data, response: HTTPURLResponse) { }
 

@@ -37,6 +37,10 @@ public protocol CustomURLTask: ServerTask {
 	var customURL: URL? { get }
 }
 
+public protocol CustomServerTask: ServerTask {
+	var customServer: Server? { get }
+}
+
 public protocol TaggedTask: ServerTask {
 	var requestTag: String { get }
 }
