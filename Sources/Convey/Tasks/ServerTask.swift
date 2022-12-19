@@ -8,11 +8,11 @@
 import Combine
 import Foundation
 
-public typealias PreviewClosure = (Data, HTTPURLResponse) -> Void
+public typealias PreviewClosure = (ServerReturned) -> Void
 
 public protocol ServerTask {
 	var path: String { get }
-	func postprocess(data: Data, response: HTTPURLResponse)
+	func postprocess(response: ServerReturned)
 	var httpMethod: String { get }
 	var server: Server { get }
 	var url: URL { get }

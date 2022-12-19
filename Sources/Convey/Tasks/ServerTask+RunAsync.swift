@@ -9,23 +9,13 @@ import Foundation
 import Combine
 
 public struct DownloadResult<Payload> {
-	public init(payload: Payload, response: HTTPURLResponse, data: Data?, fromCache: Bool) {
+	public init(payload: Payload, response: ServerReturned) {
 		self.payload = payload
 		self.response = response
-		self.data = data
-		self.fromCache = fromCache
 	}
 	
 	public let payload: Payload
-	public let response: HTTPURLResponse
-	public let data: Data?
-	public let fromCache: Bool
-}
-
-public struct RawDownloadResult {
-	public let response: HTTPURLResponse
-	public let data: Data
-	public let fromCache: Bool
+	public let response: ServerReturned
 }
 
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
@@ -54,16 +44,8 @@ public extension ServerTask {
 		try await downloadDataWithResponse(caching: caching, preview: preview).data
 	}
 
-	func downloadDataWithResponse(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) async throws -> RawDownloadResult {
+	func downloadDataWithResponse(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) async throws -> ServerReturned {
 		try await requestData(caching: caching, preview: preview)
-	}
-
-	func buildRequest() async throws -> URLRequest {
-		if let custom = self as? CustomURLRequestTask {
-			return try await custom.customURLRequest
-		}
-
-		return defaultRequest()
 	}
 }
 
@@ -75,17 +57,17 @@ extension ServerTask {
 		let actualDecoder = decoder ?? server.defaultDecoder
         do {
             let decoded = try actualDecoder.decode(Payload.self, from: result.data)
-            return DownloadResult(payload: decoded, response: result.response, data: result.data, fromCache: false)
+            return DownloadResult(payload: decoded, response: result)
         } catch {
 			  print("Error when decoding \(Payload.self) in \(self), \(String(data: result.data, encoding: .utf8) ?? "--unparseable--"): \(error)")
             throw error
         }
 	}
 
-	public func requestData(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) async throws -> RawDownloadResult {
+	public func requestData(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) async throws -> ServerReturned {
 		if caching == .localOnly, self is ServerCacheableTask {
 			if let data = cachedData {
-				return RawDownloadResult(response: HTTPURLResponse(cachedFor: url, data: data), data: data, fromCache: true)
+				return ServerReturned(response: HTTPURLResponse(cachedFor: url, data: data), data: data, fromCache: true)
 			}
 			throw HTTPError.offline
 		}
@@ -97,13 +79,13 @@ extension ServerTask {
 				return try await requestData(caching: .skipLocal, preview: preview)
 			}
 			if error.isOffline, self is FileBackedTask, let data = fileCachedData {
-				return RawDownloadResult(response: HTTPURLResponse(cachedFor: url, data: data), data: data, fromCache: true)
+				return ServerReturned(response: HTTPURLResponse(cachedFor: url, data: data), data: data, fromCache: true)
 			}
 			throw error
 		}
 	}
 	
-	func sendRequest(preview: PreviewClosure? = nil) async throws -> RawDownloadResult {
+	func sendRequest(preview: PreviewClosure? = nil) async throws -> ServerReturned {
 		var attemptCount = 1
 		
 		while true {
@@ -118,7 +100,7 @@ extension ServerTask {
 				await ConveyTaskManager.instance.begin(task: self, request: request, startedAt: startedAt)
 
 				var result = try await server.data(for: request)
-				if result.response.statusCode == 304, let data = DataCache.instance.fetchLocal(for: url), !data.data.isEmpty {
+				if result.statusCode == 304, let data = DataCache.instance.fetchLocal(for: url), !data.data.isEmpty {
 					result.data = data.data
 					await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: true)
 				} else {
@@ -131,18 +113,18 @@ extension ServerTask {
 					ETagStore.instance.store(etag: tag, for: url)
 				}
 				//postLog(startedAt: startedAt, request: request, data: result.data, response: result.response)
-				preview?(result.data, result.response)
-				postprocess(data: result.data, response: result.response)
+				preview?(result)
+				postprocess(response: result)
 				if !result.response.didDownloadSuccessfully {
-					server.reportConnectionError(self, result.response.statusCode, String(data: result.data, encoding: .utf8))
-					if result.data.isEmpty || (result.response.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
-						 throw HTTPError.serverError(request.url, result.response.statusCode, result.data)
+					server.reportConnectionError(self, result.statusCode, String(data: result.data, encoding: .utf8))
+					if result.data.isEmpty || (result.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
+						 throw HTTPError.serverError(request.url, result.statusCode, result.data)
 					}
 			  }
 				
 				try await (self as? PostFlightTask)?.postFlight()
 				if let threadName = (self as? ThreadedServerTask)?.threadName { await server.stopWaiting(forThread: threadName) }
-				return RawDownloadResult(response: result.response, data: result.data, fromCache: false)
+				return result
 			} catch {
 				if let threadName = (self as? ThreadedServerTask)?.threadName { await server.stopWaiting(forThread: threadName) }
 

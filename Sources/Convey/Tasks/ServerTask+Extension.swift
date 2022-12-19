@@ -10,7 +10,7 @@ import Foundation
 public extension ServerTask {
 	var server: Server { (self as? CustomServerTask)?.customServer ?? Server.serverInstance ?? Server.setupDefault() }
 
-	func postprocess(data: Data, response: HTTPURLResponse) { }
+	func postprocess(response: ServerReturned) { }
 
 	var url: URL {
 		let nonParameterized = (self as? CustomURLTask)?.customURL ?? server.url(forTask: self)

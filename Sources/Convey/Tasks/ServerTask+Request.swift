@@ -11,6 +11,20 @@ import Combine
 public extension ServerTask {
 	var cachedEtag: String? { ETagStore.instance.eTag(for: url) }
 	
+	func buildRequest() async throws -> URLRequest {
+		if let rerunnable = self as? RerunnableServerTask,
+			let previous = rerunnable.previousResult,
+			let newRequest = rerunnable.rerunnableRequest(from: previous) {
+			throw ServerError.endOfRepetition
+		}
+
+		if let custom = self as? CustomURLRequestTask {
+			return try await custom.customURLRequest
+		}
+
+		return defaultRequest()
+	}
+
 	func defaultRequest() -> URLRequest {
 		var request = URLRequest(url: url)
 		var isGzipped = self is GZipEncodedUploadingTask
