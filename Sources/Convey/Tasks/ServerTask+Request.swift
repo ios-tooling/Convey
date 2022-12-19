@@ -12,9 +12,8 @@ public extension ServerTask {
 	var cachedEtag: String? { ETagStore.instance.eTag(for: url) }
 	
 	func buildRequest() async throws -> URLRequest {
-		if let rerunnable = self as? RerunnableServerTask,
-			let previous = rerunnable.previousResult,
-			let newRequest = rerunnable.rerunnableRequest(from: previous) {
+		if let rerunnable = self as? RerunnableServerTask, let previous = rerunnable.previousResult {
+			if let newRequest = rerunnable.rerunnableRequest(from: previous) { return newRequest }
 			throw ServerError.endOfRepetition
 		}
 
