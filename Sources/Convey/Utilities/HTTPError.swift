@@ -14,6 +14,7 @@ extension Optional where Wrapped == URL {
 }
 
 public enum HTTPError: Error, LocalizedError {
+	case malformedURL(String)
    case nonHTTPResponse(URL?, Data)
    case offline
    case other(Error?)
@@ -51,6 +52,7 @@ public enum HTTPError: Error, LocalizedError {
    
    public var data: Data? {
       switch self {
+		case .malformedURL: return nil
       case .nonHTTPResponse(_, let data): return data
       case .requestFailed(_, _, let data): return data
       case .message: return nil
@@ -67,6 +69,7 @@ public enum HTTPError: Error, LocalizedError {
    
    public var errorDescription: String? {
       switch self {
+		case .malformedURL(let raw): return "Malformed URL (\(raw))"
       case .nonHTTPResponse(let url, let data): return "Non HTTP Response: \(url.absoluteString(replacement: nil)): \(String(data: data, encoding: .utf8) ?? "--")"
       case .offline: return "The connection appears to be offline"
       case .requestFailed(_, let code, let data): return prettyString("Request failed", nil, code, data)
@@ -83,6 +86,7 @@ public enum HTTPError: Error, LocalizedError {
    
    public var failureReason: String? {
       switch self {
+		case .malformedURL(let raw): return "Malformed URL (\(raw))"
       case .nonHTTPResponse(let url, let data): return "Non HTTP Response: \(url.absoluteString()): \(String(data: data, encoding: .utf8) ?? "--")"
       case .offline: return "The connection appears to be offline"
       case .message(let msg): return msg
@@ -107,6 +111,7 @@ public enum HTTPError: Error, LocalizedError {
    
    public var isRetriable: Bool {
       switch self {
+		case .malformedURL: return false
       case .other: return false
       case .offline: return false
       case .redirectError: return false
