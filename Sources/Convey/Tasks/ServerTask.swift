@@ -49,6 +49,10 @@ public protocol CustomURLRequestTask: ServerTask {
     var customURLRequest: URLRequest { get async throws }
 }
 
+public protocol RefreshableCachedTask: ServerTask {
+	
+}
+
 public protocol DataUploadingTask: ServerTask {
 	var dataToUpload: Data? { get }
 	var contentType: String? { get }
