@@ -20,7 +20,13 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	public var directory = URL.systemDirectoryURL(which: .cachesDirectory)!.appendingPathComponent("convey_tasks")
 	public var multitargetLogging = false
 	public var storeResults = true
-	public var shortLog = false
+	public var logStyle = LogStyle.none
+	
+	public enum LogStyle: String, Comparable, CaseIterable { case none, short, steps
+		public static func <(lhs: Self, rhs: Self) -> Bool {
+			Self.allCases.firstIndex(of: lhs)! < Self.allCases.firstIndex(of: rhs)!
+		}
+	}
 
 	let typesFilename = "convey_task_types.txt"
 	var types: [TaskType] = [] {
@@ -47,7 +53,9 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		if enabled {
 			Task {
 				await loadTypes(resetting: true)
-				if CommandLine.bool(for: "conveyShortLog") { shortLog = true }
+				if CommandLine.bool(for: "conveyShortLog") { logStyle = .short }
+				if let raw = CommandLine.string(for: "conveyLogStyle") { logStyle = LogStyle(rawValue: raw) ?? .none }
+
 				if let echos = CommandLine.string(for: "conveyEcho") ?? CommandLine.string(for: "conveyEchos") {
 					print("Echoing: \(echos)")
 					for type in echos.components(separatedBy: ",") {
@@ -175,7 +183,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	func index(of task: ServerTask) -> Int? { index(of: type(of: task) ) }
 
 	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async {
-		if shortLog { print("☎️ \(task)")}
+		if logStyle > .none { print("☎️ Begin \(task)")}
 		if !enabled { return }
 		if multitargetLogging { await loadTypes(resetting: false) }
 		queue.async {
@@ -201,6 +209,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	
 	func complete(task: ServerTask, request: URLRequest, response: HTTPURLResponse, bytes: Data, startedAt: Date, usingCache: Bool) async {
 		if multitargetLogging { await loadTypes(resetting: false) }
+		if logStyle > .short { print("☎︎ End \(task)")}
 		queue.async {
 			if let index = self.index(of: task) {
 				self.types[index].thisRunBytes += Int64(bytes.count)
