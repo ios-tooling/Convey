@@ -37,26 +37,78 @@ extension CGSize {
 }
 
 public struct ImageSize {
-	public let size: CGSize
-	public let tolerance: Double
+	public let width: CGFloat?
+	public let height: CGFloat?
+	public let tolerance: CGFloat
 	public let isMaxSize: Bool
+	
+	public func size(basedOn: CGSize) -> CGSize? {
+		if let width, let height { return CGSize(width: width, height: height) }
+		if let width {
+			return CGSize(width: width, height: width / (basedOn.width / basedOn.height))
+		}
+
+		if let height {
+			return CGSize(width: height * (basedOn.width / basedOn.height), height: height)
+		}
+		return nil
+	}
+	
+	public init(size: CGSize, tolerance: CGFloat = 1.0, isMaxSize: Bool = true) {
+		self.width = size.width
+		self.height = size.height
+		self.isMaxSize = isMaxSize
+		self.tolerance = tolerance
+	}
+	
+	public init(width: CGFloat? = nil, height: CGFloat? = nil, tolerance: CGFloat = 1.0, isMaxSize: Bool = true) {
+		self.width = width
+		self.height = height
+		self.isMaxSize = isMaxSize
+		self.tolerance = tolerance
+	}
+	
+	#if os(iOS)
+		public static var screen: ImageSize {
+			ImageSize(size: UIScreen.main.bounds.size, tolerance: 1, isMaxSize: true)
+		}
+	#endif
+	
 	public var suffix: String {
 		if tolerance == 0 {
-			return "_(\(Int(size.width))x\(Int(size.height)))"
+			return "_(\(Int(width ?? 0))x\(Int(height ?? 0)))"
 		}
-		return "_(\(Int(size.width))x\(Int(size.height)))±\(Int(tolerance))"
+		return "_(\(Int(width ?? 0))x\(Int(height ?? 0)))±\(Int(tolerance))"
 	}
 	
 	func matches(size check: CGSize) -> Bool {
 		if isMaxSize {
-			return check.width <= (size.width + tolerance) && check.height <= (size.height + tolerance)
+			if let width, width > check.width + tolerance { return false }
+			if let height, height > check.height + tolerance { return false }
+			return true
 		}
-		return check.width >= (size.width - tolerance) && check.width <= (size.width + tolerance) &&
-			check.height >= (size.height - tolerance) && check.height <= (size.height + tolerance)
+		
+		if let width, width < check.width - tolerance { return false }
+		if let height, height < check.width - tolerance { return false }
+
+		return true
 	}
 }
 
-#if os(macOS)
+#if os(iOS)
+extension ImageSize {
+	func resize(_ image: UIImage) -> UIImage? {
+		if matches(size: image.size) { return image }
+		if let limit = size(basedOn: image.size) {
+			let scaled = image.size.scaled(within: limit)
+			return UIGraphicsImageRenderer(size: scaled).image { ctx in
+				image.draw(in: CGRect(x: 0, y: 0, width: scaled.width, height: scaled.height))
+			}
+		}
+		return image
+	}
+}
+#elseif os(macOS)
 extension ImageSize {
 	func resize(_ image: NSImage) -> NSImage? {
 		return image
@@ -65,45 +117,37 @@ extension ImageSize {
 #else
 extension ImageSize {
 	func resize(_ image: UIImage) -> UIImage? {
-		if matches(size: image.size) { return image }
-		let scaled = image.size.scaled(within: size)
-		#if os(iOS)
-			return UIGraphicsImageRenderer(size: scaled).image { ctx in
-				image.draw(in: CGRect(x: 0, y: 0, width: scaled.width, height: scaled.height))
-			}
-		#else
-			return image
-		#endif
+		return image
 	}
 }
 #endif
 
 public extension ImageSize {
-	static func exact(_ double: Double) -> ImageSize {
+	static func exact(_ double: CGFloat) -> ImageSize {
 		ImageSize(size: .init(width: double, height: double), tolerance: 0, isMaxSize: false)
 	}
 
 	static func exact(_ int: Int) -> ImageSize {
-		ImageSize(size: .init(width: Double(int), height: Double(int)), tolerance: 0, isMaxSize: false)
+		ImageSize(size: .init(width: CGFloat(int), height: CGFloat(int)), tolerance: 0, isMaxSize: false)
 	}
 	
 	static func exact(_ size: CGSize) -> ImageSize {
 		ImageSize(size: size, tolerance: 0, isMaxSize: false)
 	}
 
-	static func about(_ double: Double, tolerance: Double = 10) -> ImageSize {
+	static func about(_ double: CGFloat, tolerance: CGFloat = 10) -> ImageSize {
 		ImageSize(size: .init(width: double, height: double), tolerance: tolerance, isMaxSize: false)
 	}
 
-	static func about(_ int: Int, tolerance: Double = 10) -> ImageSize {
-		ImageSize(size: .init(width: Double(int), height: Double(int)), tolerance: tolerance, isMaxSize: false)
+	static func about(_ int: Int, tolerance: CGFloat = 10) -> ImageSize {
+		ImageSize(size: .init(width: CGFloat(int), height: CGFloat(int)), tolerance: tolerance, isMaxSize: false)
 	}
 
-	static func about(_ size: CGSize, tolerance: Double = 10) -> ImageSize {
+	static func about(_ size: CGSize, tolerance: CGFloat = 10) -> ImageSize {
 		ImageSize(size: size, tolerance: tolerance, isMaxSize: false)
 	}
 
-	static func less(than size: CGSize, tolerance: Double = 10) -> ImageSize {
+	static func less(than size: CGSize, tolerance: CGFloat = 10) -> ImageSize {
 		ImageSize(size: size, tolerance: tolerance, isMaxSize: true)
 	}
 

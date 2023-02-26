@@ -102,7 +102,7 @@ public actor ImageCache {
 		guard let data = DataCache.instance.fetchLocal(for: url, location: actualLocation) else { return .init(image: nil, localURL: localURL, remoteURL: url) }
 		
 		#if os(iOS)
-			if let url = data.url, let goalSize = size?.size, let resized = url.resizedImage(maxSize: goalSize) {
+		if let url = data.url, let resized = url.resizedImage(maxWidth: size?.width, maxHeight: size?.height) {
 				return .init(image: PlatformImage(cgImage: resized), localURL: localURL, remoteURL: url)
 			}
 		#endif
