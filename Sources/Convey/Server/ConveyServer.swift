@@ -1,6 +1,6 @@
 //
-//  Server.swift
-//  Server
+//  ConveyServer.swift
+//  ConveyServer
 //
 //  Created by Ben Gottlieb on 9/11/21.
 //
@@ -8,8 +8,8 @@
 import Combine
 import Foundation
 
-open class Server: NSObject, ObservableObject {
-	public static var serverInstance: Server!
+open class ConveyServer: NSObject, ObservableObject {
+	public static var serverInstance: ConveyServer!
 	@Published public var remote: Remote = Remote(URL(string: "about://")!)
 	
 	open var baseURL: URL { remote.url }
@@ -51,8 +51,8 @@ open class Server: NSObject, ObservableObject {
 		request
 	}
 	
-	public static func setupDefault() -> Server {
-		_ = Server()
+	public static func setupDefault() -> ConveyServer {
+		_ = ConveyServer()
 		return serverInstance
 	}
 	
@@ -75,7 +75,7 @@ open class Server: NSObject, ObservableObject {
 		if asDefault { Self.serverInstance = self }
 	}
 	
-	open func standardHeaders(for task: ServerTask) -> [String: String] {
+	open func standardHeaders(for task: ServerTask) async throws -> [String: String] {
 		var headers = defaultHeaders
 		if enableGZip {
 			headers[ServerConstants.Headers.acceptEncoding] = "gzip, deflate"
@@ -96,7 +96,7 @@ open class Server: NSObject, ObservableObject {
 	}
 }
 
-extension Server: URLSessionDelegate {
+extension ConveyServer: URLSessionDelegate {
 	public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
 		if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
 			if let serverTrust = challenge.protectionSpace.serverTrust {

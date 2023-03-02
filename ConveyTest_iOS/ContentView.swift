@@ -34,7 +34,7 @@ struct ContentView: View {
 		}
 		.task {
 			do {
-				let data = try await Server.serverInstance.data(for: URL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBt-DSi9AsxGKLFOopQx-DCv4eGGez2Q2nqvLyFdP1s55CLM-MjSik-th2igTc-KFtl34&usqp=CAU"))
+				let data = try await ConveyServer.serverInstance.data(for: URL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBt-DSi9AsxGKLFOopQx-DCv4eGGez2Q2nqvLyFdP1s55CLM-MjSik-th2igTc-KFtl34&usqp=CAU"))
 				image = UIImage(data: data.data)
 			} catch {
 				print("Error downloading: \(error)")

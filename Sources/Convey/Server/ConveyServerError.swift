@@ -1,5 +1,5 @@
 //
-//  Server+Error.swift
+//  ConveyServerError.swift
 //  ConveyTest
 //
 //  Created by Ben Gottlieb on 1/29/22.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum ServerError: LocalizedError {
+public enum ConveyServerError: LocalizedError {
 	case taskAlreadyStarted
 	case unknownResponse(Data?, URLResponse?)
 	case endOfRepetition

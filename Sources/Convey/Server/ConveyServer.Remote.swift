@@ -1,13 +1,13 @@
 //
-//  Server.Remote.swift
-//  Server.Remote
+//  ConveyServer.Remote.swift
+//  ConveyServer.Remote
 //
 //  Created by Ben Gottlieb on 9/11/21.
 //
 
 import Foundation
 
-public extension Server {
+public extension ConveyServer {
 	struct Remote: Identifiable, Hashable, Equatable {
 		public let name: String?
 		public let url: URL

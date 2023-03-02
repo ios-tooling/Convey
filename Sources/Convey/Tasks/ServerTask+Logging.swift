@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Server {
+extension ConveyServer {
 	func setupLoggingDirectory() -> URL? {
 		guard let url = logDirectory else { return nil }
 		

@@ -1,5 +1,5 @@
 //
-//  Server+Threading.swift
+//  ConveyServer+Threading.swift
 //  ConveyTest_iOS
 //
 //  Created by Ben Gottlieb on 5/22/22.
@@ -9,7 +9,7 @@ import Foundation
 
 typealias EmptyContinuation = UnsafeContinuation<Void, Never>
 
-extension Server {
+extension ConveyServer {
     func wait(forThread threadName: String) async {
         await threadManager.wait(forThread: threadName)
     }

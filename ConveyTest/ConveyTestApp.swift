@@ -10,7 +10,7 @@ import SwiftUI
 @main
 struct ConveyTestApp: App {
 	init() {
-		Server.serverInstance = Server()
+		ConveyServer.serverInstance = ConveyServer()
 	}
 
     var body: some Scene {

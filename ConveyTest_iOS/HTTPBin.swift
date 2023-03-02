@@ -7,7 +7,7 @@
 
 import Foundation
 
-class HTTPBinServer: Server {
+class HTTPBinServer: ConveyServer {
 	static let instance = HTTPBinServer()
 	
 	init() {
@@ -19,7 +19,7 @@ class HTTPBinServer: Server {
 struct SampleHTTPBinPOST: ServerTask, ServerPOSTTask, DataUploadingTask, ThreadedServerTask, PostFlightTask {
 	var path: String = "post"
 	var dataToUpload: Data?
-	var server: Server { HTTPBinServer.instance }
+	var server: ConveyServer { HTTPBinServer.instance }
 	var threadName: String? = "httpBinPost"
 	
 	init(index: Int) {

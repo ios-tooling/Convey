@@ -28,7 +28,7 @@ public extension URLSession {
 					 }
 					
 					guard let httpResponse = response as? HTTPURLResponse else {
-						return continuation.resume(throwing: ServerError.unknownResponse(data, response))
+						return continuation.resume(throwing: ConveyServerError.unknownResponse(data, response))
 					}
 
 					continuation.resume(returning: ServerReturned(response: httpResponse, data: data, fromCache: false))

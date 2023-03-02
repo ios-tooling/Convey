@@ -8,7 +8,7 @@
 import Foundation
 
 public extension ServerTask {
-	var server: Server { (self as? CustomServerTask)?.customServer ?? Server.serverInstance ?? Server.setupDefault() }
+	var server: ConveyServer { (self as? CustomServerTask)?.customServer ?? ConveyServer.serverInstance ?? ConveyServer.setupDefault() }
 
 	func postprocess(response: ServerReturned) { }
 

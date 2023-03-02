@@ -14,7 +14,7 @@ public protocol ServerTask {
 	var path: String { get }
 	func postprocess(response: ServerReturned)
 	var httpMethod: String { get }
-	var server: Server { get }
+	var server: ConveyServer { get }
 	var url: URL { get }
 }
 
@@ -38,7 +38,7 @@ public protocol CustomURLTask: ServerTask {
 }
 
 public protocol CustomServerTask: ServerTask {
-	var customServer: Server? { get }
+	var customServer: ConveyServer? { get }
 }
 
 public protocol TaggedTask: ServerTask {

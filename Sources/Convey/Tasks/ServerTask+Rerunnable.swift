@@ -26,7 +26,7 @@ public extension PayloadDownloadingTask where Self: RerunnableServerTask {
 				let result = try await task.downloadWithResponse(caching: .skipLocal, decoder: decoder, preview: preview)
 				if !completion(result.payload) { return }
 				task.previousResult = result.response
-			} catch ServerError.endOfRepetition {
+			} catch ConveyServerError.endOfRepetition {
 				return
 			} catch {
 				throw error

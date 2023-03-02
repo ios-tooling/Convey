@@ -14,17 +14,17 @@ public extension ServerTask {
 	func buildRequest() async throws -> URLRequest {
 		if let rerunnable = self as? RerunnableServerTask, let previous = rerunnable.previousResult {
 			if let newRequest = rerunnable.rerunnableRequest(from: previous) { return newRequest }
-			throw ServerError.endOfRepetition
+			throw ConveyServerError.endOfRepetition
 		}
 
 		if let custom = self as? CustomURLRequestTask {
 			return try await custom.customURLRequest
 		}
 
-		return defaultRequest()
+		return try await defaultRequest()
 	}
 
-	func defaultRequest() -> URLRequest {
+	func defaultRequest() async throws -> URLRequest {
 		var request = URLRequest(url: url)
 		var isGzipped = self is GZipEncodedUploadingTask
 		
@@ -52,7 +52,7 @@ public extension ServerTask {
 				}
 			}
 		}
-		request.allHTTPHeaderFields = server.standardHeaders(for: self)
+		request.allHTTPHeaderFields = try await server.standardHeaders(for: self)
 		if let tagged = self as? TaggedTask {
 			request.addValue(tagged.requestTag, forHTTPHeaderField: ServerConstants.Headers.tag)
 		}
