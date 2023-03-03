@@ -12,7 +12,7 @@ public typealias PreviewClosure = (ServerReturned) -> Void
 
 public protocol ServerTask {
 	var path: String { get }
-	func postprocess(response: ServerReturned)
+	func postProcess(response: ServerReturned) async throws
 	var httpMethod: String { get }
 	var server: ConveyServer { get }
 	var url: URL { get }
@@ -101,7 +101,7 @@ public protocol ThreadedServerTask: ServerTask {
 // the protocols below all have associated types
 public protocol PayloadDownloadingTask: ServerTask {
 	associatedtype DownloadPayload: Decodable
-	func postprocess(payload: DownloadPayload)
+	func postProcess(payload: DownloadPayload) async throws
 }
 
 public protocol PayloadUploadingTask: DataUploadingTask, JSONPayloadTask {

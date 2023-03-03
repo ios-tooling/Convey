@@ -10,7 +10,8 @@ import Foundation
 public extension ServerTask {
 	var server: ConveyServer { (self as? CustomServerTask)?.customServer ?? ConveyServer.serverInstance ?? ConveyServer.setupDefault() }
 
-	func postprocess(response: ServerReturned) { }
+	func postProcess(response: ServerReturned) async throws { }
+	func postprocess(response: ServerReturned) { } // deprecated, use postProcess(…) instead
 
 	var url: URL {
 		let nonParameterized = (self as? CustomURLTask)?.customURL ?? server.url(forTask: self)
@@ -35,7 +36,7 @@ public extension ServerTask {
 }
 
 public extension PayloadDownloadingTask {
-	func postprocess(payload: DownloadPayload) { }
+	func postProcess(payload: DownloadPayload) async throws { }
 	
 	func cachedPayload(decoder: JSONDecoder? = nil) -> DownloadPayload? {
 		guard let data = cachedData else { return nil }

@@ -26,7 +26,7 @@ struct SampleHTTPBinPOST: ServerTask, ServerPOSTTask, DataUploadingTask, Threade
 		dataToUpload = "\(index)".data(using: .utf8)
 	}
 	
-	func postprocess(response: ServerReturned) {
+	func postProcess(response: ServerReturned) async throws {
 		do {
 			if let json = try JSONSerialization.jsonObject(with: response.data) as? [String: Any], let index = json["data"] as? String {
 				print("\(index): HTTPBin Post")

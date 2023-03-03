@@ -26,7 +26,7 @@ public extension PayloadDownloadingTask {
 	
 	func downloadWithResponse(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadResult<DownloadPayload> {
 		let result: DownloadResult<DownloadPayload> = try await requestPayload(caching: caching, decoder: decoder, preview: preview)
-		postprocess(payload: result.payload)
+		try await postProcess(payload: result.payload)
 		return result
 	}
 }
@@ -114,7 +114,8 @@ extension ServerTask {
 				}
 				//postLog(startedAt: startedAt, request: request, data: result.data, response: result.response)
 				preview?(result)
-				postprocess(response: result)
+				postprocess(response: result)		// this is deprecated now, replace with postProcess(…)
+				try await postProcess(response: result)
 				if !result.response.didDownloadSuccessfully {
 					server.reportConnectionError(self, result.statusCode, String(data: result.data, encoding: .utf8))
 					if result.data.isEmpty || (result.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
