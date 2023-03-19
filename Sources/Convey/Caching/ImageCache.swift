@@ -91,6 +91,12 @@ public actor ImageCache {
 		fetchLocalInfo(for: url, location: location, size: size, extension: ext)?.image
 	}
 	
+	public func removeItem(for url: URL, location: DataCache.CacheLocation = .default) {
+		let key = location.key(for: url, suffix: nil, extension: url.cachePathExtension ?? "jpeg")
+		DataCache.instance.removeItem(for: url, location: location)
+		inMemoryImages.value.removeValue(forKey: key)
+	}
+
 	public nonisolated func fetchLocalInfo(for url: URL, location: DataCache.CacheLocation = .default, size: ImageSize? = nil, extension ext: String? = nil) -> ImageInfo? {
 		let cacheExtension = ext ?? url.cachePathExtension ?? "jpeg"
 		let key = location.key(for: url, suffix: size?.suffix, extension: cacheExtension)

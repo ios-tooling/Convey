@@ -40,8 +40,12 @@ public class DataCache {
 		}
 	}
 
+	public func removeItem(for url: URL, location: CacheLocation = .default) {
+		let localURL = self.location(of: url, relativeTo: location) //location.location(of: task.url, relativeTo: cachesDirectory)
+		try? FileManager.default.removeItem(at: localURL)
+	}
+
 	func fetchDataAndCache<FetchTask: ServerTask>(using task: FetchTask, caching: Caching = .localFirst, location: CacheLocation = .default) async throws -> DataAndLocalCache? {
-		
 		let url = task.url
 
 		switch caching {
