@@ -13,7 +13,7 @@ public extension ServerTask {
 	
 	func buildRequest() async throws -> URLRequest {
 		if let rerunnable = self as? RerunnableServerTask, let previous = rerunnable.previousResult {
-			if let newRequest = rerunnable.rerunnableRequest(from: previous) { return newRequest }
+			if let newRequest = try await rerunnable.rerunnableRequest(from: previous) { return newRequest }
 			throw ConveyServerError.endOfRepetition
 		}
 

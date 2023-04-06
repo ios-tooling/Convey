@@ -8,7 +8,7 @@
 import Foundation
 
 public protocol RerunnableServerTask {
-	func rerunnableRequest(from serverReturned: ServerReturned) -> URLRequest?
+	func rerunnableRequest(from serverReturned: ServerReturned) async throws -> URLRequest?
 	var previousResult: ServerReturned? { get set }
 }
 
