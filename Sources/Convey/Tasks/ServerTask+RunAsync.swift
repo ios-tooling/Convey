@@ -8,6 +8,10 @@
 import Foundation
 import Combine
 
+#if os(iOS)
+	import UIKit
+#endif
+
 public struct DownloadResult<Payload> {
 	public init(payload: Payload, response: ServerReturned) {
 		self.payload = payload
@@ -85,8 +89,23 @@ extension ServerTask {
 		}
 	}
 	
+	#if os(iOS)
+		func requestBackgroundTime() -> UIBackgroundTaskIdentifier? {
+			server.application?.beginBackgroundTask(withName: "") {  }
+		}
+		func finishBackgroundTime(_ token: UIBackgroundTaskIdentifier?) {
+			guard let token else { return }
+			server.application?.endBackgroundTask(token)
+		}
+	#else
+		func requestBackgroundTime() -> Int { 0 }
+		func finishBackgroundTime(_ token: Int) { }
+	#endif
+	
 	func sendRequest(preview: PreviewClosure? = nil) async throws -> ServerReturned {
 		var attemptCount = 1
+		
+		let token = requestBackgroundTime()
 		
 		while true {
 			do {
@@ -125,6 +144,7 @@ extension ServerTask {
 				
 				try await (self as? PostFlightTask)?.postFlight()
 				if let threadName = (self as? ThreadedServerTask)?.threadName { await server.stopWaiting(forThread: threadName) }
+				finishBackgroundTime(token)
 				return result
 			} catch {
 				if let threadName = (self as? ThreadedServerTask)?.threadName { await server.stopWaiting(forThread: threadName) }
@@ -132,7 +152,9 @@ extension ServerTask {
 				if let delay = (self as? RetryableTask)?.retryInterval(after: error, attemptNumber: attemptCount) {
 					attemptCount += 1
 					try await Task.sleep(nanoseconds: UInt64(delay) * 1_000_000_000)
+					finishBackgroundTime(token)
 				} else {
+					finishBackgroundTime(token)
 					throw error
 				}
 			}

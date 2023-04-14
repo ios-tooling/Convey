@@ -8,6 +8,10 @@
 import Combine
 import Foundation
 
+#if os(iOS)
+	import UIKit
+#endif
+
 open class ConveyServer: NSObject, ObservableObject {
 	public static var serverInstance: ConveyServer!
 	@Published public var remote: Remote = Remote(URL(string: "about://")!)
@@ -34,6 +38,9 @@ open class ConveyServer: NSObject, ObservableObject {
 		ServerConstants.Headers.accept: "*/*"
 	]
 	let threadManager = ThreadManager()
+	#if os(iOS)
+		public var application: UIApplication?
+	#endif
 	
 	public var defaultUserAgent: String {
 		"\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)/\(Device.rawDeviceType)/CFNetwork/1325.0.1 Darwin/21.1.0"

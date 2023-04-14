@@ -37,10 +37,10 @@ extension URL {
 	
 	func resizedImage(maxDimension: CGFloat) -> CGImage? {
 		let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
-		let downsampleOptions =  [kCGImageSourceCreateThumbnailFromImageAlways: true,
+		let downsampleOptions = ([kCGImageSourceCreateThumbnailFromImageAlways: true,
 								  kCGImageSourceShouldCacheImmediately: true,
 								  kCGImageSourceCreateThumbnailWithTransform: true,
-								  kCGImageSourceThumbnailMaxPixelSize: maxDimension] as CFDictionary
+													 kCGImageSourceThumbnailMaxPixelSize: maxDimension] as [CFString : Any]) as CFDictionary
 
 		guard
 			let imageSource = CGImageSourceCreateWithURL(self as CFURL, imageSourceOptions),
