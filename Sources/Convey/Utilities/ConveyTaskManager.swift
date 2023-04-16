@@ -53,10 +53,10 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		if enabled {
 			Task {
 				await loadTypes(resetting: true)
-				if CommandLine.bool(for: "conveyShortLog") { logStyle = .short }
-				if let raw = CommandLine.string(for: "conveyLogStyle") { logStyle = LogStyle(rawValue: raw) ?? .none }
+				if CommandLine.bool(for: "conveyShortLog") || ProcessInfo.bool(for: "conveyShortLog") { logStyle = .short }
+				if let raw = CommandLine.string(for: "conveyLogStyle") ?? ProcessInfo.string(for: "conveyLogStyle") { logStyle = LogStyle(rawValue: raw) ?? .none }
 
-				if let echos = CommandLine.string(for: "conveyEcho") ?? CommandLine.string(for: "conveyEchos") {
+				if let echos = CommandLine.string(for: "conveyEcho") ?? CommandLine.string(for: "conveyEchos") ?? ProcessInfo.string(for: "conveyEcho") ?? ProcessInfo.string(for: "conveyEchos") {
 					print("Echoing: \(echos)")
 					for type in echos.components(separatedBy: ",") {
 						let trimmed = type.trimmingCharacters(in: .whitespacesAndNewlines)

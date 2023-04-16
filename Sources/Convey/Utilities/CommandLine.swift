@@ -27,3 +27,17 @@ extension CommandLine {
 		return nil
 	}
 }
+
+extension ProcessInfo {
+	static func bool(for key: String) -> Bool {
+		if let string = self.string(for: key)?.lowercased() {
+			return string == "y" || string == "yes" || string == "true"
+		}
+		
+		return false
+	}
+	
+	static func string(for key: String) -> String? {
+		ProcessInfo.processInfo.environment[key]
+	}
+}
