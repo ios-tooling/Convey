@@ -21,6 +21,7 @@ public struct CachedURLImage: View {
 	@State var localURL: URL?
 	let imageSize: ImageSize?
 	private var initialFetch: ImageCache.ImageInfo?
+	let tag: Int
 	
 	func platformImage(named name: String) -> PlatformImage? {
 #if os(macOS)
@@ -44,6 +45,9 @@ public struct CachedURLImage: View {
 			if let image = initialFetch?.image {
 				_platformImage = State(initialValue: image)
 			}
+			tag = url.hashValue
+		} else {
+			tag = 0
 		}
 	}
 	
@@ -89,6 +93,10 @@ public struct CachedURLImage: View {
 				.padding()
 			//	.background(RoundedRectangle(cornerRadius: 5).fill(Color.black))
 			}
+		}
+		.onChange(of: tag) { newValue in
+			localURL = nil
+			platformImage = nil
 		}
 		.task() {
 			guard let url = imageURL, url != fetchedURL else { return }
