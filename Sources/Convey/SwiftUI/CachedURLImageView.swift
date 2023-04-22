@@ -10,18 +10,19 @@ import SwiftUI
 @available(iOS 15.0, watchOS 8.0, macOS 12.0, *)
 @MainActor
 public struct CachedURLImage: View {
+	@Binding var error: Error?
+
 	let placeholder: Image?
 	let imageURL: URL?
 	let contentMode: ContentMode
 	var showURLs = false
-	let errorCallback: ((Error?) -> Void)?
 	let cacheLocation: DataCache.CacheLocation
-	@State var platformImage: PlatformImage?
-	@State var fetchedURL: URL?
-	var localURL: URL?
 	let imageSize: ImageSize?
-	private var initialFetch: ImageCache.ImageInfo?
-	let tag: Int
+	
+	@State var cacheInfo: ImageCache.ImageInfo?
+	@State var cachedURL: URL?
+	@State var cachedImage: PlatformImage?
+	@State var fetchedURL: URL?
 	
 	func platformImage(named name: String) -> PlatformImage? {
 #if os(macOS)
@@ -31,99 +32,58 @@ public struct CachedURLImage: View {
 #endif
 	}
 	
-	public init(url: URL?, contentMode: ContentMode = .fit, placeholder: Image? = nil, showURLs: Bool = false, size: ImageSize? = nil, cache: DataCache.CacheLocation = .default, errorCallback: ((Error?) -> Void)? = nil) {
+	public init(url: URL?, contentMode: ContentMode = .fit, placeholder: Image? = nil, showURLs: Bool = false, size: ImageSize? = nil, cache: DataCache.CacheLocation = .default, error: Binding<Error?>? = nil) {
 		imageURL = url
 		self.contentMode = contentMode
 		self.placeholder = placeholder
-		self.errorCallback = errorCallback
+		_error = error ?? .constant(nil)
 		self.cacheLocation = cache
 		self.showURLs = showURLs
 		self.imageSize = size
-		if let url = url {
-			initialFetch = ImageCache.instance.fetchLocalInfo(for: url, location: cache, size: size)
-			localURL = initialFetch?.localURL
-			if let image = initialFetch?.image {
-				_platformImage = State(wrappedValue: image)
-			} else {
-				_platformImage = State(wrappedValue: nil)
-			}
-			tag = url.hashValue
-		} else {
-			tag = 0
-		}
+		
+		_cacheInfo = State(initialValue: ImageCache.instance.fetchLocalInfo(for: url, location: cache, size: size))
 	}
 	
 	var imageView: Image? {
-		if let image = platformImage {
-#if os(OSX)
-			return Image(nsImage: image)
-#else
-			return Image(uiImage: image)
-#endif
+		Image(platformImage: platformImage) ?? placeholder
+	}
+	
+	var platformImage: PlatformImage? {
+		if cachedURL != imageURL {
+			DispatchQueue.main.async { updateCache() }
+			return nil
 		}
 		
-		if let placeholder = placeholder { return placeholder }
+		if let image = cacheInfo?.image ?? cachedImage { return image }
+		
+		if cachedImage == nil, let imageURL {
+			Task { @MainActor in
+				do {
+					cachedImage = try await ImageCache.instance.fetch(from: imageURL, location: cacheLocation, size: imageSize)
+				} catch {
+					self.error = error
+				}
+			}
+		}
+		
 		return nil
 	}
 	
+	func updateCache() {
+		cachedURL = imageURL
+		cacheInfo = ImageCache.instance.fetchLocalInfo(for: imageURL, location: cacheLocation, size: imageSize)
+		cachedImage = nil
+	}
+	
 	public var body: some View {
-		if initialFetch?.localURL != localURL {
-			let _ = DispatchQueue.main.async { resetCached() }
-		}
 		ZStack() {
-			if let imageView = imageView {
+			if let imageView {
 				imageView
 					.resizable()
 					.aspectRatio(contentMode: contentMode)
 			}
-			if showURLs {
-				VStack() {
-					if let url = localURL {
-						Text(url.lastPathComponent)
-							.foregroundColor(platformImage == nil ? .red : .white)
-							.background(Color.black)
-					}
-
-					if let url = imageURL {
-						Text(url.absoluteString)
-							.foregroundColor(.orange)
-					}
-
-//					if let location = fetchedURL {
-//						Text(location.path)
-//							.foregroundColor(.yellow)
-//					}
-				}
-				.font(.caption)
-				.padding()
-			//	.background(RoundedRectangle(cornerRadius: 5).fill(Color.black))
-			}
 		}
-		.task() {
-			guard let url = imageURL, url != fetchedURL else { return }
-			if let image = ImageCache.instance.fetchLocal(for: url, location: cacheLocation, size: imageSize) {
-				platformImage = image
-				fetchedURL = url
-			}
-			
-			if let imageURL = imageURL, platformImage == nil {
-				do {
-					platformImage = try await ImageCache.instance.fetch(from: imageURL, location: cacheLocation, size: imageSize)
-					fetchedURL = url
-				} catch {
-					errorCallback?(error)
-				}
-			}
-		}
-		.id(imageURL?.absoluteString ?? "--")
 	}
-	
-	func resetCached() {
-//		let info = ImageCache.instance.fetchLocalInfo(for: imageURL, location: cache, size: size)
-//		localURL = nil
-		platformImage = nil
-	}
-	
 }
 
 @available(iOS 15.0, watchOS 8.0, macOS 12.0, *)

@@ -13,17 +13,40 @@ let landscape = URL(string: "https://www.learningcontainer.com/bfd_download/larg
 let enterprise = URL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBt-DSi9AsxGKLFOopQx-DCv4eGGez2Q2nqvLyFdP1s55CLM-MjSik-th2igTc-KFtl34&usqp=CAU")
 
 
+struct TestView: View {
+	@State var someState = ""
+	@State var checksumState = Int.random(in: 1...100000)
+	let checksum = Int.random(in: 1...100000)
+	let counter: Int
+	let callback: (() -> Void)?
+	
+	var body: some View {
+		let _ = Self._printChanges()
+		let _ = print("TestView: \(checksum) \(checksumState)")
+		
+		Button("Button: \(someState)") {
+			callback?()
+		}
+	}
+}
+
 struct ContentView: View {
 	@State var image: UIImage?
 	@State var showBig = false
 	@State var imageURL = enterprise
+	@State var counter = 0
 	
 	var body: some View {
 		VStack() {
+//			TestView(someState: "Text \(counter)", counter: 3) {
+//				counter += 1
+//			}
+			
 			Text("Hello, world!")
 				.padding()
 			
 			CachedURLImage(url: imageURL)
+				.frame(width: 100, height: 100)
 				.onTapGesture {
 					imageURL = (imageURL == enterprise) ? landscape : enterprise
 				}
