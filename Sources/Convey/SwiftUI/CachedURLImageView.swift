@@ -18,9 +18,9 @@ public struct CachedURLImage: View {
 	var showURLs = false
 	let cacheLocation: DataCache.CacheLocation
 	let imageSize: ImageSize?
+	let deferredUntil: Date?
 	
 	@State var cacheInfo: ImageCache.ImageInfo?
-	@State var cachedURL: URL?
 	@State var cachedImage: PlatformImage?
 	@State var fetchedURL: URL?
 	
@@ -32,15 +32,16 @@ public struct CachedURLImage: View {
 #endif
 	}
 	
-	public init(url: URL?, contentMode: ContentMode = .fit, placeholder: Image? = nil, showURLs: Bool = false, size: ImageSize? = nil, cache: DataCache.CacheLocation = .default, error: Binding<Error?>? = nil) {
+	public init(url: URL?, contentMode: ContentMode = .fit, placeholder: Image? = nil, showURLs: Bool = false, size: ImageSize? = nil, cache: DataCache.CacheLocation = .default, error: Binding<Error?>? = nil, deferredUntil date: Date? = nil) {
 		imageURL = url
+		_error = error ?? .constant(nil)
+		cacheLocation = cache
+		imageSize = size
+		deferredUntil = date
 		self.contentMode = contentMode
 		self.placeholder = placeholder
-		_error = error ?? .constant(nil)
-		self.cacheLocation = cache
 		self.showURLs = showURLs
-		self.imageSize = size
-		
+
 		_cacheInfo = State(initialValue: ImageCache.instance.fetchLocalInfo(for: url, location: cache, size: size))
 	}
 	
@@ -49,7 +50,7 @@ public struct CachedURLImage: View {
 	}
 	
 	var platformImage: PlatformImage? {
-		if cachedURL != imageURL {
+		if cacheInfo?.remoteURL != imageURL {
 			DispatchQueue.main.async { updateCache() }
 			return nil
 		}
@@ -59,7 +60,16 @@ public struct CachedURLImage: View {
 		if cachedImage == nil, let imageURL {
 			Task { @MainActor in
 				do {
-					cachedImage = try await ImageCache.instance.fetch(from: imageURL, location: cacheLocation, size: imageSize)
+					let image = try await ImageCache.instance.fetch(from: imageURL, location: cacheLocation, size: imageSize)
+					if #available(iOS 16.0, *) {
+						if let end = deferredUntil, end > Date() {
+							let interval = end.timeIntervalSinceNow
+							if interval > 0 {
+								try await Task.sleep(for: .seconds(interval))
+							}
+						}
+					}
+					cachedImage = image
 				} catch {
 					self.error = error
 				}
@@ -70,9 +80,8 @@ public struct CachedURLImage: View {
 	}
 	
 	func updateCache() {
-		cachedURL = imageURL
 		cacheInfo = ImageCache.instance.fetchLocalInfo(for: imageURL, location: cacheLocation, size: imageSize)
-		cachedImage = nil
+		cachedImage = cacheInfo?.image
 	}
 	
 	public var body: some View {

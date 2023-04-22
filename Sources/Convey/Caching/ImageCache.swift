@@ -103,23 +103,24 @@ public actor ImageCache {
 		let key = location.key(for: url, suffix: size?.suffix, extension: cacheExtension)
 		let actualLocation = self.location(for: url, current: location, extension: cacheExtension)
 		let localURL = DataCache.instance.location(of: url, relativeTo: actualLocation)
+		let remoteURL = url
 
-		if let cached = inMemoryImages.value[key] { return .init(image: cached.image, localURL: localURL, remoteURL: url) }
+		if let cached = inMemoryImages.value[key] { return .init(image: cached.image, localURL: localURL, remoteURL: remoteURL) }
 		
-		guard let data = DataCache.instance.fetchLocal(for: url, location: actualLocation) else { return .init(image: nil, localURL: localURL, remoteURL: url) }
+		guard let data = DataCache.instance.fetchLocal(for: url, location: actualLocation) else { return .init(image: nil, localURL: localURL, remoteURL: remoteURL) }
 		
 		#if os(iOS)
 		if let url = data.url, let resized = url.resizedImage(maxWidth: size?.width, maxHeight: size?.height) {
-				return .init(image: PlatformImage(cgImage: resized), localURL: localURL, remoteURL: url)
+				return .init(image: PlatformImage(cgImage: resized), localURL: localURL, remoteURL: remoteURL)
 			}
 		#endif
 		
 		if let image = PlatformImage(data: data.data) {
 			let resized = size?.resize(image) ?? image
 			updateCache(for: key, with: InMemoryImage(image: resized, size: data.data.count, createdAt: Date(), key: key, group: location.group))
-			return .init(image: resized, localURL: localURL, remoteURL: url)
+			return .init(image: resized, localURL: localURL, remoteURL: remoteURL)
 		}
-		return .init(image: nil, localURL: localURL, remoteURL: url)
+		return .init(image: nil, localURL: localURL, remoteURL: remoteURL)
 	}
 	
 	public nonisolated func fetchLocalData(for url: URL, location: DataCache.CacheLocation = .default, size: ImageSize? = nil) -> DataCache.DataAndLocalCache? {
