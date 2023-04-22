@@ -18,7 +18,7 @@ public struct CachedURLImage: View {
 	let cacheLocation: DataCache.CacheLocation
 	@State var platformImage: PlatformImage?
 	@State var fetchedURL: URL?
-	@State var localURL: URL?
+	var localURL: URL?
 	let imageSize: ImageSize?
 	private var initialFetch: ImageCache.ImageInfo?
 	let tag: Int
@@ -41,9 +41,11 @@ public struct CachedURLImage: View {
 		self.imageSize = size
 		if let url = url {
 			initialFetch = ImageCache.instance.fetchLocalInfo(for: url, location: cache, size: size)
-			_localURL = State(initialValue: initialFetch?.localURL)
+			localURL = initialFetch?.localURL
 			if let image = initialFetch?.image {
-				_platformImage = State(initialValue: image)
+				_platformImage = State(wrappedValue: image)
+			} else {
+				_platformImage = State(wrappedValue: nil)
 			}
 			tag = url.hashValue
 		} else {
@@ -65,6 +67,9 @@ public struct CachedURLImage: View {
 	}
 	
 	public var body: some View {
+		if initialFetch?.localURL != localURL {
+			let _ = DispatchQueue.main.async { resetCached() }
+		}
 		ZStack() {
 			if let imageView = imageView {
 				imageView
@@ -94,10 +99,6 @@ public struct CachedURLImage: View {
 			//	.background(RoundedRectangle(cornerRadius: 5).fill(Color.black))
 			}
 		}
-		.onChange(of: tag) { newValue in
-			localURL = nil
-			platformImage = nil
-		}
 		.task() {
 			guard let url = imageURL, url != fetchedURL else { return }
 			if let image = ImageCache.instance.fetchLocal(for: url, location: cacheLocation, size: imageSize) {
@@ -115,6 +116,12 @@ public struct CachedURLImage: View {
 			}
 		}
 		.id(imageURL?.absoluteString ?? "--")
+	}
+	
+	func resetCached() {
+//		let info = ImageCache.instance.fetchLocalInfo(for: imageURL, location: cache, size: size)
+//		localURL = nil
+		platformImage = nil
 	}
 	
 }

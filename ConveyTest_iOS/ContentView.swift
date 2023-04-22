@@ -8,24 +8,32 @@
 import SwiftUI
 import Suite
 
+let landscape = URL(string: "https://www.learningcontainer.com/bfd_download/large-sample-image-file-download-for-testing/")!
+
+let enterprise = URL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBt-DSi9AsxGKLFOopQx-DCv4eGGez2Q2nqvLyFdP1s55CLM-MjSik-th2igTc-KFtl34&usqp=CAU")
+
+
 struct ContentView: View {
 	@State var image: UIImage?
 	@State var showBig = false
+	@State var imageURL = enterprise
+	
 	var body: some View {
 		VStack() {
 			Text("Hello, world!")
 				.padding()
 			
-			if let image = image {
-				Image(uiImage: image)
-			}
+			CachedURLImage(url: imageURL)
+				.onTapGesture {
+					imageURL = (imageURL == enterprise) ? landscape : enterprise
+				}
 			
 			Button("Async Test") {
 				asyncTest()
 			}
 			
 			if showBig {
-				CachedURLImage(url: URL(string: "https://www.learningcontainer.com/bfd_download/large-sample-image-file-download-for-testing/"))
+				CachedURLImage(url: imageURL)
 					.frame(height: 200)
 
 				Text("Cache count: \(ImageCache.instance.cacheCount())")
@@ -34,7 +42,7 @@ struct ContentView: View {
 		}
 		.task {
 			do {
-				let data = try await ConveyServer.serverInstance.data(for: URL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBt-DSi9AsxGKLFOopQx-DCv4eGGez2Q2nqvLyFdP1s55CLM-MjSik-th2igTc-KFtl34&usqp=CAU"))
+				let data = try await ConveyServer.serverInstance.data(for: landscape)
 				image = UIImage(data: data.data)
 			} catch {
 				print("Error downloading: \(error)")

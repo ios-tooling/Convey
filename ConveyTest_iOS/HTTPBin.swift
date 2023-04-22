@@ -17,6 +17,8 @@ class HTTPBinServer: ConveyServer {
 }
 
 struct SampleHTTPBinPOST: ServerTask, ServerPOSTTask, DataUploadingTask, ThreadedServerTask, PostFlightTask {
+	var contentType: String?
+	
 	var path: String = "post"
 	var dataToUpload: Data?
 	var server: ConveyServer { HTTPBinServer.instance }
