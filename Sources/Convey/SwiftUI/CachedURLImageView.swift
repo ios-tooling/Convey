@@ -65,7 +65,7 @@ public struct CachedURLImage: View {
 						if let end = deferredUntil, end > Date() {
 							let interval = end.timeIntervalSinceNow
 							if interval > 0 {
-								try await Task.sleep(for: .seconds(interval))
+								try await Task.sleep(nanoseconds: UInt64(Double(1_000_000_000) * interval))
 							}
 						}
 					}
