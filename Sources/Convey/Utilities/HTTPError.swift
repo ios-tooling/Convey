@@ -26,6 +26,7 @@ public enum HTTPError: Error, LocalizedError {
    case networkError(URL?, Error)
    case decodingError(URL?, DecodingError)
    case unreachableError
+	case noCachedData
    
    public init(_ url: URL?, _ error: Error) {
       if let err = error as? HTTPError {
@@ -64,6 +65,7 @@ public enum HTTPError: Error, LocalizedError {
       case .offline: return nil
       case .other: return nil
       case .unreachableError: return nil
+		case .noCachedData: return nil
       }
    }
    
@@ -80,6 +82,7 @@ public enum HTTPError: Error, LocalizedError {
       case .networkError(_, let err): return err.localizedDescription
       case .decodingError(_, let err): return err.localizedDescription
       case .other(let err): return err?.localizedDescription ?? "unknown error"
+		case .noCachedData: return "No cached data"
       case .unreachableError: return "We should never get here"
       }
    }
@@ -98,6 +101,7 @@ public enum HTTPError: Error, LocalizedError {
       case .decodingError(let url, let err): return url.absoluteString() + ": " + err.localizedDescription
       case .other(let err): return err?.localizedDescription ?? "unknown error"
       case .unreachableError: return "Something bad happened"
+		case .noCachedData: return "No cached data"
       }
    }
    
@@ -125,6 +129,7 @@ public enum HTTPError: Error, LocalizedError {
          
       case .serverError, .networkError, .nonHTTPResponse:
          return true
+		case .noCachedData: return false
       case .unreachableError: return false
       }
    }
