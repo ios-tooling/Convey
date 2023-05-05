@@ -23,7 +23,7 @@ extension RefreshableCachedTask {
 		switch style {
 		case .cachedOnly: break
 		case .cachedThenFetched:
-			if date != nil { break }
+			if data != nil { break }
 			fallthrough
 			
 		case .cachedThenForceRefresh:
