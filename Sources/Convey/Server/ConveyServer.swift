@@ -26,6 +26,7 @@ open class ConveyServer: NSObject, ObservableObject {
 	open var reportBadHTTPStatusAsError = true
 	open var configuration = URLSessionConfiguration.default
 	open var enableGZip = false
+	open var defaultTimeout = 30.0
 	public var userAgent: String? { didSet {
 		updateUserAgentHeader()
 		print("User agent set to: \(userAgent ?? "--")")

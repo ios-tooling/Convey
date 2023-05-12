@@ -53,6 +53,10 @@ public protocol RefreshableCachedTask: ServerTask {
 	
 }
 
+public protocol CustomTimeoutTask: ServerTask {
+	var timeout: TimeInterval { get }
+}
+
 public protocol DataUploadingTask: ServerTask {
 	var dataToUpload: Data? { get }
 	var contentType: String? { get }
