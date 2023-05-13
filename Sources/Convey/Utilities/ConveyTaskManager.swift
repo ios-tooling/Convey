@@ -29,7 +29,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	}
 
 	let typesFilename = "convey_task_types.txt"
-	var types: [TaskType] = [] {
+	var types: [LoggedTaskInfo] = [] {
 		willSet { objectWillChange.send() }
 		didSet { saveTypes() }
 	}
@@ -72,12 +72,25 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		if let index = index(of: taskType) {
 			types[index].thisRunOnlyEcho = on
 		} else {
-			var newTask = TaskType(taskName: taskType)
+			var newTask = LoggedTaskInfo(taskName: taskType)
 			newTask.thisRunOnlyEcho = true
 			types.append(newTask)
 		}
 	}
 	
+	func incrementOneOffLog(for task: ServerTask) {
+		enabled = true
+		if let index = index(of: type(of: task), noMatterWhat: true) {
+			types[index].oneOffLoggedCount = (types[index].oneOffLoggedCount ?? 0) + 1
+		}
+	}
+
+	func decrementOneOffLog(for task: ServerTask) {
+		if let index = index(of: type(of: task)) {
+			types[index].oneOffLoggedCount = max((types[index].oneOffLoggedCount ?? 0) - 1, 0)
+		}
+	}
+
 	func shouldEcho(_ task: ServerTask.Type) -> Bool {
 		guard enabled, let index = index(of: task) else { return task.self is EchoingTask.Type }
 		return types[index].shouldEcho
@@ -86,7 +99,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	func task(_ task: ServerTask.Type, shouldEcho: Bool) {
 		guard enabled else { return }
 		
-		if let index = index(of: task) {
+		if let index = index(of: task, noMatterWhat: true) {
 			if shouldEcho {
 				types[index].manuallyEcho = true
 			} else {
@@ -97,12 +110,6 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 					types[index].manuallyEcho = nil
 				}
 			}
-		} else {
-			let name = String(describing: task.self)
-			var newTask = TaskType(taskName: name)
-			newTask.manuallyEcho = shouldEcho
-			newTask.compiledEcho = task.self is EchoingTask.Type
-			self.types.append(newTask)
 		}
 		objectWillChange.send()
 	}
@@ -163,7 +170,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	func loadTypes(resetting: Bool) async {
 		guard let data = try? Data(contentsOf: typesURL) else { return }
 		
-		var newTypes = (try? JSONDecoder().decode([TaskType].self, from: data)) ?? []
+		var newTypes = (try? JSONDecoder().decode([LoggedTaskInfo].self, from: data)) ?? []
 		if resetting { newTypes.resetTaskTypes() }
 		let filtered = newTypes
 		await MainActor.run {
@@ -171,9 +178,15 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		}
 	}
 	
-	func index(of task: ServerTask.Type) -> Int? {
+	func index(of task: ServerTask.Type, noMatterWhat: Bool = false) -> Int? {
 		let name = String(describing: task.self)
-		return index(of: name)
+		if let index = index(of: name) { return index }
+		
+		if !noMatterWhat { return nil }
+		var newTask = LoggedTaskInfo(taskName: name)
+		newTask.compiledEcho = task.self is EchoingTask.Type
+		self.types.append(newTask)
+		return self.types.count - 1
 	}
 	
 	func index(of taskName: String) -> Int? {
@@ -194,7 +207,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 				echo = self.types[index].shouldEcho
 			} else {
 				let name = String(describing: type(of: task))
-				var newTask = TaskType(taskName: name)
+				var newTask = LoggedTaskInfo(taskName: name)
 				newTask.compiledEcho = task is EchoingTask || task.server.echoAll
 				echo = newTask.shouldEcho
 				self.types.append(newTask)
@@ -249,7 +262,7 @@ extension ConveyTaskManager {
 	enum Sort: String { case alpha, count, size, recent, enabled }
 }
 
-extension Array where Element == ConveyTaskManager.TaskType {
+extension Array where Element == ConveyTaskManager.LoggedTaskInfo {
 	mutating func resetTaskTypes() {
 		for i in indices {
 			self[i].dates = []

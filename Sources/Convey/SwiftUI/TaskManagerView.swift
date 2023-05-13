@@ -43,7 +43,7 @@ public struct TaskManagerView: View {
     }
 	
 	struct TaskTypeRow: View {
-		@Binding var taskType: ConveyTaskManager.TaskType
+		@Binding var taskType: ConveyTaskManager.LoggedTaskInfo
 		
 		var body: some View {
 			Group {

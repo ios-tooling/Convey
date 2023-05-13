@@ -20,21 +20,23 @@ public extension URLSession {
 	}
 	
 	func data(from request: URLRequest) async throws -> ServerReturned {
-		  try await withUnsafeThrowingContinuation { continuation in
-				let task = self.dataTask(with: request) { data, response, error in
-					 guard let data = data, let response = response else {
-						  let error = error ?? URLError(.badServerResponse)
-						  return continuation.resume(throwing: error)
-					 }
-					
-					guard let httpResponse = response as? HTTPURLResponse else {
-						return continuation.resume(throwing: ConveyServerError.unknownResponse(data, response))
-					}
-
-					continuation.resume(returning: ServerReturned(response: httpResponse, data: data, fromCache: false))
+		try await withUnsafeThrowingContinuation { continuation in
+			let startedAt = Date()
+			
+			let task = self.dataTask(with: request) { data, response, error in
+				guard let data = data, let response = response else {
+					let error = error ?? URLError(.badServerResponse)
+					return continuation.resume(throwing: error)
 				}
-
-				task.resume()
-		  }
-	 }
+				
+				guard let httpResponse = response as? HTTPURLResponse else {
+					return continuation.resume(throwing: ConveyServerError.unknownResponse(data, response))
+				}
+				
+				continuation.resume(returning: ServerReturned(response: httpResponse, data: data, fromCache: false, duration: abs(startedAt.timeIntervalSinceNow)))
+			}
+			
+			task.resume()
+		}
+	}
 }

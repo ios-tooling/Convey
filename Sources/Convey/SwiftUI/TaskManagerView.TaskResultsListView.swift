@@ -12,10 +12,10 @@ import SwiftUI
 @available(watchOS, unavailable)
 extension TaskManagerView {
 	struct TaskResultsListView: View {
-		let taskType: ConveyTaskManager.TaskType
+		let taskType: ConveyTaskManager.LoggedTaskInfo
 		let urls: [URL]
 		
-		init(taskType: ConveyTaskManager.TaskType) {
+		init(taskType: ConveyTaskManager.LoggedTaskInfo) {
 			self.taskType = taskType
 			self.urls = taskType.storedURLs.sorted { $0.absoluteString > $1.absoluteString }
 		}

@@ -9,11 +9,12 @@ import Foundation
 import SwiftUI
 
 extension ConveyTaskManager {
-	struct TaskType: Codable, Identifiable {
+	struct LoggedTaskInfo: Codable, Identifiable {
 		enum CodingKeys: String, CodingKey { case taskName, totalCount, dates, totalBytes, thisRunBytes, manuallyEcho, compiledEcho }
 		
 		var id: String { taskName }
 		let taskName: String
+		var oneOffLoggedCount: Int?
 		var totalCount = 1
 		var dates: [Date] = [Date()]
 		var thisRunCount: Int { dates.count }
@@ -31,6 +32,7 @@ extension ConveyTaskManager {
 		
 		var shouldEcho: Bool {
 			get {
+				if let oneOffLoggedCount, oneOffLoggedCount > 0 { return true }
 				if let manual = manuallyEcho { return manual }
 				return thisRunOnlyEcho || compiledEcho
 			}

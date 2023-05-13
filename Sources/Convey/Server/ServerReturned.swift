@@ -11,6 +11,7 @@ public struct ServerReturned {
 	public var response: HTTPURLResponse
 	public var data: Data
 	public var fromCache: Bool
+	public var duration: TimeInterval?
 	
 	public var statusCode: Int { response.statusCode }
 }

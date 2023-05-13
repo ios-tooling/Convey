@@ -111,11 +111,11 @@ extension ServerTask {
 			do {
 				if let threadName = (self as? ThreadedServerTask)?.threadName { await server.wait(forThread: threadName) }
 				let startedAt = Date()
+				let oneOffLogging = isOneOffLogged
 
 				try await (self as? PreFlightTask)?.preFlight()
 				var request = try await buildRequest()
 				request = try await server.preflight(self, request: request)
-				//preLog(startedAt: Date(), request: request)
 				await ConveyTaskManager.instance.begin(task: self, request: request, startedAt: startedAt)
 
 				var result = try await server.data(for: request)
@@ -127,6 +127,7 @@ extension ServerTask {
 					if self is FileBackedTask { self.fileCachedData = result.data }
 				}
 				
+				if oneOffLogging { ConveyTaskManager.instance.decrementOneOffLog(for: self) }
 				if self is ETagCachedTask, let tag = result.response.etag {
 					DataCache.instance.cache(data: result.data, for: url)
 					ETagStore.instance.store(etag: tag, for: url)
