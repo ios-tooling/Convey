@@ -21,6 +21,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	public var multitargetLogging = false
 	public var storeResults = true
 	public var logStyle = LogStyle.none
+	public var oneOffTypes: [String] = []
 	
 	public enum LogStyle: String, Comparable, CaseIterable { case none, short, steps
 		public static func <(lhs: Self, rhs: Self) -> Bool {
@@ -80,14 +81,12 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	
 	func incrementOneOffLog(for task: ServerTask) {
 		enabled = true
-		if let index = index(of: type(of: task), noMatterWhat: true) {
-			types[index].oneOffLoggedCount = (types[index].oneOffLoggedCount ?? 0) + 1
-		}
+		oneOffTypes.append(String(describing: type(of: task)))
 	}
 
 	func decrementOneOffLog(for task: ServerTask) {
-		if let index = index(of: type(of: task)) {
-			types[index].oneOffLoggedCount = max((types[index].oneOffLoggedCount ?? 0) - 1, 0)
+		if let index = oneOffTypes.firstIndex(of: String(describing: type(of: task))) {
+			oneOffTypes.remove(at: index)
 		}
 	}
 

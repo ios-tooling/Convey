@@ -22,9 +22,7 @@ extension ServerTask {
 	}
 	
 	public var isOneOffLogged: Bool {
-		guard let index = ConveyTaskManager.instance.index(of: type(of: self)) else { return false }
-		guard let count = ConveyTaskManager.instance.types[index].oneOffLoggedCount else { return false }
-		return count > 0
+		ConveyTaskManager.instance.oneOffTypes.contains(String(describing: type(of: self)))
 	}
 	
 	func logFilename(for date: Date) -> String {
