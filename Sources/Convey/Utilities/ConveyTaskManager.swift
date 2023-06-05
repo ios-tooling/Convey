@@ -220,6 +220,13 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	}
 	
 	func complete(task: ServerTask, request: URLRequest, response: HTTPURLResponse, bytes: Data, startedAt: Date, usingCache: Bool) async {
+		let shouldEcho: Bool
+		
+		if let index = self.index(of: task) {
+			shouldEcho = self.types[index].shouldEcho
+		} else {
+			shouldEcho = false
+		}
 		if multitargetLogging { await loadTypes(resetting: false) }
 		if logStyle > .short { print("☎︎ End \(task)")}
 		queue.async {
@@ -227,7 +234,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 				self.types[index].thisRunBytes += Int64(bytes.count)
 				self.types[index].totalBytes += Int64(bytes.count)
 				if self.multitargetLogging { self.saveTypes() }
-				if self.types[index].shouldEcho {
+				if shouldEcho {
 					let log = task.loggingOutput(startedAt: startedAt, request: request, data: bytes, response: response)
 					
 					if usingCache {
