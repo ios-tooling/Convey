@@ -11,10 +11,22 @@ import SwiftUI
 struct ConveyTest_iOSApp: App {
 	init() {
 		ConveyServer.serverInstance = ConveyServer()
+		
+		Task { await Self.testLinks() }
 	}
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
     }
+	
+	static func testLinks() async {
+		let data = try! await SimpleGETTask(url: URL("https://iosdev.space/api/v1/timelines/public")).downloadDataWithResponse()
+		
+		let links = data.response.links
+		print(links)
+		
+		let prev = data.response.linkURL(for: "prev")
+		print(prev!)
+	}
 }

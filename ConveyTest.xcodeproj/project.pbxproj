@@ -18,6 +18,10 @@
 		B54CAB8726ECB76400781A3A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B54CAB8626ECB76400781A3A /* Assets.xcassets */; };
 		B54CAB8A26ECB76400781A3A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B54CAB8926ECB76400781A3A /* Preview Assets.xcassets */; };
 		B54CAB9426ECB99F00781A3A /* Suite in Frameworks */ = {isa = PBXBuildFile; productRef = B54CAB9326ECB99F00781A3A /* Suite */; };
+		B566F2DE2A2DE4D600147728 /* HTTPURLResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B566F2DD2A2DE4D600147728 /* HTTPURLResponse.swift */; };
+		B566F2E02A2DE70700147728 /* ConveyTaskManager.LoggedTaskInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B566F2DF2A2DE70700147728 /* ConveyTaskManager.LoggedTaskInfo.swift */; };
+		B566F2E12A2DE70A00147728 /* ConveyTaskManager.LoggedTaskInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B566F2DF2A2DE70700147728 /* ConveyTaskManager.LoggedTaskInfo.swift */; };
+		B566F2E22A2DE7C400147728 /* HTTPURLResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B566F2DD2A2DE4D600147728 /* HTTPURLResponse.swift */; };
 		B56CFC7029F401ED00235938 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56CFC6F29F401ED00235938 /* Image.swift */; };
 		B56CFC7129F4039C00235938 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56CFC6F29F401ED00235938 /* Image.swift */; };
 		B5E3C0F329F3ED29005DD893 /* ServerTask+MIME.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0C029F3ED29005DD893 /* ServerTask+MIME.swift */; };
@@ -38,12 +42,12 @@
 		B5E3C10229F3ED29005DD893 /* ServerTask+Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0C729F3ED29005DD893 /* ServerTask+Request.swift */; };
 		B5E3C10329F3ED29005DD893 /* ServerTask+Echoing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0C829F3ED29005DD893 /* ServerTask+Echoing.swift */; };
 		B5E3C10429F3ED29005DD893 /* ServerTask+Echoing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0C829F3ED29005DD893 /* ServerTask+Echoing.swift */; };
-		B5E3C10529F3ED29005DD893 /* ServerTask+UploadAsync.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0C929F3ED29005DD893 /* ServerTask+UploadAsync.swift */; };
-		B5E3C10629F3ED29005DD893 /* ServerTask+UploadAsync.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0C929F3ED29005DD893 /* ServerTask+UploadAsync.swift */; };
+		B5E3C10529F3ED29005DD893 /* ServerTask+Upload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0C929F3ED29005DD893 /* ServerTask+Upload.swift */; };
+		B5E3C10629F3ED29005DD893 /* ServerTask+Upload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0C929F3ED29005DD893 /* ServerTask+Upload.swift */; };
 		B5E3C10729F3ED29005DD893 /* ServerTask+RefreshableCachedTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0CA29F3ED29005DD893 /* ServerTask+RefreshableCachedTask.swift */; };
 		B5E3C10829F3ED29005DD893 /* ServerTask+RefreshableCachedTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0CA29F3ED29005DD893 /* ServerTask+RefreshableCachedTask.swift */; };
-		B5E3C10929F3ED29005DD893 /* ServerTask+RunAsync.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0CB29F3ED29005DD893 /* ServerTask+RunAsync.swift */; };
-		B5E3C10A29F3ED29005DD893 /* ServerTask+RunAsync.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0CB29F3ED29005DD893 /* ServerTask+RunAsync.swift */; };
+		B5E3C10929F3ED29005DD893 /* ServerTask+Run.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0CB29F3ED29005DD893 /* ServerTask+Run.swift */; };
+		B5E3C10A29F3ED29005DD893 /* ServerTask+Run.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0CB29F3ED29005DD893 /* ServerTask+Run.swift */; };
 		B5E3C10B29F3ED29005DD893 /* ConveyServer+Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0CD29F3ED29005DD893 /* ConveyServer+Download.swift */; };
 		B5E3C10C29F3ED29005DD893 /* ConveyServer+Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0CD29F3ED29005DD893 /* ConveyServer+Download.swift */; };
 		B5E3C10D29F3ED29005DD893 /* ServerReturned.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0CE29F3ED29005DD893 /* ServerReturned.swift */; };
@@ -80,8 +84,6 @@
 		B5E3C12C29F3ED29005DD893 /* Bundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0DE29F3ED29005DD893 /* Bundle.swift */; };
 		B5E3C12D29F3ED29005DD893 /* URL+ContentType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0DF29F3ED29005DD893 /* URL+ContentType.swift */; };
 		B5E3C12E29F3ED29005DD893 /* URL+ContentType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0DF29F3ED29005DD893 /* URL+ContentType.swift */; };
-		B5E3C12F29F3ED29005DD893 /* ConveyTaskManager.TaskType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0E129F3ED29005DD893 /* ConveyTaskManager.TaskType.swift */; };
-		B5E3C13029F3ED29005DD893 /* ConveyTaskManager.TaskType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0E129F3ED29005DD893 /* ConveyTaskManager.TaskType.swift */; };
 		B5E3C13129F3ED29005DD893 /* CommandLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0E229F3ED29005DD893 /* CommandLine.swift */; };
 		B5E3C13229F3ED29005DD893 /* CommandLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0E229F3ED29005DD893 /* CommandLine.swift */; };
 		B5E3C13329F3ED29005DD893 /* ConveyTaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E3C0E329F3ED29005DD893 /* ConveyTaskManager.swift */; };
@@ -127,6 +129,8 @@
 		B54CAB8926ECB76400781A3A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B54CAB8B26ECB76400781A3A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B54CAB8C26ECB76400781A3A /* ConveyTest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ConveyTest.entitlements; sourceTree = "<group>"; };
+		B566F2DD2A2DE4D600147728 /* HTTPURLResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPURLResponse.swift; sourceTree = "<group>"; };
+		B566F2DF2A2DE70700147728 /* ConveyTaskManager.LoggedTaskInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConveyTaskManager.LoggedTaskInfo.swift; sourceTree = "<group>"; };
 		B56CFC6F29F401ED00235938 /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		B5E3C0C029F3ED29005DD893 /* ServerTask+MIME.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+MIME.swift"; sourceTree = "<group>"; };
 		B5E3C0C129F3ED29005DD893 /* ServerTask+Logging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+Logging.swift"; sourceTree = "<group>"; };
@@ -137,9 +141,9 @@
 		B5E3C0C629F3ED29005DD893 /* ServerTask+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+Extension.swift"; sourceTree = "<group>"; };
 		B5E3C0C729F3ED29005DD893 /* ServerTask+Request.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+Request.swift"; sourceTree = "<group>"; };
 		B5E3C0C829F3ED29005DD893 /* ServerTask+Echoing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+Echoing.swift"; sourceTree = "<group>"; };
-		B5E3C0C929F3ED29005DD893 /* ServerTask+UploadAsync.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+UploadAsync.swift"; sourceTree = "<group>"; };
+		B5E3C0C929F3ED29005DD893 /* ServerTask+Upload.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+Upload.swift"; sourceTree = "<group>"; };
 		B5E3C0CA29F3ED29005DD893 /* ServerTask+RefreshableCachedTask.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+RefreshableCachedTask.swift"; sourceTree = "<group>"; };
-		B5E3C0CB29F3ED29005DD893 /* ServerTask+RunAsync.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+RunAsync.swift"; sourceTree = "<group>"; };
+		B5E3C0CB29F3ED29005DD893 /* ServerTask+Run.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ServerTask+Run.swift"; sourceTree = "<group>"; };
 		B5E3C0CD29F3ED29005DD893 /* ConveyServer+Download.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ConveyServer+Download.swift"; sourceTree = "<group>"; };
 		B5E3C0CE29F3ED29005DD893 /* ServerReturned.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerReturned.swift; sourceTree = "<group>"; };
 		B5E3C0CF29F3ED29005DD893 /* ConveyServerConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConveyServerConstants.swift; sourceTree = "<group>"; };
@@ -158,7 +162,6 @@
 		B5E3C0DD29F3ED29005DD893 /* URLQueryItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLQueryItem.swift; sourceTree = "<group>"; };
 		B5E3C0DE29F3ED29005DD893 /* Bundle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bundle.swift; sourceTree = "<group>"; };
 		B5E3C0DF29F3ED29005DD893 /* URL+ContentType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "URL+ContentType.swift"; sourceTree = "<group>"; };
-		B5E3C0E129F3ED29005DD893 /* ConveyTaskManager.TaskType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConveyTaskManager.TaskType.swift; sourceTree = "<group>"; };
 		B5E3C0E229F3ED29005DD893 /* CommandLine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandLine.swift; sourceTree = "<group>"; };
 		B5E3C0E329F3ED29005DD893 /* ConveyTaskManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConveyTaskManager.swift; sourceTree = "<group>"; };
 		B5E3C0E429F3ED29005DD893 /* HTTPError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HTTPError.swift; sourceTree = "<group>"; };
@@ -293,9 +296,9 @@
 				B5E3C0C629F3ED29005DD893 /* ServerTask+Extension.swift */,
 				B5E3C0C729F3ED29005DD893 /* ServerTask+Request.swift */,
 				B5E3C0C829F3ED29005DD893 /* ServerTask+Echoing.swift */,
-				B5E3C0C929F3ED29005DD893 /* ServerTask+UploadAsync.swift */,
+				B5E3C0C929F3ED29005DD893 /* ServerTask+Upload.swift */,
 				B5E3C0CA29F3ED29005DD893 /* ServerTask+RefreshableCachedTask.swift */,
-				B5E3C0CB29F3ED29005DD893 /* ServerTask+RunAsync.swift */,
+				B5E3C0CB29F3ED29005DD893 /* ServerTask+Run.swift */,
 			);
 			path = Tasks;
 			sourceTree = "<group>";
@@ -320,6 +323,7 @@
 				B5E3C0D529F3ED29005DD893 /* URLRequest.swift */,
 				B5E3C0D629F3ED29005DD893 /* Error.swift */,
 				B5E3C0D729F3ED29005DD893 /* URLResponse.swift */,
+				B566F2DD2A2DE4D600147728 /* HTTPURLResponse.swift */,
 				B5E3C0D829F3ED29005DD893 /* MD5.swift */,
 				B5E3C0D929F3ED29005DD893 /* URLSession.swift */,
 				B5E3C0DA29F3ED29005DD893 /* URL+Images.swift */,
@@ -336,7 +340,7 @@
 		B5E3C0E029F3ED29005DD893 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				B5E3C0E129F3ED29005DD893 /* ConveyTaskManager.TaskType.swift */,
+				B566F2DF2A2DE70700147728 /* ConveyTaskManager.LoggedTaskInfo.swift */,
 				B5E3C0E229F3ED29005DD893 /* CommandLine.swift */,
 				B5E3C0E329F3ED29005DD893 /* ConveyTaskManager.swift */,
 				B5E3C0E429F3ED29005DD893 /* HTTPError.swift */,
@@ -484,8 +488,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5E3C10A29F3ED29005DD893 /* ServerTask+RunAsync.swift in Sources */,
+				B5E3C10A29F3ED29005DD893 /* ServerTask+Run.swift in Sources */,
 				B5E3C12C29F3ED29005DD893 /* Bundle.swift in Sources */,
+				B566F2E22A2DE7C400147728 /* HTTPURLResponse.swift in Sources */,
 				B5E3C11A29F3ED29005DD893 /* URLRequest.swift in Sources */,
 				B5E3C14829F3ED29005DD893 /* TaskManagerView.TaskResultsListView.swift in Sources */,
 				B5E3C14A29F3ED29005DD893 /* TaskManagerView.swift in Sources */,
@@ -501,13 +506,13 @@
 				B5E3C13C29F3ED29005DD893 /* ImageCache.swift in Sources */,
 				B5E3C0F429F3ED29005DD893 /* ServerTask+MIME.swift in Sources */,
 				B5E3C12E29F3ED29005DD893 /* URL+ContentType.swift in Sources */,
+				B566F2E12A2DE70A00147728 /* ConveyTaskManager.LoggedTaskInfo.swift in Sources */,
 				B5E3C10C29F3ED29005DD893 /* ConveyServer+Download.swift in Sources */,
 				B5E3C0F629F3ED29005DD893 /* ServerTask+Logging.swift in Sources */,
 				B5E3C14629F3ED29005DD893 /* CachedURLImageView.swift in Sources */,
 				B5E3C11229F3ED29005DD893 /* ConveyServer.swift in Sources */,
-				B5E3C13029F3ED29005DD893 /* ConveyTaskManager.TaskType.swift in Sources */,
 				B5E3C0F829F3ED29005DD893 /* ServerTask+FileBacked.swift in Sources */,
-				B5E3C10629F3ED29005DD893 /* ServerTask+UploadAsync.swift in Sources */,
+				B5E3C10629F3ED29005DD893 /* ServerTask+Upload.swift in Sources */,
 				B5E3C13429F3ED29005DD893 /* ConveyTaskManager.swift in Sources */,
 				B5E3C12829F3ED29005DD893 /* String.swift in Sources */,
 				B5E3C13E29F3ED29005DD893 /* PlatformImage.swift in Sources */,
@@ -557,6 +562,7 @@
 				B5E3C12D29F3ED29005DD893 /* URL+ContentType.swift in Sources */,
 				B5E3C10B29F3ED29005DD893 /* ConveyServer+Download.swift in Sources */,
 				B5E3C14129F3ED29005DD893 /* DataCache.swift in Sources */,
+				B566F2E02A2DE70700147728 /* ConveyTaskManager.LoggedTaskInfo.swift in Sources */,
 				B5E3C12129F3ED29005DD893 /* URLSession.swift in Sources */,
 				B5E3C11929F3ED29005DD893 /* URLRequest.swift in Sources */,
 				B5E3C10129F3ED29005DD893 /* ServerTask+Request.swift in Sources */,
@@ -565,6 +571,7 @@
 				B5E3C11329F3ED29005DD893 /* ConveyServerError.swift in Sources */,
 				B5E3C0FF29F3ED29005DD893 /* ServerTask+Extension.swift in Sources */,
 				B5E3C10329F3ED29005DD893 /* ServerTask+Echoing.swift in Sources */,
+				B566F2DE2A2DE4D600147728 /* HTTPURLResponse.swift in Sources */,
 				B56CFC7029F401ED00235938 /* Image.swift in Sources */,
 				B5E3C13D29F3ED29005DD893 /* PlatformImage.swift in Sources */,
 				B5E3C11D29F3ED29005DD893 /* URLResponse.swift in Sources */,
@@ -575,16 +582,15 @@
 				B5E3C0F729F3ED29005DD893 /* ServerTask+FileBacked.swift in Sources */,
 				B5E3C11F29F3ED29005DD893 /* MD5.swift in Sources */,
 				B5E3C14B29F3ED29005DD893 /* TaskManagerView.TaskResultsDetails.swift in Sources */,
-				B5E3C12F29F3ED29005DD893 /* ConveyTaskManager.TaskType.swift in Sources */,
 				B5E3C13B29F3ED29005DD893 /* ImageCache.swift in Sources */,
-				B5E3C10929F3ED29005DD893 /* ServerTask+RunAsync.swift in Sources */,
+				B5E3C10929F3ED29005DD893 /* ServerTask+Run.swift in Sources */,
 				B5E3C10729F3ED29005DD893 /* ServerTask+RefreshableCachedTask.swift in Sources */,
 				B5E3C13729F3ED29005DD893 /* DeviceType.swift in Sources */,
 				B5E3C13529F3ED29005DD893 /* HTTPError.swift in Sources */,
 				B5E3C0FD29F3ED29005DD893 /* ServerTask.swift in Sources */,
 				B5E3C0FB29F3ED29005DD893 /* SimpleTasks.swift in Sources */,
 				B5E3C0F529F3ED29005DD893 /* ServerTask+Logging.swift in Sources */,
-				B5E3C10529F3ED29005DD893 /* ServerTask+UploadAsync.swift in Sources */,
+				B5E3C10529F3ED29005DD893 /* ServerTask+Upload.swift in Sources */,
 				B5E3C13129F3ED29005DD893 /* CommandLine.swift in Sources */,
 				B5E3C10D29F3ED29005DD893 /* ServerReturned.swift in Sources */,
 				B5E3C11529F3ED29005DD893 /* ConveyServer+Threading.swift in Sources */,
