@@ -36,11 +36,18 @@ extension CGSize {
 	}
 }
 
-public struct ImageSize {
+public struct ImageSize: CustomStringConvertible {
 	public let width: CGFloat?
 	public let height: CGFloat?
 	public let tolerance: CGFloat
 	public let isMaxSize: Bool
+	public let aspectRatio: CGFloat?
+	
+	public var description: String {
+		if let width, let height { return "-\(width)x\(height)"}
+		if let aspectRatio { return "-⦛\(aspectRatio)" }
+		return ""
+	}
 	
 	public func size(basedOn: CGSize) -> CGSize? {
 		if let width, let height { return CGSize(width: width, height: height) }
@@ -51,6 +58,14 @@ public struct ImageSize {
 		if let height {
 			return CGSize(width: height * (basedOn.width / basedOn.height), height: height)
 		}
+		
+		if let aspectRatio {
+			if (basedOn.width > basedOn.height) == (aspectRatio <= 1) {
+				return CGSize(width: basedOn.height * aspectRatio, height: basedOn.height)
+			} else {
+				return CGSize(width: basedOn.width, height: basedOn.height / aspectRatio)
+			}
+		}
 		return nil
 	}
 	
@@ -59,6 +74,7 @@ public struct ImageSize {
 		self.height = size.height
 		self.isMaxSize = isMaxSize
 		self.tolerance = tolerance
+		self.aspectRatio = nil
 	}
 	
 	public init(width: CGFloat? = nil, height: CGFloat? = nil, tolerance: CGFloat = 1.0, isMaxSize: Bool = true) {
@@ -66,6 +82,15 @@ public struct ImageSize {
 		self.height = height
 		self.isMaxSize = isMaxSize
 		self.tolerance = tolerance
+		self.aspectRatio = nil
+	}
+	
+	public init(aspectRatio: CGFloat) {
+		self.width = nil
+		self.height = nil
+		self.isMaxSize = false
+		self.tolerance = 1.0
+		self.aspectRatio = aspectRatio
 	}
 	
 	#if os(iOS)
@@ -75,6 +100,8 @@ public struct ImageSize {
 	#endif
 	
 	public var suffix: String {
+		if let aspectRatio { return "_⦛\(aspectRatio)" }
+
 		if tolerance == 0 {
 			return "_(\(Int(width ?? 0))x\(Int(height ?? 0)))"
 		}
@@ -82,6 +109,10 @@ public struct ImageSize {
 	}
 	
 	func matches(size check: CGSize) -> Bool {
+		if let aspectRatio {
+			return check.width / check.height == aspectRatio
+		}
+
 		if isMaxSize {
 			if let width, width > check.width + tolerance { return false }
 			if let height, height > check.height + tolerance { return false }
@@ -102,7 +133,8 @@ extension ImageSize {
 		if let limit = size(basedOn: image.size) {
 			let scaled = image.size.scaled(within: limit)
 			return UIGraphicsImageRenderer(size: scaled).image { ctx in
-				image.draw(in: CGRect(x: 0, y: 0, width: scaled.width, height: scaled.height))
+			//	image.draw(in: CGRect(x: 0, y: 0, width: scaled.width, height: scaled.height))
+				image.draw(in: CGRect(x: (scaled.width - image.size.width) / 2, y: (scaled.height - image.size.height) / 2, width: image.size.width, height: image.size.height))
 			}
 		}
 		return image
