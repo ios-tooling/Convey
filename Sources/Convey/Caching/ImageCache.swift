@@ -23,9 +23,9 @@ public actor ImageCache {
 	nonisolated let parentDirectory = CurrentValueSubject<URL, Never>(ImageCache.defaultDirectory)
 	
 	public struct ImageInfo {
-		let image: PlatformImage?
-		let localURL: URL?
-		let remoteURL: URL?
+		public let image: PlatformImage?
+		public let localURL: URL?
+		public let remoteURL: URL?
 		
 		static let empty = ImageInfo(image: nil, localURL: nil, remoteURL: nil)
 	}
@@ -73,6 +73,10 @@ public actor ImageCache {
 		inMemoryImages.value.removeValue(forKey: key)
 	}
 
+	public nonisolated func fetchLocalImage(for url: URL?, kind: DataCache.CacheKind = .default, size: ImageSize? = nil, extension ext: String? = nil) -> PlatformImage? {
+		fetchLocalInfo(for: url, kind: kind, size: size, extension: ext)?.image
+	}
+		
 	public nonisolated func fetchLocalInfo(for url: URL?, kind: DataCache.CacheKind = .default, size: ImageSize? = nil, extension ext: String? = nil) -> ImageInfo? {
 		guard let url else { return nil }
 		return fetchLocalInfo(for: provision(url: url, kind: kind, suffix: size?.suffix, ext: ext), size: size)
