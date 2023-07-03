@@ -75,14 +75,13 @@ public actor ImageCache {
 
 	public nonisolated func fetchLocalInfo(for url: URL?, kind: DataCache.CacheKind = .default, size: ImageSize? = nil, extension ext: String? = nil) -> ImageInfo? {
 		guard let url else { return nil }
-		return fetchLocalInfo(for: provision(url: url, kind: kind), size: size)
+		return fetchLocalInfo(for: provision(url: url, kind: kind, suffix: size?.suffix, ext: ext), size: size)
 	}
 
-	public nonisolated func fetchLocalInfo(for provision: DataCache.Provision, size: ImageSize? = nil) -> ImageInfo? {
-		var prov = provision
-		prov.ext = provision.ext ?? provision.url.cachePathExtension ?? "jpeg"
+	public nonisolated func fetchLocalInfo(for prov: DataCache.Provision, size: ImageSize? = nil) -> ImageInfo? {
+		let provision = prov.byAdding(extension: prov.ext ?? prov.url.cachePathExtension ?? "jpeg")
 		let key = provision.key
-		let localURL = provision.location
+		let localURL = provision.localURL
 		let remoteURL = provision.url
 
 		if let cached = inMemoryImages.value[key] { return .init(image: cached.image, localURL: localURL, remoteURL: remoteURL) }

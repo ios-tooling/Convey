@@ -25,7 +25,13 @@ public extension CGSize {
 
 extension CGSize {
 	var aspectRatio: CGFloat { width / height }
-	func scaled(within parent: CGSize) -> CGSize {
+	func scaled(within parent: CGSize, toFit: Bool) -> CGSize {
+		if toFit {
+			let scale = min(parent.width / self.width, parent.height / self.height)
+			let width = self.width * scale
+			let height = self.height * scale
+			return CGSize(width: width, height: height)
+		}
 		if aspectRatio < parent.aspectRatio {
 			return CGSize(width: parent.width * (aspectRatio / parent.aspectRatio), height: parent.height)
 		} else if aspectRatio < parent.aspectRatio {
@@ -42,6 +48,7 @@ public struct ImageSize: CustomStringConvertible {
 	public let tolerance: CGFloat
 	public let isMaxSize: Bool
 	public let aspectRatio: CGFloat?
+	public var toFit = false
 	
 	public var description: String {
 		if let width, let height { return "-\(width)x\(height)"}
@@ -69,28 +76,31 @@ public struct ImageSize: CustomStringConvertible {
 		return nil
 	}
 	
-	public init(size: CGSize, tolerance: CGFloat = 1.0, isMaxSize: Bool = true) {
+	public init(size: CGSize, tolerance: CGFloat = 1.0, isMaxSize: Bool = true, toFit: Bool = false) {
 		self.width = size.width
 		self.height = size.height
 		self.isMaxSize = isMaxSize
 		self.tolerance = tolerance
 		self.aspectRatio = nil
+		self.toFit = toFit
 	}
 	
-	public init(width: CGFloat? = nil, height: CGFloat? = nil, tolerance: CGFloat = 1.0, isMaxSize: Bool = true) {
+	public init(width: CGFloat? = nil, height: CGFloat? = nil, tolerance: CGFloat = 1.0, isMaxSize: Bool = true, toFit: Bool = false) {
 		self.width = width
 		self.height = height
 		self.isMaxSize = isMaxSize
 		self.tolerance = tolerance
 		self.aspectRatio = nil
+		self.toFit = toFit
 	}
 	
-	public init(aspectRatio: CGFloat) {
+	public init(aspectRatio: CGFloat, toFit: Bool = false) {
 		self.width = nil
 		self.height = nil
 		self.isMaxSize = false
 		self.tolerance = 1.0
 		self.aspectRatio = aspectRatio
+		self.toFit = toFit
 	}
 	
 	#if os(iOS)
@@ -100,12 +110,13 @@ public struct ImageSize: CustomStringConvertible {
 	#endif
 	
 	public var suffix: String {
-		if let aspectRatio { return "_⦛\(aspectRatio)" }
+		let toFitSuffix = self.toFit ? "-toFit" : ""
+		if let aspectRatio { return "_⦛\(aspectRatio)" + toFitSuffix }
 
 		if tolerance == 0 {
-			return "_(\(Int(width ?? 0))x\(Int(height ?? 0)))"
+			return "_(\(Int(width ?? 0))x\(Int(height ?? 0)))" + toFitSuffix
 		}
-		return "_(\(Int(width ?? 0))x\(Int(height ?? 0)))±\(Int(tolerance))"
+		return "_(\(Int(width ?? 0))x\(Int(height ?? 0)))±\(Int(tolerance))" + toFitSuffix
 	}
 	
 	func matches(size check: CGSize) -> Bool {
@@ -131,10 +142,15 @@ extension ImageSize {
 	func resize(_ image: UIImage) -> UIImage? {
 		if matches(size: image.size) { return image }
 		if let limit = size(basedOn: image.size) {
-			let scaled = image.size.scaled(within: limit)
-			return UIGraphicsImageRenderer(size: scaled).image { ctx in
-			//	image.draw(in: CGRect(x: 0, y: 0, width: scaled.width, height: scaled.height))
-				image.draw(in: CGRect(x: (scaled.width - image.size.width) / 2, y: (scaled.height - image.size.height) / 2, width: image.size.width, height: image.size.height))
+			let scaled = image.size.scaled(within: limit, toFit: toFit)
+			let format = UIGraphicsImageRendererFormat()
+			format.scale = 1
+			return UIGraphicsImageRenderer(size: scaled, format: format).image { ctx in
+				if toFit {
+					image.draw(in: CGRect(x: 0, y: 0, width: scaled.width, height: scaled.height))
+				} else {
+					image.draw(in: CGRect(x: (scaled.width - image.size.width) / 2, y: (scaled.height - image.size.height) / 2, width: image.size.width, height: image.size.height))
+				}
 			}
 		}
 		return image

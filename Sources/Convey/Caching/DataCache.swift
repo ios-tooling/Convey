@@ -42,8 +42,7 @@ public class DataCache {
 	}
 	
 	public func removeItem(for provision: Provision) {
-		let localURL = self.location(of: provision) //location.location(of: task.url, relativeTo: cachesDirectory)
-		try? FileManager.default.removeItem(at: localURL)
+		try? FileManager.default.removeItem(at: provision.localURL)
 	}
 
 	@discardableResult func cache(data: Data, for url: URL) -> URL {
@@ -51,18 +50,14 @@ public class DataCache {
 	}
 
 	@discardableResult func cache(data: Data, for provision: Provision) -> URL {
-		let localURL = self.location(of: provision) //location.location(of: task.url, relativeTo: cachesDirectory)
+		let localURL = provision.localURL //location.location(of: task.url, relativeTo: cachesDirectory)
 		try? FileManager.default.createDirectory(at: localURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
 		try? data.write(to: localURL)
 		return localURL
 	}
 	
 	public func location(of url: URL) -> URL {
-		location(of: provision(url: url))
-	}
-
-	public func location(of provision: Provision) -> URL {
-		provision.location
+		provision(url: url).localURL
 	}
 
 	public func replace(data: Data, for url: URL) throws {
@@ -70,7 +65,7 @@ public class DataCache {
 	}
 
 	public func replace(data: Data, for provision: Provision) throws {
-		let localURL = provision.location
+		let localURL = provision.localURL
 		try? FileManager.default.removeItem(at: localURL)
 		try? FileManager.default.createDirectory(at: localURL.deletingLastPathComponent(), withIntermediateDirectories: true)
 		try data.write(to: localURL)
@@ -81,7 +76,7 @@ public class DataCache {
 	}
 
 	public func hasCachedValue(for provision: Provision, newerThan: Date? = nil) -> Bool {
-		let localURL = provision.location
+		let localURL = provision.localURL
 		
 		if !FileManager.default.fileExists(atPath: localURL.path) { return false }
 		guard let size = localURL.size, size > 0 else { return false }
@@ -97,12 +92,12 @@ public class DataCache {
 		
 	public func fetchLocal(for provision: Provision, newerThan: Date? = nil) -> DataAndLocalCache? {
 		if provision.isLocal {
-			if let data = try? Data(contentsOf: provision.location) {
+			if let data = try? Data(contentsOf: provision.localURL) {
 				return DataAndLocalCache(data: data, url: provision.url)
 			}
 			return nil
 		}
-		let localURL = provision.location
+		let localURL = provision.localURL
 
 		if !FileManager.default.fileExists(atPath: localURL.path) { return nil }
 		if let limit = newerThan {
