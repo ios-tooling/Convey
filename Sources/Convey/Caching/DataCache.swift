@@ -12,94 +12,76 @@ public class DataCache {
 	public var cachesDirectory = URL.systemDirectoryURL(which: .cachesDirectory)!
 
 	public func setCacheRoot(_ root: URL) { cachesDirectory = root }
-	public func fetch<FetchTask: ServerTask>(using task: FetchTask, caching: Caching = .localFirst, location: CacheLocation = .default) async throws -> Data? {
-		try await fetchDataAndCache(using: task, caching: caching, location: location)?.data
+
+	public func fetch(from url: URL, caching: Caching = .localFirst, provision: Provision) async throws -> Data? {
+		try await fetch(using: provision, caching: caching)
+	}
+	
+	public func fetch(using provision: Provision, caching: Caching = .localFirst) async throws -> Data? {
+		if provision.url.isFileURL { return try Data(contentsOf: provision.url) }
+		return try await fetch(using: SimpleGETTask(url: provision.url), caching: caching, provision: provision)
 	}
 
-	public func fetchCachedLocation<FetchTask: ServerTask>(using task: FetchTask, caching: Caching = .localFirst, location: CacheLocation = .default) async throws -> URL? {
-		try await fetchDataAndCache(using: task, caching: caching, location: location)?.url
-	}
-
-	public func fetch(from url: URL, caching: Caching = .localFirst, location: CacheLocation = .default) async throws -> Data? {
-		if url.isFileURL { return try Data(contentsOf: url) }
-		return try await fetch(using: SimpleGETTask(url: url), caching: caching, location: location)
-	}
-
-	public func fetchCachedLocation(from url: URL, caching: Caching = .localFirst, location: CacheLocation = .default) async throws -> URL? {
-		try await fetchCachedLocation(using: SimpleGETTask(url: url), caching: caching, location: location)
+	public func fetchCachedLocation(from provision: Provision, caching: Caching = .localFirst) async throws -> URL? {
+		try await fetchCachedLocation(using: SimpleGETTask(url: provision.url), caching: caching, provision: provision)
 	}
 	
 	public func clear() {
 		try? FileManager.default.removeItem(at: cachesDirectory)
 		try? FileManager.default.createDirectory(at: cachesDirectory, withIntermediateDirectories: true)
 	}
-
-	public func prune(location: CacheLocation) {
-		if let url = location.container(relativeTo: cachesDirectory) {
+	
+	public func prune(kind: CacheKind) {
+		if let url = kind.container(relativeTo: cachesDirectory) {
 			try? FileManager.default.removeItem(at: url)
 		}
 	}
 
-	public func removeItem(for url: URL, location: CacheLocation = .default) {
-		let localURL = self.location(of: url, relativeTo: location) //location.location(of: task.url, relativeTo: cachesDirectory)
+	public func removeItem(for url: URL) {
+		removeItem(for: provision(url: url, kind: .default))
+	}
+	
+	public func removeItem(for provision: Provision) {
+		let localURL = self.location(of: provision) //location.location(of: task.url, relativeTo: cachesDirectory)
 		try? FileManager.default.removeItem(at: localURL)
 	}
 
-	func fetchDataAndCache<FetchTask: ServerTask>(using task: FetchTask, caching: Caching = .localFirst, location: CacheLocation = .default) async throws -> DataAndLocalCache? {
-		let url = task.url
-
-		switch caching {
-		case .skipLocal, .never:
-			return try await download(using: task, caching: caching, location: location)
-			
-		case .localFirst:
-			if let data = fetchLocal(for: url, location: location) { return data }
-			return try await download(using: task, caching: caching, location: location)
-
-		case .localIfNewer(let date):
-			if let data = fetchLocal(for: url, location: location, newerThan: date) { return data }
-			return try await download(using: task, caching: caching, location: location)
-
-		case .localOnly:
-			return fetchLocal(for: url, location: location)
-
-		}
+	@discardableResult func cache(data: Data, for url: URL) -> URL {
+		cache(data: data, for: provision(url: url))
 	}
-	
-	@discardableResult func cache(data: Data, for url: URL, location: CacheLocation = .default) -> URL {
-		let localURL = self.location(of: url, relativeTo: location) //location.location(of: task.url, relativeTo: cachesDirectory)
+
+	@discardableResult func cache(data: Data, for provision: Provision) -> URL {
+		let localURL = self.location(of: provision) //location.location(of: task.url, relativeTo: cachesDirectory)
 		try? FileManager.default.createDirectory(at: localURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
 		try? data.write(to: localURL)
 		return localURL
 	}
 	
-	func download<Task: ServerTask>(using task: Task, caching: Caching, location: CacheLocation) async throws -> DataAndLocalCache {
-		let data = try await task.downloadData()
+	public func location(of url: URL) -> URL {
+		location(of: provision(url: url))
+	}
 
-		if caching != .never {
-			let localURL = cache(data: data, for: task.url, location: location)
-			return DataAndLocalCache(data: data, url: localURL)
-		}
-		return DataAndLocalCache(data: data, url: nil)
+	public func location(of provision: Provision) -> URL {
+		provision.location
 	}
-	
-	public func location(of url: URL, relativeTo location: CacheLocation = .default, extension ext: String? = nil) -> URL {
-		location.location(of: url, relativeTo: cachesDirectory, extension: ext)
+
+	public func replace(data: Data, for url: URL) throws {
+		try replace(data: data, for: provision(url: url))
 	}
-	
-	public func replace(data: Data, for url: URL, location: CacheLocation, extension ext: String? = nil) throws {
-		let localURL = self.location(of: url, relativeTo: location, extension: ext)
+
+	public func replace(data: Data, for provision: Provision) throws {
+		let localURL = provision.location
 		try? FileManager.default.removeItem(at: localURL)
 		try? FileManager.default.createDirectory(at: localURL.deletingLastPathComponent(), withIntermediateDirectories: true)
 		try data.write(to: localURL)
 	}
-	
-	public func replace<Task: ServerTask>(data: Data, for task: Task, location: CacheLocation) throws {
-		try replace(data: data, for: task.url, location: location)
+
+	public func hasCachedValue(for url: URL, newerThan: Date? = nil) -> Bool {
+		hasCachedValue(for: provision(url: url))
 	}
-	
-	public func hasCachedValue(for url: URL, location: CacheLocation = .default, newerThan: Date? = nil) -> Bool {
-		let localURL = self.location(of: url, relativeTo: location)
+
+	public func hasCachedValue(for provision: Provision, newerThan: Date? = nil) -> Bool {
+		let localURL = provision.location
 		
 		if !FileManager.default.fileExists(atPath: localURL.path) { return false }
 		guard let size = localURL.size, size > 0 else { return false }
@@ -108,15 +90,19 @@ public class DataCache {
 		}
 		return true
 	}
-	
-	public func fetchLocal(for url: URL, location: CacheLocation = .default, newerThan: Date? = nil) -> DataAndLocalCache? {
-		if url.isFileURL {
-			if let data = try? Data(contentsOf: url) {
-				return DataAndLocalCache(data: data, url: url)
+
+	public func fetchLocal(for url: URL, newerThan: Date? = nil) -> DataAndLocalCache? {
+		fetchLocal(for: provision(url: url))
+	}
+		
+	public func fetchLocal(for provision: Provision, newerThan: Date? = nil) -> DataAndLocalCache? {
+		if provision.isLocal {
+			if let data = try? Data(contentsOf: provision.location) {
+				return DataAndLocalCache(data: data, url: provision.url)
 			}
 			return nil
 		}
-		let localURL = self.location(of: url, relativeTo: location)
+		let localURL = provision.location
 
 		if !FileManager.default.fileExists(atPath: localURL.path) { return nil }
 		if let limit = newerThan {
@@ -133,90 +119,3 @@ public class DataCache {
 	}
 }
 
-extension DataCache {
-	public enum Caching: Equatable { case skipLocal, localFirst, localIfNewer(Date), localOnly, never }
-	public enum CacheLocation { case `default`, keyed(String), fixed(URL), grouped(String, String?)
-		func location(of url: URL, relativeTo parent: URL, extension ext: String? = nil) -> URL {
-			let pathExtension = (ext ?? url.cachePathExtension ?? "dat" )
-			switch self {
-			case .default:
-				return parent.appendingPathComponent(url.cacheKey + "." + pathExtension)
-
-			case .keyed(let key):
-				return parent.appendingPathComponent(key)
-				
-			case .fixed(let location):
-				return location
-				
-			case .grouped(let group, let key):
-				return parent.appendingPathComponent(group).appendingPathComponent(key ?? (url.cacheKey + "." + pathExtension))
-
-			}
-		}
-		
-		var group: String? {
-			switch self {
-			case .grouped(let group, _): return group
-			default: return nil
-			}
-		}
-		
-		func container(relativeTo parent: URL) -> URL? {
-			switch self {
-			case .grouped(let group, _):
-				return parent.appendingPathComponent(group)
-			default:
-				return nil
-			}
-		}
-		
-		func key(for url: URL, suffix: String? = nil, extension ext: String = "dat") -> String {
-			switch self {
-			case .default:
-				return url.cacheKey + (suffix ?? "") + "." + ext
-
-			case .keyed(let key):
-				return key
-				
-			case .fixed:
-				return url.cacheKey
-				
-			case .grouped(let group, let key):
-				return group + "/" + (key ?? (url.cacheKey + "." + ext))
-
-			}
-		}
-
-		func localURL(for remote: URL, key: String?, group: String?, parent: URL, preferred: URL?) -> URL {
-			if let location = preferred { return location }
-			
-			let actualKey = key ?? (remote.cacheKey + ".dat")
-			
-			if let group = group {
-				return parent.appendingPathComponent(group).appendingPathComponent(actualKey)
-			}
-			
-			return parent.appendingPathComponent(actualKey)
-		}
-	}
-}
-
-extension URL {
-	var creationDate: Date? {
-		guard
-			isFileURL,
-			let attributes = try? FileManager.default.attributesOfItem(atPath: path),
-			let date = attributes[.creationDate] as? Date
-		else { return nil }
-		return date
-	}
-	
-	var size: UInt64? {
-		guard
-			isFileURL,
-			let attributes = try? FileManager.default.attributesOfItem(atPath: path),
-			let size = attributes[.size] as? UInt64
-		else { return nil }
-		return size
-	}
-}

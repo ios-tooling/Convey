@@ -31,7 +31,7 @@ extension RefreshableCachedTask {
 				Task {
 					do {
 						let result = try await self.downloadData()
-						try DataCache.instance.replace(data: result, for: self, location: .default)
+						try DataCache.instance.replace(data: result, for: self)
 						completion(.success(result))
 					} catch {
 						completion(.failure(error))
@@ -43,7 +43,7 @@ extension RefreshableCachedTask {
 			
 		case .forceRefetch:
 			let fresh = try await self.downloadData()
-			try DataCache.instance.replace(data: fresh, for: self, location: .default)
+			try DataCache.instance.replace(data: fresh, for: self)
 			return fresh
 		}
 		

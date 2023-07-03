@@ -13,8 +13,6 @@ import Combine
 	import UIKit
 #endif
 
-
-
 public actor ImageCache {
 	public static let instance = ImageCache()
 	public var cachesDirectory = ImageCache.defaultDirectory { didSet {
@@ -50,64 +48,46 @@ public actor ImageCache {
 	public func setCacheLimit(_ limit: Int) { currentSizeLimit = limit }
 	public func fetchTotalSize() -> Int { totalSize }
 
-	public func fetch<FetchTask: ServerTask>(using task: FetchTask, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default, size: ImageSize? = nil) async throws -> PlatformImage? {
-		try await fetchInfo(using: task, caching: caching, location: location, size: size).image
+	public nonisolated func provision(url: URL, kind: DataCache.CacheKind = .default, suffix: String? = nil, ext: String? = nil) -> DataCache.Provision {
+		DataCache.Provision(url: url, kind: kind, suffix: suffix, ext: ext, root: parentDirectory.value)
 	}
 
-	public func fetchInfo<FetchTask: ServerTask>(using task: FetchTask, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default, size: ImageSize? = nil) async throws -> ImageInfo {
-		
-		let key = location.key(for: task.url, suffix: size?.suffix, extension: task.url.cachePathExtension ?? "jpeg")
-		let actualLocation = self.location(for: task.url, current: location)
-		let localURL = DataCache.instance.location(of: task.url, relativeTo: actualLocation)
-		
-		if let cachedImage = inMemoryImages.value[key]?.image {
-			return .init(image: cachedImage, localURL: localURL, remoteURL: task.url)
-		}
-		
-		guard let data = try await DataCache.instance.fetch(using: task, caching: caching, location: actualLocation) else { return .init(image: nil, localURL: localURL, remoteURL: task.url) }
-		
-		if let image = PlatformImage(data: data) {
-			let resized = size?.resize(image) ?? image
-			if resized != image, let data = resized.data {
-				try? DataCache.instance.replace(data: data, for: task, location: actualLocation)
-			}
-			if caching == .never { return .init(image: resized, localURL: localURL, remoteURL: task.url) }
-			updateCache(for: key, with: InMemoryImage(image: resized, size: data.count, createdAt: Date(), key: key, group: location.group))
-			prune()
-			return .init(image: resized, localURL: localURL, remoteURL: task.url)
-		}
-		return .init(image: nil, localURL: localURL, remoteURL: task.url)
-	}
-	
 	public func store(image: PlatformImage, for url: URL) {
 		if let data = image.data {
-			let location = self.location(for: url, current: .default, extension: "jpeg")
-			try? DataCache.instance.replace(data: data, for: url, location: location, extension: "jpeg")
+			try? DataCache.instance.replace(data: data, for: provision(url: url, ext: "jpeg"))
 		}
 	}
 	
 	nonisolated func cacheCount() -> Int { inMemoryImages.value.count }
-	public nonisolated func fetchLocal(for url: URL, location: DataCache.CacheLocation = .default, size: ImageSize? = nil, extension ext: String? = nil) -> PlatformImage? {
-		fetchLocalInfo(for: url, location: location, size: size, extension: ext)?.image
+	public nonisolated func fetchLocal(for url: URL, kind: DataCache.CacheKind = .default, size: ImageSize? = nil, extension ext: String? = nil) -> PlatformImage? {
+		fetchLocalInfo(for: url, kind: kind, size: size, extension: ext)?.image
 	}
-	
-	public func removeItem(for url: URL, location: DataCache.CacheLocation = .default) {
-		let key = location.key(for: url, suffix: nil, extension: url.cachePathExtension ?? "jpeg")
-		DataCache.instance.removeItem(for: url, location: location)
+
+	public func removeItem(for url: URL) {
+		removeItem(for: provision(url: url))
+	}
+
+	public func removeItem(for provision: DataCache.Provision) {
+		let key = provision.key
+		DataCache.instance.removeItem(for: provision)
 		inMemoryImages.value.removeValue(forKey: key)
 	}
 
-	public nonisolated func fetchLocalInfo(for url: URL?, location: DataCache.CacheLocation = .default, size: ImageSize? = nil, extension ext: String? = nil) -> ImageInfo? {
+	public nonisolated func fetchLocalInfo(for url: URL?, kind: DataCache.CacheKind = .default, size: ImageSize? = nil, extension ext: String? = nil) -> ImageInfo? {
 		guard let url else { return nil }
-		let cacheExtension = ext ?? url.cachePathExtension ?? "jpeg"
-		let key = location.key(for: url, suffix: size?.suffix, extension: cacheExtension)
-		let actualLocation = self.location(for: url, current: location, extension: cacheExtension)
-		let localURL = DataCache.instance.location(of: url, relativeTo: actualLocation)
-		let remoteURL = url
+		return fetchLocalInfo(for: provision(url: url, kind: kind), size: size)
+	}
+
+	public nonisolated func fetchLocalInfo(for provision: DataCache.Provision, size: ImageSize? = nil) -> ImageInfo? {
+		var prov = provision
+		prov.ext = provision.ext ?? provision.url.cachePathExtension ?? "jpeg"
+		let key = provision.key
+		let localURL = provision.location
+		let remoteURL = provision.url
 
 		if let cached = inMemoryImages.value[key] { return .init(image: cached.image, localURL: localURL, remoteURL: remoteURL) }
 		
-		guard let data = DataCache.instance.fetchLocal(for: url, location: actualLocation) else { return .init(image: nil, localURL: localURL, remoteURL: remoteURL) }
+		guard let data = DataCache.instance.fetchLocal(for: provision) else { return .init(image: nil, localURL: localURL, remoteURL: remoteURL) }
 		
 		#if os(iOS)
 		if let url = data.url, let resized = url.resizedImage(maxWidth: size?.width, maxHeight: size?.height) {
@@ -117,23 +97,29 @@ public actor ImageCache {
 		
 		if let image = PlatformImage(data: data.data) {
 			let resized = size?.resize(image) ?? image
-			updateCache(for: key, with: InMemoryImage(image: resized, size: data.data.count, createdAt: Date(), key: key, group: location.group))
+			updateCache(for: key, with: InMemoryImage(image: resized, size: data.data.count, createdAt: Date(), key: key, group: provision.group))
 			return .init(image: resized, localURL: localURL, remoteURL: remoteURL)
 		}
 		return .init(image: nil, localURL: localURL, remoteURL: remoteURL)
 	}
-	
-	public nonisolated func fetchLocalData(for url: URL, location: DataCache.CacheLocation = .default, size: ImageSize? = nil) -> DataCache.DataAndLocalCache? {
-		let actualLocation = self.location(for: url, current: location)
-		return DataCache.instance.fetchLocal(for: url, location: actualLocation)
+
+	public nonisolated func fetchLocalData(for url: URL, location: DataCache.CacheKind = .default, size: ImageSize? = nil) -> DataCache.DataAndLocalCache? {
+		fetchLocalData(for: provision(url: url, kind: location), size: size)
 	}
-	
-	nonisolated public func hasCachedValue(for url: URL, location: DataCache.CacheLocation = .default, size: ImageSize? = nil, newerThan: Date? = nil) -> Bool {
-		let key = location.key(for: url, suffix: size?.suffix, extension: url.cachePathExtension ?? "jpeg")
+
+	public nonisolated func fetchLocalData(for provision: DataCache.Provision, size: ImageSize? = nil) -> DataCache.DataAndLocalCache? {
+		DataCache.instance.fetchLocal(for: provision)
+	}
+
+	nonisolated public func hasCachedValue(for url: URL, kind: DataCache.CacheKind = .default, size: ImageSize? = nil, newerThan: Date? = nil) -> Bool {
+		hasCachedValue(for: provision(url: url, kind: kind))
+	}
+
+	nonisolated public func hasCachedValue(for provision: DataCache.Provision, size: ImageSize? = nil, newerThan: Date? = nil) -> Bool {
+		let key = provision.key
 		if let _ = inMemoryImages.value[key] { return true }
 
-		let actualLocation = self.location(for: url, current: location)
-		return DataCache.instance.hasCachedValue(for: url, location: actualLocation, newerThan: newerThan)
+		return DataCache.instance.hasCachedValue(for: provision, newerThan: newerThan)
 	}
 	
 	nonisolated func updateCache(for key: String, with image: InMemoryImage) {
@@ -142,29 +128,33 @@ public actor ImageCache {
 		inMemoryImages.send(cache)
 
 	}
+
+	nonisolated func location(for url: URL) -> DataCache.CacheKind {
+		location(for: provision(url: url, ext: url.cachePathExtension))
+	}
 	
-	nonisolated func location(for url: URL, current: DataCache.CacheLocation, extension ext: String? = nil) -> DataCache.CacheLocation {
-		let pathExtension = ext ?? url.cachePathExtension ?? "jpeg"
-		switch current {
+	nonisolated func location(for provision: DataCache.Provision) -> DataCache.CacheKind {
+		let pathExtension = provision.ext ?? "jpeg"
+		switch provision.kind {
 		case .default:
-			return .fixed(parentDirectory.value.appendingPathComponent(url.cacheKey + "." + pathExtension))
+			return .fixed(parentDirectory.value.appendingPathComponent(provision.url.cacheKey + "." + pathExtension))
 
 		case .keyed(let key):
 			return .fixed(parentDirectory.value.appendingPathComponent(key))
 			
 		case .fixed:
-			return current
+			return provision.kind
 			
 		case .grouped(let group, let key):
-			return .fixed(parentDirectory.value.appendingPathComponent(group).appendingPathComponent(key ?? (url.cacheKey + "." + pathExtension)))
+			return .fixed(parentDirectory.value.appendingPathComponent(group).appendingPathComponent(key ?? (provision.url.cacheKey + "." + pathExtension)))
 		}
 	}
 	
-	public func fetch(from url: URL, caching: DataCache.Caching = .localFirst, location: DataCache.CacheLocation = .default, size: ImageSize? = nil) async throws -> PlatformImage? {
-		try await fetch(using: SimpleGETTask(url: url), caching: caching, location: location, size: size)
+	public func fetch(from provision: DataCache.Provision, caching: DataCache.Caching = .localFirst, size: ImageSize? = nil) async throws -> PlatformImage? {
+		try await fetchInfo(using: SimpleGETTask(url: provision.url), caching: caching, kind: provision.kind, size: size).image
 	}
 
-	public func prune(location: DataCache.CacheLocation) {
+	public func prune(location: DataCache.CacheKind) {
 		var cache = inMemoryImages.value
 		for image in inMemoryImages.value.values.filter({ $0.group == location.group }) {
 			cache.removeValue(forKey: image.key)
