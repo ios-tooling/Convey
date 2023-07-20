@@ -8,7 +8,7 @@
 import Foundation
 
 public extension ConveyServer {
-	struct Remote: Identifiable, Hashable, Equatable {
+	struct Remote: Identifiable, Hashable, Equatable, Codable {
 		public let name: String?
 		public let url: URL
 		public let shortName: String?
