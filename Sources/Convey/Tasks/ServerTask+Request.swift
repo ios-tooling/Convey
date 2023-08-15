@@ -68,6 +68,10 @@ public extension ServerTask {
 			request.addValue(etag, forHTTPHeaderField: ServerConstants.Headers.ifNoneMatch)
 		}
 		
+		if let cookies = (self as? CookieSendingTask)?.cookies {
+			request.addValue(cookies.cookieHeaderValue, forHTTPHeaderField: "Cookie")
+		}
+		
 		return request
 	}
 

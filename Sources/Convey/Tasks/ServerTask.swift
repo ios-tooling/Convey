@@ -49,8 +49,10 @@ public protocol CustomURLRequestTask: ServerTask {
     var customURLRequest: URLRequest { get async throws }
 }
 
-public protocol RefreshableCachedTask: ServerTask {
-	
+public protocol RefreshableCachedTask: ServerTask { }
+
+public protocol CookieSendingTask: ServerTask {
+	var cookies: [HTTPCookie]? { get }
 }
 
 public protocol CustomTimeoutTask: ServerTask {
