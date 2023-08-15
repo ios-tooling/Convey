@@ -69,7 +69,10 @@ public extension ServerTask {
 		}
 		
 		if let cookies = (self as? CookieSendingTask)?.cookies {
-			request.addValue(cookies.cookieHeaderValue, forHTTPHeaderField: "Cookie")
+			let fields = HTTPCookie.requestHeaderFields(with: cookies)
+			for (key, value) in fields {
+				request.addValue(value, forHTTPHeaderField: key)
+			}
 		}
 		
 		return request
