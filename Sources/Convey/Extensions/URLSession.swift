@@ -19,6 +19,27 @@ public extension URLSession {
 		}
 	}
 	
+	func downloadFile(from request: URLRequest, to destination: URL) async throws {
+		let _: Void = try await withUnsafeThrowingContinuation { continuation in
+			let task = self.downloadTask(with: request) { url, response, error in
+				if let error {
+					continuation.resume(throwing: error)
+				} else if let url {
+					try? FileManager.default.removeItem(at: destination)
+					do {
+						try FileManager.default.moveItem(at: url, to: destination)
+						continuation.resume()
+					} catch {
+						continuation.resume(throwing: error)
+					}
+				} else {
+					continuation.resume(throwing: ConveyServerError.unknownResponse(Data(), response))
+				}
+			}
+			task.resume()
+		}
+	}
+	
 	func data(from request: URLRequest) async throws -> ServerReturned {
 		try await withUnsafeThrowingContinuation { continuation in
 			let startedAt = Date()

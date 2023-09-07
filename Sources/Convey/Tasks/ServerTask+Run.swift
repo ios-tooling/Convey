@@ -153,7 +153,6 @@ extension ServerTask {
 				if let delay = (self as? RetryableTask)?.retryInterval(after: error, attemptNumber: attemptCount) {
 					attemptCount += 1
 					try await Task.sleep(nanoseconds: UInt64(delay) * 1_000_000_000)
-					finishBackgroundTime(token)
 				} else {
 					finishBackgroundTime(token)
 					throw error
