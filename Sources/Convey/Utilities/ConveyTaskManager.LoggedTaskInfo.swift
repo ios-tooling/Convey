@@ -10,7 +10,7 @@ import SwiftUI
 
 extension ConveyTaskManager {
 	struct LoggedTaskInfo: Codable, Identifiable {
-		enum CodingKeys: String, CodingKey { case taskName, totalCount, dates, totalBytes, thisRunBytes, manuallyEcho, compiledEcho }
+		enum CodingKeys: String, CodingKey { case taskName, totalCount, dates, totalBytes, thisRunBytes, manuallyEcho, suppressCompiledEcho }
 		
 		var id: String { taskName }
 		let taskName: String
@@ -21,6 +21,7 @@ extension ConveyTaskManager {
 		var thisRunBytes: Int64 = 0
 		var manuallyEcho: Bool?
 		var thisRunOnlyEcho = false
+		var suppressCompiledEcho = false
 		var compiledEcho = false
 		var mostRecent: Date? { dates.last }
 		var viewID: String { taskName + String(describing: manuallyEcho) }
@@ -33,14 +34,16 @@ extension ConveyTaskManager {
 			get {
 				if ConveyTaskManager.instance.oneOffTypes.contains(taskName) { return true }
 				if let manual = manuallyEcho { return manual }
-				return thisRunOnlyEcho || compiledEcho
+				if !suppressCompiledEcho, compiledEcho { return true }
+				return thisRunOnlyEcho
 			}
 			set {
 				withAnimation {
 					if thisRunOnlyEcho {
 						manuallyEcho = newValue ? nil : false
-					} else if newValue == compiledEcho {
+					} else if newValue == manuallyEcho {
 						manuallyEcho = nil
+						if !newValue { suppressCompiledEcho = true }
 					} else {
 						manuallyEcho = newValue
 					}

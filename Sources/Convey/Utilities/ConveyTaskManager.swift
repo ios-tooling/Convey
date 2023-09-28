@@ -9,7 +9,7 @@ import Foundation
 
 public extension ServerTask {
 	static var shouldEcho: Bool {
-		get { ConveyTaskManager.instance.shouldEcho(self) }
+		get { ConveyTaskManager.instance.shouldEcho(self as! ServerTask) }
 		set { ConveyTaskManager.instance.task(self, shouldEcho: newValue) }
 	}
 }
@@ -90,22 +90,23 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		}
 	}
 
-	func shouldEcho(_ task: ServerTask.Type) -> Bool {
-		guard enabled, let index = index(of: task) else { return task.self is EchoingTask.Type }
+	func shouldEcho(_ task: ServerTask.Type, isEchoing: Bool) -> Bool {
+		guard enabled, let index = index(ofType: task, isEchoing: isEchoing) else { return task.self is EchoingTask.Type }
 		return types[index].shouldEcho
 	}
 	
 	func task(_ task: ServerTask.Type, shouldEcho: Bool) {
 		guard enabled else { return }
 		
-		if let index = index(of: task, noMatterWhat: true) {
+		if let index = index(ofType: task, isEchoing: task is EchoingTask, noMatterWhat: true) {
 			if shouldEcho {
 				types[index].manuallyEcho = true
 			} else {
-				if types[index].compiledEcho || types[index].manuallyEcho == true || types[index].thisRunOnlyEcho {
+				let compiledEcho = !types[index].suppressCompiledEcho && task is EchoingTask
+				if compiledEcho || types[index].manuallyEcho == true || types[index].thisRunOnlyEcho {
 					types[index].manuallyEcho = false
 					types[index].thisRunOnlyEcho = false
-				} else if !types[index].compiledEcho || types[index].manuallyEcho == false {
+				} else if !compiledEcho || types[index].manuallyEcho == false {
 					types[index].manuallyEcho = nil
 				}
 			}
@@ -121,12 +122,9 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	
 	public func turnAllOff() {
 		for i in types.indices {
-			if types[i].name == "FetchUserProfile" {
-				print("dddf")
-			}
-
-			if types[i].compiledEcho || types[i].manuallyEcho == true || types[i].thisRunOnlyEcho == true {
+			if types[i].manuallyEcho == true || types[i].thisRunOnlyEcho == true {
 				types[i].manuallyEcho = false
+				types[i].suppressCompiledEcho = true
 			} else if !types[i].compiledEcho {
 				types[i].manuallyEcho = nil
 				types[i].thisRunOnlyEcho = false
@@ -177,13 +175,16 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		}
 	}
 	
-	func index(of task: ServerTask.Type, noMatterWhat: Bool = false) -> Int? {
+	func index(ofType task: ServerTask.Type, isEchoing: Bool, noMatterWhat: Bool = false) -> Int? {
 		let name = String(describing: task.self)
-		if let index = index(of: name) { return index }
+		if let index = index(of: name) { 
+			types[index].compiledEcho = isEchoing
+			return index
+		}
 		
 		if !noMatterWhat { return nil }
 		var newTask = LoggedTaskInfo(taskName: name)
-		newTask.compiledEcho = task.self is EchoingTask.Type
+		newTask.compiledEcho = task is EchoingTask
 		self.types.append(newTask)
 		return self.types.count - 1
 	}
@@ -192,7 +193,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		return types.firstIndex(where: { $0.taskName == taskName })
 	}
 	
-	func index(of task: ServerTask) -> Int? { index(of: type(of: task) ) }
+	func index(of task: ServerTask) -> Int? { index(ofType: type(of: task), isEchoing: task is EchoingTask) }
 
 	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async {
 		if logStyle > .none { print("☎️ Begin \(task)")}
@@ -207,7 +208,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 			} else {
 				let name = String(describing: type(of: task))
 				var newTask = LoggedTaskInfo(taskName: name)
-				newTask.compiledEcho = task is EchoingTask || task.server.echoAll
+				newTask.compiledEcho = task is EchoingTask
 				echo = newTask.shouldEcho
 				self.types.append(newTask)
 			}
