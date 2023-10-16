@@ -13,8 +13,9 @@ public class DataCache {
 
 	public func setCacheRoot(_ root: URL) { cachesDirectory = root }
 
-	public func fetch(from url: URL, caching: Caching = .localFirst, provision: Provision) async throws -> Data? {
-		try await fetch(using: provision, caching: caching)
+	public func fetch(from url: URL? = nil, caching: Caching = .localFirst, provision: Provision? = nil) async throws -> Data? {
+		guard provision != nil || url != nil else { return nil }
+		return try await fetch(using: provision ?? self.provision(url: url!), caching: caching)
 	}
 	
 	public func fetch(using provision: Provision, caching: Caching = .localFirst) async throws -> Data? {
