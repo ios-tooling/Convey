@@ -10,19 +10,21 @@ import Foundation
 typealias EmptyContinuation = UnsafeContinuation<Void, Never>
 
 extension ConveyServer {
-    func wait(forThread threadName: String) async {
-        await threadManager.wait(forThread: threadName)
-    }
-
-    func stopWaiting(forThread threadName: String) async {
-        await threadManager.stopWaiting(forThread: threadName)
-    }
+	func wait(forThread threadName: String?) async {
+		guard let threadName else { return }
+		await threadManager.wait(forThread: threadName)
+	}
+	
+	func stopWaiting(forThread threadName: String?) async {
+		guard let threadName else { return }
+		await threadManager.stopWaiting(forThread: threadName)
+	}
 }
 
 actor ThreadManager {
 	var continuations: [String: [EmptyContinuation]] = [:]
 	var active: [String: Bool] = [:]
-
+	
 	func fetchContinuations(for name: String) -> [EmptyContinuation] { self.continuations[name] ?? [] }
 	func setContinuations(_ cont: [EmptyContinuation], for name: String) {
 		self.continuations[name] = cont
@@ -33,7 +35,7 @@ actor ThreadManager {
 			self.active[threadName] = true
 			return
 		}
-
+		
 		let _: Void = await withUnsafeContinuation { continuation in
 			let current = fetchContinuations(for: threadName)
 			setContinuations(current + [continuation], for: threadName)

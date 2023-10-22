@@ -11,7 +11,16 @@ import Combine
 public extension ServerTask {
 	var cachedEtag: String? { ETagStore.instance.eTag(for: url) }
 	
-	func buildRequest() async throws -> URLRequest {
+	func beginRequest(at startedAt: Date) async throws -> URLRequest {
+		try await (self as? PreFlightTask)?.preFlight()
+
+		var request = try await buildRequest()
+		request = try await server.preflight(self, request: request)
+		await ConveyTaskManager.instance.begin(task: self, request: request, startedAt: startedAt)
+		return request
+	}
+
+	fileprivate func buildRequest() async throws -> URLRequest {
 		if let rerunnable = self as? RerunnableServerTask, let previous = rerunnable.previousResult {
 			if let newRequest = try await rerunnable.rerunnableRequest(from: previous) { return newRequest }
 			throw ConveyServerError.endOfRepetition

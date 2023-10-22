@@ -45,6 +45,10 @@ public protocol TaggedTask: ServerTask {
 	var requestTag: String { get }
 }
 
+public protocol Server: ServerTask {
+	var requestTag: String { get }
+}
+
 public protocol CustomURLRequestTask: ServerTask {
     var customURLRequest: URLRequest { get async throws }
 }
@@ -103,6 +107,22 @@ public protocol ThreadedServerTask: ServerTask {
 	var threadName: String? { get }
 }
 
+public protocol PreFlightTask: ServerTask {
+	 func preFlight() async throws
+}
+
+public protocol PostFlightTask: ServerTask {
+	 func postFlight() async throws
+}
+
+public protocol RetryableTask: ServerTask {
+	func retryInterval(after error: Error, attemptNumber: Int) -> TimeInterval?
+}
+
+public protocol ServerSentEventTargetTask: ServerTask {
+	
+}
+
 
 // the protocols below all have associated types
 public protocol PayloadDownloadingTask: ServerTask {
@@ -113,17 +133,5 @@ public protocol PayloadDownloadingTask: ServerTask {
 public protocol PayloadUploadingTask: DataUploadingTask, JSONPayloadTask {
 	associatedtype UploadPayload: Encodable
 	var uploadPayload: UploadPayload? { get }
-}
-
-public protocol PreFlightTask: ServerTask {
-    func preFlight() async throws
-}
-
-public protocol PostFlightTask: ServerTask {
-    func postFlight() async throws
-}
-
-public protocol RetryableTask: ServerTask {
-	func retryInterval(after error: Error, attemptNumber: Int) -> TimeInterval?
 }
 

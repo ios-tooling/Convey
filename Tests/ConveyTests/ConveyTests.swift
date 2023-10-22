@@ -18,7 +18,12 @@ final class ConveyTests: XCTestCase {
 		let result = try JSONDecoder().decode(SimpleResponse.self, from: data)
 		XCTAssert(result.success == "true", "Failed to POST data")
 	}
-
+	
+	func testSessionCleanup() async throws {
+		let _ = try await SimpleGETTask(url: URL(string: "https://apple.com")!).downloadData()
+		XCTAssert(ConveyServer.serverInstance.activeSessions.isEmpty, "Active sessions should be empty")
+	}
+	
     static var allTests = [
 		("testGet", testGET),
 		("testPost", testPOST),

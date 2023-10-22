@@ -102,60 +102,60 @@ extension ServerTask {
 		func finishBackgroundTime(_ token: Int) { }
 	#endif
 	
-	func sendRequest(preview: PreviewClosure? = nil) async throws -> ServerReturned {
-		var attemptCount = 1
-		
+	func handleThreadAndBackgrounding<Result>(closure: () async throws -> Result) async throws -> Result {
+		let oneOffLogging = isOneOffLogged
+
+		await server.wait(forThread: (self as? ThreadedServerTask)?.threadName)
 		let token = requestBackgroundTime()
-		
-		while true {
-			do {
-				if let threadName = (self as? ThreadedServerTask)?.threadName { await server.wait(forThread: threadName) }
-				let startedAt = Date()
-				let oneOffLogging = isOneOffLogged
-
-				try await (self as? PreFlightTask)?.preFlight()
-				var request = try await buildRequest()
-				request = try await server.preflight(self, request: request)
-				await ConveyTaskManager.instance.begin(task: self, request: request, startedAt: startedAt)
-
-				var result = try await server.data(for: request)
-				if result.statusCode == 304, let data = DataCache.instance.fetchLocal(for: url), !data.data.isEmpty {
-					result.data = data.data
-					await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: true)
-				} else {
-					await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: false)
-					if self is FileBackedTask { self.fileCachedData = result.data }
-				}
-				
-				if oneOffLogging { ConveyTaskManager.instance.decrementOneOffLog(for: self) }
-				if self is ETagCachedTask, let tag = result.response.etag {
-					DataCache.instance.cache(data: result.data, for: url)
-					ETagStore.instance.store(etag: tag, for: url)
-				}
-				//postLog(startedAt: startedAt, request: request, data: result.data, response: result.response)
-				preview?(result)
-				postprocess(response: result)		// this is deprecated now, replace with postProcess(…)
-				try await postProcess(response: result)
-				if !result.response.didDownloadSuccessfully {
-					server.reportConnectionError(self, result.statusCode, String(data: result.data, encoding: .utf8))
-					if result.data.isEmpty || (result.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
-						 throw HTTPError.serverError(request.url, result.statusCode, result.data)
+		let result = try await closure()
+		finishBackgroundTime(token)
+		await server.stopWaiting(forThread: (self as? ThreadedServerTask)?.threadName)
+		if oneOffLogging { ConveyTaskManager.instance.decrementOneOffLog(for: self) }
+		return result
+	}
+	
+	func sendRequest(preview: PreviewClosure? = nil) async throws -> ServerReturned {
+		try await handleThreadAndBackgrounding {
+			var attemptCount = 1
+			
+			while true {
+				do {
+					let startedAt = Date()
+					
+					let request = try await beginRequest(at: startedAt)
+					let session = ConveySession(task: self)
+					var result = try await session.data(for: request)
+					
+					if result.statusCode == 304, let data = DataCache.instance.fetchLocal(for: url), !data.data.isEmpty {
+						result.data = data.data
+						await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: true)
+					} else {
+						await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: false)
+						if self is FileBackedTask { self.fileCachedData = result.data }
 					}
-			  }
-				
-				try await (self as? PostFlightTask)?.postFlight()
-				if let threadName = (self as? ThreadedServerTask)?.threadName { await server.stopWaiting(forThread: threadName) }
-				finishBackgroundTime(token)
-				return result
-			} catch {
-				if let threadName = (self as? ThreadedServerTask)?.threadName { await server.stopWaiting(forThread: threadName) }
-
-				if let delay = (self as? RetryableTask)?.retryInterval(after: error, attemptNumber: attemptCount) {
-					attemptCount += 1
-					try await Task.sleep(nanoseconds: UInt64(delay) * 1_000_000_000)
-				} else {
-					finishBackgroundTime(token)
-					throw error
+					
+					if self is ETagCachedTask, let tag = result.response.etag {
+						DataCache.instance.cache(data: result.data, for: url)
+						ETagStore.instance.store(etag: tag, for: url)
+					}
+					preview?(result)
+					try await postProcess(response: result)
+					if !result.response.didDownloadSuccessfully {
+						server.reportConnectionError(self, result.statusCode, String(data: result.data, encoding: .utf8))
+						if result.data.isEmpty || (result.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
+							throw HTTPError.serverError(request.url, result.statusCode, result.data)
+						}
+					}
+					
+					try await (self as? PostFlightTask)?.postFlight()
+					return result
+				} catch {
+					if let delay = (self as? RetryableTask)?.retryInterval(after: error, attemptNumber: attemptCount) {
+						attemptCount += 1
+						try await Task.sleep(nanoseconds: UInt64(delay) * 1_000_000_000)
+					} else {
+						throw error
+					}
 				}
 			}
 		}

@@ -17,7 +17,6 @@ open class ConveyServer: NSObject, ObservableObject {
 	@Published public var remote: Remote = Remote(URL(string: "about://")!)
 	
 	open var baseURL: URL { remote.url }
-	open var session: URLSession!
 	open var isReady = CurrentValueSubject<Bool, Never>(false)
 	open var recentServerError: Error? { didSet { Task { await MainActor.run { self.objectWillChange.send() }} }}
 	open var defaultEncoder = JSONEncoder()
@@ -35,6 +34,8 @@ open class ConveyServer: NSObject, ObservableObject {
 	open var maxLoggedUploadSize = 1024 * 4
 	open var launchedAt = Date()
 	open var echoAll = false
+	var activeSessions: Set<ConveySession> = []
+
 	private var defaultHeaders: [String: String] = [
 		ServerConstants.Headers.accept: "*/*"
 	]
@@ -76,10 +77,6 @@ open class ConveyServer: NSObject, ObservableObject {
 
 	public init(asDefault: Bool = true) {
 		super.init()
-		configuration.allowsCellularAccess = true
-		configuration.allowsConstrainedNetworkAccess = true
-		
-		session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
 		if asDefault { Self.serverInstance = self }
 	}
 	
@@ -102,19 +99,7 @@ open class ConveyServer: NSObject, ObservableObject {
 	open var reportConnectionError: (ServerTask, Int, String?) -> Void = { task, code, description in
         print("\(type(of: task)), \(task.url) Connection error: \(code): \(description ?? "Unparseable error")")
 	}
-}
-
-extension ConveyServer: URLSessionDelegate {
-	public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-		if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-			if let serverTrust = challenge.protectionSpace.serverTrust {
-				let credential = URLCredential(trust: serverTrust)
-				completionHandler(URLSession.AuthChallengeDisposition.useCredential, credential)
-				return
-			}
-		}
-		completionHandler(.useCredential, challenge.proposedCredential)
-	}
+	
 }
 
 public extension Int {

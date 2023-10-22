@@ -8,20 +8,10 @@
 import Foundation
 
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
-public extension URLSession {
-	func cancelTasks(with tags: [String]) async {
-		let allTasks = await allTasks
-		
-		for task in allTasks {
-			if let tag = task.originalRequest?.requestTag, tags.contains(tag) {
-				task.cancel()
-			}
-		}
-	}
-	
+extension ConveySession {
 	func downloadFile(from request: URLRequest, to destination: URL) async throws {
 		let _: Void = try await withUnsafeThrowingContinuation { continuation in
-			let task = self.downloadTask(with: request) { url, response, error in
+			let task = session.downloadTask(with: request) { url, response, error in
 				if let error {
 					continuation.resume(throwing: error)
 				} else if let url {
@@ -44,7 +34,7 @@ public extension URLSession {
 		try await withUnsafeThrowingContinuation { continuation in
 			let startedAt = Date()
 			
-			let task = self.dataTask(with: request) { data, response, error in
+			let task = session.dataTask(with: request) { data, response, error in
 				guard let data = data, let response = response else {
 					let error = error ?? URLError(.badServerResponse)
 					return continuation.resume(throwing: error)

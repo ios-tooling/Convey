@@ -11,7 +11,6 @@ public extension ServerTask {
 	var server: ConveyServer { (self as? CustomServerTask)?.customServer ?? ConveyServer.serverInstance ?? ConveyServer.setupDefault() }
 
 	func postProcess(response: ServerReturned) async throws { }
-	func postprocess(response: ServerReturned) { } // deprecated, use postProcess(…) instead
 
 	var url: URL {
 		let nonParameterized = (self as? CustomURLTask)?.customURL ?? server.url(forTask: self)
