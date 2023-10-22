@@ -35,6 +35,13 @@ open class ConveyServer: NSObject, ObservableObject {
 	open var launchedAt = Date()
 	open var echoAll = false
 	var activeSessions: Set<ConveySession> = []
+	public var pinnedServerKeys: [String: [String]] = [:]
+	
+	public func register(publicKey: String, for server: String) {
+		var keys = pinnedServerKeys[server, default: []]
+		keys.append(publicKey)
+		pinnedServerKeys[server] = keys
+	}
 
 	private var defaultHeaders: [String: String] = [
 		ServerConstants.Headers.accept: "*/*"
