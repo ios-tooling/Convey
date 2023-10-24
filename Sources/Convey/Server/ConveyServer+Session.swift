@@ -8,16 +8,16 @@
 import Foundation
 
 extension ConveyServer {
-	func register(session: ConveySession) {
-		activeSessions.insert(session)
+	func register(session: ConveySession) async {
+		await activeSessions.insert(session)
 	}
 	
-	func unregister(session: ConveySession) {
-		activeSessions.remove(session)
+	func unregister(session: ConveySession) async {
+		await activeSessions.remove(session)
 	}
 	
 	public func cancelTasks(with tags: [String]) async {
-		for session in activeSessions {
+		for session in await activeSessions.sessions {
 			let allTasks = await session.session.allTasks
 			
 			for task in allTasks {

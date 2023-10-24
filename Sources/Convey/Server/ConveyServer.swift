@@ -34,7 +34,7 @@ open class ConveyServer: NSObject, ObservableObject {
 	open var maxLoggedUploadSize = 1024 * 4
 	open var launchedAt = Date()
 	open var echoAll = false
-	var activeSessions: Set<ConveySession> = []
+	var activeSessions = ActiveSessions()
 	public var pinnedServerKeys: [String: [String]] = [:]
 	
 	public func register(publicKey: String, for server: String) {
@@ -116,5 +116,17 @@ public extension Int {
 	
 	var isHTTPSuccess: Bool {
 		(self / 100) == 2
+	}
+}
+
+actor ActiveSessions {
+	var sessions: Set<ConveySession> = []
+	
+	func insert(_ session: ConveySession) {
+		sessions.insert(session)
+	}
+	
+	func remove(_ session: ConveySession) {
+		sessions.remove(session)
 	}
 }

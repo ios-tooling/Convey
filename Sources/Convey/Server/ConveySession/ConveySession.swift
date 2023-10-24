@@ -43,9 +43,9 @@ class ConveySession: NSObject {
 	}
 	
 	func data(for request: URLRequest) async throws -> ServerReturned {
-		server.register(session: self)
+		await server.register(session: self)
 		let result = try await data(from: request)
-		server.unregister(session: self)
+		await server.unregister(session: self)
 		return result
 	}
 }
