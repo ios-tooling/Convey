@@ -25,6 +25,7 @@ open class ConveyServer: NSObject, ObservableObject {
 	open var reportBadHTTPStatusAsError = true
 	open var configuration = URLSessionConfiguration.default
 	open var enableGZip = false
+	open var archiveURL: URL?
 	open var defaultTimeout = 30.0
 	public var userAgent: String? { didSet {
 		updateUserAgentHeader()
@@ -84,6 +85,10 @@ open class ConveyServer: NSObject, ObservableObject {
 
 	public init(asDefault: Bool = true) {
 		super.init()
+		if #available(iOS 16.0, *) {
+			archiveURL = URL.libraryDirectory.appendingPathComponent("archived-downloads")
+			try? FileManager.default.createDirectory(at: archiveURL!, withIntermediateDirectories: true)
+		}
 		if asDefault { Self.serverInstance = self }
 	}
 	

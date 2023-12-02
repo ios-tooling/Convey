@@ -125,6 +125,7 @@ extension ServerTask {
 					let request = try await beginRequest(at: startedAt)
 					let session = ConveySession(task: self)
 					var result = try await session.data(for: request)
+					(self as? ArchivingTask)?.archive(result)
 					
 					if result.statusCode == 304, let data = DataCache.instance.fetchLocal(for: url), !data.data.isEmpty {
 						result.data = data.data

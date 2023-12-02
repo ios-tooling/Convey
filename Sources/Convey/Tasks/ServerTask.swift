@@ -95,6 +95,9 @@ public protocol CustomHTTPHeaders: ServerTask {
 }
 
 public protocol EchoingTask: ServerTask { }
+public protocol ArchivingTask: ServerTask { 
+	var archiveURL: URL? { get }
+}
 
 public protocol ServerCacheableTask { }
 public protocol ServerGETTask: ServerTask { }
