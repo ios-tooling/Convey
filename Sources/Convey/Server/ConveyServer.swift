@@ -85,7 +85,7 @@ open class ConveyServer: NSObject, ObservableObject {
 
 	public init(asDefault: Bool = true) {
 		super.init()
-		if #available(iOS 16.0, *) {
+		if #available(iOS 16.0, macOS 13, *) {
 			archiveURL = URL.libraryDirectory.appendingPathComponent("archived-downloads")
 			try? FileManager.default.createDirectory(at: archiveURL!, withIntermediateDirectories: true)
 		}
