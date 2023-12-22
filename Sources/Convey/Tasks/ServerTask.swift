@@ -74,6 +74,10 @@ public protocol MIMEUploadingTask: DataUploadingTask {
 	var base64EncodeBody: Bool { get }
 }
 
+public protocol FormURLEncodedUploadingTask: DataUploadingTask {
+	var formFields: [String: Any] { get }
+}
+
 public protocol ETagCachedTask: ServerGETTask { }
 public protocol JSONPayloadTask: ServerTask { }
 public protocol GZipEncodedUploadingTask: DataUploadingTask { }
