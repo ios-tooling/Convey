@@ -8,12 +8,23 @@
 import Foundation
 
 public extension String {
-	static var sampleMIMEBoundary: String { UUID().uuidString }
+	static let sampleMIMEBoundary: String = { String.createBoundary() }()
 }
 
-fileprivate extension String {
-	var mimeData: Data {
+extension String {
+	fileprivate var mimeData: Data {
 		data(using: .utf8) ?? Data()
+	}
+	
+	public static func createBoundary() -> String {
+		 var str = "----------==-Boundary-=--"
+		 let length = arc4random_uniform(11) + 30
+		 let charSet = [Character]("-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+		 for _ in 0..<length {
+			  str.append(charSet[Int(arc4random_uniform(UInt32(charSet.count)))])
+		 }
+		 return str
 	}
 }
 
@@ -26,19 +37,19 @@ fileprivate extension Data {
 fileprivate let lineBreak = "\r\n"
 
 extension MIMEUploadingTask {
-	public var dataToUpload: Data? { mimeData(base64Encoded: base64EncodeBody) }
+	public var dataToUpload: Data? { mimeFields?.mimeData(boundary: mimeBoundary, base64Encoded: base64EncodeBody) }
 	public var contentType: String? { "multipart/form-data;boundary=" + mimeBoundary }
 
-	public func mimeData(base64Encoded: Bool) -> Data? {
-		guard let fields = mimeFields else { return nil }
+}
+
+public extension [MIMEMessageComponent] {
+	func mimeData(boundary mimeBoundary: String = .createBoundary(), base64Encoded: Bool = true) -> Data? {
 		let boundary = "--" + mimeBoundary
-	//	let contentType = "application/json;charset=utf-8"
-		
 		var data = Data()
 		data.append("Content-Type: multipart/form-data;boundary=\(mimeBoundary)" + lineBreak + lineBreak)
 		data.append(boundary + lineBreak)
 		
-		zip(fields, fields.indices).forEach { field, index in
+		zip(self, self.indices).forEach { field, index in
 			var text = ""
 			
 			text += field.mimeString(base64Encoded: base64Encoded)
@@ -50,11 +61,12 @@ extension MIMEUploadingTask {
 				data.append(fieldData)
 			}
 			data.append(lineBreak)
-			if index != fields.indices.last { data.append(boundary + lineBreak) }
+			if index != self.indices.last { data.append(boundary + lineBreak) }
 		}
 		
 		data.append(boundary + "--")
 		return data
+		
 	}
 }
 
