@@ -26,6 +26,10 @@ extension String {
 		 }
 		 return str
 	}
+	
+	public static func contentType(for boundary: String) -> String {
+		"multipart/form-data;boundary=" + boundary
+	}
 }
 
 fileprivate extension Data {
@@ -38,12 +42,12 @@ fileprivate let lineBreak = "\r\n"
 
 extension MIMEUploadingTask {
 	public var dataToUpload: Data? { mimeFields?.mimeData(boundary: mimeBoundary, base64Encoded: base64EncodeBody) }
-	public var contentType: String? { "multipart/form-data;boundary=" + mimeBoundary }
+	public var contentType: String? { String.contentType(for: mimeBoundary) }
 
 }
 
 public extension [MIMEMessageComponent] {
-	func mimeData(boundary mimeBoundary: String = .createBoundary(), base64Encoded: Bool = true) -> Data? {
+	func mimeData(boundary mimeBoundary: String, base64Encoded: Bool = false) -> Data? {
 		let boundary = "--" + mimeBoundary
 		var data = Data()
 		data.append("Content-Type: multipart/form-data;boundary=\(mimeBoundary)" + lineBreak + lineBreak)
