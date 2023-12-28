@@ -27,6 +27,8 @@ open class ConveyServer: NSObject, ObservableObject {
 	open var enableGZip = false
 	open var archiveURL: URL?
 	open var defaultTimeout = 30.0
+	open var allowsExpensiveNetworkAccess = true
+	open var allowsConstrainedNetworkAccess = true
 	public var userAgent: String? { didSet {
 		updateUserAgentHeader()
 		print("User agent set to: \(userAgent ?? "--")")
@@ -109,7 +111,7 @@ open class ConveyServer: NSObject, ObservableObject {
 	}
 	
 	open var reportConnectionError: (ServerTask, Int, String?) -> Void = { task, code, description in
-        print("\(type(of: task)), \(task.url) Connection error: \(code): \(description ?? "Unparseable error")")
+		  print("\(type(of: task)), \(task.url) Connection error: \(code): \(description ?? "Unparseable error")")
 	}
 	
 }

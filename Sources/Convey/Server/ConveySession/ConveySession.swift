@@ -20,9 +20,21 @@ class ConveySession: NSObject {
 		super.init()
 
 		let config = task.server.configuration
-		config.allowsCellularAccess = true
-		config.allowsConstrainedNetworkAccess = true
 		
+		if task is AllowedOnExpensiveNetworkTask {
+			config.allowsCellularAccess = true
+			config.allowsExpensiveNetworkAccess = true
+		} else {
+			config.allowsCellularAccess = server.allowsExpensiveNetworkAccess
+			config.allowsExpensiveNetworkAccess = server.allowsExpensiveNetworkAccess
+		}
+		
+		if task is AllowedOnConstrainedNetworkTask {
+			config.allowsConstrainedNetworkAccess = true
+		} else {
+			config.allowsConstrainedNetworkAccess = server.allowsConstrainedNetworkAccess
+		}
+
 		if task is ServerSentEventTargetTask {
 			var additionalHeaders: [String: String] = [:]
 			additionalHeaders["Accept"] = "text/event-stream"

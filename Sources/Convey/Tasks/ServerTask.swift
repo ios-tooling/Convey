@@ -25,6 +25,9 @@ public protocol TaskURLParameters {
 extension Dictionary: TaskURLParameters where Key == String, Value == String { }
 extension Array: TaskURLParameters where Element == URLQueryItem { }
 
+public protocol AllowedOnExpensiveNetworkTask: ServerTask { }
+public protocol AllowedOnConstrainedNetworkTask: ServerTask { }
+
 public protocol ParameterizedTask: ServerTask {
 	var parameters: TaskURLParameters? { get }
 }
@@ -63,7 +66,7 @@ public protocol CustomTimeoutTask: ServerTask {
 	var timeout: TimeInterval { get }
 }
 
-public protocol DataUploadingTask: ServerTask {
+public protocol DataUploadingTask: ServerUploadingTask {
 	var dataToUpload: Data? { get }
 	var contentType: String? { get }
 }
@@ -104,10 +107,11 @@ public protocol ArchivingTask: ServerTask {
 }
 
 public protocol ServerCacheableTask { }
+public protocol ServerUploadingTask: ServerTask { }
 public protocol ServerGETTask: ServerTask { }
-public protocol ServerPUTTask: ServerTask { }
-public protocol ServerPOSTTask: ServerTask { }
-public protocol ServerPATCHTask: ServerTask { }
+public protocol ServerPUTTask: ServerUploadingTask { }
+public protocol ServerPOSTTask: ServerUploadingTask { }
+public protocol ServerPATCHTask: ServerUploadingTask { }
 public protocol ServerDELETETask: ServerTask { }
 
 public protocol ThreadedServerTask: ServerTask {

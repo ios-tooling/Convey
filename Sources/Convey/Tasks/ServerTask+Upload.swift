@@ -8,6 +8,13 @@
 import Foundation
 
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
+public extension ServerTask where Self: ServerUploadingTask {
+	func uploadOnly(preview: PreviewClosure? = nil) async throws {
+		_ = try await sendRequest(preview: preview)
+	}
+}
+
+@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension PayloadDownloadingTask where Self: DataUploadingTask {
 	func upload(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadPayload {
 		try await uploadWithResponse(decoder: decoder, preview: preview).payload
