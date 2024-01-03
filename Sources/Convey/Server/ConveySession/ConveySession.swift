@@ -47,6 +47,7 @@ class ConveySession: NSObject {
 			queue = OperationQueue()
 		}
 
+		config.waitsForConnectivity = server.waitsForConnectivity
 		session = URLSession(configuration: config, delegate: self, delegateQueue: queue)
 	}
 	

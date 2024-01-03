@@ -8,12 +8,14 @@
 import Foundation
 
 public enum ConveyServerError: LocalizedError {
+	case serverDisabled
 	case taskAlreadyStarted
 	case unknownResponse(Data?, URLResponse?)
 	case endOfRepetition
     
     public var errorDescription: String? {
         switch self {
+		  case .serverDisabled: return "Server DISABLED"
         case .taskAlreadyStarted: return "Task already started"
 			  
         case .unknownResponse(let data, let response):

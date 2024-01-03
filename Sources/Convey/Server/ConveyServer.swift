@@ -29,6 +29,10 @@ open class ConveyServer: NSObject, ObservableObject {
 	open var defaultTimeout = 30.0
 	open var allowsExpensiveNetworkAccess = true
 	open var allowsConstrainedNetworkAccess = true
+	open var waitsForConnectivity = true
+	open var disabled = false { didSet {
+		if disabled { print("#### \(String(describing: self)) DISABLED #### ")}
+	}}
 	public var userAgent: String? { didSet {
 		updateUserAgentHeader()
 		print("User agent set to: \(userAgent ?? "--")")
@@ -67,7 +71,8 @@ open class ConveyServer: NSObject, ObservableObject {
 	}
 
 	open func preflight(_ task: ServerTask, request: URLRequest) async throws -> URLRequest {
-		request
+		if disabled { throw ConveyServerError.serverDisabled }
+		return request
 	}
 	
 	public static func setupDefault() -> ConveyServer {
