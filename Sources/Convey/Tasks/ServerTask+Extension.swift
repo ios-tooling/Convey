@@ -37,12 +37,16 @@ public extension ServerTask {
 public extension PayloadDownloadingTask {
 	func postProcess(payload: DownloadPayload) async throws { }
 	
+	func decode(data: Data, decoder possible: JSONDecoder? = nil) throws -> DownloadPayload {
+		let decoder = possible ?? server.defaultDecoder
+		return try decoder.decode(DownloadPayload.self, from: data)
+	}
+	
 	func cachedPayload(decoder: JSONDecoder? = nil) -> DownloadPayload? {
 		guard let data = cachedData else { return nil }
-		let decoder = decoder ?? server.defaultDecoder
-		
+
 		do {
-			return try decoder.decode(DownloadPayload.self, from: data)
+			return try decode(data: data, decoder: decoder)
 		} catch {
 			print("Local requestPayload failed for \(DownloadPayload.self) \(url)\n\n \(error)\n\n\(String(data: data, encoding: .utf8) ?? "--")")
 			return nil

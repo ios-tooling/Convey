@@ -8,12 +8,10 @@
 import Foundation
 
 public extension PayloadDownloadingTask {
-	func preloadedPayload(filename: String? = nil) throws -> DownloadPayload {
+	func preloadedPayload(filename: String? = nil, decoder: JSONDecoder? = nil) throws -> DownloadPayload {
 		let url = preloadedSource(filename: filename)
 		let data = try Data(contentsOf: url)
-		
-		let decoder = server.defaultDecoder
-		return try decoder.decode(DownloadPayload.self, from: data)
+		return try decode(data: data, decoder: decoder)
 	}
 	
 	func preloadedSource(filename: String?) -> URL {
