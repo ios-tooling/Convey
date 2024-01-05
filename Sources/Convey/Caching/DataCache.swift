@@ -88,7 +88,7 @@ public class DataCache {
 	}
 
 	public func fetchLocal(for url: URL, newerThan: Date? = nil) -> DataAndLocalCache? {
-		fetchLocal(for: provision(url: url))
+		fetchLocal(for: provision(url: url), newerThan: newerThan)
 	}
 		
 	public func fetchLocal(for provision: Provision, newerThan: Date? = nil) -> DataAndLocalCache? {
