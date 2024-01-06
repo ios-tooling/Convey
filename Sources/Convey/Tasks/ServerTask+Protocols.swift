@@ -1,6 +1,6 @@
 //
 //  ServerTask+Protocols.swift
-//  
+//
 //
 //  Created by Ben Gottlieb on 1/5/24.
 //
@@ -22,15 +22,7 @@ public protocol CustomURLTask: ServerTask {
 	var customURL: URL? { get }
 }
 
-public protocol CustomServerTask: ServerTask {
-	var customServer: ConveyServer? { get }
-}
-
 public protocol TaggedTask: ServerTask {
-	var requestTag: String { get }
-}
-
-public protocol Server: ServerTask {
 	var requestTag: String { get }
 }
 
