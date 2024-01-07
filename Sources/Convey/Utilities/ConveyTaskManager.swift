@@ -22,6 +22,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	public var storeResults = true
 	public var logStyle = LogStyle.none
 	public var oneOffTypes: [String] = []
+	public var recordings: [String: String] = [:]
 	
 	public enum LogStyle: String, Comparable, CaseIterable { case none, short, steps
 		public static func <(lhs: Self, rhs: Self) -> Bool {
@@ -114,6 +115,27 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		objectWillChange.send()
 	}
 	
+	func record(_ string: String, for task: ServerTask) {
+		let tag = task.taskTag
+		let current = recordings[tag] ?? ""
+		
+		recordings[tag] = current + string
+	}
+	
+	func dumpRecording(for task: ServerTask) {
+		task.server.pathCount += 1
+		let tag = task.taskTag
+		guard let recording = recordings[tag] else { return }
+		
+		if task.isEchoing { print(recording) }
+		if let pathURL = task.server.taskPathURL {
+			let filename = String(format: "%02d", task.server.pathCount) + ". " + tag.filename
+			let url = pathURL.appendingPathComponent(filename + ".txt")
+			try? recording.write(to: url, atomically: true, encoding: .utf8)
+		}
+		recordings.removeValue(forKey: tag)
+	}
+	
 	func shouldEcho(_ task: ServerTask) -> Bool {
 		guard enabled, let index = index(of: task) else { return task is EchoingTask }
 		
@@ -196,8 +218,8 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	func index(of task: ServerTask) -> Int? { index(ofType: type(of: task), isEchoing: task is EchoingTask) }
 
 	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async {
-		if logStyle > .none { print("☎️ Begin \(task)")}
 		if !enabled { return }
+		if logStyle > .none { print("☎️ Begin \(task)")}
 		if multitargetLogging { await loadTypes(resetting: false) }
 		queue.async {
 			let echo: Bool
@@ -212,8 +234,8 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 				echo = newTask.shouldEcho
 				self.types.append(newTask)
 			}
-			if echo {
-				print("🌐↑ \(type(of: task)): \(request)\n")
+			if echo || task.server.shouldRecordTaskPath{
+				self.record("\(type(of: task)): \(request)\n", for: task)
 			}
 			self.updateSort()
 			if self.multitargetLogging { self.saveTypes() }
@@ -231,21 +253,24 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		if multitargetLogging { await loadTypes(resetting: false) }
 		if logStyle > .short { print("☎︎ End \(task)")}
 		queue.async {
-			if let index = self.index(of: task) {
+			let index = self.index(of: task)
+			if let index {
 				self.types[index].thisRunBytes += Int64(bytes.count)
 				self.types[index].totalBytes += Int64(bytes.count)
 				if self.multitargetLogging { self.saveTypes() }
-				if shouldEcho {
-					let log = task.loggingOutput(startedAt: startedAt, request: request, data: bytes, response: response)
-					
-					if usingCache {
-						print("🌐⬇︎ \(type(of: task)): used cached response")
-					} else {
-						print("🌐⬇︎ \(type(of: task)) Response ======================\n \(String(data: log, encoding: .utf8) ?? "unable to stringify response")\n======================")
-						if self.storeResults, response.didDownloadSuccessfully {
-							self.types[index].store(results: log, from: startedAt) }
-					}
+			}
+			if shouldEcho || task.server.shouldRecordTaskPath {
+				let log = task.loggingOutput(startedAt: startedAt, request: request, data: bytes, response: response)
+				
+				if usingCache {
+					self.record("\(type(of: task)): used cached response", for: task)
+				} else {
+					self.record("\(type(of: task)) Response ======================\n \(String(data: log, encoding: .utf8) ?? "unable to stringify response")\n======================", for: task)
+					if self.storeResults, response.didDownloadSuccessfully, let index {
+						self.types[index].store(results: log, from: startedAt) }
 				}
+				
+				self.dumpRecording(for: task)
 			}
 		}
 	}

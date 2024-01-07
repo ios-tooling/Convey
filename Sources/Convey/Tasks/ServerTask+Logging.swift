@@ -29,7 +29,7 @@ extension ServerTask {
 		let timestamp = date.timeIntervalSince(server.launchedAt)
         let name = "\(Int(timestamp)).txt"
         if #available(iOS 15, macOS 12, watchOS 8, tvOS 15.0, *) {
-            return "\(date.formatted(date: .numeric, time: .shortened).replacingOccurrences(of: ":", with: "᠄ ")); \(name)"
+            return "\(date.filename) \(name)"
         }
         return name
 	}

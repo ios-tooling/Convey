@@ -24,3 +24,10 @@ extension ServerTask {
 }
 
 #endif
+
+public extension ServerTask {
+	var taskTag: String {
+		if let tag = (self as? (any TaggedTask))?.requestTag { return tag }
+		return String(describing: self)
+	}
+}

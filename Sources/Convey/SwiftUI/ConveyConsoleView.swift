@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-@available(iOS 13, macOS 13.0, *)
+@available(iOS 15, macOS 13.0, *)
 public struct ConveyConsoleView: View {
 	var availableTasks: [any ConsoleDisplayableTask] = []
 	@State var currentTaskIndex = 0

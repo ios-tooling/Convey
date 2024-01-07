@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-@available(iOS 13, macOS 13.0, *)
+@available(iOS 15, macOS 13.0, *)
 public struct DisplayedTaskResultView: View {
 	let task: any ConsoleDisplayableTask
 	@State private var result: ServerReturned?
@@ -39,7 +39,7 @@ public struct DisplayedTaskResultView: View {
 				Text(string.prefix(2000))
 					.multilineTextAlignment(.leading)
 					.font(.body)
-					.monospaced()
+					.font(.system(size: 14, design: .monospaced))
 			} else {
 				Text("\(result.data.count) bytes")
 			}

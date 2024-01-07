@@ -30,6 +30,9 @@ open class ConveyServer: NSObject, ObservableObject {
 	open var allowsExpensiveNetworkAccess = true
 	open var allowsConstrainedNetworkAccess = true
 	open var waitsForConnectivity = true
+	public var taskPathURL: URL?
+	
+	var shouldRecordTaskPath: Bool { taskPathURL != nil }
 	open var disabled = false { didSet {
 		if disabled { print("#### \(String(describing: self)) DISABLED #### ")}
 	}}
@@ -43,6 +46,31 @@ open class ConveyServer: NSObject, ObservableObject {
 	open var echoAll = false
 	var activeSessions = ActiveSessions()
 	public var pinnedServerKeys: [String: [String]] = [:]
+	
+	public func recordTaskPath(to url: URL? = nil) {
+		pathCount = 0
+		if let url {
+			taskPathURL = url
+			try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+			print("Recording tasks to \(url.path)")
+		} else {
+			if #available(iOS 16.0, *) {
+				let name = Date.now.filename + ".txt"
+				taskPathURL = URL.documentsDirectory.appendingPathComponent(name)
+				try? FileManager.default.createDirectory(at: taskPathURL!, withIntermediateDirectories: true)
+				print("Recording tasks to \(taskPathURL!.path)")
+			} else {
+				print("Please pass a valid URL to recordTaskPath(:)")
+			}
+		}
+	}
+	
+	var pathCount = 0
+	public func endTaskPathRecording() {
+		ConveyTaskManager.instance.queue.async {
+			self.taskPathURL = nil
+		}
+	}
 	
 	public func register(publicKey: String, for server: String) {
 		var keys = pinnedServerKeys[server, default: []]

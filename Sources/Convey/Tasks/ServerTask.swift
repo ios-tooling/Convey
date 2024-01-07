@@ -15,4 +15,5 @@ public protocol ServerTask {
 	var httpMethod: String { get }
 	var server: ConveyServer { get }
 	var url: URL { get }
+	var taskTag: String { get }
 }

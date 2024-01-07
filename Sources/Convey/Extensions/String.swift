@@ -34,3 +34,10 @@ fileprivate extension String {
 		return nil
 	}
 }
+
+extension String {
+	var filename: String {
+		replacingOccurrences(of: ":", with: ";")
+			.replacingOccurrences(of: "/", with: "|")
+	}
+}
