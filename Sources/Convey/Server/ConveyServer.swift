@@ -54,7 +54,7 @@ open class ConveyServer: NSObject, ObservableObject {
 			try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
 			print("Recording tasks to \(url.path)")
 		} else {
-			if #available(iOS 16.0, *) {
+			if #available(iOS 16.0, macOS 13.0, *) {
 				let name = Date.now.filename
 				taskPathURL = URL.documentsDirectory.appendingPathComponent(name)
 				try? FileManager.default.createDirectory(at: taskPathURL!, withIntermediateDirectories: true)

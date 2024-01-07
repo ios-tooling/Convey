@@ -24,8 +24,9 @@ public struct ConveyConsoleView: View {
 				}
 				
 			}
-			DisplayedTaskResultView(task: availableTasks[currentTaskIndex], result: nil)
-			
+			let task = availableTasks[currentTaskIndex]
+			DisplayedTaskResultView(task: task, result: nil)
+				.id(task.taskTag)
 			Spacer()
 			
 		}
