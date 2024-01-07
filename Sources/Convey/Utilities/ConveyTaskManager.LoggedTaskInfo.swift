@@ -99,7 +99,7 @@ extension String {
 extension Date {
 	var filename: String {
 		var text = description.filename
-		text = text.replacingOccurrences(of: "+0000", with: "")
+		text = text.replacingOccurrences(of: "+0000", with: "").trimmingCharacters(in: .whitespaces)
 		text.append(".\(Int(self.timeIntervalSinceReferenceDate * 100000) % 100000).txt")
 		return text
 	}

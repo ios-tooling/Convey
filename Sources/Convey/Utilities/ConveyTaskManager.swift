@@ -129,8 +129,8 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		
 		if task.isEchoing { print(recording) }
 		if let pathURL = task.server.taskPathURL {
-			let filename = String(format: "%02d", task.server.pathCount) + ". " + tag.filename
-			let url = pathURL.appendingPathComponent(filename + ".txt")
+			let filename = String(format: "%02d", task.server.pathCount) + ". " + task.filename
+			let url = pathURL.appendingPathComponent(filename)
 			try? recording.write(to: url, atomically: true, encoding: .utf8)
 		}
 		recordings.removeValue(forKey: tag)

@@ -37,7 +37,7 @@ fileprivate extension String {
 
 extension String {
 	var filename: String {
-		replacingOccurrences(of: ":", with: ";")
-			.replacingOccurrences(of: "/", with: "|")
+		replacingOccurrences(of: ":", with: "-")
+			.replacingOccurrences(of: "/", with: "-")
 	}
 }

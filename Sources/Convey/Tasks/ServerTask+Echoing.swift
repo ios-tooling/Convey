@@ -30,4 +30,10 @@ public extension ServerTask {
 		if let tag = (self as? (any TaggedTask))?.requestTag { return tag }
 		return String(describing: self)
 	}
+	
+	var filename: String {
+		let method = httpMethod
+		
+		return "\(method) \(String(describing: type(of: self))).txt"
+	}
 }
