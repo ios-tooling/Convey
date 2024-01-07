@@ -36,10 +36,10 @@ public struct DisplayedTaskResultView: View {
 	@ViewBuilder var resultBody: some View {
 		if let result {
 			if let string = String(data: result.data, encoding: .utf8) {
-				Text(string.prefix(2000))
+				TextEditor(text: .constant(string))
 					.multilineTextAlignment(.leading)
-					.font(.body)
 					.font(.system(size: 14, design: .monospaced))
+					.scrollContentBackground(.hidden)
 			} else {
 				Text("\(result.data.count) bytes")
 			}
