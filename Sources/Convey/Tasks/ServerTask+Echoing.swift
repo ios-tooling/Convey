@@ -33,7 +33,16 @@ public extension ServerTask {
 	
 	var filename: String {
 		let method = httpMethod
+		var name = String(describing: type(of: self))
 		
-		return "\(method) \(String(describing: type(of: self))).txt"
+		if name.lowercased().hasPrefix(method.lowercased()) {
+			name = String(name.dropFirst(method.count))
+		}
+		
+		if name.lowercased().hasSuffix("task") {
+			name = String(name.dropLast(4))
+		}
+		
+		return "\(method) \(name).txt"
 	}
 }

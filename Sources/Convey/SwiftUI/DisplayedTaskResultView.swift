@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-@available(iOS 15, macOS 13.0, *)
+@available(iOS 16, macOS 13.0, *)
 public struct DisplayedTaskResultView: View {
 	let task: any ConsoleDisplayableTask
 	@State private var result: ServerReturned?
