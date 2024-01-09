@@ -12,6 +12,7 @@ struct ConsoleTaskConfigurationSheet: View {
 	let taskType: any ConfigurableConsoleDisplayableTask.Type
 	@Binding var fields: [String: String]
 	@Environment(\.dismiss) private var dismiss
+	@Binding var newTask: (any ConfigurableConsoleDisplayableTask)?
 	
 	func binding(forField named: String) -> Binding<String> {
 		Binding<String>(
@@ -29,6 +30,9 @@ struct ConsoleTaskConfigurationSheet: View {
 				} label: {
 					Text(field.label)
 				}
+				.onSubmit {
+					save()
+				}
 			}
 			
 			Spacer()
@@ -38,12 +42,19 @@ struct ConsoleTaskConfigurationSheet: View {
 				}
 				.buttonStyle(.bordered)
 				Button("Run") {
-					dismiss()
+					save()
 				}
 				.buttonStyle(.borderedProminent)
 			}
 		}
 		.frame(minWidth: 400, minHeight: 200)
 		.padding()
+	}
+	
+	func save() {
+		if let task = taskType.init(configuration: fields) {
+			newTask = task
+			dismiss()
+		}
 	}
 }

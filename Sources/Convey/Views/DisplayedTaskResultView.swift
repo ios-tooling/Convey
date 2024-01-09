@@ -10,17 +10,32 @@ import SwiftUI
 @available(iOS 16, macOS 13.0, *)
 public struct DisplayedTaskResultView: View {
 	let task: any ConsoleDisplayableTask
-	@State private var result: ServerReturned?
 	@State private var error: Error?
+	@Binding var isFetching: Bool
+	@EnvironmentObject var responses: TaskResponseManager
 	
-	public init(task: any ConsoleDisplayableTask, result: ServerReturned?) {
+	public init(task: any ConsoleDisplayableTask, isFetching: Binding<Bool>) {
 		self.task = task
-		self.result = result
+		_isFetching = isFetching
 	}
 	
+	var response: ServerReturned? { responses[task] }
+	
 	public var body: some View {
+		let result = response
+		
 		VStack {
 			ScrollView {
+				if isFetching {
+					HStack {
+						Text("Downloading…")
+							.opacity(0.66)
+						
+						ProgressView()
+							.scaleEffect(0.5)
+							.frame(height: 20)
+					}
+				}
 				if result != nil {
 					resultBody
 				} else if let error {
@@ -31,10 +46,15 @@ public struct DisplayedTaskResultView: View {
 		.task {
 			if result == nil { await fetchResult() }
 		}
+		.onReceive(responses.objectWillChange) { _ in
+			if !isFetching, response == nil {
+				Task { await fetchResult() }
+			}
+		}
 	}
 	
 	@ViewBuilder var resultBody: some View {
-		if let result {
+		if let result = response {
 			if let string = String(data: result.data, encoding: .utf8) {
 				TextEditor(text: .constant(string))
 					.multilineTextAlignment(.leading)
@@ -46,13 +66,16 @@ public struct DisplayedTaskResultView: View {
 		}
 	}
 	
-	func fetchResult() async {
+	@MainActor func fetchResult() async {
+		isFetching = true
 		do {
 			print("Fetching \(task.displayString)")
-			result = try await task.downloadDataWithResponse()
+			responses[task] = try await task.downloadDataWithResponse()
 			print("Fetched task")
 		} catch {
+			responses.clearResults(for: task)
 			self.error = error
 		}
+		isFetching = false
 	}
 }
