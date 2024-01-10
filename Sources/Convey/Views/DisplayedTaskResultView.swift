@@ -12,7 +12,7 @@ public struct DisplayedTaskResultView: View {
 	let task: any ConsoleDisplayableTask
 	@State private var error: Error?
 	@Binding var isFetching: Bool
-	@EnvironmentObject var responses: TaskResponseManager
+	@EnvironmentObject var responses: ConsoleTaskResponseCache
 	
 	public init(task: any ConsoleDisplayableTask, isFetching: Binding<Bool>) {
 		self.task = task

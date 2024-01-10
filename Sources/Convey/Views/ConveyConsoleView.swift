@@ -13,7 +13,7 @@ public struct ConveyConsoleView: View {
 	@State var currentTaskIndex = 0
 	@State private var isShowingConfigurationSheet = false
 	@State private var isFetching = false
-	@ObservedObject var responses = TaskResponseManager()
+	@ObservedObject var responses = ConsoleTaskResponseCache()
 	
 	public init(tasks: [any ConsoleDisplayableTask]) {
 		_availableTasks = State(initialValue: tasks)

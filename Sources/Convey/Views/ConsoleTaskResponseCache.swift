@@ -7,11 +7,18 @@
 
 import SwiftUI
 
-class TaskResponseManager: ObservableObject {
-	static let instance = TaskResponseManager()
+class ConsoleTaskResponseCache: ObservableObject {
+	static let instance = ConsoleTaskResponseCache()
 	
 	var results: [String: ServerReturned] = [:]
-	var configurations: [String: [String: String]] = [:]
+	var configurations: [String: [String: String]] {
+		get { (UserDefaults.standard.dictionary(forKey: Self.savedConfigurationsKey) as? [String: [String: String]]) ?? [:] }
+		set {
+			UserDefaults.standard.setValue(newValue, forKey: Self.savedConfigurationsKey)
+		}
+	}
+	
+	static var savedConfigurationsKey = String(describing: ConsoleTaskResponseCache.self)
 	
 	subscript(task: any ConsoleDisplayableTask) -> ServerReturned? {
 		get { results[task.resultsKey] }
