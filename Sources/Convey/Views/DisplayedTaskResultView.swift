@@ -12,6 +12,7 @@ public struct DisplayedTaskResultView: View {
 	let task: any ConsoleDisplayableTask
 	@State private var error: Error?
 	@Binding var isFetching: Bool
+	@State private var request: URLRequest?
 	@EnvironmentObject var responses: ConsoleTaskResponseCache
 	
 	public init(task: any ConsoleDisplayableTask, isFetching: Binding<Bool>) {
@@ -26,20 +27,32 @@ public struct DisplayedTaskResultView: View {
 		
 		VStack {
 			ScrollView {
-				if isFetching {
-					HStack {
-						Text("Downloading…")
-							.opacity(0.66)
-						
-						ProgressView()
-							.scaleEffect(0.5)
-							.frame(height: 20)
+				VStack(alignment: .leading) {
+					if isFetching {
+						HStack {
+							Text("Downloading…")
+								.opacity(0.66)
+							
+							ProgressView()
+								.scaleEffect(0.5)
+								.frame(height: 20)
+						}
 					}
-				}
-				if result != nil {
-					resultBody
-				} else if let error {
-					Text(error.localizedDescription)
+					if let result {
+						if let requestData = request?.descriptionData(maxUploadSize: task.server.maxLoggedUploadSize), let requestString = String(data: requestData, encoding: .utf8) {
+							Text(requestString)
+								.multilineTextAlignment(.leading)
+								.font(.system(size: 14, weight: .regular, design: .monospaced))
+						}
+						if let header = String(data: task.loggingOutput(request: nil, data: nil, response: result.response, includeMarkers: false), encoding: .utf8) {
+							Text(header)
+								.multilineTextAlignment(.leading)
+								.font(.system(size: 14, weight: .semibold, design: .monospaced))
+						}
+						resultBody
+					} else if let error {
+						Text(error.localizedDescription)
+					}
 				}
 			}
 		}
@@ -68,6 +81,7 @@ public struct DisplayedTaskResultView: View {
 	
 	@MainActor func fetchResult() async {
 		isFetching = true
+		request = try? await task.buildRequest()
 		do {
 			print("Fetching \(task.displayString)")
 			responses[task] = try await task.downloadDataWithResponse()

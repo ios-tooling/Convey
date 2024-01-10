@@ -58,17 +58,22 @@ extension ServerTask {
 //		try? output.write(to: url)
 //	}
 	
-	func loggingOutput(startedAt: Date, request: URLRequest, data: Data?, response: URLResponse?) -> Data {
-        var output = "Started at: \(startedAt.timeLabel), took: \(abs(startedAt.timeIntervalSinceNow))s\n".data(using: .utf8) ?? Data()
-		output += request.descriptionData(maxUploadSize: server.maxLoggedUploadSize)
+	func loggingOutput(startedAt: Date? = nil, request: URLRequest?, data: Data?, response: URLResponse?, includeMarkers: Bool = true) -> Data {
+		var output = Data()
+		
+		if let startedAt {
+			output = "Started at: \(startedAt.timeLabel), took: \(abs(startedAt.timeIntervalSinceNow))s\n".data(using: .utf8) ?? Data()
+		}
+		
+		output += (request?.descriptionData(maxUploadSize: server.maxLoggedUploadSize)) ?? Data()
 		
 		if let responseData = response?.descriptionData {
-			output += "\n\n⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗\n\n".data(using: .utf8) ?? Data()
+			if includeMarkers { output += "\n\n⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗\n\n".data(using: .utf8) ?? Data() }
 			output += responseData
 		}
 		
 		if let body = data, body.count < server.maxLoggedDataSize {
-			output += "\n\n⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗\n\n".data(using: .utf8) ?? Data()
+			if includeMarkers { output += "\n\n⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗\n\n".data(using: .utf8) ?? Data() }
 			do {
 				let json = try JSONSerialization.jsonObject(with: body, options: [])
 				let jsonData = try JSONSerialization.data(withJSONObject: json, options: [.prettyPrinted])
