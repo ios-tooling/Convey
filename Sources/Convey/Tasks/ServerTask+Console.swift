@@ -16,10 +16,12 @@ public struct ConsoleConfigurationField: Identifiable {
 	public enum Kind { case string, integer }
 	public let label: String
 	public let kind: Kind
+	public let defaultValue: String?
 	
-	public init(label: String, kind: Kind = .string) {
+	public init(label: String, kind: Kind = .string, defaultValue: String? = nil) {
 		self.label = label
 		self.kind = kind
+		self.defaultValue = defaultValue
 	}
 }
 

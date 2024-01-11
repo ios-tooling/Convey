@@ -14,11 +14,11 @@ struct ConsoleTaskConfigurationSheet: View {
 	@Environment(\.dismiss) private var dismiss
 	@Binding var newTask: (any ConfigurableConsoleDisplayableTask)?
 	
-	func binding(forField named: String) -> Binding<String> {
+	func binding(forField field: ConsoleConfigurationField) -> Binding<String> {
 		Binding<String>(
-			get: { fields[named] ?? "" },
+			get: { fields[field.label] ?? field.defaultValue ?? "" },
 			set: { newValue in
-				fields[named] = newValue}
+				fields[field.label] = newValue}
 		)
 	}
 	
@@ -26,7 +26,7 @@ struct ConsoleTaskConfigurationSheet: View {
 		VStack {
 			ForEach(taskType.configurationFields) { field in
 				LabeledContent {
-					TextField(field.label, text: binding(forField: field.label))
+					TextField(field.label, text: binding(forField: field))
 				} label: {
 					Text(field.label)
 				}
