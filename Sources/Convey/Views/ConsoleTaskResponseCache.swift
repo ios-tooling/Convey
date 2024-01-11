@@ -18,6 +18,10 @@ class ConsoleTaskResponseCache: ObservableObject {
 		}
 	}
 	
+	func filename(for task: any ConsoleDisplayableTask, ext: String = "json") -> String {
+		task.resultsKey + "." + ext
+	}
+	
 	static var savedConfigurationsKey = String(describing: ConsoleTaskResponseCache.self)
 	
 	subscript(task: any ConsoleDisplayableTask) -> ServerReturned? {
@@ -47,6 +51,14 @@ class ConsoleTaskResponseCache: ObservableObject {
 				Task { @MainActor in self.objectWillChange.send() }
 			}
 		)
+	}
+	
+	func task(matching: any ConsoleDisplayableTask) -> any ConsoleDisplayableTask {
+		if let configurable = matching as? (any ConfigurableConsoleDisplayableTask), let opts = configurations[configurable.resultsKey] {
+			return type(of: configurable).init(configuration: opts) ?? matching
+		}
+		
+		return matching
 	}
 }
 

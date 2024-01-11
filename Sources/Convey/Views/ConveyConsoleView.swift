@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+#if os(macOS)
+import Cocoa
+#endif
+
 @available(iOS 16, macOS 13.0, *)
 public struct ConveyConsoleView: View {
 	@State var availableTasks: [any ConsoleDisplayableTask] = []
@@ -20,7 +24,7 @@ public struct ConveyConsoleView: View {
 	}
 	
 	public var body: some View {
-		let task = availableTasks[currentTaskIndex]
+		let task = responses.task(matching: availableTasks[currentTaskIndex])
 
 		VStack {
 			HStack {
@@ -30,13 +34,15 @@ public struct ConveyConsoleView: View {
 					}
 					
 				}
-				
+
+				viewOnMacButton
+
 				Button("Configure") {
 					isShowingConfigurationSheet.toggle()
 				}
 				.disabled(isFetching || !(availableTasks[currentTaskIndex] is ConfigurableConsoleDisplayableTask))
 				
-				Button(action: { 
+				Button(action: {
 					responses.clearResults(for: task)
 				}) {
 					Image(systemName: "arrow.counterclockwise")
@@ -55,6 +61,23 @@ public struct ConveyConsoleView: View {
 		}
 		.padding()
 		.environmentObject(responses)
+	}
+	
+	@ViewBuilder var viewOnMacButton: some View {
+		#if os(macOS)
+		let task = availableTasks[currentTaskIndex]
+		if let response = responses[task] {
+			Button(action: {
+				let url = URL.temporaryDirectory.appendingPathComponent(responses.filename(for: task, ext: "txt"))
+				try! response.data.write(to: url)
+				NSWorkspace.shared.open(url)
+			}) {
+				Image(systemName: "eye")
+			}
+		}
+		#else
+			EmptyView()
+		#endif
 	}
 	
 	var newTaskBinding: Binding<(any ConfigurableConsoleDisplayableTask)?> {

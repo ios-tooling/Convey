@@ -14,7 +14,9 @@ public struct DisplayedTaskResultView: View {
 	@Binding var isFetching: Bool
 	@State private var request: URLRequest?
 	@EnvironmentObject var responses: ConsoleTaskResponseCache
-	
+	@AppStorage("show_convey_console_submitted") var showSubmitted = true
+	@AppStorage("show_convey_console_returned") var showReturned = true
+
 	public init(task: any ConsoleDisplayableTask, isFetching: Binding<Bool>) {
 		self.task = task
 		_isFetching = isFetching
@@ -26,6 +28,12 @@ public struct DisplayedTaskResultView: View {
 		let result = response
 		
 		VStack {
+			HStack {
+				Toggle("Submitted", isOn: $showSubmitted)
+				Toggle("Returned", isOn: $showReturned)
+			}
+			.toggleStyle(.button)
+			
 			ScrollView {
 				VStack(alignment: .leading) {
 					if isFetching {
@@ -39,17 +47,21 @@ public struct DisplayedTaskResultView: View {
 						}
 					}
 					if let result {
-						if let requestData = request?.descriptionData(maxUploadSize: task.server.maxLoggedUploadSize), let requestString = String(data: requestData, encoding: .utf8) {
-							Text(requestString)
-								.multilineTextAlignment(.leading)
-								.font(.system(size: 14, weight: .regular, design: .monospaced))
+						if showSubmitted {
+							if let requestData = request?.descriptionData(maxUploadSize: task.server.maxLoggedUploadSize), let requestString = String(data: requestData, encoding: .utf8) {
+								Text(requestString)
+									.multilineTextAlignment(.leading)
+									.font(.system(size: 14, weight: .regular, design: .monospaced))
+							}
+							if let header = String(data: task.loggingOutput(request: nil, data: nil, response: result.response, includeMarkers: false), encoding: .utf8) {
+								Text(header)
+									.multilineTextAlignment(.leading)
+									.font(.system(size: 14, weight: .semibold, design: .monospaced))
+							}
 						}
-						if let header = String(data: task.loggingOutput(request: nil, data: nil, response: result.response, includeMarkers: false), encoding: .utf8) {
-							Text(header)
-								.multilineTextAlignment(.leading)
-								.font(.system(size: 14, weight: .semibold, design: .monospaced))
+						if showReturned {
+							resultBody
 						}
-						resultBody
 					} else if let error {
 						Text(error.localizedDescription)
 					}
