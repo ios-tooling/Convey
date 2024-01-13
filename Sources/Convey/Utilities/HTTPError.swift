@@ -50,6 +50,16 @@ public enum HTTPError: Error, LocalizedError {
       default: return false
       }
    }
+	
+	public var statusCode: Int? {
+		switch self {
+		case .requestFailed(_, let code, _): code
+		case .redirectError(_, let code, _): code
+		case .serverError(_, let code, _): code
+		case .unknownError(_, let code, _): code
+		default: nil
+		}
+	}
    
    public var data: Data? {
       switch self {
