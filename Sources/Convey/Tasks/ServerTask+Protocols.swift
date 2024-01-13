@@ -71,8 +71,16 @@ public protocol CustomHTTPMethodTask: ServerTask {
 	var customHTTPMethod: String { get }
 }
 
+public struct ConveyHeader: Codable, Hashable {
+	let name: String
+	let value: String
+}
+public protocol ConveyHeaders { }
+extension [String: String]: ConveyHeaders { }
+extension [ConveyHeader]: ConveyHeaders { }
+
 public protocol CustomHTTPHeaders: ServerTask {
-	var customHTTPHeaders: [String: String] { get }
+	var customHTTPHeaders: ConveyHeaders { get }
 }
 
 public protocol EchoingTask: ServerTask { }

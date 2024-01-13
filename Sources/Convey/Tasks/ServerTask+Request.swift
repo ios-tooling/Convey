@@ -67,12 +67,18 @@ public extension ServerTask {
 			request.addValue(tagged.requestTag, forHTTPHeaderField: ServerConstants.Headers.tag)
 		}
 		
-		if let additionalHeaders = (self as? CustomHTTPHeaders)?.customHTTPHeaders {
+		if let additionalHeaders = (self as? CustomHTTPHeaders)?.customHTTPHeaders as? [String: String] {
 			for (value, header) in additionalHeaders {
 				request.addValue(header, forHTTPHeaderField: value)
 			}
 		}
-		
+
+		if let additionalHeaders = (self as? CustomHTTPHeaders)?.customHTTPHeaders as? [ConveyHeader] {
+			for header in additionalHeaders {
+				request.addValue(header.value, forHTTPHeaderField: header.name)
+			}
+		}
+
 		if self is ETagCachedTask, let etag = cachedEtag, DataCache.instance.hasCachedValue(for: url) {
 			request.addValue(etag, forHTTPHeaderField: ServerConstants.Headers.ifNoneMatch)
 		}

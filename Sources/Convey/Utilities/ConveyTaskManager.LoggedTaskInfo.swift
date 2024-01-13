@@ -30,29 +30,30 @@ extension ConveyTaskManager {
 			!storedURLs.isEmpty
 		}
 		
-		var shouldEcho: Bool {
-			get {
-				if ConveyTaskManager.instance.oneOffTypes.contains(taskName) { return true }
-				if let manual = manuallyEcho { return manual }
-				if !suppressCompiledEcho, compiledEcho { return true }
-				return thisRunOnlyEcho
-			}
-			set {
-				withAnimation {
-					if thisRunOnlyEcho {
-						manuallyEcho = newValue ? nil : false
-					} else if newValue == manuallyEcho {
-						manuallyEcho = nil
-						if !newValue { suppressCompiledEcho = true }
-					} else {
-						manuallyEcho = newValue
-					}
+		func shouldEcho(_ task: ServerTask.Type? = nil) -> Bool {
+			if let task, task is EchoingTask.Type, !suppressCompiledEcho { return true }
+			if ConveyTaskManager.instance.oneOffTypes.contains(taskName) { return true }
+			if let manual = manuallyEcho { return manual }
+			if !suppressCompiledEcho, compiledEcho { return true }
+			return thisRunOnlyEcho
+		}
+
+		mutating func setShouldEcho(_ newValue: Bool) {
+			withAnimation {
+				if thisRunOnlyEcho {
+					manuallyEcho = newValue ? nil : false
+				} else if newValue == manuallyEcho {
+					manuallyEcho = nil
+					if !newValue { suppressCompiledEcho = true }
+				} else {
+					manuallyEcho = newValue
 				}
 			}
 		}
 		
+		
 		func store(results: Data, from date: Date) {
-			if shouldEcho {
+			if shouldEcho(nil) {
 				print("Storing data for \(name) at \(date.filename)")
 				let typeURL = directory
 				try? FileManager.default.createDirectory(at: typeURL, withIntermediateDirectories: true)

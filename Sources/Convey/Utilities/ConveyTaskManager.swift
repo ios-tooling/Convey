@@ -93,7 +93,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 
 	func shouldEcho(_ task: ServerTask.Type, isEchoing: Bool) -> Bool {
 		guard enabled, let index = index(ofType: task, isEchoing: isEchoing) else { return task.self is EchoingTask.Type }
-		return types[index].shouldEcho
+		return types[index].shouldEcho(task)
 	}
 	
 	func task(_ task: ServerTask.Type, shouldEcho: Bool) {
@@ -139,7 +139,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	func shouldEcho(_ task: ServerTask) -> Bool {
 		guard enabled, let index = index(of: task) else { return task is EchoingTask }
 		
-		return types[index].shouldEcho
+		return types[index].shouldEcho(type(of: task))
 	}
 	
 	public func turnAllOff() {
@@ -156,7 +156,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 	}
 	
 	var areAllOff: Bool {
-		types.filter { $0.shouldEcho }.isEmpty
+		types.filter { $0.shouldEcho() }.isEmpty
 	}
 	
 	public func resetAll() {
@@ -219,21 +219,23 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 
 	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async {
 		if !enabled { return }
-		if logStyle > .none { print("☎️ Begin \(task)")}
+		if logStyle > .none { print("☎️ Begin \(task)") }
 		if multitargetLogging { await loadTypes(resetting: false) }
 		queue.async {
 			let echo: Bool
+
 			if let index = self.index(of: task) {
 				self.types[index].dates.append(date)
 				self.types[index].totalCount += 1
-				echo = self.types[index].shouldEcho
+				echo = self.types[index].shouldEcho(type(of: task))
 			} else {
 				let name = String(describing: type(of: task))
 				var newTask = LoggedTaskInfo(taskName: name)
 				newTask.compiledEcho = task is EchoingTask
-				echo = newTask.shouldEcho
+				echo = newTask.shouldEcho(type(of: task))
 				self.types.append(newTask)
 			}
+
 			if echo || task.server.shouldRecordTaskPath{
 				self.record("\(type(of: task)): \(request)\n", for: task)
 			}
@@ -246,7 +248,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		let shouldEcho: Bool
 		
 		if let index = self.index(of: task) {
-			shouldEcho = self.types[index].shouldEcho
+			shouldEcho = self.types[index].shouldEcho(type(of: task))
 		} else {
 			shouldEcho = false
 		}
@@ -282,8 +284,8 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 		case .size: types.sort { $0.thisRunBytes > $1.thisRunBytes }
 		case .recent: types.sort { ($0.mostRecent ?? .distantPast) > ($1.mostRecent ?? .distantPast) }
 		case .enabled: types.sort {
-			if $0.shouldEcho, !$1.shouldEcho { return true }
-			if $1.shouldEcho, !$0.shouldEcho { return false }
+			if $0.shouldEcho(), !$1.shouldEcho() { return true }
+			if $1.shouldEcho(), !$0.shouldEcho() { return false }
 			return $0.taskName < $1.taskName
 			}
 		}
