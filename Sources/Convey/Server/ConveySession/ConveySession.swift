@@ -46,6 +46,11 @@ class ConveySession: NSObject {
 			
 			queue = OperationQueue()
 		}
+		
+		let timeout = (task as? CustomTimeoutTask)?.timeout ?? task.server.defaultTimeout
+		
+		config.timeoutIntervalForRequest = timeout
+		config.timeoutIntervalForResource = timeout
 
 		config.waitsForConnectivity = server.waitsForConnectivity
 		session = URLSession(configuration: config, delegate: self, delegateQueue: queue)
