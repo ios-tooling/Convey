@@ -62,13 +62,15 @@ public struct TaskManagerView: View {
 		var rowContent: some View {
 			HStack(spacing: 20) {
 				VStack(spacing: 0) {
-					Button(action: { taskType.shouldEcho.toggle() }) {
+					Button(action: {
+						taskType.setShouldEcho(!taskType.shouldEcho(nil))
+					}) {
 						Text("Echo")
 							.font(.system(size: 12, weight: .bold).smallCaps())
 							.padding(.vertical, 5)
 							.padding(.horizontal, 10)
-							.foregroundColor(taskType.shouldEcho ? .white : .blue)
-							.background(Capsule().fill(taskType.shouldEcho ? .blue : .white))
+							.foregroundColor(taskType.shouldEcho(nil) ? .white : .blue)
+							.background(Capsule().fill(taskType.shouldEcho(nil) ? .blue : .white))
 							.overlay(Capsule().stroke(.blue))
 					}
 					.buttonStyle(.plain)
