@@ -46,6 +46,7 @@ public extension ServerTask {
 				if isGzipped {
 					do {
 						data = try data.gzipped()
+						request.addValue("\(data.count)", forHTTPHeaderField: ServerConstants.Headers.contentLength)
 					} catch {
 						print("Failed to gzip upload data: \(error)")
 						isGzipped = false

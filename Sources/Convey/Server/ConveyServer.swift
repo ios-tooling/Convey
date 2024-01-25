@@ -24,7 +24,7 @@ open class ConveyServer: NSObject, ObservableObject {
 	open var logDirectory: URL?
 	open var reportBadHTTPStatusAsError = true
 	open var configuration = URLSessionConfiguration.default
-	open var enableGZip = false
+	open var enableGZipDownloads = false
 	open var archiveURL: URL?
 	open var defaultTimeout = 30.0
 	open var allowsExpensiveNetworkAccess = true
@@ -129,7 +129,7 @@ open class ConveyServer: NSObject, ObservableObject {
 	
 	open func standardHeaders(for task: ServerTask) async throws -> [String: String] {
 		var headers = defaultHeaders
-		if enableGZip {
+		if enableGZipDownloads {
 			headers[ServerConstants.Headers.acceptEncoding] = "gzip, deflate"
 		}
 		return headers

@@ -267,7 +267,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 				if usingCache {
 					self.record("\(type(of: task)): used cached response", for: task)
 				} else {
-					self.record("\(type(of: task)) Response ======================\n \(String(data: log, encoding: .utf8) ?? "unable to stringify response")\n======================", for: task)
+					self.record("\(type(of: task)) Response ======================\n \(String(data: log, encoding: .utf8) ?? String(data: log, encoding: .ascii) ?? "unable to stringify response")\n======================", for: task)
 					if self.storeResults, response.didDownloadSuccessfully, let index {
 						self.types[index].store(results: log, from: startedAt) }
 				}

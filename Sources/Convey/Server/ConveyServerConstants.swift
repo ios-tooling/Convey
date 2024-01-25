@@ -12,6 +12,7 @@ struct ServerConstants {
 		static let contentType = "Content-Type"
 		static let accept = "Accept"
 		static let contentEncoding = "Content-Encoding"
+		static let contentLength = "Content-Length"
 		static let acceptEncoding = "Accept-Encoding"
 		static let tag = "X-Convey-RequestTag"
 		static let userAgent = "User-Agent"
