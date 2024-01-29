@@ -30,6 +30,9 @@ open class ConveyServer: NSObject, ObservableObject {
 	open var allowsExpensiveNetworkAccess = true
 	open var allowsConstrainedNetworkAccess = true
 	open var waitsForConnectivity = true
+	public var logStyle: ConveyTaskManager.LogStyle?
+	internal var effectiveLogStyle: ConveyTaskManager.LogStyle { logStyle ?? ConveyTaskManager.instance.logStyle }
+
 	public var taskPathURL: URL?
 	
 	var shouldRecordTaskPath: Bool { taskPathURL != nil }

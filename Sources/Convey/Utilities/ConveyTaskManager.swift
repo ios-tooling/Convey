@@ -219,7 +219,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 
 	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async {
 		if !enabled { return }
-		if logStyle > .none { print("☎️ Begin \(task)") }
+		if task.server.effectiveLogStyle > .none { print("☎️ Begin \(task)") }
 		if multitargetLogging { await loadTypes(resetting: false) }
 		queue.async {
 			let echo: Bool
@@ -253,7 +253,7 @@ public class ConveyTaskManager: NSObject, ObservableObject {
 			shouldEcho = false
 		}
 		if multitargetLogging { await loadTypes(resetting: false) }
-		if logStyle > .short { print("☎︎ End \(task)")}
+		if task.server.effectiveLogStyle > .short { print("☎︎ End \(task)")}
 		queue.async {
 			let index = self.index(of: task)
 			if let index {
