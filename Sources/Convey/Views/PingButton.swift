@@ -67,11 +67,14 @@ public struct PingButton<TaskKind: ServerTask, Content: View>: View {
 		.onReceive(timer) { _ in
 			ping()
 		}
-		.onChange(of: frequency) { newFreq in if newFreq != frequency, newFreq != nil { ping() }}
+		#if os(visionOS)
+			.onChange(of: frequency) { _, newFreq in if newFreq != frequency, newFreq != nil { ping() }}
+			.onChange(of: scenePhase) { _, newPhase in if frequency != nil, newPhase == .active { ping() } }
+		#else
+			.onChange(of: frequency) { newFreq in if newFreq != frequency, newFreq != nil { ping() }}
+			.onChange(of: scenePhase) { newPhase in if frequency != nil, newPhase == .active { ping() } }
+		#endif
 		.onAppear { if frequency != nil { ping() }}
-		.onChange(of: scenePhase) { newPhase in
-			if frequency != nil, newPhase == .active { ping() }
-		}
 	}
 }
 

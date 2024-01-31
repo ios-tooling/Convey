@@ -22,7 +22,7 @@ class Device {
       }
    #endif
    
-   #if os(iOS) || os(watchOS)
+   #if os(iOS) || os(watchOS) || os(visionOS)
       public static var rawDeviceType: String {
          var         systemInfo = utsname()
          uname(&systemInfo)

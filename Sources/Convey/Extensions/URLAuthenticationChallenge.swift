@@ -13,8 +13,12 @@ extension URLAuthenticationChallenge {
 	
 	var publicKey: String? {
 		guard let serverTrust = self.protectionSpace.serverTrust else { return nil }
-		guard let certificate = SecTrustGetCertificateAtIndex(serverTrust, 0) else { return nil }
-
+		#if os(visionOS)
+			guard let certificates = SecTrustCopyCertificateChain(serverTrust) as? [SecCertificate], let certificate = certificates.first else { return nil }
+		#else
+			guard let certificate = SecTrustGetCertificateAtIndex(serverTrust, 0) else { return nil }
+		#endif
+		
 		let policies = [SecPolicyCreateSSL(true, host as CFString)] as NSArray
 		SecTrustSetPolicies(serverTrust, policies)
 		
