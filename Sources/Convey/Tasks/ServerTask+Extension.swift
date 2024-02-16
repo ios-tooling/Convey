@@ -11,6 +11,7 @@ public extension ServerTask {
 	var server: ConveyServer { ConveyServer.serverInstance ?? ConveyServer.setupDefault() }
 
 	func postProcess(response: ServerReturned) async throws { }
+	var path: String { "" }
 
 	var url: URL {
 		let nonParameterized = (self as? CustomURLTask)?.customURL ?? server.url(forTask: self)

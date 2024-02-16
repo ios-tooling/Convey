@@ -72,7 +72,7 @@ extension ServerTask {
 			output += responseData
 		}
 		
-		if let body = data, body.count < server.maxLoggedDataSize {
+		if let body = data, body.count < server.maxLoggedDownloadSize {
 			if includeMarkers { output += "\n\n⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗\n\n".data(using: .utf8) ?? Data() }
 			do {
 				let json = try JSONSerialization.jsonObject(with: body, options: [])

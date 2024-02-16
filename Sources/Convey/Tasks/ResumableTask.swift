@@ -16,7 +16,6 @@ public protocol ResumableTask: CustomHTTPHeaders, ServerPATCHTask {
 
 public extension ResumableTask {
 	var contentType: String? { "application/offset+octet-stream" }
-	var path: String { "" }
 	
 	var customHTTPHeaders: ConveyHeaders {
 		[

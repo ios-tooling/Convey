@@ -14,11 +14,9 @@ import Foundation
 
 open class ConveyServer: NSObject, ObservableObject {
 	public static var serverInstance: ConveyServer!
-	@Published public var remote: Remote = Remote(URL(string: "about://")!)
+	@Published public var remote: Remote = .empty
 	
 	open var baseURL: URL { remote.url }
-	open var isReady = CurrentValueSubject<Bool, Never>(false)
-	open var recentServerError: Error? { didSet { Task { await MainActor.run { self.objectWillChange.send() }} }}
 	open var defaultEncoder = JSONEncoder()
 	open var defaultDecoder = JSONDecoder()
 	open var logDirectory: URL?
@@ -33,7 +31,7 @@ open class ConveyServer: NSObject, ObservableObject {
 	public var logStyle: ConveyTaskManager.LogStyle?
 	internal var effectiveLogStyle: ConveyTaskManager.LogStyle { logStyle ?? ConveyTaskManager.instance.logStyle }
 
-	public var taskPathURL: URL?
+	public private(set) var taskPathURL: URL?
 	
 	var shouldRecordTaskPath: Bool { taskPathURL != nil }
 	open var disabled = false { didSet {
@@ -43,12 +41,11 @@ open class ConveyServer: NSObject, ObservableObject {
 		updateUserAgentHeader()
 		print("User agent set to: \(userAgent ?? "--")")
 	}}
-	open var maxLoggedDataSize = 1024 * 1024 * 10
+	open var maxLoggedDownloadSize = 1024 * 1024 * 10
 	open var maxLoggedUploadSize = 1024 * 4
 	open var launchedAt = Date()
-	open var echoAll = false
 	var activeSessions = ActiveSessions()
-	public var pinnedServerKeys: [String: [String]] = [:]
+	public private(set) var pinnedServerKeys: [String: [String]] = [:]
 	
 	public func recordTaskPath(to url: URL? = nil) {
 		pathCount = 0
@@ -103,6 +100,8 @@ open class ConveyServer: NSObject, ObservableObject {
 
 	open func preflight(_ task: ServerTask, request: URLRequest) async throws -> URLRequest {
 		if disabled { throw ConveyServerError.serverDisabled }
+		if remote.isEmtpy { throw ConveyServerError.remoteNotSet }
+		
 		return request
 	}
 	

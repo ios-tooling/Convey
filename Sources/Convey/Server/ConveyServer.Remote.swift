@@ -13,17 +13,22 @@ public extension ConveyServer {
 		public let url: URL
 		public let shortName: String?
 		public var id: URL { url }
-		public func hash(into hasher: inout Hasher) {
-			hasher.combine(url)
-		}
-		public static func ==(lhs: Remote, rhs: Remote) -> Bool {
-			lhs.url == rhs.url
-		}
+
+		public static let empty = Remote(URL(string: "about://")!)
 
 		public init(_ url: URL, name: String? = nil, shortName: String? = nil) {
 			self.name = name
 			self.shortName = shortName
 			self.url = url
+		}
+		
+		public var isEmtpy: Bool { url == Self.empty.url }
+
+		public func hash(into hasher: inout Hasher) {
+			hasher.combine(url)
+		}
+		public static func ==(lhs: Remote, rhs: Remote) -> Bool {
+			lhs.url == rhs.url
 		}
 	}
 }

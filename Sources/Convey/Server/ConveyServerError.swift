@@ -8,6 +8,7 @@
 import Foundation
 
 public enum ConveyServerError: LocalizedError {
+	case remoteNotSet
 	case serverDisabled
 	case taskAlreadyStarted
 	case unknownResponse(Data?, URLResponse?)
@@ -15,6 +16,7 @@ public enum ConveyServerError: LocalizedError {
     
     public var errorDescription: String? {
         switch self {
+		  case .remoteNotSet: return "You've not yet set a remote for this server"
 		  case .serverDisabled: return "Server DISABLED"
         case .taskAlreadyStarted: return "Task already started"
 			  
