@@ -25,7 +25,7 @@ public struct DownloadResult<Payload> {
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension PayloadDownloadingTask {
 	func download(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadPayload {
-		try await downloadWithResponse().payload
+		try await downloadWithResponse(caching: caching, decoder: decoder, preview: preview).payload
 	}
 	
 	func downloadWithResponse(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadResult<DownloadPayload> {
