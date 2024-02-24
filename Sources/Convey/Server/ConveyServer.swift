@@ -138,7 +138,9 @@ open class ConveyServer: NSObject, ObservableObject {
 	}
 	
 	open func url(forTask task: ServerTask) -> URL {
-		baseURL.appendingPathComponent(task.path)
+		var path = task.path
+		if path.hasPrefix("/") { path.removeFirst() }
+		return baseURL.appendingPathComponent(path)
 	}
 	
 	open func handle(error: Error, from task: ServerTask) {
