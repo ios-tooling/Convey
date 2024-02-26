@@ -14,7 +14,7 @@ class ConveySession: NSObject {
 	
 	var receivedData: Data?
 	var streamContinuation: AsyncStream<ServerEvent>.Continuation?
-
+	
 	init(task: ServerTask) {
 		server = task.server
 		super.init()
@@ -64,6 +64,8 @@ class ConveySession: NSObject {
 		await server.register(session: self)
 		let result = try await data(from: request)
 		await server.unregister(session: self)
+		session.finishTasksAndInvalidate()
+		session = nil
 		return result
 	}
 }
