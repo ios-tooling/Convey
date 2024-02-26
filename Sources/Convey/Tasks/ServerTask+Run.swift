@@ -110,7 +110,7 @@ extension ServerTask {
 		let result = try await closure()
 		finishBackgroundTime(token)
 		await server.stopWaiting(forThread: (self as? ThreadedServerTask)?.threadName)
-		if oneOffLogging { ConveyTaskManager.instance.decrementOneOffLog(for: self) }
+		if oneOffLogging { server.taskManager.decrementOneOffLog(for: self) }
 		return result
 	}
 	
@@ -129,9 +129,9 @@ extension ServerTask {
 					
 					if result.statusCode == 304, let data = DataCache.instance.fetchLocal(for: url), !data.data.isEmpty {
 						result.data = data.data
-						await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: true)
+						await server.taskManager.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: true)
 					} else {
-						await ConveyTaskManager.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: false)
+						await server.taskManager.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: false)
 						if self is FileBackedTask { self.fileCachedData = result.data }
 					}
 					

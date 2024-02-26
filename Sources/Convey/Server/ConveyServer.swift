@@ -28,8 +28,9 @@ open class ConveyServer: NSObject, ObservableObject {
 	open var allowsExpensiveNetworkAccess = true
 	open var allowsConstrainedNetworkAccess = true
 	open var waitsForConnectivity = true
+	open var taskManager: ConveyTaskManager!
 	public var logStyle: ConveyTaskManager.LogStyle?
-	internal var effectiveLogStyle: ConveyTaskManager.LogStyle { logStyle ?? ConveyTaskManager.instance.logStyle }
+	internal var effectiveLogStyle: ConveyTaskManager.LogStyle { logStyle ?? taskManager.logStyle }
 
 	public private(set) var taskPathURL: URL?
 	
@@ -67,7 +68,7 @@ open class ConveyServer: NSObject, ObservableObject {
 	
 	var pathCount = 0
 	public func endTaskPathRecording() {
-		ConveyTaskManager.instance.queue.async {
+		taskManager.queue.async {
 			self.taskPathURL = nil
 		}
 	}
@@ -122,6 +123,7 @@ open class ConveyServer: NSObject, ObservableObject {
 
 	public init(asDefault: Bool = true) {
 		super.init()
+		taskManager = .init(for: self)
 		if #available(iOS 16.0, macOS 13, *) {
 			archiveURL = URL.libraryDirectory.appendingPathComponent("archived-downloads")
 			try? FileManager.default.createDirectory(at: archiveURL!, withIntermediateDirectories: true)

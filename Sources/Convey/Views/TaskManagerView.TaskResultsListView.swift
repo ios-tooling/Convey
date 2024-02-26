@@ -14,10 +14,12 @@ extension TaskManagerView {
 	struct TaskResultsListView: View {
 		let taskType: ConveyTaskManager.LoggedTaskInfo
 		let urls: [URL]
+		let manager: ConveyTaskManager
 		
-		init(taskType: ConveyTaskManager.LoggedTaskInfo) {
+		init(taskType: ConveyTaskManager.LoggedTaskInfo, manager: ConveyTaskManager) {
 			self.taskType = taskType
-			self.urls = taskType.storedURLs.sorted { $0.absoluteString > $1.absoluteString }
+			self.manager = manager
+			self.urls = taskType.storedURLs(for: manager).sorted { $0.absoluteString > $1.absoluteString }
 		}
 		
 		var body: some View {

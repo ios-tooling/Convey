@@ -10,9 +10,11 @@ import SwiftUI
 #if canImport(UIKit)
 @available(watchOS, unavailable)
 public struct TaskManagerView: View {
-	@ObservedObject private var manager = ConveyTaskManager.instance
+	@ObservedObject private var manager: ConveyTaskManager
 	
-	public init() { }
+	public init(server: ConveyServer) {
+		manager = server.taskManager
+	}
 	
 	public var body: some View {
 		 VStack() {
@@ -27,7 +29,7 @@ public struct TaskManagerView: View {
 			 .padding()
 			 
 			 List(manager.types.indices, id: \.self) { index in
-				 TaskTypeRow(taskType: $manager.types[index])
+				 TaskTypeRow(taskType: $manager.types[index], manager: manager)
 			 }
 			 .listStyle(.plain)
 			
@@ -36,7 +38,7 @@ public struct TaskManagerView: View {
 					 .disabled(manager.areAllOff)
 				 Button("Reset All") { manager.resetAll() }.padding()
 					 .disabled(!manager.canResetAll)
-				 Button("Reset Current") { manager.types.resetTaskTypes() }.padding()
+				 Button("Reset Current") { manager.types.resetTaskTypes(for: manager) }.padding()
 			 }
 		 }
 		 .navigationBarTitle("Network Tasks")
@@ -44,12 +46,13 @@ public struct TaskManagerView: View {
 	
 	struct TaskTypeRow: View {
 		@Binding var taskType: ConveyTaskManager.LoggedTaskInfo
+		let manager: ConveyTaskManager
 		
 		var body: some View {
 			Group {
-				if taskType.hasStoredResults {
+				if taskType.hasStoredResults(for: manager) {
 					ZStack() {
-						NavigationLink(destination: TaskResultsListView(taskType: taskType)) { rowContent }.opacity(0.5)
+						NavigationLink(destination: TaskResultsListView(taskType: taskType, manager: manager)) { rowContent }.opacity(0.5)
 						rowContent
 					}
 				} else {
@@ -63,14 +66,14 @@ public struct TaskManagerView: View {
 			HStack(spacing: 20) {
 				VStack(spacing: 0) {
 					Button(action: {
-						taskType.setShouldEcho(!taskType.shouldEcho(nil))
+						taskType.setShouldEcho(!taskType.shouldEcho(nil, for: manager))
 					}) {
 						Text("Echo")
 							.font(.system(size: 12, weight: .bold).smallCaps())
 							.padding(.vertical, 5)
 							.padding(.horizontal, 10)
-							.foregroundColor(taskType.shouldEcho(nil) ? .white : .blue)
-							.background(Capsule().fill(taskType.shouldEcho(nil) ? .blue : .white))
+							.foregroundColor(taskType.shouldEcho(nil, for: manager) ? .white : .blue)
+							.background(Capsule().fill(taskType.shouldEcho(nil, for: manager) ? .blue : .white))
 							.overlay(Capsule().stroke(.blue))
 					}
 					.buttonStyle(.plain)
@@ -97,7 +100,7 @@ public struct TaskManagerView: View {
 @available(watchOS, unavailable)
 struct TaskManagerView_Previews: PreviewProvider {
     static var previews: some View {
-		 TaskManagerView()
+		 TaskManagerView(server: ConveyServer.serverInstance)
     }
 }
 

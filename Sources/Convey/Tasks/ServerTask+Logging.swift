@@ -17,12 +17,12 @@ extension ConveyServer {
 }
 extension ServerTask {
 	public func logged() -> Self {
-		ConveyTaskManager.instance.incrementOneOffLog(for: self)
+		server.taskManager.incrementOneOffLog(for: self)
 		return self
 	}
 	
 	public var isOneOffLogged: Bool {
-		ConveyTaskManager.instance.oneOffTypes.contains(String(describing: type(of: self)))
+		server.taskManager.oneOffTypes.contains(String(describing: type(of: self)))
 	}
 	
 	func logFilename(for date: Date) -> String {

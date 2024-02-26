@@ -26,13 +26,13 @@ extension ConveyTaskManager {
 		var mostRecent: Date? { dates.last }
 		var viewID: String { taskName + String(describing: manuallyEcho) }
 		
-		var hasStoredResults: Bool {
-			!storedURLs.isEmpty
+		func hasStoredResults(for manager: ConveyTaskManager) -> Bool {
+			!storedURLs(for: manager).isEmpty
 		}
 		
-		func shouldEcho(_ task: ServerTask.Type? = nil) -> Bool {
+		func shouldEcho(_ task: ServerTask.Type? = nil, for manager: ConveyTaskManager) -> Bool {
 			if let task, task is EchoingTask.Type, !suppressCompiledEcho { return true }
-			if ConveyTaskManager.instance.oneOffTypes.contains(taskName) { return true }
+			if manager.oneOffTypes.contains(taskName) { return true }
 			if let manual = manuallyEcho { return manual }
 			if !suppressCompiledEcho, compiledEcho { return true }
 			return thisRunOnlyEcho
@@ -52,24 +52,24 @@ extension ConveyTaskManager {
 		}
 		
 		
-		func store(results: Data, from date: Date) {
-			if shouldEcho(nil) {
+		func store(results: Data, from date: Date, for manager: ConveyTaskManager) {
+			if shouldEcho(nil, for: manager) {
 				print("Storing data for \(name) at \(date.filename)")
-				let typeURL = directory
+				let typeURL = directory(for: manager)
 				try? FileManager.default.createDirectory(at: typeURL, withIntermediateDirectories: true)
 				let fileURL = typeURL.appendingPathComponent(date.filename)
 				try? results.write(to: fileURL)
 			}
 		}
 		
-		func clearStoredFiles() {
-			try? FileManager.default.removeItem(at: directory)
+		func clearStoredFiles(for manager: ConveyTaskManager) {
+			try? FileManager.default.removeItem(at: directory(for: manager))
 		}
 		
-		var storedURLs: [URL] { (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)) ?? [] }
+		func storedURLs(for manager: ConveyTaskManager) -> [URL] { (try? FileManager.default.contentsOfDirectory(at: directory(for: manager), includingPropertiesForKeys: nil, options: .skipsHiddenFiles)) ?? [] }
 		
-		var directory: URL {
-			ConveyTaskManager.instance.directory.appendingPathComponent(taskName)
+		func directory(for manager: ConveyTaskManager) -> URL {
+			manager.directory.appendingPathComponent(taskName)
 		}
 		
 		var thisRunBytesString: String {

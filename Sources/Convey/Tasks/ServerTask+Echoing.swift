@@ -12,7 +12,7 @@ var echoingTypeNames: [String] = []
 
 extension ServerTask {
 	var isEchoing: Bool {
-		ConveyTaskManager.instance.shouldEcho(self)
+		server.taskManager.shouldEcho(self)
 	}
 }
 #else
