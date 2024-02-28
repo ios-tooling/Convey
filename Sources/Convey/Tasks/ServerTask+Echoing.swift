@@ -7,6 +7,15 @@
 
 import Foundation
 
+extension ServerTask {
+	var abbreviatedDescription: String {
+		let desc = "\(self)"
+		if desc.count < 100 { return desc }
+		
+		return desc.prefix(45) + "…" + desc.suffix(45)
+	}
+}
+
 #if canImport(UIKit)
 var echoingTypeNames: [String] = []
 
