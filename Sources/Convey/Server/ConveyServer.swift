@@ -101,7 +101,10 @@ open class ConveyServer: NSObject, ObservableObject {
 
 	open func preflight(_ task: ServerTask, request: URLRequest) async throws -> URLRequest {
 		if disabled { throw ConveyServerError.serverDisabled }
-		if remote.isEmtpy { throw ConveyServerError.remoteNotSet }
+		if remote.isEmtpy {
+			if task.url.host?.contains("about:") == false { return request }
+			throw ConveyServerError.remoteNotSet
+		}
 		
 		return request
 	}
