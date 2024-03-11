@@ -42,7 +42,7 @@ public enum Gzip {
 
 
 /// Compression level whose rawValue is based on the zlib's constants.
-public struct CompressionLevel: RawRepresentable {
+public struct CompressionLevel: RawRepresentable, Sendable {
     
     /// Compression level in the range of `0` (no compression) to `9` (maximum compression).
     public let rawValue: Int32
@@ -72,7 +72,7 @@ public struct CompressionLevel: RawRepresentable {
 public struct GzipError: Swift.Error {
     // cf. http://www.zlib.net/manual.html
     
-    public enum Kind: Equatable {
+    public enum Kind: Equatable, Sendable {
         /// The stream structure was inconsistent.
         ///
         /// - underlying zlib error: `Z_STREAM_ERROR` (-2)

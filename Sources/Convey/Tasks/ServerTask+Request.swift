@@ -9,7 +9,9 @@ import Foundation
 import Combine
 
 public extension ServerTask {
-	var cachedEtag: String? { ETagStore.instance.eTag(for: url) }
+	var cachedEtag: String? {
+		get async { await ETagStore.instance.eTag(for: url) }
+	}
 	
 	func beginRequest(at startedAt: Date) async throws -> URLRequest {
 		try await (self as? PreFlightTask)?.preFlight()
@@ -80,7 +82,7 @@ public extension ServerTask {
 			}
 		}
 
-		if self is ETagCachedTask, let etag = cachedEtag, DataCache.instance.hasCachedValue(for: url) {
+		if self is ETagCachedTask, let etag = await cachedEtag, DataCache.instance.hasCachedValue(for: url) {
 			request.addValue(etag, forHTTPHeaderField: ServerConstants.Headers.ifNoneMatch)
 		}
 		

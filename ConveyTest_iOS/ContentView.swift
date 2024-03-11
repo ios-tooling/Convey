@@ -65,7 +65,8 @@ struct ContentView: View {
 		}
 		.task {
 			do {
-				let data = try await ConveyServer.serverInstance.data(for: landscape)
+				let session = ConveySession()
+				let data = try await session.data(for: landscape)
 				image = UIImage(data: data.data)
 			} catch {
 				print("Error downloading: \(error)")

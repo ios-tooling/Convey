@@ -137,7 +137,7 @@ extension ServerTask {
 					
 					if self is ETagCachedTask, let tag = result.response.etag {
 						DataCache.instance.cache(data: result.data, for: url)
-						ETagStore.instance.store(etag: tag, for: url)
+						await ETagStore.instance.store(etag: tag, for: url)
 					}
 					preview?(result)
 					try await postProcess(response: result)

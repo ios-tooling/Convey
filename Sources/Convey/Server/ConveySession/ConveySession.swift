@@ -6,14 +6,21 @@
 //
 
 import Foundation
+import Combine
 
-class ConveySession: NSObject {
+actor ConveySession: NSObject {
 	var session: URLSession!
 	let server: ConveyServer
 	var queue: OperationQueue?
 	
-	var receivedData: Data?
+	nonisolated let receivedData: CurrentValueSubject<Data?, Never> = .init(nil)
 	var streamContinuation: AsyncStream<ServerEvent>.Continuation?
+	
+	override init() {
+		server = ConveyServer.serverInstance
+		super.init()
+		session = URLSession(configuration: .default, delegate: self, delegateQueue: queue)
+	}
 	
 	init(task: ServerTask) {
 		server = task.server
@@ -71,7 +78,7 @@ class ConveySession: NSObject {
 }
 
 extension ConveySession: URLSessionDelegate {
-	public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+	public nonisolated func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
 		
 		if let keys = server.pinnedServerKeys[challenge.host] {
 			guard let key = challenge.publicKey, keys.contains(key) else {
