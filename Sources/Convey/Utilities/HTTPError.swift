@@ -13,7 +13,7 @@ extension Optional where Wrapped == URL {
    public func absoluteString(replacement: String? = "Missing URL") -> String { self?.absoluteString ?? replacement ?? "" }
 }
 
-public enum HTTPError: Error, LocalizedError {
+public enum HTTPError: Error, LocalizedError, Sendable {
 	case malformedURL(String)
    case nonHTTPResponse(URL?, Data)
    case offline

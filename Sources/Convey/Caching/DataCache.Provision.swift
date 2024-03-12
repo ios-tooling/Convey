@@ -12,7 +12,7 @@ extension DataCache {
 		Provision(url: url, kind: kind, suffix: suffix, ext: ext, root: cachesDirectory)
 	}
 	
-	public struct Provision {
+	public struct Provision: Sendable {
 		let url: URL
 		var kind: CacheKind = .default
 		var suffix: String?

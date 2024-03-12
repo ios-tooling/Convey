@@ -8,7 +8,7 @@
 import Foundation
 
 public typealias RefreshableCompletion = (Result<Data, Error>) -> Void
-public enum CachedDataFetchStyle { case cachedOnly, forceRefetch, cachedThenFetched, cachedThenForceRefresh }
+public enum CachedDataFetchStyle: Sendable { case cachedOnly, forceRefetch, cachedThenFetched, cachedThenForceRefresh }
 
 extension RefreshableCachedTask {
 	public func fetchData(decoder: JSONDecoder? = nil, ignoringCacheIfOlderThan interval: TimeInterval, style: CachedDataFetchStyle = .cachedThenFetched, refreshing completion: RefreshableCompletion? = nil) async throws -> Data? {

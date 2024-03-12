@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 extension ServerTask {
 	var abbreviatedDescription: String {
@@ -17,8 +18,6 @@ extension ServerTask {
 }
 
 #if canImport(UIKit)
-var echoingTypeNames: [String] = []
-
 extension ServerTask {
 	var isEchoing: Bool {
 		get async { await server.taskManager.shouldEcho(self) }

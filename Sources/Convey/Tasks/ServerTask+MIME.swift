@@ -74,7 +74,7 @@ public extension [MIMEMessageComponent] {
 	}
 }
 
-public enum MIMEMessageComponent {
+public enum MIMEMessageComponent: Sendable {
 	case text(name: String, content: String)
 	case file(name: String, contentType: String, url: URL)
 	case image(name: String, image: PlatformImage, quality: Double)

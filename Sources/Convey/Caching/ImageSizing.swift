@@ -42,7 +42,7 @@ extension CGSize {
 	}
 }
 
-public struct ImageSize: CustomStringConvertible {
+public struct ImageSize: CustomStringConvertible, Sendable {
 	public let width: CGFloat?
 	public let height: CGFloat?
 	public let tolerance: CGFloat

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum ServerSentEventError: Error { case cancelled }
+public enum ServerSentEventError: Error, Sendable { case cancelled }
 
 extension ServerTask where Self: ServerSentEventTargetTask {
 	public func eventStream() async throws -> AsyncStream<ServerEvent> {

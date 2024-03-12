@@ -22,7 +22,7 @@ extension ServerTask {
 	}
 	
 	public var isOneOffLogged: Bool {
-		get async { await server.taskManager.oneOffTypes.contains(String(describing: type(of: self))) }
+		get async { server.taskManager.oneOffTypes.value.contains(String(describing: type(of: self))) }
 	}
 	
 	func logFilename(for date: Date) -> String {

@@ -28,7 +28,7 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 	public var multitargetLogging = false
 	public var storeResults = true
 	public var logStyle = LogStyle.none
-	public var oneOffTypes: [String] = []
+	let oneOffTypes: CurrentValueSubject<[String], Never> = .init([])
 	public var recordings: [String: String] = [:]
 	unowned var server: ConveyServer
 	
@@ -39,20 +39,24 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 	}
 
 	let typesFilename: String
-	var types: [LoggedTaskInfo] = [] {
-		didSet {
-			saveTypes()
-			DispatchQueue.main.async { self.objectWillChange.send() }
+	let types: CurrentValueSubject<[LoggedTaskInfo], Never> = .init([])
+	nonisolated var sortedTypes: [LoggedTaskInfo] { types.value }
+	func saveTypes(_ types: [LoggedTaskInfo]? = nil) {
+		if let types { self.types.value = types }
+		
+		validateDirectories()
+		if let data = try? JSONEncoder().encode(self.types.value) {
+			try? FileManager.default.removeItem(at: typesURL)
+			try? data.write(to: typesURL)
 		}
+
+		DispatchQueue.main.async { self.objectWillChange.send() }
 	}
 	
 	var typesURL: URL { directory.appendingPathComponent(typesFilename) }
 	func validateDirectories() { try? FileManager.default.createDirectory(at: typesURL.deletingLastPathComponent(), withIntermediateDirectories: true) }
 
-	var sort = ConveyTaskManager.Sort.alpha { didSet {
-		updateSort()
-		objectWillChange.send()
-	}}
+	let sort: CurrentValueSubject<ConveyTaskManager.Sort, Never> = .init(.alpha)
 	
 	var queue = DispatchQueue(label: "ConveyTaskManager")
 	init(for server: ConveyServer) {
@@ -84,47 +88,50 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 	
 	func setShouldEcho(taskType: String, on: Bool = true) {
 		if let index = index(of: taskType) {
-			types[index].thisRunOnlyEcho = on
+			types.value[index].thisRunOnlyEcho = on
 		} else {
 			var newTask = LoggedTaskInfo(taskName: taskType)
 			newTask.thisRunOnlyEcho = true
-			types.append(newTask)
+			types.value.append(newTask)
 		}
+		saveTypes()
 	}
 	
 	func incrementOneOffLog(for task: ServerTask) {
 		enabled = true
-		oneOffTypes.append(String(describing: type(of: task)))
+		oneOffTypes.value.append(String(describing: type(of: task)))
 	}
 
 	func decrementOneOffLog(for task: ServerTask) {
-		if let index = oneOffTypes.firstIndex(of: String(describing: type(of: task))) {
-			oneOffTypes.remove(at: index)
+		if let index = oneOffTypes.value.firstIndex(of: String(describing: type(of: task))) {
+			oneOffTypes.value.remove(at: index)
 		}
 	}
 
 	func shouldEcho(_ task: ServerTask.Type, isEchoing: Bool) -> Bool {
 		guard enabled, let index = index(ofType: task, isEchoing: isEchoing) else { return task.self is EchoingTask.Type }
-		return types[index].shouldEcho(task, for: self)
+		return types.value[index].shouldEcho(task, for: self)
 	}
 	
 	func task(_ task: ServerTask.Type, shouldEcho: Bool) {
 		guard enabled else { return }
 		
+		var insideTypes = types.value
+		
 		if let index = index(ofType: task, isEchoing: task is EchoingTask, noMatterWhat: true) {
 			if shouldEcho {
-				types[index].manuallyEcho = true
+				insideTypes[index].manuallyEcho = true
 			} else {
-				let compiledEcho = !types[index].suppressCompiledEcho && task is EchoingTask
-				if compiledEcho || types[index].manuallyEcho == true || types[index].thisRunOnlyEcho {
-					types[index].manuallyEcho = false
-					types[index].thisRunOnlyEcho = false
-				} else if !compiledEcho || types[index].manuallyEcho == false {
-					types[index].manuallyEcho = nil
+				let compiledEcho = !insideTypes[index].suppressCompiledEcho && task is EchoingTask
+				if compiledEcho || insideTypes[index].manuallyEcho == true || insideTypes[index].thisRunOnlyEcho {
+					insideTypes[index].manuallyEcho = false
+					insideTypes[index].thisRunOnlyEcho = false
+				} else if !compiledEcho || insideTypes[index].manuallyEcho == false {
+					insideTypes[index].manuallyEcho = nil
 				}
 			}
 		}
-		objectWillChange.send()
+		saveTypes(insideTypes)
 	}
 	
 	func record(_ string: String, for task: ServerTask) {
@@ -151,51 +158,47 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 	func shouldEcho(_ task: ServerTask) -> Bool {
 		guard enabled, let index = index(of: task) else { return task is EchoingTask }
 		
-		return types[index].shouldEcho(type(of: task), for: self)
+		return types.value[index].shouldEcho(type(of: task), for: self)
 	}
 	
-	public func turnAllOff() {
-		for i in types.indices {
-			if types[i].manuallyEcho == true || types[i].thisRunOnlyEcho == true {
-				types[i].manuallyEcho = false
-				types[i].suppressCompiledEcho = true
-			} else if !types[i].compiledEcho {
-				types[i].manuallyEcho = nil
-				types[i].thisRunOnlyEcho = false
+	public nonisolated func turnAllOff() {
+		for i in types.value.indices {
+			if types.value[i].manuallyEcho == true || types.value[i].thisRunOnlyEcho == true {
+				types.value[i].manuallyEcho = false
+				types.value[i].suppressCompiledEcho = true
+			} else if !types.value[i].compiledEcho {
+				types.value[i].manuallyEcho = nil
+				types.value[i].thisRunOnlyEcho = false
 			}
 		}
 		objectWillChange.send()
 	}
 	
-	var areAllOff: Bool {
-		types.filter { $0.shouldEcho(for: self) }.isEmpty
+	nonisolated var areAllOff: Bool {
+		types.value.filter { $0.shouldEcho(for: self) }.isEmpty
 	}
 	
-	public func resetAll() {
-		for i in types.indices {
-			types[i].totalCount = 0
-			types[i].dates = []
-			types[i].totalBytes = 0
-			types[i].thisRunBytes = 0
-			types[i].manuallyEcho = nil
-			types[i].clearStoredFiles(for: self)
+	public nonisolated func resetAll() {
+		var insideTypes = types.value
+		
+		for i in insideTypes.indices {
+			insideTypes[i].totalCount = 0
+			insideTypes[i].dates = []
+			insideTypes[i].totalBytes = 0
+			insideTypes[i].thisRunBytes = 0
+			insideTypes[i].manuallyEcho = nil
+			insideTypes[i].clearStoredFiles(for: self)
 		}
-		objectWillChange.send()
+		
+		let saveThis = insideTypes
+		Task { await saveTypes(saveThis) }
 	}
 	
-	var canResetAll: Bool {
-		for type in types {
+	nonisolated var canResetAll: Bool {
+		for type in types.value {
 			if type.manuallyEcho != nil { return true }
 		}
 		return false
-	}
-
-	func saveTypes() {
-		validateDirectories()
-		if let data = try? JSONEncoder().encode(types) {
-			try? FileManager.default.removeItem(at: typesURL)
-			try? data.write(to: typesURL)
-		}
 	}
 	
 	func loadTypes(resetting: Bool) async {
@@ -204,25 +207,25 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 		var newTypes = (try? JSONDecoder().decode([LoggedTaskInfo].self, from: data)) ?? []
 		if resetting { newTypes.resetTaskTypes(for: self) }
 		let filtered = newTypes
-		types = filtered
+		types.value = filtered
 	}
 	
 	func index(ofType task: ServerTask.Type, isEchoing: Bool, noMatterWhat: Bool = false) -> Int? {
 		let name = String(describing: task.self)
 		if let index = index(of: name) { 
-			types[index].compiledEcho = isEchoing
+			types.value[index].compiledEcho = isEchoing
 			return index
 		}
 		
 		if !noMatterWhat { return nil }
 		var newTask = LoggedTaskInfo(taskName: name)
 		newTask.compiledEcho = task is EchoingTask
-		self.types.append(newTask)
-		return self.types.count - 1
+		self.types.value.append(newTask)
+		return self.types.value.count - 1
 	}
 	
 	func index(of taskName: String) -> Int? {
-		return types.firstIndex(where: { $0.taskName == taskName })
+		return types.value.firstIndex(where: { $0.taskName == taskName })
 	}
 	
 	func index(of task: ServerTask) -> Int? { index(ofType: type(of: task), isEchoing: task is EchoingTask) }
@@ -235,15 +238,15 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 		let echo: Bool
 
 		if let index = self.index(of: task) {
-			self.types[index].dates.append(date)
-			self.types[index].totalCount += 1
-			echo = self.types[index].shouldEcho(type(of: task), for: self)
+			self.types.value[index].dates.append(date)
+			self.types.value[index].totalCount += 1
+			echo = self.types.value[index].shouldEcho(type(of: task), for: self)
 		} else {
 			let name = String(describing: type(of: task))
 			var newTask = LoggedTaskInfo(taskName: name)
 			newTask.compiledEcho = task is EchoingTask
 			echo = newTask.shouldEcho(type(of: task), for: self)
-			self.types.append(newTask)
+			self.types.value.append(newTask)
 		}
 
 		if echo || task.server.shouldRecordTaskPath{
@@ -257,7 +260,7 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 		let shouldEcho: Bool
 		
 		if let index = self.index(of: task) {
-			shouldEcho = self.types[index].shouldEcho(type(of: task), for: self)
+			shouldEcho = self.types.value[index].shouldEcho(type(of: task), for: self)
 		} else {
 			shouldEcho = false
 		}
@@ -266,8 +269,8 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 
 	let index = self.index(of: task)
 		if let index {
-			self.types[index].thisRunBytes += Int64(bytes.count)
-			self.types[index].totalBytes += Int64(bytes.count)
+			self.types.value[index].thisRunBytes += Int64(bytes.count)
+			self.types.value[index].totalBytes += Int64(bytes.count)
 			if self.multitargetLogging { self.saveTypes() }
 		}
 		if shouldEcho || task.server.shouldRecordTaskPath {
@@ -278,25 +281,30 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 			} else {
 				self.record("\(type(of: task)) Response ======================\n \(String(data: log, encoding: .utf8) ?? String(data: log, encoding: .ascii) ?? "unable to stringify response")\n======================", for: task)
 				if self.storeResults, response.didDownloadSuccessfully, let index {
-					self.types[index].store(results: log, from: startedAt, for: self) }
+					self.types.value[index].store(results: log, from: startedAt, for: self) }
 			}
 			
 			await self.dumpRecording(for: task)
 		}
 	}
 	
-	func updateSort() {
+	func updateSort(by: ConveyTaskManager.Sort? = nil) {
+		let sort = by ?? self.sort.value
+		self.sort.value = sort
+		var insideTypes = types.value
+		
 		switch sort {
-		case .alpha: types.sort { $0.taskName < $1.taskName }
-		case .count: types.sort { $0.thisRunCount > $1.thisRunCount }
-		case .size: types.sort { $0.thisRunBytes > $1.thisRunBytes }
-		case .recent: types.sort { ($0.mostRecent ?? .distantPast) > ($1.mostRecent ?? .distantPast) }
-		case .enabled: types.sort {
+		case .alpha: insideTypes.sort { $0.taskName < $1.taskName }
+		case .count: insideTypes.sort { $0.thisRunCount > $1.thisRunCount }
+		case .size: insideTypes.sort { $0.thisRunBytes > $1.thisRunBytes }
+		case .recent: insideTypes.sort { ($0.mostRecent ?? .distantPast) > ($1.mostRecent ?? .distantPast) }
+		case .enabled: insideTypes.sort {
 			if $0.shouldEcho(for: self), !$1.shouldEcho(for: self) { return true }
 			if $1.shouldEcho(for: self), !$0.shouldEcho(for: self) { return false }
 			return $0.taskName < $1.taskName
 			}
 		}
+		saveTypes(insideTypes)
 	}
 }
 

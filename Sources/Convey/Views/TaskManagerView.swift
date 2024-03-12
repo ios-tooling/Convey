@@ -9,16 +9,18 @@ import SwiftUI
 
 #if canImport(UIKit)
 @available(watchOS, unavailable)
-public struct TaskManagerView: View {
+@MainActor public struct TaskManagerView: View {
 	@ObservedObject private var manager: ConveyTaskManager
+	@State private var sort: ConveyTaskManager.Sort
 	
-	public init(server: ConveyServer) {
+	public init(server: ConveyServer = ConveyServer.serverInstance) {
 		manager = server.taskManager
+		sort = server.taskManager.sort.value
 	}
 	
 	public var body: some View {
 		 VStack() {
-			 Picker("", selection: $manager.sort.animation()) {
+			 Picker("", selection: $sort.animation()) {
 				 Text("Alpha").tag(ConveyTaskManager.Sort.alpha)
 				 Text("Count").tag(ConveyTaskManager.Sort.count)
 				 Text("Size").tag(ConveyTaskManager.Sort.size)
@@ -28,8 +30,9 @@ public struct TaskManagerView: View {
 			 .pickerStyle(.segmented)
 			 .padding()
 			 
-			 List(manager.types.indices, id: \.self) { index in
-				 TaskTypeRow(taskType: $manager.types[index], manager: manager)
+			 let types = manager.sortedTypes
+			 List(types.indices, id: \.self) { index in
+				 TaskTypeRow(taskType: types[index], manager: manager)
 			 }
 			 .listStyle(.plain)
 			
@@ -38,14 +41,22 @@ public struct TaskManagerView: View {
 					 .disabled(manager.areAllOff)
 				 Button("Reset All") { manager.resetAll() }.padding()
 					 .disabled(!manager.canResetAll)
-				 Button("Reset Current") { manager.types.resetTaskTypes(for: manager) }.padding()
+				 
+				 //#FIXME
+				 //Button("Reset Current") { sortedTypes.resetTaskTypes(for: manager) }.padding()
 			 }
 		 }
 		 .navigationBarTitle("Network Tasks")
+		 .onChange(of: sort) { newValue in
+			 Task { @MainActor in
+				 await manager.updateSort(by: newValue)
+				 manager.objectWillChange.send()
+			 }
+		 }
     }
 	
 	struct TaskTypeRow: View {
-		@Binding var taskType: ConveyTaskManager.LoggedTaskInfo
+		var taskType: ConveyTaskManager.LoggedTaskInfo
 		let manager: ConveyTaskManager
 		
 		var body: some View {
@@ -66,7 +77,8 @@ public struct TaskManagerView: View {
 			HStack(spacing: 20) {
 				VStack(spacing: 0) {
 					Button(action: {
-						taskType.setShouldEcho(!taskType.shouldEcho(nil, for: manager))
+						//#FIXME
+						//	taskType.setShouldEcho(!taskType.shouldEcho(nil, for: manager))
 					}) {
 						Text("Echo")
 							.font(.system(size: 12, weight: .bold).smallCaps())
