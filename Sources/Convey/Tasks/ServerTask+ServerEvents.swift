@@ -21,12 +21,12 @@ extension ServerTask where Self: ServerSentEventTargetTask {
 		}
 	}
 
-	public func stream<Element: Codable>(_ result: Element.Type, shouldCancel: @escaping () -> Bool = { false }) async throws -> AsyncThrowingStream<Element, Error> {
+	public func stream<Element: Codable>(_ result: Element.Type, shouldCancel: @Sendable @escaping () -> Bool = { false }) async throws -> AsyncThrowingStream<Element, Error> {
 		let stream: AsyncThrowingStream<Element, Error> = try await self.stream(shouldCancel: shouldCancel)
 		return stream
 	}
 	
-	public func stream<Element: Codable>(shouldCancel: @escaping () -> Bool = { false }) async throws -> AsyncThrowingStream<Element, Error> {
+	public func stream<Element: Codable>(shouldCancel: @Sendable @escaping () -> Bool = { false }) async throws -> AsyncThrowingStream<Element, Error> {
 		let stream = try await eventStream()
 		
 		return AsyncThrowingStream(Element.self) { continuation in

@@ -12,7 +12,7 @@ import Cocoa
 #endif
 
 @available(iOS 16, macOS 13.0, *)
-public struct ConveyConsoleView: View {
+@MainActor public struct ConveyConsoleView: View {
 	@State var availableTasks: [any ConsoleDisplayableTask] = []
 	@State var currentTaskIndex = 0
 	@State private var isShowingConfigurationSheet = false

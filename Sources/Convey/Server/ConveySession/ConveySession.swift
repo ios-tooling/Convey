@@ -14,7 +14,7 @@ actor ConveySession: NSObject {
 	var queue: OperationQueue?
 	
 	nonisolated let receivedData: CurrentValueSubject<Data?, Never> = .init(nil)
-	var streamContinuation: AsyncStream<ServerEvent>.Continuation?
+	nonisolated let streamContinuation: CurrentValueSubject<AsyncStream<ServerEvent>.Continuation?, Never> = .init(nil)
 	
 	override init() {
 		server = ConveyServer.serverInstance

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct ServerReturned {
+public struct ServerReturned: Sendable {
 	public var response: HTTPURLResponse
 	public var data: Data
 	public var fromCache: Bool

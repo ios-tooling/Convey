@@ -15,7 +15,7 @@ import Cocoa
 
 #if os(iOS)
 public extension CGSize {
-	static var screen: CGSize {
+	@MainActor static var screen: CGSize {
 		let screen = UIScreen.main
 		
 		return CGSize(width: screen.bounds.width * screen.scale, height: screen.bounds.height * screen.scale)
@@ -104,7 +104,7 @@ public struct ImageSize: CustomStringConvertible {
 	}
 	
 	#if os(iOS)
-		public static var screen: ImageSize {
+		@MainActor public static var screen: ImageSize {
 			ImageSize(size: UIScreen.main.bounds.size, tolerance: 1, isMaxSize: true)
 		}
 	#endif

@@ -22,7 +22,7 @@ public actor ImageCache {
 	nonisolated let inMemoryImages = CurrentValueSubject<[String: InMemoryImage], Never>([:])
 	nonisolated let parentDirectory = CurrentValueSubject<URL, Never>(ImageCache.defaultDirectory)
 	
-	public struct ImageInfo {
+	public struct ImageInfo: Sendable {
 		public let image: PlatformImage?
 		public let localURL: URL?
 		public let remoteURL: URL?

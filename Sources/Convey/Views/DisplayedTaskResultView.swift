@@ -104,10 +104,11 @@ public struct DisplayedTaskResultView: View {
 		request = try? await task.buildRequest()
 		do {
 			print("Fetching \(task.displayString)")
-			responses[task] = try await task.downloadDataWithResponse()
+			let response = try await task.downloadDataWithResponse()
+			await responses.save(response, for: task)
 			print("Fetched task")
 		} catch {
-			responses.clearResults(for: task)
+			await responses.clearResults(for: task)
 			self.error = error
 		}
 		isFetching = false

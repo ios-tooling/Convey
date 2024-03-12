@@ -21,7 +21,7 @@ var echoingTypeNames: [String] = []
 
 extension ServerTask {
 	var isEchoing: Bool {
-		server.taskManager.shouldEcho(self)
+		get async { await server.taskManager.shouldEcho(self) }
 	}
 }
 #else
