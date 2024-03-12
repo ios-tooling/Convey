@@ -24,6 +24,15 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 		get { directoryValue.value }
 		set { directoryValue.value = newValue }
 	}
+	
+	public func setEnabled(_ enabled: Bool = true) {
+		self.enabled = enabled
+	}
+	
+	public func setLogStyle(_ logStyle: LogStyle) {
+		self.logStyle = logStyle
+	}
+	
 	let directoryValue: CurrentValueSubject<URL, Never> = .init(URL.systemDirectoryURL(which: .cachesDirectory)!.appendingPathComponent("convey_tasks"))
 	public var multitargetLogging = false
 	public var storeResults = true
