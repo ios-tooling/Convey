@@ -95,7 +95,7 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	]
 	let threadManager = ThreadManager()
 	#if os(iOS)
-		var application: UIApplication?
+		public var application: UIApplication?
 	#endif
 	
 	public var defaultUserAgent: String {
