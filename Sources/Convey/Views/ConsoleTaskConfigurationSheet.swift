@@ -8,7 +8,7 @@
 import SwiftUI
 
 @available(iOS 16, macOS 13.0, *)
-struct ConsoleTaskConfigurationSheet: View {
+@MainActor struct ConsoleTaskConfigurationSheet: View {
 	let taskType: any ConfigurableConsoleDisplayableTask.Type
 	@Binding var fields: [String: String]
 	@Environment(\.dismiss) private var dismiss

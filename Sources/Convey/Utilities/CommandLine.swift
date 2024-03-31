@@ -7,7 +7,18 @@
 
 import Foundation
 
+extension CommandLine: @unchecked Sendable { }
+
 extension CommandLine {
+	static func sendableArguments() -> [String] {
+		UnsafeBufferPointer<UnsafeMutablePointer<CChar>?>(
+		  start: CommandLine.unsafeArgv,
+		  count: Int(CommandLine.argc)
+		).lazy
+		  .compactMap { $0 }
+		  .compactMap { String(validatingUTF8: $0) }
+	}
+	
 	static func bool(for key: String) -> Bool {
 		if let string = self.string(for: key)?.lowercased() {
 			return string == "y" || string == "yes" || string == "true"
@@ -18,7 +29,7 @@ extension CommandLine {
 
 	static func string(for key: String) -> String? {
 		let punct = CharacterSet.punctuationCharacters
-		for arg in self.arguments {
+		for arg in sendableArguments() {
 			let comps = arg.components(separatedBy: "=")
 			if comps.count < 2 { continue }
 			

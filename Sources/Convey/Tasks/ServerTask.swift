@@ -7,9 +7,9 @@
 
 import Foundation
 
-public typealias PreviewClosure = (ServerReturned) -> Void
+public typealias PreviewClosure = @Sendable (ServerReturned) -> Void
 
-public protocol ServerTask {
+public protocol ServerTask: Sendable {
 	var path: String { get }
 	func postProcess(response: ServerReturned) async throws
 	var httpMethod: String { get }

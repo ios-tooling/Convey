@@ -8,7 +8,7 @@
 import SwiftUI
 
 @available(iOS 16, macOS 13.0, *)
-public struct DisplayedTaskResultView: View {
+@MainActor public struct DisplayedTaskResultView: View {
 	let task: any ConsoleDisplayableTask
 	@State private var error: Error?
 	@Binding var isFetching: Bool
@@ -104,7 +104,8 @@ public struct DisplayedTaskResultView: View {
 		request = try? await task.buildRequest()
 		do {
 			print("Fetching \(task.displayString)")
-			responses[task] = try await task.downloadDataWithResponse()
+			let response = try await task.downloadDataWithResponse()
+			responses.save(response, for: task)
 			print("Fetched task")
 		} catch {
 			responses.clearResults(for: task)

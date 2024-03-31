@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 extension ConveyTaskManager {
-	struct LoggedTaskInfo: Codable, Identifiable {
+	struct LoggedTaskInfo: Codable, Identifiable, Sendable {
 		enum CodingKeys: String, CodingKey { case taskName, totalCount, dates, totalBytes, thisRunBytes, manuallyEcho, suppressCompiledEcho }
 		
 		var id: String { taskName }
@@ -32,7 +32,7 @@ extension ConveyTaskManager {
 		
 		func shouldEcho(_ task: ServerTask.Type? = nil, for manager: ConveyTaskManager) -> Bool {
 			if let task, task is EchoingTask.Type, !suppressCompiledEcho { return true }
-			if manager.oneOffTypes.contains(taskName) { return true }
+			if manager.oneOffTypes.value.contains(taskName) { return true }
 			if let manual = manuallyEcho { return manual }
 			if !suppressCompiledEcho, compiledEcho { return true }
 			return thisRunOnlyEcho

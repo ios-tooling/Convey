@@ -30,7 +30,7 @@ extension ImageCache {
 		if let image = PlatformImage(data: data) {
 			let resized = size?.resize(image) ?? image
 			if resized != image, let data = resized.jpegData(compressionQuality: 0.9) {
-				try? DataCache.instance.replace(data: data, for: task, provision: provision)
+				try? await DataCache.instance.replace(data: data, for: task, provision: provision)
 			}
 			if caching == .never { return .init(image: resized, localURL: localURL, remoteURL: task.url) }
 			updateCache(for: key, with: InMemoryImage(image: resized, size: data.count, createdAt: Date(), key: key, group: provision.group))

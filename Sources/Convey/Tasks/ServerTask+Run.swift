@@ -12,7 +12,7 @@ import Combine
 	import UIKit
 #endif
 
-public struct DownloadResult<Payload> {
+public struct DownloadResult<Payload: Sendable>: Sendable {
 	public init(payload: Payload, response: ServerReturned) {
 		self.payload = payload
 		self.response = response
@@ -90,10 +90,10 @@ extension ServerTask {
 	}
 	
 	#if os(iOS)
-		func requestBackgroundTime() -> UIBackgroundTaskIdentifier? {
+		@MainActor func requestBackgroundTime() async -> UIBackgroundTaskIdentifier? {
 			server.application?.beginBackgroundTask(withName: "") {  }
 		}
-		func finishBackgroundTime(_ token: UIBackgroundTaskIdentifier?) {
+		@MainActor func finishBackgroundTime(_ token: UIBackgroundTaskIdentifier?) {
 			guard let token else { return }
 			server.application?.endBackgroundTask(token)
 		}
@@ -102,15 +102,15 @@ extension ServerTask {
 		func finishBackgroundTime(_ token: Int) { }
 	#endif
 	
-	func handleThreadAndBackgrounding<Result>(closure: () async throws -> Result) async throws -> Result {
-		let oneOffLogging = isOneOffLogged
+	func handleThreadAndBackgrounding<Result: Sendable>(closure: () async throws -> Result) async throws -> Result {
+		let oneOffLogging = await isOneOffLogged
 
 		await server.wait(forThread: (self as? ThreadedServerTask)?.threadName)
-		let token = requestBackgroundTime()
+		let token = await requestBackgroundTime()
 		let result = try await closure()
-		finishBackgroundTime(token)
+		await finishBackgroundTime(token)
 		await server.stopWaiting(forThread: (self as? ThreadedServerTask)?.threadName)
-		if oneOffLogging { server.taskManager.decrementOneOffLog(for: self) }
+		if oneOffLogging { await server.taskManager.decrementOneOffLog(for: self) }
 		return result
 	}
 	
@@ -136,8 +136,8 @@ extension ServerTask {
 					}
 					
 					if self is ETagCachedTask, let tag = result.response.etag {
-						DataCache.instance.cache(data: result.data, for: url)
-						ETagStore.instance.store(etag: tag, for: url)
+						await DataCache.instance.cache(data: result.data, for: url)
+						await ETagStore.instance.store(etag: tag, for: url)
 					}
 					preview?(result)
 					try await postProcess(response: result)

@@ -52,7 +52,7 @@ public protocol MIMEUploadingTask: DataUploadingTask {
 }
 
 public protocol FormURLEncodedUploadingTask: DataUploadingTask {
-	var formFields: [String: Any] { get }
+	var formFields: [String: any Sendable] { get }
 }
 
 public protocol ETagCachedTask: ServerGETTask { }
@@ -60,7 +60,7 @@ public protocol JSONPayloadTask: ServerTask { }
 public protocol GZipEncodedUploadingTask: DataUploadingTask { }
 
 public protocol JSONUploadingTask: DataUploadingTask, JSONPayloadTask {
-	var jsonToUpload: [String: Any]? { get }
+	var jsonToUpload: [String: any Sendable]? { get }
 }
 
 public protocol CustomJSONEncoderTask: ServerTask {
@@ -71,7 +71,7 @@ public protocol CustomHTTPMethodTask: ServerTask {
 	var customHTTPMethod: String { get }
 }
 
-public struct ConveyHeader: Codable, Hashable, CustomStringConvertible {
+public struct ConveyHeader: Codable, Hashable, CustomStringConvertible, Sendable {
 	public let name: String
 	public let value: String
 	public var description: String {

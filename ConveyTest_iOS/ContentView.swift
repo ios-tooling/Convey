@@ -28,6 +28,7 @@ struct TestView: View {
 			callback?()
 		}
 	}
+		
 }
 
 struct ContentView: View {
@@ -35,7 +36,8 @@ struct ContentView: View {
 	@State var showBig = false
 	@State var imageURL = enterprise
 	@State var counter = 0
-	
+	@State private var showingTaskManager = false
+
 	var body: some View {
 		VStack() {
 //			TestView(someState: "Text \(counter)", counter: 3) {
@@ -62,10 +64,14 @@ struct ContentView: View {
 				Text("Cache count: \(ImageCache.instance.cacheCount())")
 			}
 			Button("Show Big") { showBig.toggle() }
+			Button("Tasks") { showingTaskManager.toggle() }
+				.sheet(isPresented: $showingTaskManager) { TaskManagerView() }
+
 		}
 		.task {
 			do {
-				let data = try await ConveyServer.serverInstance.data(for: landscape)
+				let session = ConveySession()
+				let data = try await session.data(for: landscape)
 				image = UIImage(data: data.data)
 			} catch {
 				print("Error downloading: \(error)")

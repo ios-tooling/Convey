@@ -12,8 +12,16 @@ import Foundation
 	import UIKit
 #endif
 
-open class ConveyServer: NSObject, ObservableObject {
-	public static var serverInstance: ConveyServer!
+extension CurrentValueSubject: @unchecked Sendable { }
+
+open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
+	public static var serverInstance: ConveyServer! {
+		get { _serverInstance.value }
+		set { _serverInstance.value = newValue }
+	}
+	
+	private static let _serverInstance: CurrentValueSubject<ConveyServer?, Never> = .init(nil)
+	
 	@Published public var remote: Remote = .empty
 	
 	open var baseURL: URL { remote.url }
@@ -30,7 +38,12 @@ open class ConveyServer: NSObject, ObservableObject {
 	open var waitsForConnectivity = true
 	open var taskManager: ConveyTaskManager!
 	public var logStyle: ConveyTaskManager.LogStyle?
-	internal var effectiveLogStyle: ConveyTaskManager.LogStyle { logStyle ?? taskManager.logStyle }
+	internal var effectiveLogStyle: ConveyTaskManager.LogStyle {
+		get async { 
+			if let logStyle { return logStyle }
+			return await taskManager.logStyle
+		}
+	}
 
 	public private(set) var taskPathURL: URL?
 	
@@ -68,9 +81,7 @@ open class ConveyServer: NSObject, ObservableObject {
 	
 	var pathCount = 0
 	public func endTaskPathRecording() {
-		taskManager.queue.async {
-			self.taskPathURL = nil
-		}
+		self.taskPathURL = nil
 	}
 	
 	public func register(publicKey: String, for server: String) {
@@ -170,6 +181,8 @@ public extension Int {
 
 actor ActiveSessions {
 	var sessions: Set<ConveySession> = []
+	
+	var isEmpty: Bool { sessions.isEmpty }
 	
 	func insert(_ session: ConveySession) {
 		sessions.insert(session)

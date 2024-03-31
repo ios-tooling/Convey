@@ -13,7 +13,7 @@ public protocol ConsoleDisplayableTask: ServerTask {
 
 public struct ConsoleConfigurationField: Identifiable {
 	public let id = UUID()
-	public enum Kind { case string, integer }
+	public enum Kind: Sendable { case string, integer }
 	public let label: String
 	public let kind: Kind
 	public let defaultValue: String?

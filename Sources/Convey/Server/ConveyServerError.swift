@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum ConveyServerError: LocalizedError {
+public enum ConveyServerError: LocalizedError, Sendable {
 	case remoteNotSet
 	case serverDisabled
 	case taskAlreadyStarted

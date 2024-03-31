@@ -16,7 +16,15 @@ extension URLAuthenticationChallenge {
 		#if os(visionOS)
 			guard let certificates = SecTrustCopyCertificateChain(serverTrust) as? [SecCertificate], let certificate = certificates.first else { return nil }
 		#else
-			guard let certificate = SecTrustGetCertificateAtIndex(serverTrust, 0) else { return nil }
+		
+		let certificate: SecCertificate
+		if #available(iOS 15, macOS 12, *) {
+			guard let certificates = SecTrustCopyCertificateChain(serverTrust) as? [SecCertificate], let cert = certificates.first else { return nil }
+			certificate = cert
+		} else {
+			guard let cert = SecTrustGetCertificateAtIndex(serverTrust, 0) else { return nil }
+			certificate = cert
+		}
 		#endif
 		
 		let policies = [SecPolicyCreateSSL(true, host as CFString)] as NSArray

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct ServerEvent {
+public struct ServerEvent: Sendable {
 	public var event: String?
 	public var data: String?
 	public var retry: Int?
@@ -20,32 +20,34 @@ public struct ServerEvent {
 	}
 }
 
-fileprivate enum EventPart: String, CaseIterable { case event, data, retry, id, comment
-	static var standardParts: [EventPart] = [.event, .data, .retry, .id]
+fileprivate enum EventPart: String, CaseIterable, Sendable { case event, data, retry, id, comment
+	static let standardParts: [EventPart] = [.event, .data, .retry, .id]
 }
 
 extension ConveySession: URLSessionDataDelegate {
 	func start(request: URLRequest) throws -> AsyncStream<ServerEvent> {
-		receivedData = Data()
+		receivedData.value = Data()
 		let task = session.dataTask(with: request)
 		task.resume()
 		
 		let sequence = AsyncStream(ServerEvent.self) { constructor in
-			self.streamContinuation = constructor
+			self.streamContinuation.value = constructor
 		}
 		
 		return sequence
 	}
 	
-	func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-		self.receivedData?.append(data)
-		queue?.addOperation {
-			self.checkForServerEvents()
+	nonisolated func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+		self.receivedData.value?.append(data)
+		Task {
+			await queue?.addOperation {
+				self.checkForServerEvents()
+			}
 		}
 	}
 	
-	func checkForServerEvents() {
-		guard let separator = "\n\n".data(using: .utf8), var received = receivedData else { return }
+	nonisolated func checkForServerEvents() {
+		guard let separator = "\n\n".data(using: .utf8), var received = receivedData.value else { return }
 		while let range = received.firstRange(of: separator) {
 			let chunk = received[0..<range.lowerBound]
 			received = Data(received.dropFirst(range.upperBound))
@@ -66,13 +68,13 @@ extension ConveySession: URLSessionDataDelegate {
 				}
 				
 				if newEvent.isDone {
-					streamContinuation?.finish()
+					streamContinuation.value?.finish()
 				} else if !newEvent.isEmpty {
-					streamContinuation?.yield(newEvent)
+					streamContinuation.value?.yield(newEvent)
 				}
 			}
 		}
-		receivedData = received
+		receivedData.value = received
 	}
 }
 

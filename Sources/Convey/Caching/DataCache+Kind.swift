@@ -8,8 +8,8 @@
 import Foundation
 
 extension DataCache {	
-	public enum Caching: Equatable { case skipLocal, localFirst, localIfNewer(Date), localOnly, never }
-	public enum CacheKind { case `default`, keyed(String), fixed(URL), grouped(String, String?)
+	public enum Caching: Equatable, Sendable { case skipLocal, localFirst, localIfNewer(Date), localOnly, never }
+	public enum CacheKind: Sendable { case `default`, keyed(String), fixed(URL), grouped(String, String?)
 		var group: String? {
 			switch self {
 			case .grouped(let group, _): return group

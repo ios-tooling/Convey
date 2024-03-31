@@ -7,8 +7,8 @@
 
 import Foundation
 
-public typealias RefreshableCompletion = (Result<Data, Error>) -> Void
-public enum CachedDataFetchStyle { case cachedOnly, forceRefetch, cachedThenFetched, cachedThenForceRefresh }
+public typealias RefreshableCompletion = @Sendable (Result<Data, Error>) -> Void
+public enum CachedDataFetchStyle: Sendable { case cachedOnly, forceRefetch, cachedThenFetched, cachedThenForceRefresh }
 
 extension RefreshableCachedTask {
 	public func fetchData(decoder: JSONDecoder? = nil, ignoringCacheIfOlderThan interval: TimeInterval, style: CachedDataFetchStyle = .cachedThenFetched, refreshing completion: RefreshableCompletion? = nil) async throws -> Data? {
@@ -31,7 +31,7 @@ extension RefreshableCachedTask {
 				Task {
 					do {
 						let result = try await self.downloadData()
-						try DataCache.instance.replace(data: result, for: self)
+						try await DataCache.instance.replace(data: result, for: self)
 						completion(.success(result))
 					} catch {
 						completion(.failure(error))
@@ -45,7 +45,7 @@ extension RefreshableCachedTask {
 			let fresh = try await self.downloadData()
 			print(fresh)
 			if let _ = try? (self as? (any PayloadDownloadingTask))?.decode(data: fresh, decoder: decoder) {
-				try DataCache.instance.replace(data: fresh, for: self)
+				try await DataCache.instance.replace(data: fresh, for: self)
 			} else {
 				return nil
 			}
@@ -57,13 +57,13 @@ extension RefreshableCachedTask {
 }
 
 extension RefreshableCachedTask where Self: PayloadDownloadingTask {
-	public func fetchPayload(ignoringCacheIfOlderThan interval: TimeInterval, style: CachedDataFetchStyle = .cachedThenFetched, decoder: JSONDecoder? = nil, refreshing completion: ((Result<DownloadPayload, Error>) -> Void)? = nil) async throws -> DownloadPayload {
+	public func fetchPayload(ignoringCacheIfOlderThan interval: TimeInterval, style: CachedDataFetchStyle = .cachedThenFetched, decoder: JSONDecoder? = nil, refreshing completion: (@Sendable (Result<DownloadPayload, Error>) -> Void)? = nil) async throws -> DownloadPayload {
 		try await fetchPayload(ignoringCacheIfOlderThan: Date().addingTimeInterval(-interval), style: style, decoder: decoder, refreshing: completion)
 	}
 	
-	public func fetchPayload(ignoringCacheIfOlderThan date: Date? = nil, style: CachedDataFetchStyle = .cachedThenFetched, decoder: JSONDecoder? = nil, refreshing completion: ((Result<DownloadPayload, Error>) -> Void)? = nil) async throws -> DownloadPayload {
+	public func fetchPayload(ignoringCacheIfOlderThan date: Date? = nil, style: CachedDataFetchStyle = .cachedThenFetched, decoder: JSONDecoder? = nil, refreshing completion: (@Sendable (Result<DownloadPayload, Error>) -> Void)? = nil) async throws -> DownloadPayload {
 		
-		let newCompletion = { (result: Result<Data, Error>) -> Void in
+		let newCompletion = { @Sendable (result: Result<Data, Error>) -> Void in
 			switch result {
 			case .success(let data):
 				do {

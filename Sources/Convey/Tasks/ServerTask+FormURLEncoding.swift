@@ -12,7 +12,7 @@ public extension FormURLEncodedUploadingTask {
 	var contentType: String? { "application/x-www-form-urlencoded" }
 }
 
-public extension [String: Any] {
+public extension [String: any Sendable] {
 	var formURLEncodedData: Data { formURLEncodedString.data(using: .utf8) ?? Data() }
 	var formURLEncodedString: String {
 		var upload = ""

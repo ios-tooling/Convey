@@ -11,7 +11,7 @@ import SwiftUI
 
 @available(watchOS, unavailable)
 extension TaskManagerView {
-	struct TaskResultsListView: View {
+	@MainActor struct TaskResultsListView: View {
 		let taskType: ConveyTaskManager.LoggedTaskInfo
 		let urls: [URL]
 		let manager: ConveyTaskManager

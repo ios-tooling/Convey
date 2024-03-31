@@ -16,13 +16,13 @@ extension ConveyServer {
 	}
 }
 extension ServerTask {
-	public func logged() -> Self {
-		server.taskManager.incrementOneOffLog(for: self)
+	public func logged() async -> Self {
+		await server.taskManager.incrementOneOffLog(for: self)
 		return self
 	}
 	
 	public var isOneOffLogged: Bool {
-		server.taskManager.oneOffTypes.contains(String(describing: type(of: self)))
+		get async { server.taskManager.oneOffTypes.value.contains(String(describing: type(of: self))) }
 	}
 	
 	func logFilename(for date: Date) -> String {
@@ -34,8 +34,8 @@ extension ServerTask {
         return name
 	}
 	
-	func preLog(startedAt: Date, request: URLRequest) {
-		if self.isEchoing {
+	func preLog(startedAt: Date, request: URLRequest) async {
+		if await self.isEchoing {
 			print(" ====================== Echoing Request \(type(of: self)) ======================\n \(request)\n============================================")
 		}
 		guard let url = server.setupLoggingDirectory()?.appendingPathComponent(logFilename(for: startedAt)) else { return }

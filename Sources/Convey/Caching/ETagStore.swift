@@ -7,7 +7,7 @@
 
 import Foundation
 
-class ETagStore {
+actor ETagStore {
 	static let instance = ETagStore()
 	
 	var etags: [URL: String] = [:]
@@ -17,7 +17,7 @@ class ETagStore {
 	func validateDirectories() { try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true) }
 
 	init() {
-		load()
+		Task { await load() }
 	}
 	
 	func store(etag: String, for url: URL) {
