@@ -8,7 +8,7 @@
 import Foundation
 
 extension DataCache {
-	public func provision(url: URL, kind: CacheKind = .default, suffix: String? = nil, ext: String? = nil) -> Provision {
+	nonisolated public func provision(url: URL, kind: CacheKind = .default, suffix: String? = nil, ext: String? = nil) -> Provision {
 		Provision(url: url, kind: kind, suffix: suffix, ext: ext, root: cachesDirectory)
 	}
 	

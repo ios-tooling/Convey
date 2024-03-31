@@ -71,7 +71,7 @@ public protocol CustomHTTPMethodTask: ServerTask {
 	var customHTTPMethod: String { get }
 }
 
-public struct ConveyHeader: Codable, Hashable, CustomStringConvertible {
+public struct ConveyHeader: Codable, Hashable, CustomStringConvertible, Sendable {
 	public let name: String
 	public let value: String
 	public var description: String {

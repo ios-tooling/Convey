@@ -6,10 +6,16 @@
 //
 
 import Foundation
+import Combine
 
-public class DataCache {
+public actor DataCache {
 	public static let instance = DataCache()
-	public var cachesDirectory = URL.systemDirectoryURL(which: .cachesDirectory)!
+	
+	let _cachesDirectory: CurrentValueSubject<URL, Never> = .init(URL.systemDirectoryURL(which: .cachesDirectory)!)
+	public nonisolated var cachesDirectory: URL {
+		get { _cachesDirectory.value }
+		set { _cachesDirectory.send(newValue) }
+	}
 
 	public func setCacheRoot(_ root: URL) { cachesDirectory = root }
 
@@ -72,11 +78,11 @@ public class DataCache {
 		try data.write(to: localURL)
 	}
 
-	public func hasCachedValue(for url: URL, newerThan: Date? = nil) -> Bool {
+	nonisolated public func hasCachedValue(for url: URL, newerThan: Date? = nil) -> Bool {
 		hasCachedValue(for: provision(url: url))
 	}
 
-	public func hasCachedValue(for provision: Provision, newerThan: Date? = nil) -> Bool {
+	nonisolated public func hasCachedValue(for provision: Provision, newerThan: Date? = nil) -> Bool {
 		let localURL = provision.localURL
 		
 		if !FileManager.default.fileExists(atPath: localURL.path) { return false }
@@ -87,11 +93,11 @@ public class DataCache {
 		return true
 	}
 
-	public func fetchLocal(for url: URL, newerThan: Date? = nil) -> DataAndLocalCache? {
+	nonisolated public func fetchLocal(for url: URL, newerThan: Date? = nil) -> DataAndLocalCache? {
 		fetchLocal(for: provision(url: url), newerThan: newerThan)
 	}
 		
-	public func fetchLocal(for provision: Provision, newerThan: Date? = nil) -> DataAndLocalCache? {
+	nonisolated public func fetchLocal(for provision: Provision, newerThan: Date? = nil) -> DataAndLocalCache? {
 		if provision.isLocal {
 			if let data = try? Data(contentsOf: provision.localURL) {
 				return DataAndLocalCache(data: data, url: provision.url)
@@ -109,7 +115,7 @@ public class DataCache {
 		return DataAndLocalCache(data: data, url: localURL)
 	}
 	
-	public struct DataAndLocalCache {
+	public struct DataAndLocalCache: Sendable {
 		public let data: Data
 		public let url: URL?
 	}

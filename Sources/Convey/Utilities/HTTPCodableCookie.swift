@@ -19,7 +19,7 @@ extension Array where Element == HTTPCookie {
 	}
 }
 
-public struct HTTPCodableCookie: Codable, Equatable {
+public struct HTTPCodableCookie: Codable, Equatable, Sendable {
 	var properties: [String: String]
 	var expiresDate: Date?
 	var version = 0

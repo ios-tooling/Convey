@@ -31,7 +31,7 @@ extension RefreshableCachedTask {
 				Task {
 					do {
 						let result = try await self.downloadData()
-						try DataCache.instance.replace(data: result, for: self)
+						try await DataCache.instance.replace(data: result, for: self)
 						completion(.success(result))
 					} catch {
 						completion(.failure(error))
@@ -45,7 +45,7 @@ extension RefreshableCachedTask {
 			let fresh = try await self.downloadData()
 			print(fresh)
 			if let _ = try? (self as? (any PayloadDownloadingTask))?.decode(data: fresh, decoder: decoder) {
-				try DataCache.instance.replace(data: fresh, for: self)
+				try await DataCache.instance.replace(data: fresh, for: self)
 			} else {
 				return nil
 			}

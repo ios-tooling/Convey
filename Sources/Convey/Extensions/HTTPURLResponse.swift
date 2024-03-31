@@ -11,11 +11,11 @@ import Foundation
 //  Link: <https://iosdev.space/api/v1/timelines/public?max_id=110490905973621111>; rel="next", <https://iosdev.space/api/v1/timelines/public?min_id=110490928963061023>; rel="prev"
 
 public extension HTTPURLResponse {
-	struct Link: Codable {
+	struct Link: Codable, Sendable {
 		public var url: URL
 		public var fields: [Field]
 		
-		public struct Field: Codable {
+		public struct Field: Codable, Sendable {
 			public let label: String			// it appears that this is *usually* "rel"
 			public let value: String
 			

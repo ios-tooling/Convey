@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 extension ConveyTaskManager {
-	struct LoggedTaskInfo: Codable, Identifiable {
+	struct LoggedTaskInfo: Codable, Identifiable, Sendable {
 		enum CodingKeys: String, CodingKey { case taskName, totalCount, dates, totalBytes, thisRunBytes, manuallyEcho, suppressCompiledEcho }
 		
 		var id: String { taskName }

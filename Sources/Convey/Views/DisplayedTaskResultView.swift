@@ -8,7 +8,7 @@
 import SwiftUI
 
 @available(iOS 16, macOS 13.0, *)
-public struct DisplayedTaskResultView: View {
+@MainActor public struct DisplayedTaskResultView: View {
 	let task: any ConsoleDisplayableTask
 	@State private var error: Error?
 	@Binding var isFetching: Bool

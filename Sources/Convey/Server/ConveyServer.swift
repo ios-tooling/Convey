@@ -182,6 +182,8 @@ public extension Int {
 actor ActiveSessions {
 	var sessions: Set<ConveySession> = []
 	
+	var isEmpty: Bool { sessions.isEmpty }
+	
 	func insert(_ session: ConveySession) {
 		sessions.insert(session)
 	}

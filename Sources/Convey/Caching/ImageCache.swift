@@ -52,9 +52,9 @@ public actor ImageCache {
 		DataCache.Provision(url: url, kind: kind, suffix: suffix, ext: ext, root: parentDirectory.value)
 	}
 
-	public func store(image: PlatformImage, for url: URL) {
+	public func store(image: PlatformImage, for url: URL) async {
 		if let data = image.data {
-			try? DataCache.instance.replace(data: data, for: provision(url: url, ext: "jpeg"))
+			try? await DataCache.instance.replace(data: data, for: provision(url: url, ext: "jpeg"))
 		}
 	}
 	
@@ -63,13 +63,13 @@ public actor ImageCache {
 		fetchLocalInfo(for: url, kind: kind, size: size, extension: ext)?.image
 	}
 
-	public func removeItem(for url: URL) {
-		removeItem(for: provision(url: url))
+	public func removeItem(for url: URL) async {
+		await removeItem(for: provision(url: url))
 	}
 
-	public func removeItem(for provision: DataCache.Provision) {
+	public func removeItem(for provision: DataCache.Provision) async {
 		let key = provision.key
-		DataCache.instance.removeItem(for: provision)
+		await DataCache.instance.removeItem(for: provision)
 		inMemoryImages.value.removeValue(forKey: key)
 	}
 
@@ -187,7 +187,7 @@ public actor ImageCache {
 }
 
 extension ImageCache {
-	struct InMemoryImage {
+	struct InMemoryImage: Sendable {
 		let image: PlatformImage
 		let size: Int
 		let createdAt: Date

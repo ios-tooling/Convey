@@ -55,7 +55,7 @@ import SwiftUI
 		 }
     }
 	
-	struct TaskTypeRow: View {
+	@MainActor struct TaskTypeRow: View {
 		var taskType: ConveyTaskManager.LoggedTaskInfo
 		let manager: ConveyTaskManager
 		

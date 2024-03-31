@@ -11,7 +11,7 @@ import SwiftUI
 
 @available(watchOS, unavailable)
 extension TaskManagerView {
-	struct TaskResultsDetails: View {
+	@MainActor struct TaskResultsDetails: View {
 		let url: URL
 		
 		var string: String {

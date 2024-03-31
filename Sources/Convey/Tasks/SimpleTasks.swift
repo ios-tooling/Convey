@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-public struct SimpleMIMETask: ServerPOSTTask, MIMEUploadingTask {
+public struct SimpleMIMETask: ServerPOSTTask, MIMEUploadingTask, Sendable {
 	public let url: URL
 	public let base64EncodeBody = true
 	public let mimeFields: [MIMEMessageComponent]?
@@ -21,7 +21,7 @@ public struct SimpleMIMETask: ServerPOSTTask, MIMEUploadingTask {
 	}
 }
 
-public struct SimplePOSTTask: ServerPOSTTask, CustomURLRequestTask, DataUploadingTask {
+public struct SimplePOSTTask: ServerPOSTTask, CustomURLRequestTask, DataUploadingTask, Sendable {
 	let payloadString: String
 	public let url: URL
 	public var dataToUpload: Data? { payloadString.data(using: .utf8) }
@@ -40,7 +40,7 @@ public struct SimplePOSTTask: ServerPOSTTask, CustomURLRequestTask, DataUploadin
 	}
 }
 
-public struct SimpleGETTask: ServerGETTask, CustomURLRequestTask {	
+public struct SimpleGETTask: ServerGETTask, CustomURLRequestTask, Sendable {
 	public var url: URL
 	public var request: URLRequest
 	

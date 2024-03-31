@@ -12,7 +12,7 @@ import Combine
 	import UIKit
 #endif
 
-public struct DownloadResult<Payload> {
+public struct DownloadResult<Payload: Sendable>: Sendable {
 	public init(payload: Payload, response: ServerReturned) {
 		self.payload = payload
 		self.response = response
@@ -136,7 +136,7 @@ extension ServerTask {
 					}
 					
 					if self is ETagCachedTask, let tag = result.response.etag {
-						DataCache.instance.cache(data: result.data, for: url)
+						await DataCache.instance.cache(data: result.data, for: url)
 						await ETagStore.instance.store(etag: tag, for: url)
 					}
 					preview?(result)
