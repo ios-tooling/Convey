@@ -28,6 +28,14 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 	public func setEnabled(_ enabled: Bool = true) {
 		self.enabled = enabled
 	}
+
+	public nonisolated func setIsEnabled(_ enabled: Bool = true) {
+		Task { await setEnabled(enabled) }
+	}
+
+	public nonisolated func setLoggingStyle(_ logStyle: LogStyle) {
+		Task { await setLogStyle(logStyle) }
+	}
 	
 	public func setLogStyle(_ logStyle: LogStyle) {
 		self.logStyle = logStyle

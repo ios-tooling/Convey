@@ -22,7 +22,7 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	
 	private static let _serverInstance: CurrentValueSubject<ConveyServer?, Never> = .init(nil)
 	
-	@Published public var remote: Remote = .empty
+	@Published open var remote: Remote = .empty
 	
 	open var baseURL: URL { remote.url }
 	open var defaultEncoder = JSONEncoder()
