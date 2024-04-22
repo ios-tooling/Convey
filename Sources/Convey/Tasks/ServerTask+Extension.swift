@@ -77,7 +77,7 @@ public extension PayloadUploadingTask {
 		do {
 			return try encoder.encode(payload)
 		} catch {
-			server.handle(error: error, from: self)
+			server.taskFailed(self, error: error)
 			return nil
 		}
 	}

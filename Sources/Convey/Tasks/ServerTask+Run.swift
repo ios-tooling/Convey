@@ -144,17 +144,21 @@ extension ServerTask {
 					if !result.response.didDownloadSuccessfully {
 						server.reportConnectionError(self, result.statusCode, String(data: result.data, encoding: .utf8))
 						if result.data.isEmpty || (result.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
-							throw HTTPError.serverError(request.url, result.statusCode, result.data)
+							let error = HTTPError.serverError(request.url, result.statusCode, result.data)
+							server.taskFailed(self, error: error)
+							throw error
 						}
 					}
 					
 					try await (self as? PostFlightTask)?.postFlight()
+					server.postflight(self, result: result)
 					return result
 				} catch {
 					if let delay = (self as? RetryableTask)?.retryInterval(after: error, attemptNumber: attemptCount) {
 						attemptCount += 1
 						try await Task.sleep(nanoseconds: UInt64(delay) * 1_000_000_000)
 					} else {
+						server.taskFailed(self, error: error)
 						throw error
 					}
 				}

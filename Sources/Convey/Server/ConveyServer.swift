@@ -120,6 +120,14 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 		return request
 	}
 	
+	open func postflight(_ task: ServerTask, result: ServerReturned) {
+		
+	}
+	
+	open func taskFailed(_ task: ServerTask, error: Error) {
+		print("Error: \(error) from \(task)")
+	}
+	
 	public static func setupDefault() -> ConveyServer {
 		_ = ConveyServer()
 		return serverInstance
@@ -157,10 +165,6 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 		var path = task.path
 		if path.hasPrefix("/") { path.removeFirst() }
 		return baseURL.appendingPathComponent(path)
-	}
-	
-	open func handle(error: Error, from task: ServerTask) {
-		print("Error: \(error) from \(task)")
 	}
 	
 	open var reportConnectionError: (ServerTask, Int, String?) -> Void = { task, code, description in
