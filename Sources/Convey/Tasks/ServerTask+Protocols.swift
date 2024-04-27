@@ -117,9 +117,7 @@ public protocol RetryableTask: ServerTask {
 
 public protocol ServerSentEventTargetTask: ServerTask { }
 
-public protocol PayloadDownloadingTask: ServerTask {
-	associatedtype DownloadPayload: Decodable
-	func postProcess(payload: DownloadPayload) async throws
+public protocol PayloadDownloadingTask: ServerTask, PayloadDownloadable {
 }
 
 public protocol PayloadUploadingTask: DataUploadingTask, JSONPayloadTask {

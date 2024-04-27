@@ -12,24 +12,18 @@ import Combine
 	import UIKit
 #endif
 
-public struct DownloadResult<Payload: Sendable>: Sendable {
-	public init(payload: Payload, response: ServerReturned) {
-		self.payload = payload
-		self.response = response
-	}
-	
-	public let payload: Payload
-	public let response: ServerReturned
-}
-
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension PayloadDownloadingTask {
-	func download(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadPayload {
-		try await downloadWithResponse(caching: caching, decoder: decoder, preview: preview).payload
+	func download() async throws -> DownloadPayload {
+		try await downloadPayload()
 	}
 	
-	func downloadWithResponse(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadResult<DownloadPayload> {
-		let result: DownloadResult<DownloadPayload> = try await requestPayload(caching: caching, decoder: decoder, preview: preview)
+	func downloadPayload(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadPayload {
+		try await downloadPayloadWithResponse().payload
+	}
+	
+	func downloadPayloadWithResponse() async throws -> DownloadResponse<DownloadPayload> {
+		let result: DownloadResponse<DownloadPayload> = try await requestPayload()
 		try await postProcess(payload: result.payload)
 		return result
 	}
@@ -56,12 +50,12 @@ public extension ServerTask {
 
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 extension ServerTask {
-    func requestPayload<Payload: Decodable>(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadResult<Payload> {
+    func requestPayload<Payload: Decodable>(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadResponse<Payload> {
 		let result = try await requestData(caching: caching, preview: preview)
 		let actualDecoder = decoder ?? server.defaultDecoder
         do {
             let decoded = try actualDecoder.decode(Payload.self, from: result.data)
-            return DownloadResult(payload: decoded, response: result)
+            return DownloadResponse(payload: decoded, response: result)
         } catch {
 			  print("Error when decoding \(Payload.self) in \(self), \(String(data: result.data, encoding: .utf8) ?? "--unparseable--"): \(error)")
             throw error
