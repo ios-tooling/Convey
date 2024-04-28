@@ -14,7 +14,7 @@ public extension ServerTask {
 	}
 	
 	func beginRequest(at startedAt: Date) async throws -> URLRequest {
-		try await (self as? PreFlightTask)?.preFlight()
+		try await (self.wrappedTask as? PreFlightTask)?.preFlight()
 
 		var request = try await buildRequest()
 		request = try await server.preflight(self, request: request)
@@ -23,7 +23,7 @@ public extension ServerTask {
 	}
 
 	func buildRequest() async throws -> URLRequest {
-		if let custom = self as? CustomURLRequestTask {
+		if let custom = self.wrappedTask as? CustomURLRequestTask {
 			return try await custom.customURLRequest
 		}
 
@@ -34,10 +34,10 @@ public extension ServerTask {
 		var request = URLRequest(url: url)
 		var isGzipped = self is GZipEncodedUploadingTask
 		
-		request.timeoutInterval = (self as? CustomTimeoutTask)?.timeout ?? server.defaultTimeout
+		request.timeoutInterval = (self.wrappedTask as? CustomTimeoutTask)?.timeout ?? server.defaultTimeout
 		request.httpMethod = httpMethod
 		request.cachePolicy = .reloadIgnoringLocalCacheData
-		if let dataProvider = self as? DataUploadingTask {
+		if let dataProvider = self.wrappedTask as? DataUploadingTask {
 			if request.httpMethod == "GET" { request.httpMethod = "POST" }
 			if var data = dataProvider.dataToUpload {
 				if isGzipped {
@@ -61,27 +61,27 @@ public extension ServerTask {
 			}
 		}
 		request.allHTTPHeaderFields = try await server.standardHeaders(for: self)
-		if let tagged = self as? TaggedTask {
+		if let tagged = self.wrappedTask as? TaggedTask {
 			request.addValue(tagged.requestTag, forHTTPHeaderField: ServerConstants.Headers.tag)
 		}
 		
-		if let additionalHeaders = (self as? CustomHTTPHeaders)?.customHTTPHeaders as? [String: String] {
+		if let additionalHeaders = (self.wrappedTask as? CustomHTTPHeaders)?.customHTTPHeaders as? [String: String] {
 			for (value, header) in additionalHeaders {
 				request.addValue(header, forHTTPHeaderField: value)
 			}
 		}
 
-		if let additionalHeaders = (self as? CustomHTTPHeaders)?.customHTTPHeaders as? [ConveyHeader] {
+		if let additionalHeaders = (self.wrappedTask as? CustomHTTPHeaders)?.customHTTPHeaders as? [ConveyHeader] {
 			for header in additionalHeaders {
 				request.addValue(header.value, forHTTPHeaderField: header.name)
 			}
 		}
 
-		if self is ETagCachedTask, let etag = await cachedEtag, DataCache.instance.hasCachedValue(for: url) {
+		if self.wrappedTask is ETagCachedTask, let etag = await cachedEtag, DataCache.instance.hasCachedValue(for: url) {
 			request.addValue(etag, forHTTPHeaderField: ServerConstants.Headers.ifNoneMatch)
 		}
 		
-		if let cookies = (self as? CookieSendingTask)?.cookies {
+		if let cookies = (self.wrappedTask as? CookieSendingTask)?.cookies {
 			let fields = HTTPCookie.requestHeaderFields(with: cookies)
 			for (key, value) in fields {
 				request.addValue(value, forHTTPHeaderField: key)
@@ -92,12 +92,12 @@ public extension ServerTask {
 	}
 
 	var httpMethod: String {
-		if let custom = self as? CustomHTTPMethodTask { return custom.customHTTPMethod }
+		if let custom = self.wrappedTask as? CustomHTTPMethodTask { return custom.customHTTPMethod }
 		
-		if self is ServerPOSTTask { return "POST" }
-		if self is ServerPUTTask { return "PUT" }
-		if self is ServerPATCHTask { return "PATCH" }
-		if self is ServerDELETETask { return "DELETE" }
+		if self.wrappedTask is ServerPOSTTask { return "POST" }
+		if self.wrappedTask is ServerPUTTask { return "PUT" }
+		if self.wrappedTask is ServerPATCHTask { return "PATCH" }
+		if self.wrappedTask is ServerDELETETask { return "DELETE" }
 		return "GET"
 	}
 }

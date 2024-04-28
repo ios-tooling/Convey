@@ -116,11 +116,11 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 	
 	func incrementOneOffLog(for task: ServerTask) {
 		enabled = true
-		oneOffTypes.value.append(String(describing: type(of: task)))
+		oneOffTypes.value.append(String(describing: type(of: task.wrappedTask)))
 	}
 
 	func decrementOneOffLog(for task: ServerTask) {
-		if let index = oneOffTypes.value.firstIndex(of: String(describing: type(of: task))) {
+		if let index = oneOffTypes.value.firstIndex(of: String(describing: type(of: task.wrappedTask))) {
 			oneOffTypes.value.remove(at: index)
 		}
 	}
@@ -173,9 +173,9 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 	}
 	
 	func shouldEcho(_ task: ServerTask) -> Bool {
-		guard enabled, let index = index(of: task) else { return task is EchoingTask }
+		guard enabled, let index = index(of: task) else { return task.wrappedTask is EchoingTask }
 		
-		return types.value[index].shouldEcho(type(of: task), for: self)
+		return types.value[index].shouldEcho(type(of: task.wrappedTask), for: self)
 	}
 	
 	public nonisolated func turnAllOff() {
@@ -245,7 +245,7 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 		return types.value.firstIndex(where: { $0.taskName == taskName })
 	}
 	
-	func index(of task: ServerTask) -> Int? { index(ofType: type(of: task), isEchoing: task is EchoingTask) }
+	func index(of task: ServerTask) -> Int? { index(ofType: type(of: task.wrappedTask), isEchoing: task.wrappedTask is EchoingTask) }
 
 	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async {
 		if !enabled { return }
@@ -256,20 +256,20 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 
 		if task.wrappedEchoes {
 			echo = true
-		} else if let index = self.index(of: task) {
+		} else if let index = self.index(of: task.wrappedTask) {
 			self.types.value[index].dates.append(date)
 			self.types.value[index].totalCount += 1
-			echo = self.types.value[index].shouldEcho(type(of: task), for: self)
+			echo = self.types.value[index].shouldEcho(type(of: task.wrappedTask), for: self)
 		} else {
-			let name = String(describing: type(of: task))
+			let name = String(describing: type(of: task.wrappedTask))
 			var newTask = LoggedTaskInfo(taskName: name)
-			newTask.compiledEcho = task is EchoingTask
-			echo = newTask.shouldEcho(type(of: task), for: self)
+			newTask.compiledEcho = task.wrappedTask.wrappedTask is EchoingTask
+			echo = newTask.shouldEcho(type(of: task.wrappedTask), for: self)
 			self.types.value.append(newTask)
 		}
 
 		if echo || task.server.shouldRecordTaskPath{
-			self.record("\(type(of: task)): \(request)\n", for: task)
+			self.record("\(type(of: task.wrappedTask)): \(request)\n", for: task)
 		}
 		self.updateSort()
 		if self.multitargetLogging { self.saveTypes() }
@@ -281,7 +281,7 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 		if task.wrappedEchoes {
 			shouldEcho = true
 		} else if let index = self.index(of: task) {
-			shouldEcho = self.types.value[index].shouldEcho(type(of: task), for: self)
+			shouldEcho = self.types.value[index].shouldEcho(type(of: task.wrappedTask), for: self)
 		} else {
 			shouldEcho = false
 		}
@@ -298,9 +298,9 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 			let log = task.loggingOutput(startedAt: startedAt, request: request, data: bytes, response: response)
 			
 			if usingCache {
-				self.record("\(type(of: task)): used cached response", for: task)
+				self.record("\(type(of: task.wrappedTask)): used cached response", for: task)
 			} else {
-				self.record("\(type(of: task)) Response ======================\n \(String(data: log, encoding: .utf8) ?? String(data: log, encoding: .ascii) ?? "unable to stringify response")\n======================", for: task)
+				self.record("\(type(of: task.wrappedTask)) Response ======================\n \(String(data: log, encoding: .utf8) ?? String(data: log, encoding: .ascii) ?? "unable to stringify response")\n======================", for: task)
 				if self.storeResults, response.didDownloadSuccessfully, let index {
 					self.types.value[index].store(results: log, from: startedAt, for: self) }
 			}

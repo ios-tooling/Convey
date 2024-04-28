@@ -40,7 +40,7 @@ import Cocoa
 				Button("Configure") {
 					isShowingConfigurationSheet.toggle()
 				}
-				.disabled(isFetching || !(availableTasks[currentTaskIndex] is ConfigurableConsoleDisplayableTask))
+				.disabled(isFetching || !(availableTasks[currentTaskIndex].wrappedTask is ConfigurableConsoleDisplayableTask))
 				
 				Button(action: {
 					responses.clearResults(for: task)

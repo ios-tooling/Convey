@@ -16,7 +16,6 @@ public protocol WrappedServerTask: ServerTask, Sendable {
 	var preview: PreviewClosure? { get }
 	var localFileSource: URL? { get }
 	var echoes: Bool { get }
-
 }
 
 public struct WrappedPayloadDownloadingTask<Wrapped: PayloadDownloadingTask>: WrappedServerTask, PayloadDownloadingTask, Sendable {
@@ -28,7 +27,7 @@ public struct WrappedPayloadDownloadingTask<Wrapped: PayloadDownloadingTask>: Wr
 	public let decoder: JSONDecoder?
 	public let preview: PreviewClosure?
 	public let echoes: Bool
-	
+
 	init(wrapped: Wrapped, caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil, echoes: Bool = false) {
 		self.wrapped = wrapped
 		self.caching = caching
@@ -56,10 +55,15 @@ struct WrappedDataDownloadingTask<Wrapped: ServerTask>: WrappedServerTask, Senda
 }
 
 extension ServerTask {
-	var wrappedDecoder: JSONDecoder? { (self as? (any WrappedServerTask))?.decoder }
-	var wrappedCaching: DataCache.Caching { (self as? (any WrappedServerTask))?.caching ?? .skipLocal }
-	var wrappedPreview: PreviewClosure? { (self as? (any WrappedServerTask))?.preview }
-	var wrappedEchoes: Bool { (self as? (any WrappedServerTask))?.echoes ?? false }
+	var wrappedDecoder: JSONDecoder? { (self.wrappedTask as? (any WrappedServerTask))?.decoder }
+	var wrappedCaching: DataCache.Caching { (self.wrappedTask as? (any WrappedServerTask))?.caching ?? .skipLocal }
+	var wrappedPreview: PreviewClosure? { (self.wrappedTask as? (any WrappedServerTask))?.preview }
+	var wrappedEchoes: Bool { (self.wrappedTask as? (any WrappedServerTask))?.echoes ?? false }
+	
+	var wrappedTask: ServerTask {
+		if let wrapped = self as? (any WrappedServerTask) { return wrapped.wrapped }
+		return self
+	}
 }
 	
 public extension ServerTask {

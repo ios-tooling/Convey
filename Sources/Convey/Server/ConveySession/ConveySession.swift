@@ -28,7 +28,7 @@ actor ConveySession: NSObject {
 
 		let config = task.server.configuration
 		
-		if task is AllowedOnExpensiveNetworkTask {
+		if task.wrappedTask is AllowedOnExpensiveNetworkTask {
 			config.allowsCellularAccess = true
 			config.allowsExpensiveNetworkAccess = true
 		} else {
@@ -36,13 +36,13 @@ actor ConveySession: NSObject {
 			config.allowsExpensiveNetworkAccess = server.allowsExpensiveNetworkAccess
 		}
 		
-		if task is AllowedOnConstrainedNetworkTask {
+		if task.wrappedTask is AllowedOnConstrainedNetworkTask {
 			config.allowsConstrainedNetworkAccess = true
 		} else {
 			config.allowsConstrainedNetworkAccess = server.allowsConstrainedNetworkAccess
 		}
 
-		if task is ServerSentEventTargetTask {
+		if task.wrappedTask is ServerSentEventTargetTask {
 			var additionalHeaders: [String: String] = [:]
 			additionalHeaders["Accept"] = "text/event-stream"
 			additionalHeaders["Cache-Control"] = "no-cache"
@@ -54,7 +54,7 @@ actor ConveySession: NSObject {
 			queue = OperationQueue()
 		}
 		
-		let timeout = (task as? CustomTimeoutTask)?.timeout ?? task.server.defaultTimeout
+		let timeout = (task.wrappedTask as? CustomTimeoutTask)?.timeout ?? task.server.defaultTimeout
 		
 		config.timeoutIntervalForRequest = timeout
 		config.timeoutIntervalForResource = timeout

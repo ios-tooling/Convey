@@ -10,7 +10,7 @@ import Combine
 
 extension ServerTask {
 	var abbreviatedDescription: String {
-		let desc = "\(self)"
+		let desc = "\(wrappedTask)"
 		if desc.count < 100 { return desc }
 		
 		return desc.prefix(45) + "…" + desc.suffix(45)
@@ -28,7 +28,7 @@ extension ServerTask {
 
 public extension ServerTask {
 	var taskTag: String {
-		if let tag = (self as? (any TaggedTask))?.requestTag { return tag }
+		if let tag = (self.wrappedTask as? (any TaggedTask))?.requestTag { return tag }
 		return String(describing: self)
 	}
 	

@@ -112,8 +112,8 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 
 	open func preflight(_ task: ServerTask, request: URLRequest) async throws -> URLRequest {
 		if disabled { throw ConveyServerError.serverDisabled }
-		if remote.isEmtpy {
-			if task.url.host?.contains("about:") == false { return request }
+		if remote.isEmpty {
+			if task.wrappedTask.url.host?.contains("about:") == false { return request }
 			throw ConveyServerError.remoteNotSet
 		}
 		

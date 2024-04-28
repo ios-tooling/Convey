@@ -44,7 +44,7 @@ extension RefreshableCachedTask {
 		case .forceRefetch:
 			let fresh = try await self.downloadData()
 			print(fresh)
-			if let _ = try? (self as? (any PayloadDownloadingTask))?.decode(data: fresh, decoder: decoder) {
+			if let _ = try? (self.wrappedTask as? (any PayloadDownloadingTask))?.decode(data: fresh, decoder: decoder) {
 				try await DataCache.instance.replace(data: fresh, for: self)
 			} else {
 				return nil
