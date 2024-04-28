@@ -30,7 +30,7 @@ extension ConveySession {
 		}
 	}
 	
-	func data(from request: URLRequest) async throws -> ServerReturned {
+	func data(from request: URLRequest) async throws -> ServerResponse {
 		try await withUnsafeThrowingContinuation { continuation in
 			let startedAt = Date()
 			
@@ -44,7 +44,7 @@ extension ConveySession {
 					return continuation.resume(throwing: ConveyServerError.unknownResponse(data, response))
 				}
 				
-				continuation.resume(returning: ServerReturned(response: httpResponse, data: data, fromCache: false, duration: abs(startedAt.timeIntervalSinceNow)))
+				continuation.resume(returning: ServerResponse(response: httpResponse, data: data, fromCache: false, duration: abs(startedAt.timeIntervalSinceNow), startedAt: startedAt))
 			}
 			
 			task.resume()

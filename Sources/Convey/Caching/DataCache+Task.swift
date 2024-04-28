@@ -40,9 +40,9 @@ extension DataCache {
 
 		if caching != .never {
 			let localURL = cache(data: data, for: provision)
-			return DataAndLocalCache(data: data, url: localURL)
+			return DataAndLocalCache(data: data, url: localURL, cachedAt: localURL.creationDate ?? Date())
 		}
-		return DataAndLocalCache(data: data, url: nil)
+		return DataAndLocalCache(data: data, url: nil, cachedAt: Date())
 	}
 	
 	public func replace<Task: ServerTask>(data: Data, for task: Task, provision: Provision? = nil) throws {

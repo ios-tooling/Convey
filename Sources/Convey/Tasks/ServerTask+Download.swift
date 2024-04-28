@@ -12,60 +12,63 @@ import Combine
 import UIKit
 #endif
 
-@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension PayloadDownloadingTask {
 	func download() async throws -> DownloadPayload {
-		try await downloadPayload()
+		try await downloadPayloadWithResponse().payload
 	}
 	
 	func downloadPayload() async throws -> DownloadPayload {
 		try await downloadPayloadWithResponse().payload
 	}
 	
-	func downloadPayloadWithResponse() async throws -> DownloadResponse<DownloadPayload> {
-		let result: DownloadResponse<DownloadPayload> = try await requestPayload()
-		try await postProcess(payload: result.payload)
-		return result
+	func downloadPayloadWithResponse() async throws -> DownloadResult<DownloadPayload> {
+		try await requestPayload()
 	}
 }
 
-@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
+extension PayloadDownloadingTask {
+	func requestPayload() async throws -> DownloadResult<DownloadPayload> {
+		let result = try await requestResponse()
+		let actualDecoder = wrappedDecoder ?? server.defaultDecoder
+		do {
+			let decoded = try actualDecoder.decode(DownloadPayload.self, from: result.data)
+			try await postProcess(payload: decoded)
+			return DownloadResult(payload: decoded, response: result)
+		} catch {
+			print("Error when decoding \(DownloadPayload.self) in \(self), \(String(data: result.data, encoding: .utf8) ?? "--unparseable--"): \(error)")
+			throw error
+		}
+	}
+}
+
 public extension ServerTask where Self: ServerDELETETask {
-	func delete() async throws {
-		_ = try await self.downloadData()
+	@discardableResult func delete() async throws -> ServerResponse {
+		try await self.downloadDataWithResponse()
 	}
 }
 
-@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
+public extension WrappedServerTask where Wrapped: ServerDELETETask {
+	@discardableResult func delete() async throws -> ServerResponse {
+		try await self.downloadDataWithResponse()
+	}
+}
+
 public extension ServerTask {
 	func downloadData() async throws -> Data {
 		try await downloadDataWithResponse().data
 	}
 	
-	func downloadDataWithResponse() async throws -> ServerReturned {
-		try await requestData()
+	func downloadDataWithResponse() async throws -> ServerResponse {
+		try await requestResponse()
 	}
 }
 
 
-@available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 extension ServerTask {
-	func requestPayload<Payload: Decodable>() async throws -> DownloadResponse<Payload> {
-		let result = try await requestData()
-		let actualDecoder = wrappedDecoder ?? server.defaultDecoder
-		do {
-			let decoded = try actualDecoder.decode(Payload.self, from: result.data)
-			return DownloadResponse(payload: decoded, response: result)
-		} catch {
-			print("Error when decoding \(Payload.self) in \(self), \(String(data: result.data, encoding: .utf8) ?? "--unparseable--"): \(error)")
-			throw error
-		}
-	}
-	
-	public func requestData() async throws -> ServerReturned {
+	public func requestResponse() async throws -> ServerResponse {
 		if wrappedCaching == .localOnly, self is ServerCacheableTask {
-			if let data = cachedData {
-				return ServerReturned(response: HTTPURLResponse(cachedFor: url, data: data), data: data, fromCache: true)
+			if let cache = DataCache.instance.fetchLocal(for: url) {
+				return ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, startedAt: cache.cachedAt)
 			}
 			throw HTTPError.offline
 		}
@@ -74,10 +77,10 @@ extension ServerTask {
 			return try await sendRequest()
 		} catch {
 			if error.isOffline, self is ServerCacheableTask {
-				return try await requestData()
+				return try await requestResponse()
 			}
-			if error.isOffline, self is FileBackedTask, let data = fileCachedData {
-				return ServerReturned(response: HTTPURLResponse(cachedFor: url, data: data), data: data, fromCache: true)
+			if error.isOffline, self is FileBackedTask, let cache = DataCache.instance.fetchLocal(for: url) {
+				return ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, startedAt: cache.cachedAt)
 			}
 			throw error
 		}
@@ -108,7 +111,7 @@ extension ServerTask {
 		return result
 	}
 	
-	func sendRequest() async throws -> ServerReturned {
+	func sendRequest() async throws -> ServerResponse {
 		try await handleThreadAndBackgrounding {
 			var attemptCount = 1
 			

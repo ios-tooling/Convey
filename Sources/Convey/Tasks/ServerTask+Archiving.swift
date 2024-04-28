@@ -12,7 +12,7 @@ public extension ArchivingTask {
 		server.archiveURL?.appendingPathComponent(String(cString: (String(describing: self) as NSString).fileSystemRepresentation) + ".json")
 	}
 	
-	func archive(_ result: ServerReturned) {
+	func archive(_ result: ServerResponse) {
 		guard let url = archiveURL else {
 			print("Tried to archive \(self), no URL specified")
 			return

@@ -22,7 +22,7 @@ import SwiftUI
 		_isFetching = isFetching
 	}
 	
-	var response: ServerReturned? { responses[task] }
+	var response: ServerResponse? { responses[task] }
 	
 	public var body: some View {
 		let result = response

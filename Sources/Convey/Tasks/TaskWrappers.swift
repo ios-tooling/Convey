@@ -7,6 +7,18 @@
 
 import Foundation
 
+public protocol WrappedServerTask: ServerTask, Sendable {
+	associatedtype Wrapped: ServerTask
+	var wrapped: Wrapped { get }
+	
+	var caching: DataCache.Caching { get }
+	var decoder: JSONDecoder? { get }
+	var preview: PreviewClosure? { get }
+	var localFileSource: URL? { get }
+	var echoes: Bool { get }
+
+}
+
 struct WrappedPayloadDownloadingTask<Wrapped: PayloadDownloadingTask>: WrappedServerTask, PayloadDownloadingTask, Sendable {
 	typealias DownloadPayload = Wrapped.DownloadPayload
 	
@@ -86,21 +98,9 @@ public extension PayloadDownloadingTask {
 	}
 }
 
-protocol WrappedServerTask: ServerTask, Sendable {
-	associatedtype Wrapped: ServerTask
-	var wrapped: Wrapped { get }
-	
-	var caching: DataCache.Caching { get }
-	var decoder: JSONDecoder? { get }
-	var preview: PreviewClosure? { get }
-	var localFileSource: URL? { get }
-	var echoes: Bool { get }
-
-}
-
 extension WrappedServerTask {
 	var path: String { wrapped.path }
-	func postProcess(response: ServerReturned) async throws { try await wrapped.postProcess(response: response) }
+	func postProcess(response: ServerResponse) async throws { try await wrapped.postProcess(response: response) }
 	var httpMethod: String { wrapped.httpMethod }
 	var server: ConveyServer { wrapped.server }
 	var url: URL { wrapped.url }

@@ -63,11 +63,11 @@ actor ConveySession: NSObject {
 		session = URLSession(configuration: config, delegate: self, delegateQueue: queue)
 	}
 	
-	func data(for url: URL) async throws -> ServerReturned {
+	func data(for url: URL) async throws -> ServerResponse {
 		try await data(for: URLRequest(url: url))
 	}
 	
-	func data(for request: URLRequest) async throws -> ServerReturned {
+	func data(for request: URLRequest) async throws -> ServerResponse {
 		await server.register(session: self)
 		let result = try await data(from: request)
 		await server.unregister(session: self)

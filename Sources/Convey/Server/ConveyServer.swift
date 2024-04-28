@@ -120,7 +120,7 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 		return request
 	}
 	
-	open func postflight(_ task: ServerTask, result: ServerReturned) {
+	open func postflight(_ task: ServerTask, result: ServerResponse) {
 		
 	}
 	

@@ -10,7 +10,7 @@ import SwiftUI
 @MainActor class ConsoleTaskResponseCache: ObservableObject {
 	static let instance = ConsoleTaskResponseCache()
 	
-	var results: [String: ServerReturned] = [:]
+	var results: [String: ServerResponse] = [:]
 	var configurations: [String: [String: String]] {
 		get { (UserDefaults.standard.dictionary(forKey: Self.savedConfigurationsKey) as? [String: [String: String]]) ?? [:] }
 		set {
@@ -24,11 +24,11 @@ import SwiftUI
 	
 	static var savedConfigurationsKey = String(describing: ConsoleTaskResponseCache.self)
 	
-	func save(_ response: ServerReturned, for task: any ConsoleDisplayableTask) {
+	func save(_ response: ServerResponse, for task: any ConsoleDisplayableTask) {
 		self[task] = response
 	}
 
-	subscript(task: any ConsoleDisplayableTask) -> ServerReturned? {
+	subscript(task: any ConsoleDisplayableTask) -> ServerResponse? {
 		get { results[task.resultsKey] }
 		set {
 			results[task.resultsKey] = newValue
