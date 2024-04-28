@@ -27,7 +27,7 @@ extension ServerTask {
 
 extension ServerTask {
 	var isEchoing: Bool {
-		true
+		get async { await server.taskManager.shouldEcho(self) }
 	}
 }
 

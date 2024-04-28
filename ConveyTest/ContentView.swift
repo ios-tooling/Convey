@@ -51,11 +51,16 @@ struct ContentView: View {
 	
 	func fetchNewImage() async {
 		fetching = true
-		let key = "\(index)"
+		//let key = "\(index)"
 		index += 1
 		let url = URL("https://source.unsplash.com/user/c_v_r/500x500")
-		image = try? await imageCache.fetch(from: url, caching: .localFirst, location: .grouped("images", key))
-		totalSize = await imageCache.fetchTotalSize()
+		//image = try? await imageCache.fetch(from: imageCache.provision(url: url), caching: .localFirst, location: .grouped("images", key))
+		do {
+			image = try await imageCache.fetch(from: imageCache.provision(url: url))
+			totalSize = await imageCache.fetchTotalSize()
+		} catch {
+			print("Failed to fetch image: \(error)")
+		}
 		fetching = false
 	}
 }

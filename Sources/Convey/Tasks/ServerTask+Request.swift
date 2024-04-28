@@ -23,11 +23,6 @@ public extension ServerTask {
 	}
 
 	func buildRequest() async throws -> URLRequest {
-		if let rerunnable = self as? RerunnableServerTask, let previous = rerunnable.previousResult {
-			if let newRequest = try await rerunnable.rerunnableRequest(from: previous) { return newRequest }
-			throw ConveyServerError.endOfRepetition
-		}
-
 		if let custom = self as? CustomURLRequestTask {
 			return try await custom.customURLRequest
 		}

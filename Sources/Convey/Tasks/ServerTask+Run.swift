@@ -13,7 +13,7 @@ import Combine
 #endif
 
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
-public extension PayloadDownloadingTask {
+public extension PayloadDownloadable {
 	func download() async throws -> DownloadPayload {
 		try await downloadPayload()
 	}
@@ -92,8 +92,8 @@ extension ServerTask {
 			server.application?.endBackgroundTask(token)
 		}
 	#else
-		func requestBackgroundTime() -> Int { 0 }
-		func finishBackgroundTime(_ token: Int) { }
+		func requestBackgroundTime() async -> Int { 0 }
+		func finishBackgroundTime(_ token: Int) async { }
 	#endif
 	
 	func handleThreadAndBackgrounding<Result: Sendable>(closure: () async throws -> Result) async throws -> Result {

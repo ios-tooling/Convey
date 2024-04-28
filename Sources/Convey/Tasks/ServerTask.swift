@@ -23,7 +23,7 @@ public protocol DownloadableEntity {
 }
 
 public protocol PayloadDownloadable: ServerTask {
-	associatedtype DownloadPayload: Decodable
+	associatedtype DownloadPayload: Decodable & Sendable
 	func postProcess(payload: DownloadPayload) async throws
 }
 
@@ -57,9 +57,19 @@ public struct WrappedDataDownloadingTask<Wrapped: ServerTask>: WrappedServerTask
 		self.decoder = decoder
 		self.preview = preview
 	}
+	
+	public func decoder(_ decoder: JSONDecoder) -> Self {
+		.init(wrapped: wrapped, caching: caching, decoder: decoder, preview: preview)
+	}
+	
+	public func decoder(_ caching: DataCache.Caching) -> Self {
+		.init(wrapped: wrapped, caching: caching, decoder: decoder, preview: preview)
+	}
+	
+	public func decoder(_ preview: @escaping PreviewClosure) -> Self {
+		.init(wrapped: wrapped, caching: caching, decoder: decoder, preview: preview)
+	}
 }
-
-
 
 public protocol WrappedServerTask: ServerTask, Sendable {
 	associatedtype Wrapped: ServerTask
@@ -68,6 +78,7 @@ public protocol WrappedServerTask: ServerTask, Sendable {
 	var caching: DataCache.Caching { get }
 	var decoder: JSONDecoder? { get }
 	var preview: PreviewClosure? { get }
+	var localFileSource: URL? { get }
 }
 
 extension WrappedServerTask {
@@ -77,4 +88,5 @@ extension WrappedServerTask {
 	public var server: ConveyServer { wrapped.server }
 	public var url: URL { wrapped.url }
 	public var taskTag: String { wrapped.taskTag }
+	public var localFileSource: URL? { nil }
 }

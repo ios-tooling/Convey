@@ -11,7 +11,7 @@ class Device {
 
    #if os(macOS)
       public static var rawDeviceType: String {
-         let service: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
+			let service: io_service_t = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
          let cfstr = "model" as CFString
          if let model = IORegistryEntryCreateCFProperty(service, cfstr, kCFAllocatorDefault, 0).takeUnretainedValue() as? Data {
            if let nsstr =  String(data: model, encoding: .utf8) {
