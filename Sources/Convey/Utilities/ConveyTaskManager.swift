@@ -254,7 +254,9 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 
 		let echo: Bool
 
-		if let index = self.index(of: task) {
+		if task.wrappedEchoes {
+			echo = true
+		} else if let index = self.index(of: task) {
 			self.types.value[index].dates.append(date)
 			self.types.value[index].totalCount += 1
 			echo = self.types.value[index].shouldEcho(type(of: task), for: self)
@@ -276,7 +278,9 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 	func complete(task: ServerTask, request: URLRequest, response: HTTPURLResponse, bytes: Data, startedAt: Date, usingCache: Bool) async {
 		let shouldEcho: Bool
 		
-		if let index = self.index(of: task) {
+		if task.wrappedEchoes {
+			shouldEcho = true
+		} else if let index = self.index(of: task) {
 			shouldEcho = self.types.value[index].shouldEcho(type(of: task), for: self)
 		} else {
 			shouldEcho = false

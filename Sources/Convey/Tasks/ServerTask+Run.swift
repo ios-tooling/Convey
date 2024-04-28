@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 #if os(iOS)
-	import UIKit
+import UIKit
 #endif
 
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
@@ -18,7 +18,7 @@ public extension PayloadDownloadable {
 		try await downloadPayload()
 	}
 	
-	func downloadPayload(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadPayload {
+	func downloadPayload() async throws -> DownloadPayload {
 		try await downloadPayloadWithResponse().payload
 	}
 	
@@ -31,50 +31,50 @@ public extension PayloadDownloadable {
 
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension ServerTask where Self: ServerDELETETask {
-    func delete() async throws {
-        _ = try await self.downloadData()
-    }
+	func delete() async throws {
+		_ = try await self.downloadData()
+	}
 }
 
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension ServerTask {
-	func downloadData(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) async throws -> Data {
-		try await downloadDataWithResponse(caching: caching, preview: preview).data
+	func downloadData() async throws -> Data {
+		try await downloadDataWithResponse().data
 	}
-
-	func downloadDataWithResponse(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) async throws -> ServerReturned {
-		try await requestData(caching: caching, preview: preview)
+	
+	func downloadDataWithResponse() async throws -> ServerReturned {
+		try await requestData()
 	}
 }
 
 
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 extension ServerTask {
-    func requestPayload<Payload: Decodable>(caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadResponse<Payload> {
-		let result = try await requestData(caching: caching, preview: preview)
-		let actualDecoder = decoder ?? server.defaultDecoder
-        do {
-            let decoded = try actualDecoder.decode(Payload.self, from: result.data)
-            return DownloadResponse(payload: decoded, response: result)
-        } catch {
-			  print("Error when decoding \(Payload.self) in \(self), \(String(data: result.data, encoding: .utf8) ?? "--unparseable--"): \(error)")
-            throw error
-        }
+	func requestPayload<Payload: Decodable>() async throws -> DownloadResponse<Payload> {
+		let result = try await requestData()
+		let actualDecoder = wrappedDecoder ?? server.defaultDecoder
+		do {
+			let decoded = try actualDecoder.decode(Payload.self, from: result.data)
+			return DownloadResponse(payload: decoded, response: result)
+		} catch {
+			print("Error when decoding \(Payload.self) in \(self), \(String(data: result.data, encoding: .utf8) ?? "--unparseable--"): \(error)")
+			throw error
+		}
 	}
-
-	public func requestData(caching: DataCache.Caching = .skipLocal, preview: PreviewClosure? = nil) async throws -> ServerReturned {
-		if caching == .localOnly, self is ServerCacheableTask {
+	
+	public func requestData() async throws -> ServerReturned {
+		if wrappedCaching == .localOnly, self is ServerCacheableTask {
 			if let data = cachedData {
 				return ServerReturned(response: HTTPURLResponse(cachedFor: url, data: data), data: data, fromCache: true)
 			}
 			throw HTTPError.offline
 		}
-
+		
 		do {
-			return try await sendRequest(preview: preview)
+			return try await sendRequest()
 		} catch {
 			if error.isOffline, self is ServerCacheableTask {
-				return try await requestData(caching: .skipLocal, preview: preview)
+				return try await requestData()
 			}
 			if error.isOffline, self is FileBackedTask, let data = fileCachedData {
 				return ServerReturned(response: HTTPURLResponse(cachedFor: url, data: data), data: data, fromCache: true)
@@ -83,22 +83,22 @@ extension ServerTask {
 		}
 	}
 	
-	#if os(iOS)
-		@MainActor func requestBackgroundTime() async -> UIBackgroundTaskIdentifier? {
-			server.application?.beginBackgroundTask(withName: "") {  }
-		}
-		@MainActor func finishBackgroundTime(_ token: UIBackgroundTaskIdentifier?) {
-			guard let token else { return }
-			server.application?.endBackgroundTask(token)
-		}
-	#else
-		func requestBackgroundTime() async -> Int { 0 }
-		func finishBackgroundTime(_ token: Int) async { }
-	#endif
+#if os(iOS)
+	@MainActor func requestBackgroundTime() async -> UIBackgroundTaskIdentifier? {
+		server.application?.beginBackgroundTask(withName: "") {  }
+	}
+	@MainActor func finishBackgroundTime(_ token: UIBackgroundTaskIdentifier?) {
+		guard let token else { return }
+		server.application?.endBackgroundTask(token)
+	}
+#else
+	func requestBackgroundTime() async -> Int { 0 }
+	func finishBackgroundTime(_ token: Int) async { }
+#endif
 	
 	func handleThreadAndBackgrounding<Result: Sendable>(closure: () async throws -> Result) async throws -> Result {
 		let oneOffLogging = await isOneOffLogged
-
+		
 		await server.wait(forThread: (self as? ThreadedServerTask)?.threadName)
 		let token = await requestBackgroundTime()
 		let result = try await closure()
@@ -108,7 +108,7 @@ extension ServerTask {
 		return result
 	}
 	
-	func sendRequest(preview: PreviewClosure? = nil) async throws -> ServerReturned {
+	func sendRequest() async throws -> ServerReturned {
 		try await handleThreadAndBackgrounding {
 			var attemptCount = 1
 			
@@ -133,7 +133,7 @@ extension ServerTask {
 						await DataCache.instance.cache(data: result.data, for: url)
 						await ETagStore.instance.store(etag: tag, for: url)
 					}
-					preview?(result)
+					wrappedPreview?(result)
 					try await postProcess(response: result)
 					if !result.response.didDownloadSuccessfully {
 						server.reportConnectionError(self, result.statusCode, String(data: result.data, encoding: .utf8))
@@ -159,5 +159,5 @@ extension ServerTask {
 			}
 		}
 	}
-
+	
 }

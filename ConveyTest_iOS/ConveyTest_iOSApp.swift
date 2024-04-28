@@ -11,6 +11,7 @@ import SwiftUI
 struct ConveyTest_iOSApp: App {
 	init() {
 		ConveyServer.serverInstance = ConveyServer()
+		ConveyServer.serverInstance.taskManager.setIsEnabled()
 		
 		Task { await Self.testLinks() }
 	}
@@ -21,7 +22,11 @@ struct ConveyTest_iOSApp: App {
     }
 	
 	static func testLinks() async {
-		let data = try! await SimpleGETTask(url: URL("https://iosdev.space/api/v1/timelines/public")).downloadDataWithResponse()
+		let data = try! await SimpleGETTask(url: URL("https://iosdev.space/api/v1/timelines/public"))
+			.preview { preview in
+			}
+			//.echoes(true)
+			.downloadDataWithResponse()
 		
 		let links = data.response.links
 		print(links)

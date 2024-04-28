@@ -17,21 +17,14 @@ extension ServerTask {
 	}
 }
 
-#if canImport(UIKit)
 extension ServerTask {
 	var isEchoing: Bool {
-		get async { await server.taskManager.shouldEcho(self) }
+		get async {
+			if wrappedEchoes { return true }
+			return await server.taskManager.shouldEcho(self)
+		}
 	}
 }
-#else
-
-extension ServerTask {
-	var isEchoing: Bool {
-		get async { await server.taskManager.shouldEcho(self) }
-	}
-}
-
-#endif
 
 public extension ServerTask {
 	var taskTag: String {

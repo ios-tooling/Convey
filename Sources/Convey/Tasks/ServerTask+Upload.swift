@@ -9,19 +9,19 @@ import Foundation
 
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension ServerTask where Self: ServerUploadingTask {
-	func uploadOnly(preview: PreviewClosure? = nil) async throws {
-		_ = try await sendRequest(preview: preview)
+	func uploadOnly() async throws {
+		_ = try await sendRequest()
 	}
 }
 
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension PayloadDownloadingTask where Self: DataUploadingTask {
-	func upload(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadPayload {
-		try await uploadWithResponse(decoder: decoder, preview: preview).payload
+	func upload() async throws -> DownloadPayload {
+		try await uploadWithResponse().payload
 	}
 
-    func uploadWithResponse(decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil) async throws -> DownloadResponse<DownloadPayload> {
-        let result: DownloadResponse<DownloadPayload> = try await requestPayload(caching: .skipLocal, decoder: decoder, preview: preview)
+    func uploadWithResponse() async throws -> DownloadResponse<DownloadPayload> {
+        let result: DownloadResponse<DownloadPayload> = try await requestPayload()
         try await postProcess(payload: result.payload)
         return result
 	}
@@ -29,15 +29,15 @@ public extension PayloadDownloadingTask where Self: DataUploadingTask {
 
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
 public extension DataUploadingTask {
-	func uploadAndDownload(preview: PreviewClosure? = nil) async throws -> Data {
-		try await sendRequest(preview: preview).data
+	func uploadAndDownload() async throws -> Data {
+		try await sendRequest().data
 	}
 
-	func upload(preview: PreviewClosure? = nil) async throws -> Int {
-		try await sendRequest(preview: preview).response.statusCode
+	func upload() async throws -> Int {
+		try await sendRequest().response.statusCode
 	}
 
-	func uploadWithResponse(preview: PreviewClosure? = nil) async throws -> URLResponse {
-		try await sendRequest(preview: preview).response
+	func uploadWithResponse() async throws -> URLResponse {
+		try await sendRequest().response
 	}
 }
