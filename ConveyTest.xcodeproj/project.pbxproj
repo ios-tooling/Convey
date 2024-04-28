@@ -158,6 +158,8 @@
 		B5D6A4BA2BDD267C00FCFD39 /* TaskManagerView.TaskResultsDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6A42B2BDD267C00FCFD39 /* TaskManagerView.TaskResultsDetails.swift */; };
 		B5D6A4BB2BDD267C00FCFD39 /* TaskManagerView.TaskResultsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6A42C2BDD267C00FCFD39 /* TaskManagerView.TaskResultsListView.swift */; };
 		B5D6A4BC2BDD267C00FCFD39 /* TaskManagerView.TaskResultsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6A42C2BDD267C00FCFD39 /* TaskManagerView.TaskResultsListView.swift */; };
+		B5D6A4BE2BDDF6B700FCFD39 /* TaskWrappers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6A4BD2BDDF6B700FCFD39 /* TaskWrappers.swift */; };
+		B5D6A4BF2BDDF6B700FCFD39 /* TaskWrappers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6A4BD2BDDF6B700FCFD39 /* TaskWrappers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -246,6 +248,7 @@
 		B5D6A42A2BDD267C00FCFD39 /* TaskManagerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskManagerView.swift; sourceTree = "<group>"; };
 		B5D6A42B2BDD267C00FCFD39 /* TaskManagerView.TaskResultsDetails.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskManagerView.TaskResultsDetails.swift; sourceTree = "<group>"; };
 		B5D6A42C2BDD267C00FCFD39 /* TaskManagerView.TaskResultsListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskManagerView.TaskResultsListView.swift; sourceTree = "<group>"; };
+		B5D6A4BD2BDDF6B700FCFD39 /* TaskWrappers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskWrappers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -415,6 +418,7 @@
 				B5D6A4052BDD267C00FCFD39 /* DownloadResponse.swift */,
 				B5D6A4062BDD267C00FCFD39 /* ResumableTask.swift */,
 				B5D6A4072BDD267C00FCFD39 /* ServerTask.swift */,
+				B5D6A4BD2BDDF6B700FCFD39 /* TaskWrappers.swift */,
 				B5D6A4082BDD267C00FCFD39 /* ServerTask+Archiving.swift */,
 				B5D6A4092BDD267C00FCFD39 /* ServerTask+Console.swift */,
 				B5D6A40A2BDD267C00FCFD39 /* ServerTask+Echoing.swift */,
@@ -657,6 +661,7 @@
 				B5D6A47A2BDD267C00FCFD39 /* ServerTask+Console.swift in Sources */,
 				B5D6A4B62BDD267C00FCFD39 /* PingButton.swift in Sources */,
 				B5D6A4602BDD267C00FCFD39 /* ConveySession+Download.swift in Sources */,
+				B5D6A4BF2BDDF6B700FCFD39 /* TaskWrappers.swift in Sources */,
 				B5D6A4AA2BDD267C00FCFD39 /* HTTPError.swift in Sources */,
 				B5D6A4882BDD267C00FCFD39 /* ServerTask+MIME.swift in Sources */,
 				B5D6A43E2BDD267C00FCFD39 /* ImageSizing.swift in Sources */,
@@ -715,6 +720,7 @@
 				B5D6A4492BDD267C00FCFD39 /* Image.swift in Sources */,
 				B5D6A4532BDD267C00FCFD39 /* URL+Images.swift in Sources */,
 				B5D6A4752BDD267C00FCFD39 /* ServerTask.swift in Sources */,
+				B5D6A4BE2BDDF6B700FCFD39 /* TaskWrappers.swift in Sources */,
 				B5D6A4592BDD267C00FCFD39 /* URLRequest.swift in Sources */,
 				B5D6A4332BDD267C00FCFD39 /* DataCache+Kind.swift in Sources */,
 				B5D6A4832BDD267C00FCFD39 /* ServerTask+FormURLEncoding.swift in Sources */,

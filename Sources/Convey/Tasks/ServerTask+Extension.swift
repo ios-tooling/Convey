@@ -35,7 +35,7 @@ public extension ServerTask {
 	}
 }
 
-public extension PayloadDownloadable {
+public extension PayloadDownloadingTask {
 	func postProcess(payload: DownloadPayload) async throws { }
 	
 	func decode(data: Data, decoder possible: JSONDecoder? = nil) throws -> DownloadPayload {

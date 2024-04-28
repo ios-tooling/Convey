@@ -13,7 +13,7 @@ import UIKit
 #endif
 
 @available(macOS 10.15, iOS 13.0, watchOS 7.0, *)
-public extension PayloadDownloadable {
+public extension PayloadDownloadingTask {
 	func download() async throws -> DownloadPayload {
 		try await downloadPayload()
 	}
