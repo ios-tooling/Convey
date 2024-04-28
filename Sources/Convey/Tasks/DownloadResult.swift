@@ -7,6 +7,9 @@
 
 import Foundation
 
+@available(iOS, deprecated: 1, renamed: "ServerResponse", message: "ServerReturned has been renamed to ServerResponse")
+public typealias ServerReturned = ServerResponse
+
 public struct DownloadResult<Payload: Sendable>: Sendable {
 	public init(payload: Payload, response: ServerResponse) {
 		self.payload = payload

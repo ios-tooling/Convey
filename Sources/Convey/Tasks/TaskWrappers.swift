@@ -19,15 +19,15 @@ public protocol WrappedServerTask: ServerTask, Sendable {
 
 }
 
-struct WrappedPayloadDownloadingTask<Wrapped: PayloadDownloadingTask>: WrappedServerTask, PayloadDownloadingTask, Sendable {
-	typealias DownloadPayload = Wrapped.DownloadPayload
+public struct WrappedPayloadDownloadingTask<Wrapped: PayloadDownloadingTask>: WrappedServerTask, PayloadDownloadingTask, Sendable {
+	public typealias DownloadPayload = Wrapped.DownloadPayload
 	
-	let wrapped: Wrapped
+	public let wrapped: Wrapped
 	
-	let caching: DataCache.Caching
-	let decoder: JSONDecoder?
-	let preview: PreviewClosure?
-	let echoes: Bool
+	public let caching: DataCache.Caching
+	public let decoder: JSONDecoder?
+	public let preview: PreviewClosure?
+	public let echoes: Bool
 	
 	init(wrapped: Wrapped, caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil, echoes: Bool = false) {
 		self.wrapped = wrapped
@@ -99,11 +99,11 @@ public extension PayloadDownloadingTask {
 }
 
 extension WrappedServerTask {
-	var path: String { wrapped.path }
-	func postProcess(response: ServerResponse) async throws { try await wrapped.postProcess(response: response) }
-	var httpMethod: String { wrapped.httpMethod }
-	var server: ConveyServer { wrapped.server }
-	var url: URL { wrapped.url }
-	var taskTag: String { wrapped.taskTag }
-	var localFileSource: URL? { nil }
+	public var path: String { wrapped.path }
+	public func postProcess(response: ServerResponse) async throws { try await wrapped.postProcess(response: response) }
+	public var httpMethod: String { wrapped.httpMethod }
+	public var server: ConveyServer { wrapped.server }
+	public var url: URL { wrapped.url }
+	public var taskTag: String { wrapped.taskTag }
+	public var localFileSource: URL? { nil }
 }

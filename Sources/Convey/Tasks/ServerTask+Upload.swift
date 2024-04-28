@@ -8,9 +8,20 @@
 import Foundation
 
 public extension ServerTask where Self: ServerUploadingTask {
-	@discardableResult func uploadOnly() async throws -> Int {
-		try await sendRequest().statusCode
-	}
+	@discardableResult func uploadOnly() async throws -> Int { try await sendRequest().statusCode }
+	func upload() async throws -> Int { try await sendRequest().statusCode }
+	func uploadAndDownload() async throws -> Data { try await sendRequest().data }
+	func uploadAndDownloadData() async throws -> Data { try await sendRequest().data }
+	func uploadWithResponse() async throws -> ServerResponse { try await sendRequest() }
+
+}
+
+public extension WrappedServerTask where Wrapped: ServerUploadingTask {
+	@discardableResult func uploadOnly() async throws -> Int { try await sendRequest().statusCode }
+	func upload() async throws -> Int { try await sendRequest().statusCode }
+	func uploadAndDownload() async throws -> Data { try await sendRequest().data }
+	func uploadAndDownloadData() async throws -> Data { try await sendRequest().data }
+	func uploadWithResponse() async throws -> ServerResponse { try await sendRequest() }
 }
 
 public extension PayloadDownloadingTask where Self: DataUploadingTask {
@@ -18,23 +29,21 @@ public extension PayloadDownloadingTask where Self: DataUploadingTask {
 		try await uploadWithResponse().payload
 	}
 
-    func uploadWithResponse() async throws -> DownloadResult<DownloadPayload> {
-        let result: DownloadResult<DownloadPayload> = try await requestPayload()
-        try await postProcess(payload: result.payload)
-        return result
+	 func uploadWithResponse() async throws -> DownloadResult<DownloadPayload> {
+		  let result: DownloadResult<DownloadPayload> = try await requestPayload()
+		  try await postProcess(payload: result.payload)
+		  return result
 	}
 }
 
-public extension DataUploadingTask {
-	func uploadAndDownload() async throws -> Data {
-		try await sendRequest().data
+public extension WrappedPayloadDownloadingTask where Wrapped: DataUploadingTask {
+	func upload() async throws -> DownloadPayload {
+		try await uploadWithResponse().payload
 	}
 
-	func upload() async throws -> Int {
-		try await sendRequest().response.statusCode
-	}
-
-	func uploadWithResponse() async throws -> URLResponse {
-		try await sendRequest().response
+	 func uploadWithResponse() async throws -> DownloadResult<DownloadPayload> {
+		  let result: DownloadResult<DownloadPayload> = try await requestPayload()
+		  try await postProcess(payload: result.payload)
+		  return result
 	}
 }

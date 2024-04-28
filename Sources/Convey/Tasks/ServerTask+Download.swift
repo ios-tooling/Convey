@@ -54,6 +54,9 @@ public extension WrappedServerTask where Wrapped: ServerDELETETask {
 }
 
 public extension ServerTask {
+	@available(iOS, deprecated: 1, renamed: "downloadDataWithResponse", message: "requestData has been renamed to downloadDataWithResponse()")
+	func requestData(caching: DataCache.Caching = .skipLocal) async throws -> ServerResponse { try await self.caching(caching).downloadDataWithResponse() }
+
 	func downloadData() async throws -> Data {
 		try await downloadDataWithResponse().data
 	}
