@@ -7,6 +7,8 @@
 
 import Foundation
 
+public enum TaskRedirect: Sendable { case bundle(String) }
+
 public protocol WrappedServerTask: ServerTask, Sendable {
 	associatedtype Wrapped: ServerTask
 	var wrapped: Wrapped { get }
@@ -16,6 +18,8 @@ public protocol WrappedServerTask: ServerTask, Sendable {
 	var preview: PreviewClosure? { get }
 	var localFileSource: URL? { get }
 	var echoes: Bool { get }
+	var redirect: TaskRedirect? { get }
+	var timeout: TimeInterval? { get }
 }
 
 public struct WrappedPayloadDownloadingTask<Wrapped: PayloadDownloadingTask>: WrappedServerTask, PayloadDownloadingTask, Sendable {
@@ -27,13 +31,17 @@ public struct WrappedPayloadDownloadingTask<Wrapped: PayloadDownloadingTask>: Wr
 	public let decoder: JSONDecoder?
 	public let preview: PreviewClosure?
 	public let echoes: Bool
+	public let redirect: TaskRedirect?
+	public let timeout: TimeInterval?
 
-	init(wrapped: Wrapped, caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil, echoes: Bool = false) {
+	init(wrapped: Wrapped, caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil, echoes: Bool = false, redirect: TaskRedirect? = nil, timeout: TimeInterval? = nil) {
 		self.wrapped = wrapped
 		self.caching = caching
 		self.decoder = decoder
 		self.preview = preview
 		self.echoes = echoes
+		self.redirect = redirect
+		self.timeout = timeout
 	}
 }
 
@@ -44,13 +52,17 @@ struct WrappedDataDownloadingTask<Wrapped: ServerTask>: WrappedServerTask, Senda
 	let decoder: JSONDecoder?
 	let preview: PreviewClosure?
 	let echoes: Bool
+	let redirect: TaskRedirect?
+	let timeout: TimeInterval?
 
-	init(wrapped: Wrapped, caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil, echoes: Bool = true) {
+	init(wrapped: Wrapped, caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil, echoes: Bool = true, redirect: TaskRedirect? = nil, timeout: TimeInterval? = nil) {
 		self.wrapped = wrapped
 		self.caching = caching
 		self.decoder = decoder
 		self.preview = preview
 		self.echoes = echoes
+		self.redirect = redirect
+		self.timeout = timeout
 	}
 }
 
@@ -59,7 +71,9 @@ extension ServerTask {
 	var wrappedCaching: DataCache.Caching { (self.wrappedTask as? (any WrappedServerTask))?.caching ?? .skipLocal }
 	var wrappedPreview: PreviewClosure? { (self.wrappedTask as? (any WrappedServerTask))?.preview }
 	var wrappedEchoes: Bool { (self.wrappedTask as? (any WrappedServerTask))?.echoes ?? false }
-	
+	var wrappedRedirect: TaskRedirect? { (self.wrappedTask as? (any WrappedServerTask))?.redirect }
+	var wrappedTimeout: TimeInterval? { (self.wrappedTask as? (any WrappedServerTask))?.timeout }
+
 	var wrappedTask: ServerTask {
 		if let wrapped = self as? (any WrappedServerTask) { return wrapped.wrapped }
 		return self
@@ -68,37 +82,53 @@ extension ServerTask {
 	
 public extension ServerTask {
 	func decoder(_ decoder: JSONDecoder) -> any ServerTask {
-		WrappedDataDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: decoder, preview: wrappedPreview, echoes: wrappedEchoes)
+		WrappedDataDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: decoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
 	}
 	
 	func caching(_ caching: DataCache.Caching) -> any ServerTask {
-		WrappedDataDownloadingTask(wrapped: self, caching: caching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: wrappedEchoes)
+		WrappedDataDownloadingTask(wrapped: self, caching: caching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
 	}
 	
 	func preview(_ preview: @escaping PreviewClosure) -> any ServerTask {
-		WrappedDataDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: preview, echoes: wrappedEchoes)
+		WrappedDataDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: preview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
 	}
 	
 	func echoes(_ echoes: Bool) -> any ServerTask {
-		WrappedDataDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: echoes)
+		WrappedDataDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: echoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
+	}
+	
+	func redirects(_ redirect: TaskRedirect) -> any ServerTask {
+		WrappedDataDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: redirect, timeout: wrappedTimeout)
+	}
+	
+	func timeout(_ timeout: TimeInterval) -> any ServerTask {
+		WrappedDataDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: timeout)
 	}
 }
 
 public extension PayloadDownloadingTask {
 	func decoder(_ decoder: JSONDecoder) -> any PayloadDownloadingTask<DownloadPayload> {
-		WrappedPayloadDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: decoder, preview: wrappedPreview, echoes: wrappedEchoes)
+		WrappedPayloadDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: decoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
 	}
 	
 	func caching(_ caching: DataCache.Caching) -> any PayloadDownloadingTask<DownloadPayload> {
-		WrappedPayloadDownloadingTask(wrapped: self, caching: caching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: wrappedEchoes)
+		WrappedPayloadDownloadingTask(wrapped: self, caching: caching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
 	}
 	
 	func preview(_ preview: @escaping PreviewClosure) -> any PayloadDownloadingTask<DownloadPayload> {
-		WrappedPayloadDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: preview, echoes: wrappedEchoes)
+		WrappedPayloadDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: preview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
 	}
 	
 	func echoes(_ echoes: Bool) -> any PayloadDownloadingTask<DownloadPayload> {
-		WrappedPayloadDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: echoes)
+		WrappedPayloadDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: echoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
+	}
+	
+	func redirects(_ redirect: TaskRedirect) -> any ServerTask {
+		WrappedPayloadDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: redirect, timeout: wrappedTimeout)
+	}
+	
+	func timeout(_ timeout: TimeInterval) -> any ServerTask {
+		WrappedPayloadDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: timeout)
 	}
 }
 
