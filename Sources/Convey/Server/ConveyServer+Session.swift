@@ -17,7 +17,7 @@ extension ConveyServer {
 	}
 	
 	public func cancelTasks(with tags: [String]) async {
-		for session in await activeSessions.sessions {
+		for session in activeSessions.sessions.value {
 			let allTasks = await session.session.allTasks
 			
 			for task in allTasks {

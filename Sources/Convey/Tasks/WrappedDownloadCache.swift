@@ -10,7 +10,7 @@ import Combine
 
 @available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
 public actor WrappedDownloadArrayCache<Downloader: PayloadDownloadingTask>: ObservableObject where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element: Equatable {
-	let _items: CurrentValueSubject<[Downloader.DownloadPayload.Element], Never> = .init(value: [])
+	let _items: CurrentValueSubject<[Downloader.DownloadPayload.Element], Never> = .init([])
 	public nonisolated var items: [Downloader.DownloadPayload.Element] { _items.value }
 
 	var updateTask: Downloader

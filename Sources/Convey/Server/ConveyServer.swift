@@ -184,15 +184,19 @@ public extension Int {
 }
 
 actor ActiveSessions {
-	var sessions: Set<ConveySession> = []
+	let sessions: CurrentValueSubject<Set<ConveySession>, Never> = .init([])
 	
-	var isEmpty: Bool { sessions.isEmpty }
+	nonisolated var isEmpty: Bool { sessions.value.isEmpty }
 	
 	func insert(_ session: ConveySession) {
-		sessions.insert(session)
+		var value = sessions.value
+		value.insert(session)
+		sessions.send(value)
 	}
 	
 	func remove(_ session: ConveySession) {
-		sessions.remove(session)
+		var value = sessions.value
+		value.remove(session)
+		sessions.send(value)
 	}
 }
