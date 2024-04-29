@@ -15,11 +15,11 @@ public enum TaskRedirect: Sendable { case bundle(name: String, enabled: Bool = t
 		}
 	}
 	
-	var baseURL: URL? {
+	var dataURL: URL? {
 		switch self {
 		case let .bundle(name: name, enabled: _): return Bundle.main.url(forResource: name, withExtension: nil)
 		case let .documents(name: name, enabled: _):
-			if #available(iOS 16.0, *) {
+			if #available(iOS 16.0, macOS 13, *) {
 				return URL.documentsDirectory.appendingPathComponent(name)
 			} else {
 				print("TaskRedirect.documents requires iOS 16 or later")
@@ -28,9 +28,12 @@ public enum TaskRedirect: Sendable { case bundle(name: String, enabled: Bool = t
 		}
 	}
 	
+	var responseURL: URL? {
+		dataURL?.deletingPathExtension().appendingPathExtension(".urlResponse")
+	}
+	
 	func cache(response: ServerResponse) {
-		guard let dataURL = baseURL else { return }
-		let responseURL = dataURL.deletingPathExtension().appendingPathExtension(".urlResponse")
+		guard let dataURL, let responseURL else { return }
 		
 		do {
 			try response.data.write(to: dataURL)
@@ -42,13 +45,12 @@ public enum TaskRedirect: Sendable { case bundle(name: String, enabled: Bool = t
 	}
 	
 	var cached: ServerResponse? {
-		guard let dataURL = baseURL else { return nil }
-		let responseURL = dataURL.deletingPathExtension().appendingPathExtension(".urlResponse")
+		guard let dataURL, let responseURL else { return nil }
 
 		do {
 			let data = try Data(contentsOf: dataURL)
 			let response: HTTPURLResponse
-			if let responseData = try? Data(contentsOf: responseURL), let decoded = try? NSKeyedUnarchiver.unarchivedObject(ofClass: HTTPURLResponse.self, from: responseData) {
+			if let responseData = try? Data(contentsOf: responseURL), let decoded = try NSKeyedUnarchiver.unarchivedObject(ofClass: HTTPURLResponse.self, from: responseData) {
 				response = decoded
 			} else {
 				response = .init(url: dataURL, mimeType: nil, expectedContentLength: 0, textEncodingName: nil)
