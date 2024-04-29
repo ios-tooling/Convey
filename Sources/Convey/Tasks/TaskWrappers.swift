@@ -7,8 +7,6 @@
 
 import Foundation
 
-public enum TaskRedirect: Sendable { case bundle(String) }
-
 public protocol WrappedServerTask: ServerTask, Sendable {
 	associatedtype Wrapped: ServerTask
 	var wrapped: Wrapped { get }
@@ -81,55 +79,21 @@ extension ServerTask {
 }
 	
 public extension ServerTask {
-	func decoder(_ decoder: JSONDecoder) -> any ServerTask {
-		WrappedDataDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: decoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
-	}
-	
-	func caching(_ caching: DataCache.Caching) -> any ServerTask {
-		WrappedDataDownloadingTask(wrapped: self, caching: caching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
-	}
-	
-	func preview(_ preview: @escaping PreviewClosure) -> any ServerTask {
-		WrappedDataDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: preview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
-	}
-	
-	func echoes(_ echoes: Bool) -> any ServerTask {
-		WrappedDataDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: echoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
-	}
-	
-	func redirects(_ redirect: TaskRedirect) -> any ServerTask {
-		WrappedDataDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: redirect, timeout: wrappedTimeout)
-	}
-	
-	func timeout(_ timeout: TimeInterval) -> any ServerTask {
-		WrappedDataDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: timeout)
-	}
+	func decoder(_ decoder: JSONDecoder) -> any ServerTask { copy(decoder: decoder) }
+	func caching(_ caching: DataCache.Caching) -> any ServerTask { copy(caching: caching) }
+	func preview(_ preview: @escaping PreviewClosure) -> any ServerTask { copy(preview: preview) }
+	func echoes(_ echoes: Bool) -> any ServerTask { copy(echoes: echoes) }
+	func redirects(_ redirect: TaskRedirect) -> any ServerTask { redirect.enabled ? copy(redirect: redirect) : self }
+	func timeout(_ timeout: TimeInterval) -> any ServerTask { copy(timeout: timeout) }
 }
 
 public extension PayloadDownloadingTask {
-	func decoder(_ decoder: JSONDecoder) -> any PayloadDownloadingTask<DownloadPayload> {
-		WrappedPayloadDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: decoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
-	}
-	
-	func caching(_ caching: DataCache.Caching) -> any PayloadDownloadingTask<DownloadPayload> {
-		WrappedPayloadDownloadingTask(wrapped: self, caching: caching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
-	}
-	
-	func preview(_ preview: @escaping PreviewClosure) -> any PayloadDownloadingTask<DownloadPayload> {
-		WrappedPayloadDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: preview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
-	}
-	
-	func echoes(_ echoes: Bool) -> any PayloadDownloadingTask<DownloadPayload> {
-		WrappedPayloadDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: echoes, redirect: wrappedRedirect, timeout: wrappedTimeout)
-	}
-	
-	func redirects(_ redirect: TaskRedirect) -> any ServerTask {
-		WrappedPayloadDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: redirect, timeout: wrappedTimeout)
-	}
-	
-	func timeout(_ timeout: TimeInterval) -> any ServerTask {
-		WrappedPayloadDownloadingTask(wrapped: self, caching: wrappedCaching, decoder: wrappedDecoder, preview: wrappedPreview, echoes: wrappedEchoes, redirect: wrappedRedirect, timeout: timeout)
-	}
+	func decoder(_ decoder: JSONDecoder) -> any PayloadDownloadingTask<DownloadPayload> { copy(decoder: decoder) }
+	func caching(_ caching: DataCache.Caching) -> any PayloadDownloadingTask<DownloadPayload> { copy(caching: caching) }
+	func preview(_ preview: @escaping PreviewClosure) -> any PayloadDownloadingTask<DownloadPayload> { copy(preview: preview) }
+	func echoes(_ echoes: Bool) -> any PayloadDownloadingTask<DownloadPayload> { copy(echoes: echoes) }
+	func redirects(_ redirect: TaskRedirect) -> any PayloadDownloadingTask<DownloadPayload> { redirect.enabled ? copy(redirect: redirect) : self }
+	func timeout(_ timeout: TimeInterval) -> any PayloadDownloadingTask<DownloadPayload> { copy(timeout: timeout) }
 }
 
 extension WrappedServerTask {
@@ -140,4 +104,16 @@ extension WrappedServerTask {
 	public var url: URL { wrapped.url }
 	public var taskTag: String { wrapped.taskTag }
 	public var localFileSource: URL? { nil }
+}
+
+extension PayloadDownloadingTask {
+	func copy(caching: DataCache.Caching? = nil, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil, echoes: Bool? = nil, redirect: TaskRedirect? = nil, timeout: TimeInterval? = nil) -> any PayloadDownloadingTask<DownloadPayload> {
+		WrappedPayloadDownloadingTask(wrapped: self, caching: caching ?? wrappedCaching, decoder: decoder ?? wrappedDecoder, preview: preview ?? wrappedPreview, echoes: echoes ?? wrappedEchoes, redirect: redirect ?? wrappedRedirect, timeout: timeout ?? wrappedTimeout)
+	}
+}
+
+extension ServerTask {
+	func copy(caching: DataCache.Caching? = nil, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil, echoes: Bool? = nil, redirect: TaskRedirect? = nil, timeout: TimeInterval? = nil) -> any ServerTask {
+		WrappedDataDownloadingTask(wrapped: self, caching: caching ?? wrappedCaching, decoder: decoder ?? wrappedDecoder, preview: preview ?? wrappedPreview, echoes: echoes ?? wrappedEchoes, redirect: redirect ?? wrappedRedirect, timeout: timeout ?? wrappedTimeout)
+	}
 }
