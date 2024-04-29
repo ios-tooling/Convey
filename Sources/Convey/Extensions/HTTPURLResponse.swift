@@ -47,4 +47,22 @@ public extension HTTPURLResponse {
 	func linkURL(for field: String) -> URL? {
 		links.first { $0.fields.contains(where: { $0.value == field })}?.url
 	}
+	
+	var data: Data {
+		get throws { try NSKeyedArchiver.archivedData(withRootObject: self, requiringSecureCoding: true) }
+	}
+	
+	func write(to file: URL) throws {
+		try data.write(to: file)
+	}
+	
+	class func load(from data: Data) throws -> HTTPURLResponse? {
+		try NSKeyedUnarchiver.unarchivedObject(ofClass: HTTPURLResponse.self, from: data)
+	}
+		
+	class func load(from file: URL) throws -> HTTPURLResponse? {
+		let responseData = try Data(contentsOf: file)
+		return try load(from: responseData)
+	}
+	
 }

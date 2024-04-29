@@ -37,8 +37,7 @@ public enum TaskRedirect: Sendable { case bundle(name: String, enabled: Bool = t
 		
 		do {
 			try response.data.write(to: dataURL)
-			let responseData = try NSKeyedArchiver.archivedData(withRootObject: response.response, requiringSecureCoding: false)
-			try responseData.write(to: responseURL)
+			try response.response.write(to: responseURL)
 		} catch {
 			print("Failed to cache re-directed task \(self): \(error)")
 		}
@@ -49,12 +48,8 @@ public enum TaskRedirect: Sendable { case bundle(name: String, enabled: Bool = t
 
 		do {
 			let data = try Data(contentsOf: dataURL)
-			let response: HTTPURLResponse
-			if let responseData = try? Data(contentsOf: responseURL), let decoded = try NSKeyedUnarchiver.unarchivedObject(ofClass: HTTPURLResponse.self, from: responseData) {
-				response = decoded
-			} else {
-				response = .init(url: dataURL, mimeType: nil, expectedContentLength: 0, textEncodingName: nil)
-			}
+			let response: HTTPURLResponse = (try? .load(from: responseURL)) ?? .init(url: dataURL, mimeType: nil, expectedContentLength: 0, textEncodingName: nil)
+			
 			return ServerResponse(response: response, data: data, fromCache: true, startedAt: Date())
 		} catch {
 			return nil
