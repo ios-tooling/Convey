@@ -65,12 +65,12 @@ struct WrappedDataDownloadingTask<Wrapped: ServerTask>: WrappedServerTask, Senda
 }
 
 extension ServerTask {
-	var wrappedDecoder: JSONDecoder? { (self.wrappedTask as? (any WrappedServerTask))?.decoder }
-	var wrappedCaching: DataCache.Caching { (self.wrappedTask as? (any WrappedServerTask))?.caching ?? .skipLocal }
-	var wrappedPreview: PreviewClosure? { (self.wrappedTask as? (any WrappedServerTask))?.preview }
-	var wrappedEchoes: Bool { (self.wrappedTask as? (any WrappedServerTask))?.echoes ?? false }
-	var wrappedRedirect: TaskRedirect? { (self.wrappedTask as? (any WrappedServerTask))?.redirect }
-	var wrappedTimeout: TimeInterval? { (self.wrappedTask as? (any WrappedServerTask))?.timeout }
+	var wrappedDecoder: JSONDecoder? { (self as? (any WrappedServerTask))?.decoder }
+	var wrappedCaching: DataCache.Caching { (self as? (any WrappedServerTask))?.caching ?? .skipLocal }
+	var wrappedPreview: PreviewClosure? { (self as? (any WrappedServerTask))?.preview }
+	var wrappedEchoes: Bool { (self as? (any WrappedServerTask))?.echoes ?? false }
+	var wrappedRedirect: TaskRedirect? { (self as? (any WrappedServerTask))?.redirect }
+	var wrappedTimeout: TimeInterval? { (self as? (any WrappedServerTask))?.timeout }
 
 	var wrappedTask: ServerTask {
 		if let wrapped = self as? (any WrappedServerTask) { return wrapped.wrapped }

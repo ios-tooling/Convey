@@ -48,7 +48,7 @@ public enum TaskRedirect: Sendable { case bundle(name: String, enabled: Bool = t
 		do {
 			let data = try Data(contentsOf: dataURL)
 			let response: HTTPURLResponse
-			if let responseData = try? Data(contentsOf: responseURL), let decoded = try NSKeyedUnarchiver.unarchivedObject(ofClass: HTTPURLResponse.self, from: responseData) {
+			if let responseData = try? Data(contentsOf: responseURL), let decoded = try? NSKeyedUnarchiver.unarchivedObject(ofClass: HTTPURLResponse.self, from: responseData) {
 				response = decoded
 			} else {
 				response = .init(url: dataURL, mimeType: nil, expectedContentLength: 0, textEncodingName: nil)
