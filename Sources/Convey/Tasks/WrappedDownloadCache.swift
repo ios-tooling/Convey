@@ -8,25 +8,29 @@
 import Foundation
 import Combine
 
-public actor WrappedDownloadArrayCache<UpdateTask: PayloadDownloadingTask>: ObservableObject where UpdateTask.DownloadPayload: WrappedDownloadArray, UpdateTask.DownloadPayload.Element: Equatable {
-	let _items: CurrentValueSubject<[UpdateTask.DownloadPayload.Element], Never> = .init(value: [])
-	public nonisolated var items: [UpdateTask.DownloadPayload.Element] { _items.value }
+@available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
+public actor WrappedDownloadArrayCache<Downloader: PayloadDownloadingTask>: ObservableObject where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element: Equatable {
+	let _items: CurrentValueSubject<[Downloader.DownloadPayload.Element], Never> = .init(value: [])
+	public nonisolated var items: [Downloader.DownloadPayload.Element] { _items.value }
 
-	var updateTask: UpdateTask
+	var updateTask: Downloader
 	
-	public func setUpdateTask(_ task: UpdateTask) {
-		self.updateTask = task
-	}
-	
-	init(updateTask: UpdateTask) {
+	init(updateTask: Downloader) {
 		self.updateTask = updateTask
 	}
 	
-	public func refresh() async throws {
-		let newItems = try await updateTask.downloadArray()
+	public func load<NewDownloader: PayloadDownloadingTask>(from task: NewDownloader) async throws where NewDownloader.DownloadPayload: WrappedDownloadArray, NewDownloader.DownloadPayload.Element == Downloader.DownloadPayload.Element {
+		load(items: try await task.downloadArray())
+	}
+	
+	public func load(items newItems: [Downloader.DownloadPayload.Element]) {
 		if _items.value != newItems {
 			_items.send(newItems)
 			Task { @MainActor in self.objectWillChange.send() }
 		}
+	}
+	
+	public func refresh() async throws {
+		load(items: try await updateTask.downloadArray())
 	}
 }
