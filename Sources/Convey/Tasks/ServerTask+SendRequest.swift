@@ -41,7 +41,7 @@ extension ServerTask {
 					
 					let request = try await beginRequest(at: startedAt)
 					let session = ConveySession(task: self.wrappedTask)
-					print(request)
+
 					var result = try await session.data(for: request)
 					(self.wrappedTask as? ArchivingTask)?.archive(result)
 					

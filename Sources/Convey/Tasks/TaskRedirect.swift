@@ -38,6 +38,11 @@ public enum TaskRedirect: Sendable { case bundle(name: String, enabled: Bool = t
 		do {
 			try response.data.write(to: dataURL)
 			try response.response.write(to: responseURL)
+			if #available(iOS 16.0, *) {
+				print("💾 Saved data to \(dataURL.path(percentEncoded: false))")
+			} else {
+				print("💾 Saved data to \(dataURL.path)")
+			}
 		} catch {
 			print("Failed to cache re-directed task \(self): \(error)")
 		}
@@ -50,6 +55,11 @@ public enum TaskRedirect: Sendable { case bundle(name: String, enabled: Bool = t
 			let data = try Data(contentsOf: dataURL)
 			let response: HTTPURLResponse = (try? .load(from: responseURL)) ?? .init(url: dataURL, mimeType: nil, expectedContentLength: 0, textEncodingName: nil)
 			
+			if #available(iOS 16.0, *) {
+				print("💾 Restored data from \(dataURL.path(percentEncoded: false))")
+			} else {
+				print("💾 Restored data from \(dataURL.path)")
+			}
 			return ServerResponse(response: response, data: data, fromCache: true, startedAt: Date())
 		} catch {
 			return nil
