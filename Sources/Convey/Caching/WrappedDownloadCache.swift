@@ -14,9 +14,15 @@ public actor WrappedDownloadArrayCache<Downloader: PayloadDownloadingTask>: Obse
 	public nonisolated var items: [Downloader.DownloadPayload.Element] { _items.value }
 
 	var updateTask: Downloader
+	var redirect: TaskRedirect?
 	
 	init(updateTask: Downloader) {
 		self.updateTask = updateTask
+	}
+	
+	func setRedirect(_ redirect: TaskRedirect?) async throws {
+		self.redirect = redirect
+		try await refresh()
 	}
 	
 	public func load<NewDownloader: PayloadDownloadingTask>(from task: NewDownloader) async throws where NewDownloader.DownloadPayload: WrappedDownloadArray, NewDownloader.DownloadPayload.Element == Downloader.DownloadPayload.Element {
@@ -31,6 +37,9 @@ public actor WrappedDownloadArrayCache<Downloader: PayloadDownloadingTask>: Obse
 	}
 	
 	public func refresh() async throws {
-		load(items: try await updateTask.downloadArray())
+		let task = updateTask
+			.redirects(redirect)
+		
+		load(items: try await task.downloadArray())
 	}
 }

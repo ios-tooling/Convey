@@ -83,7 +83,7 @@ public extension ServerTask {
 	func caching(_ caching: DataCache.Caching) -> any ServerTask { copy(caching: caching) }
 	func preview(_ preview: @escaping PreviewClosure) -> any ServerTask { copy(preview: preview) }
 	func echoes(_ echoes: Bool) -> any ServerTask { copy(echoes: echoes) }
-	func redirects(_ redirect: TaskRedirect) -> any ServerTask { redirect.enabled ? copy(redirect: redirect) : self }
+	func redirects(_ redirect: TaskRedirect?) -> any ServerTask { redirect?.enabled != false ? copy(redirect: redirect) : self }
 	func timeout(_ timeout: TimeInterval) -> any ServerTask { copy(timeout: timeout) }
 }
 
@@ -92,7 +92,7 @@ public extension PayloadDownloadingTask {
 	func caching(_ caching: DataCache.Caching) -> any PayloadDownloadingTask<DownloadPayload> { copy(caching: caching) }
 	func preview(_ preview: @escaping PreviewClosure) -> any PayloadDownloadingTask<DownloadPayload> { copy(preview: preview) }
 	func echoes(_ echoes: Bool) -> any PayloadDownloadingTask<DownloadPayload> { copy(echoes: echoes) }
-	func redirects(_ redirect: TaskRedirect) -> any PayloadDownloadingTask<DownloadPayload> { redirect.enabled ? copy(redirect: redirect) : self }
+	func redirects(_ redirect: TaskRedirect?) -> any PayloadDownloadingTask<DownloadPayload> { redirect?.enabled != false ? copy(redirect: redirect) : self }
 	func timeout(_ timeout: TimeInterval) -> any PayloadDownloadingTask<DownloadPayload> { copy(timeout: timeout) }
 }
 
