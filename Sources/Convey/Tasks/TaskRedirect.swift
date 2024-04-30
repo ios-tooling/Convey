@@ -29,7 +29,7 @@ public enum TaskRedirect: Sendable { case bundle(name: String, enabled: Bool = t
 	}
 	
 	var responseURL: URL? {
-		dataURL?.deletingPathExtension().appendingPathExtension(".urlResponse")
+		dataURL?.deletingPathExtension().appendingPathExtension("urlResponse")
 	}
 	
 	func cache(response: ServerResponse) {
