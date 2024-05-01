@@ -8,6 +8,8 @@
 import Foundation
 import Combine
 
+public enum EchoStyle: String, Codable, Hashable, Sendable { case full, timing }
+
 extension ServerTask {
 	var abbreviatedDescription: String {
 		let desc = "\(wrappedTask)"
@@ -20,13 +22,17 @@ extension ServerTask {
 extension ServerTask {
 	var isEchoing: Bool {
 		get async {
-			if wrappedEchoes { return true }
+			if let wrappedEcho { return wrappedEcho == .full }
 			return await server.taskManager.shouldEcho(self)
 		}
 	}
 }
 
 public extension ServerTask {
+	func logTiming(_ duration: TimeInterval) {
+		print(String(format: "%@ took %.2fs", abbreviatedDescription, duration))
+	}
+
 	var taskTag: String {
 		if let tag = (self.wrappedTask as? (any TaggedTask))?.requestTag { return tag }
 		return String(describing: self)

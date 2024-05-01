@@ -254,7 +254,7 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 
 		let echo: Bool
 
-		if task.wrappedEchoes {
+		if task.wrappedEcho == .full {
 			echo = true
 		} else if let index = self.index(of: task.wrappedTask) {
 			self.types.value[index].dates.append(date)
@@ -278,7 +278,7 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 	func complete(task: ServerTask, request: URLRequest, response: HTTPURLResponse, bytes: Data, startedAt: Date, usingCache: Bool) async {
 		let shouldEcho: Bool
 		
-		if task.wrappedEchoes {
+		if task.wrappedEcho == .full {
 			shouldEcho = true
 		} else if let index = self.index(of: task) {
 			shouldEcho = self.types.value[index].shouldEcho(type(of: task.wrappedTask), for: self)

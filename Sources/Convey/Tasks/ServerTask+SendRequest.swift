@@ -71,6 +71,7 @@ extension ServerTask {
 					try await (self.wrappedTask as? PostFlightTask)?.postFlight()
 					server.postflight(self, result: result)
 					wrappedRedirect?.cache(response: result)
+					if wrappedEcho == .timing { logTiming(abs(startedAt.timeIntervalSinceNow)) }
 					return result
 				} catch {
 					if let delay = (self.wrappedTask as? RetryableTask)?.retryInterval(after: error, attemptNumber: attemptCount) {
