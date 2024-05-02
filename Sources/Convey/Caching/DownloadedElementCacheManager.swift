@@ -36,6 +36,7 @@ public actor ElementCache<Element: CacheableElement>: DownloadedElementCache {
 	public nonisolated var items: [Element] { wrapped.value.items }
 	public var cacheLocation: URL? { nil }
 	public nonisolated func setup() { wrapped.value.setup() }
+	public var fileWatcher: FileWatcher?
 }
 
 @available(iOS 16, macOS 13, watchOS 9, *)

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FileWatcher {
+public struct FileWatcher {
 	var source: (any DispatchSourceFileSystemObject)!
 	
 	func finish() {
@@ -26,5 +26,7 @@ struct FileWatcher {
 		source.setCancelHandler {
 			try? fileHandle.close()
 		}
+		
+		source.resume()
 	}
 }

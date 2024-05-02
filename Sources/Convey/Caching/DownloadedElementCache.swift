@@ -18,6 +18,7 @@ public protocol DownloadedElementCache<DownloadedElement>: Actor, ObservableObje
 	nonisolated func setup()
 	nonisolated var items: [DownloadedElement] { get }
 	var cacheName: String? { get }
+	var fileWatcher: FileWatcher? { get set }
 }
 
 public extension DownloadedElementCache {
@@ -27,6 +28,13 @@ public extension DownloadedElementCache {
 		guard let redirect else { return }
 		
 		print("Setting up redirect to \(redirect)")
+		if let url = redirect.dataURL {
+			fileWatcher?.finish()
+			fileWatcher = try? FileWatcher(url: url, changed: { _ in
+				print("Watched file changed")
+				Task { await self.loadFromCache() }
+			})
+		}
 	}
 	
 	var cacheLocation: URL? {
@@ -47,6 +55,7 @@ public extension DownloadedElementCache {
 			let data = try Data(contentsOf: cacheLocation)
 			let items = try JSONDecoder().decode([DownloadedElement].self, from: data)
 			load(items: items)
+			print("Loaded \(items.count)")
 		} catch {
 			print("Failed to load \(DownloadedElement.self) from \(cacheLocation.path)")
 		}

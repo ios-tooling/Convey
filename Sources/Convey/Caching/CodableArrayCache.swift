@@ -15,6 +15,7 @@ public actor CodableArrayCache<DownloadedElement: CacheableElement>: DownloadedE
 	let _items: CurrentValueSubject<[DownloadedElement], Never> = .init([])
 	public nonisolated var items: [DownloadedElement] { _items.value }
 	public private(set) var cacheName: String?
+	public var fileWatcher: FileWatcher?
 
 	public func refresh<NewDownloader: PayloadDownloadingTask>(from task: NewDownloader) async throws where NewDownloader.DownloadPayload: WrappedDownloadArray, NewDownloader.DownloadPayload.Element == DownloadedElement {
 		load(items: try await task.downloadArray())
@@ -50,12 +51,15 @@ public actor TaskBasedCodableArrayCache<Downloader: PayloadDownloadingTask, Down
 	let _items: CurrentValueSubject<[DownloadedElement], Never> = .init([])
 	public nonisolated var items: [DownloadedElement] { _items.value }
 	public private(set) var cacheName: String?
+	public var fileWatcher: FileWatcher?
+	var redirect: TaskRedirect?
 
 	var updateTask: Downloader
 	
 	init(updateTask: Downloader, cacheName: String? = String(describing: DownloadedElement.self) + "_cache.json", redirect: TaskRedirect? = nil) {
 		self.cacheName = cacheName
 		self.updateTask = updateTask
+		self.redirect = redirect
 		Task {
 			await setupRedirect(redirect ?? updateTask.wrappedRedirect)
 			await loadFromCache()
@@ -76,7 +80,7 @@ public actor TaskBasedCodableArrayCache<Downloader: PayloadDownloadingTask, Down
 	
 	public func refresh() async throws {
 		let task = updateTask
-		
+			.redirects(redirect)
 		load(items: try await task.downloadArray())
 		try saveToCache()
 	}
