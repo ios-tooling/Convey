@@ -45,13 +45,17 @@ public extension DownloadedElementCache {
 }
 
 @available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
-public actor LocalElementCache<DownloadedElement: CacheableElement>: DownloadedElementCache {
+actor LocalElementCache<DownloadedElement: CacheableElement>: DownloadedElementCache {
 	let _items: CurrentValueSubject<[DownloadedElement], Never> = .init([])
 	public nonisolated var items: [DownloadedElement] { _items.value }
 
 	public func refresh<NewDownloader: PayloadDownloadingTask>(from task: NewDownloader) async throws where NewDownloader.DownloadPayload: WrappedDownloadArray, NewDownloader.DownloadPayload.Element == DownloadedElement {
 		load(items: try await task.downloadArray())
 		try saveToCache()
+	}
+	
+	init() {
+		Task { await loadFromCache() }
 	}
 	
 	public func load(items newItems: [DownloadedElement]) {
@@ -68,7 +72,7 @@ public actor LocalElementCache<DownloadedElement: CacheableElement>: DownloadedE
 
 
 @available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
-public actor PayloadDownloadedElementCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableElement>: DownloadedElementCache where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
+actor PayloadDownloadedElementCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableElement>: DownloadedElementCache where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
 	let _items: CurrentValueSubject<[DownloadedElement], Never> = .init([])
 	public nonisolated var items: [DownloadedElement] { _items.value }
 
@@ -77,6 +81,7 @@ public actor PayloadDownloadedElementCache<Downloader: PayloadDownloadingTask, D
 	
 	init(updateTask: Downloader) {
 		self.updateTask = updateTask
+		Task { await loadFromCache() }
 	}
 	
 	func setRedirect(_ redirect: TaskRedirect?) async throws {
