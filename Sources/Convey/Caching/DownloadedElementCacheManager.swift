@@ -6,13 +6,25 @@
 //
 
 import Foundation
+import Combine
 
 @available(iOS 16, macOS 13, watchOS 9, *)
 public actor ElementCache<Element: CacheableElement>: DownloadedElementCache {
 	let wrapped: any DownloadedElementCache<Element>
 	
+	var observer: AnyCancellable?
+	
 	init(wrapped: any DownloadedElementCache<Element>) {
 		self.wrapped = wrapped
+		Task { await setupWrapper() }
+	}
+	
+	func setupWrapper() {
+		observer = (self.wrapped.objectWillChange as? ObservableObjectPublisher)?
+			.receive(on: RunLoop.main)
+			.sink { _ in
+				self.objectWillChange.send()
+			}
 	}
 	
 	public func load(items newItems: [Element]) { Task { await wrapped.load(items: items) }}
@@ -23,13 +35,14 @@ public actor ElementCache<Element: CacheableElement>: DownloadedElementCache {
 	
 	public nonisolated var items: [Element] { wrapped.items }
 	public var cacheLocation: URL? { nil }
+	public nonisolated func setup() { wrapped.setup() }
 }
 
 
 @available(iOS 16, macOS 13, watchOS 9, *)
 public extension Decodable where Self: CacheableElement {
 	static var downloadedCache: ElementCache<Self> { DownloadedElementCacheManager.instance.fetchCache() }
-	static func downloadedElementCache<Downloader: PayloadDownloadingTask>(_ downloader: Downloader) -> ElementCache<Self> where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == Self { DownloadedElementCacheManager.instance.fetchCache(downloader) }
+	static func downloadedCache<Downloader: PayloadDownloadingTask>(_ downloader: Downloader) -> ElementCache<Self> where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == Self { DownloadedElementCacheManager.instance.fetchCache(downloader) }
 }
 
 @available(iOS 16, macOS 13, watchOS 9, *)

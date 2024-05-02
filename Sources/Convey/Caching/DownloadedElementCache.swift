@@ -17,6 +17,7 @@ public protocol DownloadedElementCache<DownloadedElement>: Actor, ObservableObje
 	func refresh() async throws
 	func refresh<NewDownloader: PayloadDownloadingTask>(from task: NewDownloader) async throws -> Void where NewDownloader.DownloadPayload: WrappedDownloadArray, NewDownloader.DownloadPayload.Element == DownloadedElement
 	
+	nonisolated func setup()
 	nonisolated var items: [DownloadedElement] { get }
 	var cacheLocation: URL? { get }
 }
@@ -32,6 +33,7 @@ public extension DownloadedElementCache {
 		try data.write(to: cacheLocation, options: .atomic)
 	}
 	
+	nonisolated func setup() { }
 	func loadFromCache() {
 		guard let cacheLocation else { return }
 		do {
@@ -58,6 +60,7 @@ actor LocalElementCache<DownloadedElement: CacheableElement>: DownloadedElementC
 		Task { await loadFromCache() }
 	}
 	
+	nonisolated func setup() { }
 	public func load(items newItems: [DownloadedElement]) {
 		if _items.value != newItems {
 			_items.send(newItems)
