@@ -31,8 +31,7 @@ public extension DownloadedElementCache {
 		if let url = redirect.dataURL {
 			fileWatcher?.finish()
 			fileWatcher = try? FileWatcher(url: url, changed: { _ in
-				print("Watched file changed")
-				Task { await self.loadFromCache() }
+				Task { try? await self.refresh() }
 			})
 		}
 	}

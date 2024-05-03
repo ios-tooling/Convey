@@ -17,7 +17,7 @@ public struct FileWatcher {
 	init(url: URL, queue: DispatchQueue = .main, changed: @escaping @Sendable (URL) -> Void) throws {
 		let fileHandle = try FileHandle(forReadingFrom: url)
 		
-		source = DispatchSource.makeFileSystemObjectSource(fileDescriptor: fileHandle.fileDescriptor, eventMask: .all, queue: queue)
+		source = DispatchSource.makeFileSystemObjectSource(fileDescriptor: fileHandle.fileDescriptor, eventMask: .extend, queue: queue)
 		
 		source.setEventHandler {
 			changed(url)
