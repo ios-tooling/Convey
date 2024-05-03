@@ -16,5 +16,5 @@ public struct CacheRefreshTiming: OptionSet, Sendable {
 	public static let atSignIn = CacheRefreshTiming(rawValue: 0x0001 << 2)						// this is indicated by the host application posting conveyDidSignInNotification
 	public static let atSignOut = CacheRefreshTiming(rawValue: 0x0001 << 3)						// this is indicated by the host application posting conveyDidSignOutNotification
 
-	public static let always: CacheRefreshTiming = [.atStartup, .atResume, .atSignIn]
+	public static let always: CacheRefreshTiming = [.atStartup, .atResume, .atSignIn, .atSignOut]
 }

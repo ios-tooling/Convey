@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum TaskRedirect: Sendable { case bundle(name: String, enabled: Bool = true), documents(name: String, enabled: Bool = true)
+public enum TaskRedirect: Sendable, Equatable { case bundle(name: String, enabled: Bool = true), documents(name: String, enabled: Bool = true)
 	var enabled: Bool {
 		switch self {
 		case let .bundle(name: _, enabled: enabled): enabled

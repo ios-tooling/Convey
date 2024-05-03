@@ -39,8 +39,13 @@ public actor CodableArrayCache<DownloadedElement: CacheableElement>: DownloadedE
 
 	init<Downloader: PayloadDownloadingTask>(downloader: Downloader, cacheName: String? = String(describing: DownloadedElement.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
 	
+		if let redirect, let other = downloader.wrappedRedirect, redirect != other {
+			print("Redirect mismatch for \(downloader): \(redirect) != \(other)")
+		}
 		self.init(cacheName: cacheName, redirect: redirect, refresh: refresh) {
-			try await downloader.downloadArray()
+			try await downloader
+				.redirects(redirect)
+				.downloadArray()
 		}
 	}
 
@@ -81,7 +86,11 @@ public actor CodableArrayCache<DownloadedElement: CacheableElement>: DownloadedE
 	
 	func addObserver(_ observer: Any) { notificationObservers.append(observer) }
 	nonisolated func refresh(on name: Notification.Name) {
-		Task { await addObserver(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main, using: { note in self.nonisolatedRefresh(note) })) }
+		if name == .conveyDidSignOutNotification {
+			clear()
+		} else {
+			Task { await addObserver(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main, using: { note in self.nonisolatedRefresh(note) })) }
+		}
 	}
 	
 	public func refresh() async throws {
