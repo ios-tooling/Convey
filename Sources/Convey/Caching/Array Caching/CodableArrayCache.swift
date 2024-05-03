@@ -24,28 +24,33 @@ struct PlaceholderTask<DownloadedElement: CacheableElement>: PayloadDownloadingT
 	}
 }
 
-@available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
-typealias PlainCodableArrayCache<Element: CacheableElement> = CodableArrayCache<PlaceholderTask<Element>, Element>
-
 /// This cache is linked to an individual codable type, and is pre-loaded with a refreshing task. It can automatically refresh in response to certain system events (app launch, resume, etc)
 
 @available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
-public actor CodableArrayCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableElement>: DownloadedElementCache where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
+public actor CodableArrayCache<DownloadedElement: CacheableElement>: DownloadedElementCache {
 	let _items: CurrentValueSubject<[DownloadedElement], Never> = .init([])
 	public nonisolated var items: [DownloadedElement] { _items.value }
 	public private(set) var cacheName: String?
 	public var fileWatcher: FileWatcher?
 	var redirect: TaskRedirect?
 
-	var updateTask: Downloader
+	var updateClosure: (() async throws -> [DownloadedElement])?
 	var notificationObservers: [Any] = []
 
-	init(updateTask: Downloader, cacheName: String? = String(describing: DownloadedElement.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) {
+	init<Downloader: PayloadDownloadingTask>(downloader: Downloader, cacheName: String? = String(describing: DownloadedElement.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
+	
+		self.init(cacheName: cacheName, redirect: redirect, refresh: refresh) {
+			try await downloader.downloadArray()
+		}
+	}
+
+	
+	init(cacheName: String? = String(describing: DownloadedElement.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> [DownloadedElement])? = nil) {
 		self.cacheName = cacheName
-		self.updateTask = updateTask
+		self.updateClosure = update
 		self.redirect = redirect
 		Task {
-			await setupRedirect(redirect ?? updateTask.wrappedRedirect)
+			await setupRedirect(redirect)
 			await loadFromCache()
 			if refresh.contains(.atStartup) { try? await self.refresh() }
 			#if os(iOS)
@@ -80,9 +85,8 @@ public actor CodableArrayCache<Downloader: PayloadDownloadingTask, DownloadedEle
 	}
 	
 	public func refresh() async throws {
-		let task = updateTask
-			.redirects(redirect)
-		load(items: try await task.downloadArray())
+		guard let updateClosure else { return }
+		load(items: try await updateClosure())
 		try saveToCache()
 	}
 	
@@ -96,11 +100,5 @@ public actor CodableArrayCache<Downloader: PayloadDownloadingTask, DownloadedEle
 				print("Error during refresh of \(String(describing: DownloadedElement.self)) cache: \(error)")
 			}
 		}
-	}
-}
-
-extension CodableArrayCache where Downloader == PlaceholderTask<DownloadedElement> {
-	init(cacheName: String? = String(describing: DownloadedElement.self) + "_cache.json", redirect: TaskRedirect? = nil) {
-		self.init(updateTask: PlaceholderTask(), cacheName: cacheName, redirect: redirect, refresh: [])
 	}
 }
