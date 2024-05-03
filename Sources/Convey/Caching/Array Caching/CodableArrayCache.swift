@@ -12,7 +12,7 @@ import Combine
 	import UIKit
 #endif
 
-struct NonfunctionalDownloadTask<DownloadedElement: CacheableElement>: PayloadDownloadingTask {
+struct PlaceholderTask<DownloadedElement: CacheableElement>: PayloadDownloadingTask {
 	typealias DownloadPayload = NonfunctionalWrapper
 
 	var path: String { "" }
@@ -22,14 +22,15 @@ struct NonfunctionalDownloadTask<DownloadedElement: CacheableElement>: PayloadDo
 		static var wrappedKeypath: KeyPath<Self, [DownloadedElement]> { \.wrapped }
 		var wrapped: [DownloadedElement]
 	}
-	
-	
 }
 
-/// This cache is linked to an individual codable type, but is pre-loaded with a refreshing task
+@available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
+typealias PlainCodableArrayCache<Element: CacheableElement> = CodableArrayCache<PlaceholderTask<Element>, Element>
+
+/// This cache is linked to an individual codable type, and is pre-loaded with a refreshing task. It can automatically refresh in response to certain system events (app launch, resume, etc)
 
 @available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
-public actor TaskBasedCodableArrayCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableElement>: DownloadedElementCache where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
+public actor CodableArrayCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableElement>: DownloadedElementCache where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
 	let _items: CurrentValueSubject<[DownloadedElement], Never> = .init([])
 	public nonisolated var items: [DownloadedElement] { _items.value }
 	public private(set) var cacheName: String?
@@ -55,11 +56,15 @@ public actor TaskBasedCodableArrayCache<Downloader: PayloadDownloadingTask, Down
 			if refresh.contains(.atSignOut) { self.refresh(on: .conveyDidSignOutNotification) }
 		}
 	}
-	
 
 	public func refresh<NewDownloader: PayloadDownloadingTask>(from task: NewDownloader) async throws where NewDownloader.DownloadPayload: WrappedDownloadArray, NewDownloader.DownloadPayload.Element == DownloadedElement {
 		load(items: try await task.downloadArray())
 		try saveToCache()
+	}
+	
+	public nonisolated func clear() {
+		_items.value = []
+		Task { try? await saveToCache() }
 	}
 	
 	public func load(items newItems: [DownloadedElement]) {
@@ -94,8 +99,8 @@ public actor TaskBasedCodableArrayCache<Downloader: PayloadDownloadingTask, Down
 	}
 }
 
-extension TaskBasedCodableArrayCache where Downloader == NonfunctionalDownloadTask<DownloadedElement> {
+extension CodableArrayCache where Downloader == PlaceholderTask<DownloadedElement> {
 	init(cacheName: String? = String(describing: DownloadedElement.self) + "_cache.json", redirect: TaskRedirect? = nil) {
-		self.init(updateTask: NonfunctionalDownloadTask(), cacheName: cacheName, redirect: redirect, refresh: [])
+		self.init(updateTask: PlaceholderTask(), cacheName: cacheName, redirect: redirect, refresh: [])
 	}
 }

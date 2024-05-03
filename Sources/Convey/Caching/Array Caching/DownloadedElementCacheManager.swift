@@ -28,6 +28,7 @@ public actor ElementCache<Element: CacheableElement>: DownloadedElementCache {
 	}
 	
 	public func load(items newItems: [Element]) { Task { await wrapped.value.load(items: items) }}
+	public nonisolated func clear() { wrapped.value.clear() }
 	public func refresh() async throws { try await wrapped.value.refresh() }
 	public func refresh<NewDownloader: PayloadDownloadingTask>(from task: NewDownloader) async throws -> Void where NewDownloader.DownloadPayload: WrappedDownloadArray, NewDownloader.DownloadPayload.Element == Element {
 		try await wrapped.value.refresh(from: task)
@@ -47,13 +48,13 @@ public class DownloadedElementCacheManager {
 	
 	func fetchCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableElement>(_ downloader: Downloader, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> (ElementCache<DownloadedElement>) where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
 		if let cache = caches[DownloadedElement.cacheKey] as? ElementCache<DownloadedElement> {
-			if cache.wrapped.value is (TaskBasedCodableArrayCache<Downloader, DownloadedElement>) { return cache }
+			if cache.wrapped.value is (CodableArrayCache<Downloader, DownloadedElement>) { return cache }
 			
-			cache.wrapped.value = TaskBasedCodableArrayCache(updateTask: downloader, redirect: redirect, refresh: cache.items.isEmpty ? refresh : refresh.subtracting(.atStartup))
+			cache.wrapped.value = CodableArrayCache(updateTask: downloader, redirect: redirect, refresh: cache.items.isEmpty ? refresh : refresh.subtracting(.atStartup))
 			return cache
 		}
 		
-		let cache = TaskBasedCodableArrayCache(updateTask: downloader, redirect: redirect, refresh: refresh)
+		let cache = CodableArrayCache(updateTask: downloader, redirect: redirect, refresh: refresh)
 		let wrapped = ElementCache(wrapped: cache)
 		caches[DownloadedElement.cacheKey] = wrapped
 		return wrapped
@@ -62,7 +63,7 @@ public class DownloadedElementCacheManager {
 	func fetchCache<DownloadedElement: CacheableElement>(redirect: TaskRedirect? = nil) -> ElementCache<DownloadedElement> {
 		if let cache = caches[DownloadedElement.cacheKey] as? ElementCache<DownloadedElement> { return cache }
 		
-		let cache: TaskBasedCodableArrayCache<NonfunctionalDownloadTask, DownloadedElement> = TaskBasedCodableArrayCache(redirect: redirect)
+		let cache: PlainCodableArrayCache<DownloadedElement> = CodableArrayCache(redirect: redirect)
 		let wrapped = ElementCache(wrapped: cache)
 		caches[DownloadedElement.cacheKey] = wrapped
 		return wrapped

@@ -8,18 +8,6 @@
 import Foundation
 import Combine
 
-public struct CacheRefreshTiming: OptionSet, Sendable {
-	public init(rawValue: Int) { self.rawValue = rawValue }
-	public var rawValue: Int
-	
-	public static let atStartup = CacheRefreshTiming(rawValue: 0x0001 << 0)
-	public static let atResume = CacheRefreshTiming(rawValue: 0x0001 << 1)
-	public static let atSignIn = CacheRefreshTiming(rawValue: 0x0001 << 2)						// this is indicated by the host application posting conveyDidSignInNotification
-	public static let atSignOut = CacheRefreshTiming(rawValue: 0x0001 << 3)						// this is indicated by the host application posting conveyDidSignOutNotification
-
-	public static let always: CacheRefreshTiming = [.atStartup, .atResume, .atSignIn]
-}
-
 public protocol DownloadedElementCache<DownloadedElement>: Actor, ObservableObject {
 	associatedtype DownloadedElement: CacheableElement
 	
@@ -27,6 +15,7 @@ public protocol DownloadedElementCache<DownloadedElement>: Actor, ObservableObje
 	func refresh() async throws
 	func refresh<NewDownloader: PayloadDownloadingTask>(from task: NewDownloader) async throws -> Void where NewDownloader.DownloadPayload: WrappedDownloadArray, NewDownloader.DownloadPayload.Element == DownloadedElement
 	
+	nonisolated func clear()
 	nonisolated func setup()
 	nonisolated var items: [DownloadedElement] { get }
 	var cacheName: String? { get }
