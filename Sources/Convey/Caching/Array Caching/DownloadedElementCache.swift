@@ -14,8 +14,10 @@ public struct CacheRefreshTiming: OptionSet, Sendable {
 	
 	public static let atStartup = CacheRefreshTiming(rawValue: 0x0001 << 0)
 	public static let atResume = CacheRefreshTiming(rawValue: 0x0001 << 1)
-	public static let always: CacheRefreshTiming = [.atStartup, .atResume]
+	public static let atSignIn = CacheRefreshTiming(rawValue: 0x0001 << 2)						// this is indicated by the host application posting conveyDidSignInNotification
+	public static let atSignOut = CacheRefreshTiming(rawValue: 0x0001 << 3)						// this is indicated by the host application posting conveyDidSignOutNotification
 
+	public static let always: CacheRefreshTiming = [.atStartup, .atResume, .atSignIn]
 }
 
 public protocol DownloadedElementCache<DownloadedElement>: Actor, ObservableObject {

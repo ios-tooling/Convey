@@ -37,8 +37,8 @@ public actor TaskBasedCodableArrayCache<Downloader: PayloadDownloadingTask, Down
 	var redirect: TaskRedirect?
 
 	var updateTask: Downloader
-	var resumeObserver: Any?
-	
+	var notificationObservers: [Any] = []
+
 	init(updateTask: Downloader, cacheName: String? = String(describing: DownloadedElement.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) {
 		self.cacheName = cacheName
 		self.updateTask = updateTask
@@ -48,19 +48,15 @@ public actor TaskBasedCodableArrayCache<Downloader: PayloadDownloadingTask, Down
 			await loadFromCache()
 			if refresh.contains(.atStartup) { try? await self.refresh() }
 			#if os(iOS)
-			if refresh.contains(.atResume) {
-				await setResumeObserver(NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main, using: { _ in
-					Task { try? await self.refresh() }
-				}))
-			}
+				if refresh.contains(.atResume) { await self.refresh(on: UIApplication.didBecomeActiveNotification) }
 			#endif
+
+			if refresh.contains(.atSignIn) { self.refresh(on: .conveyDidSignInNotification) }
+			if refresh.contains(.atSignOut) { self.refresh(on: .conveyDidSignOutNotification) }
 		}
 	}
 	
-	func setResumeObserver(_ observer: Any) {
-		self.resumeObserver = observer
-	}
-	
+
 	public func refresh<NewDownloader: PayloadDownloadingTask>(from task: NewDownloader) async throws where NewDownloader.DownloadPayload: WrappedDownloadArray, NewDownloader.DownloadPayload.Element == DownloadedElement {
 		load(items: try await task.downloadArray())
 		try saveToCache()
@@ -73,11 +69,28 @@ public actor TaskBasedCodableArrayCache<Downloader: PayloadDownloadingTask, Down
 		}
 	}
 	
+	func addObserver(_ observer: Any) { notificationObservers.append(observer) }
+	nonisolated func refresh(on name: Notification.Name) {
+		Task { await addObserver(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main, using: { note in self.nonisolatedRefresh(note) })) }
+	}
+	
 	public func refresh() async throws {
 		let task = updateTask
 			.redirects(redirect)
 		load(items: try await task.downloadArray())
 		try saveToCache()
+	}
+	
+	public nonisolated func nonisolatedRefresh(_ note: Notification) {
+		print("Received \(note)")
+
+		Task {
+			do {
+				try await refresh()
+			} catch {
+				print("Error during refresh of \(String(describing: DownloadedElement.self)) cache: \(error)")
+			}
+		}
 	}
 }
 
