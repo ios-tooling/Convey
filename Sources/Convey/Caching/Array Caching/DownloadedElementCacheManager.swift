@@ -45,15 +45,15 @@ public class DownloadedElementCacheManager {
 	
 	var caches: [String: any DownloadedElementCache] = [:]
 	
-	func fetchCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableElement>(_ downloader: Downloader, redirect: TaskRedirect? = nil) -> (ElementCache<DownloadedElement>) where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
+	func fetchCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableElement>(_ downloader: Downloader, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> (ElementCache<DownloadedElement>) where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
 		if let cache = caches[DownloadedElement.cacheKey] as? ElementCache<DownloadedElement> {
 			if cache.wrapped.value is (TaskBasedCodableArrayCache<Downloader, DownloadedElement>) { return cache }
 			
-			cache.wrapped.value = TaskBasedCodableArrayCache(updateTask: downloader, redirect: redirect)
+			cache.wrapped.value = TaskBasedCodableArrayCache(updateTask: downloader, redirect: redirect, refresh: cache.items.isEmpty ? refresh : refresh.subtracting(.atStartup))
 			return cache
 		}
 		
-		let cache = TaskBasedCodableArrayCache(updateTask: downloader, redirect: redirect)
+		let cache = TaskBasedCodableArrayCache(updateTask: downloader, redirect: redirect, refresh: refresh)
 		let wrapped = ElementCache(wrapped: cache)
 		caches[DownloadedElement.cacheKey] = wrapped
 		return wrapped

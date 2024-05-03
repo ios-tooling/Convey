@@ -8,6 +8,16 @@
 import Foundation
 import Combine
 
+public struct CacheRefreshTiming: OptionSet, Sendable {
+	public init(rawValue: Int) { self.rawValue = rawValue }
+	public var rawValue: Int
+	
+	public static let atStartup = CacheRefreshTiming(rawValue: 0x0001 << 0)
+	public static let atResume = CacheRefreshTiming(rawValue: 0x0001 << 1)
+	public static let always: CacheRefreshTiming = [.atStartup, .atResume]
+
+}
+
 public protocol DownloadedElementCache<DownloadedElement>: Actor, ObservableObject {
 	associatedtype DownloadedElement: CacheableElement
 	
@@ -27,7 +37,7 @@ public extension DownloadedElementCache {
 	func setupRedirect(_ redirect: TaskRedirect?) {
 		guard let redirect else { return }
 		
-		print("Setting up redirect to \(redirect)")
+		print("Setting up redirect for \(String(describing: DownloadedElement.self)) to \(redirect)")
 		if let url = redirect.dataURL {
 			fileWatcher?.finish()
 			fileWatcher = try? FileWatcher(url: url, changed: { _ in
@@ -54,9 +64,10 @@ public extension DownloadedElementCache {
 			let data = try Data(contentsOf: cacheLocation)
 			let items = try JSONDecoder().decode([DownloadedElement].self, from: data)
 			load(items: items)
-			print("Loaded \(items.count)")
 		} catch {
-			print("Failed to load \(DownloadedElement.self) from \(cacheLocation.path)")
+			let ns = error as NSError
+			if ns.domain == NSCocoaErrorDomain, ns.code == 260 { return }
+			print("Failed to load \(DownloadedElement.self) from \(cacheLocation.path): \(error)")
 		}
 	}
 }

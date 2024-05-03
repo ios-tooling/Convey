@@ -14,5 +14,5 @@ public typealias CacheableElement = Codable & Equatable & Sendable
 public extension Decodable where Self: CacheableElement {
 	static var downloadedCache: ElementCache<Self> { DownloadedElementCacheManager.instance.fetchCache() }
 	static func downloadedCache(redirect: TaskRedirect? = nil) -> ElementCache<Self> { DownloadedElementCacheManager.instance.fetchCache(redirect: redirect) }
-	static func downloadedCache<Downloader: PayloadDownloadingTask>(_ downloader: Downloader, redirect: TaskRedirect? = nil) -> ElementCache<Self> where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == Self { DownloadedElementCacheManager.instance.fetchCache(downloader, redirect: redirect) }
+	static func downloadedCache<Downloader: PayloadDownloadingTask>(_ downloader: Downloader, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> ElementCache<Self> where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == Self { DownloadedElementCacheManager.instance.fetchCache(downloader, redirect: redirect, refresh: refresh) }
 }
