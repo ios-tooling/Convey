@@ -14,7 +14,7 @@ public class DownloadedCacheManager {
 	
 	var caches: [String: any DownloadedCacheProtocol] = [:]
 	
-	func fetchCache<DownloadedElement: CacheableContent>(redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> DownloadedElement)? = nil) -> (DownloadedCache<DownloadedElement>) {
+	func fetchCache<DownloadedElement: CacheableContent>(redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> DownloadedElement?)? = nil) -> (DownloadedCache<DownloadedElement>) {
 		if let cache = caches[DownloadedElement.cacheKey] as? DownloadedCache<DownloadedElement> {
 			return cache
 		}
@@ -46,7 +46,7 @@ public class DownloadedCacheManager {
 		return cache
 	}
 	
-	func fetchArrayCache<DownloadedElement: CacheableContent>(redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> [DownloadedElement])? = nil) -> (DownloadedArrayCache<DownloadedElement>) {
+	func fetchArrayCache<DownloadedElement: CacheableContent>(redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> [DownloadedElement]?)? = nil) -> (DownloadedArrayCache<DownloadedElement>) {
 		if let cache = caches[DownloadedElement.cacheKey] as? DownloadedArrayCache<DownloadedElement> {
 			return cache
 		}

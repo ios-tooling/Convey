@@ -12,9 +12,9 @@ import Combine
 	import UIKit
 #endif
 
-protocol DownloadedCacheProtocol<DownloadedItem>: Actor, ObservableObject {
+public protocol DownloadedCacheProtocol<DownloadedItem>: Actor, ObservableObject {
 	associatedtype DownloadedItem: CacheableContent
-	typealias UpdateClosure = (() async throws -> DownloadedItem)
+	typealias UpdateClosure = (() async throws -> DownloadedItem?)
 
 	func load(_ new: DownloadedItem?)
 	func refresh() async throws
@@ -36,7 +36,7 @@ protocol DownloadedArrayCacheProtocol<DownloadedElement>: DownloadedCacheProtoco
 	var items: [DownloadedElement] { get }
 }
 
-extension DownloadedCacheProtocol {
+public extension DownloadedCacheProtocol {
 	var cacheName: String? { String(describing: DownloadedItem.self) + "_cache.json" }
 	
 	func setupRedirect(_ redirect: TaskRedirect?) {
@@ -70,13 +70,13 @@ extension DownloadedCacheProtocol {
 		Task { await addObserver(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main, using: { note in self.nonisolatedRefresh(note) })) }
 	}
 	
-	public func refresh() async throws {
+	func refresh() async throws {
 		guard let updateClosure else { return }
 		load(try await updateClosure())
 		try saveToCache()
 	}
 	
-	public nonisolated func nonisolatedRefresh(_ note: Notification) {
+	nonisolated func nonisolatedRefresh(_ note: Notification) {
 		if note.name == .conveyDidSignOutNotification {
 			clear()
 		} else {

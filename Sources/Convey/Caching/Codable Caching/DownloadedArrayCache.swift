@@ -16,11 +16,11 @@ public actor DownloadedArrayCache<DownloadedElement: CacheableContent>: Download
 	public nonisolated var content: [DownloadedElement]? { _items.value }
 	public private(set) var cacheName: String?
 	public var fileWatcher: FileWatcher?
-	var redirect: TaskRedirect?
+	public var redirect: TaskRedirect?
 	public nonisolated var items: [DownloadedElement] { content ?? [] }
 
-	var updateClosure: UpdateClosure?
-	var notificationObservers: [Any] = []
+	public var updateClosure: UpdateClosure?
+	public var notificationObservers: [Any] = []
 
 	init<Downloader: PayloadDownloadingTask>(downloader: Downloader, cacheName: String? = String(describing: DownloadedItem.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
 	

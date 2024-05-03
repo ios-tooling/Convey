@@ -18,10 +18,10 @@ public actor DownloadedCache<DownloadedContent: CacheableContent>: DownloadedCac
 	public nonisolated var content: DownloadedContent? { _item.value }
 	public private(set) var cacheName: String?
 	public var fileWatcher: FileWatcher?
-	var redirect: TaskRedirect?
+	public var redirect: TaskRedirect?
 
-	var updateClosure: UpdateClosure?
-	var notificationObservers: [Any] = []
+	public var updateClosure: UpdateClosure?
+	public var notificationObservers: [Any] = []
 
 	init<Downloader: PayloadDownloadingTask>(downloader: Downloader, cacheName: String? = String(describing: DownloadedContent.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) where Downloader.DownloadPayload == DownloadedContent {
 	
