@@ -83,11 +83,7 @@ public actor CodableElementCache<DownloadedElement: CacheableElement>: CodableEl
 	
 	func addObserver(_ observer: Any) { notificationObservers.append(observer) }
 	nonisolated func refresh(on name: Notification.Name) {
-		if name == .conveyDidSignOutNotification {
-			clear()
-		} else {
-			Task { await addObserver(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main, using: { note in self.nonisolatedRefresh(note) })) }
-		}
+		Task { await addObserver(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main, using: { note in self.nonisolatedRefresh(note) })) }
 	}
 	
 	public func refresh() async throws {
@@ -98,12 +94,15 @@ public actor CodableElementCache<DownloadedElement: CacheableElement>: CodableEl
 	
 	public nonisolated func nonisolatedRefresh(_ note: Notification) {
 		print("Received \(note)")
-
-		Task {
-			do {
-				try await refresh()
-			} catch {
-				print("Error during refresh of \(String(describing: DownloadedElement.self)) cache: \(error)")
+		if note.name == .conveyDidSignOutNotification {
+			clear()
+		} else {
+			Task {
+				do {
+					try await refresh()
+				} catch {
+					print("Error during refresh of \(String(describing: DownloadedElement.self)) cache: \(error)")
+				}
 			}
 		}
 	}
