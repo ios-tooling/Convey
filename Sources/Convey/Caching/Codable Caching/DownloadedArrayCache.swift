@@ -11,7 +11,7 @@ import Combine
 /// This cache is linked to an individual codable type, and is pre-loaded with a refreshing closure. It can automatically refresh in response to certain system events (app launch, resume, etc)
 
 @available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
-public actor DownloadedArrayCache<DownloadedElement: CacheableElement>: DownloadedArrayCacheProtocol {
+public actor DownloadedArrayCache<DownloadedElement: CacheableContent>: DownloadedArrayCacheProtocol {
 	let _items: CurrentValueSubject<[DownloadedElement]?, Never> = .init([])
 	public nonisolated var content: [DownloadedElement]? { _items.value }
 	public private(set) var cacheName: String?
@@ -27,12 +27,12 @@ public actor DownloadedArrayCache<DownloadedElement: CacheableElement>: Download
 		if let redirect, let other = downloader.wrappedRedirect, redirect != other {
 			print("Redirect mismatch for \(downloader): \(redirect) != \(other)")
 		}
-		self.init(cacheName: cacheName, redirect: redirect, refresh: refresh, update: Self.buildRefreshClosure(for: downloader))
+		self.init(cacheName: cacheName, redirect: redirect, refresh: refresh, update: Self.buildRefreshClosure(for: downloader, redirects: redirect))
 	}
 	
 	static func buildRefreshClosure<Downloader: PayloadDownloadingTask>(for downloader: Downloader, redirects: TaskRedirect? = nil) -> UpdateClosure where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
-		
-		{
+
+		return {
 		  try await downloader
 			  .redirects(redirects)
 			  .downloadArray()

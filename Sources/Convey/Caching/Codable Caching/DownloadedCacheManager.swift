@@ -14,7 +14,28 @@ public class DownloadedCacheManager {
 	
 	var caches: [String: any DownloadedCacheProtocol] = [:]
 	
-	func fetchCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableElement>(_ downloader: Downloader, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> DownloadedArrayCache<DownloadedElement> where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
+	func fetchCache<DownloadedElement: CacheableContent>(redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> DownloadedElement)? = nil) -> (DownloadedCache<DownloadedElement>) {
+		if let cache = caches[DownloadedElement.cacheKey] as? DownloadedCache<DownloadedElement> {
+			return cache
+		}
+		
+		let cache = DownloadedCache(redirect: redirect, refresh: refresh, update: update)
+		caches[DownloadedElement.cacheKey] = cache
+		return cache
+	}
+
+	func fetchCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableContent>(_ downloader: Downloader, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> DownloadedCache<DownloadedElement> where Downloader.DownloadPayload == DownloadedElement {
+		if let cache = caches[DownloadedElement.cacheKey] as? DownloadedCache<DownloadedElement> {
+			Task { await cache.updateRefreshClosure(for: downloader, redirects: redirect) }
+			return cache
+		}
+		
+		let cache = DownloadedCache(downloader: downloader, redirect: redirect, refresh: refresh)
+		caches[DownloadedElement.cacheKey] = cache
+		return cache
+	}
+	
+	func fetchArrayCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableContent>(_ downloader: Downloader, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> DownloadedArrayCache<DownloadedElement> where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
 		if let cache = caches[DownloadedElement.cacheKey] as? DownloadedArrayCache<DownloadedElement> {
 			Task { await cache.updateRefreshClosure(for: downloader, redirects: redirect) }
 			return cache
@@ -25,7 +46,7 @@ public class DownloadedCacheManager {
 		return cache
 	}
 	
-	func fetchCache<DownloadedElement: CacheableElement>(redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> [DownloadedElement])? = nil) -> (DownloadedArrayCache<DownloadedElement>) {
+	func fetchArrayCache<DownloadedElement: CacheableContent>(redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> [DownloadedElement])? = nil) -> (DownloadedArrayCache<DownloadedElement>) {
 		if let cache = caches[DownloadedElement.cacheKey] as? DownloadedArrayCache<DownloadedElement> {
 			return cache
 		}

@@ -13,7 +13,7 @@ import Combine
 #endif
 
 protocol DownloadedCacheProtocol<DownloadedItem>: Actor, ObservableObject {
-	associatedtype DownloadedItem: CacheableElement
+	associatedtype DownloadedItem: CacheableContent
 	typealias UpdateClosure = (() async throws -> DownloadedItem)
 
 	func load(_ new: DownloadedItem?)
@@ -24,13 +24,14 @@ protocol DownloadedCacheProtocol<DownloadedItem>: Actor, ObservableObject {
 	
 	nonisolated var content: DownloadedItem? { get }
 	var cacheName: String? { get }
+	var redirect: TaskRedirect? { get set }
 	var fileWatcher: FileWatcher? { get set }
 	var notificationObservers: [Any] { get set }
 	var updateClosure: UpdateClosure? { get set }
 }
 
 protocol DownloadedArrayCacheProtocol<DownloadedElement>: DownloadedCacheProtocol where DownloadedItem == [DownloadedElement] {
-	associatedtype DownloadedElement: CacheableElement
+	associatedtype DownloadedElement: CacheableContent
 	
 	var items: [DownloadedElement] { get }
 }
@@ -98,6 +99,7 @@ extension DownloadedCacheProtocol {
 		guard let cacheLocation else { return }
 		let data = try JSONEncoder().encode(content)
 		try data.write(to: cacheLocation, options: .atomic)
+		if fileWatcher == nil, let redirect { setupRedirect(redirect) }
 	}
 	
 	nonisolated func setup() { }
