@@ -12,41 +12,19 @@ import Combine
 	import UIKit
 #endif
 
-/// This cache is linked to an individual codable type. If initialized with a nil-cacheName, it will not be persisted to disk
+struct NonfunctionalDownloadTask<DownloadedElement: CacheableElement>: PayloadDownloadingTask {
+	typealias DownloadPayload = NonfunctionalWrapper
 
-@available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
-public actor CodableArrayCache<DownloadedElement: CacheableElement>: DownloadedElementCache {
-	let _items: CurrentValueSubject<[DownloadedElement], Never> = .init([])
-	public nonisolated var items: [DownloadedElement] { _items.value }
-	public private(set) var cacheName: String?
-	public var fileWatcher: FileWatcher?
-
-	public func refresh<NewDownloader: PayloadDownloadingTask>(from task: NewDownloader) async throws where NewDownloader.DownloadPayload: WrappedDownloadArray, NewDownloader.DownloadPayload.Element == DownloadedElement {
-		load(items: try await task.downloadArray())
-		try saveToCache()
+	var path: String { "" }
+	struct NonfunctionalWrapper: WrappedDownloadArray {
+		typealias Element = DownloadedElement
+		
+		static var wrappedKeypath: KeyPath<Self, [DownloadedElement]> { \.wrapped }
+		var wrapped: [DownloadedElement]
 	}
 	
-	public init(cacheName: String? = String(describing: DownloadedElement.self) + "_cache.json", redirect: TaskRedirect? = nil) {
-		self.cacheName = cacheName
-		Task {
-			await setupRedirect(redirect)
-			await loadFromCache()
-		}
-	}
 	
-	public nonisolated func setup() { }
-	public func load(items newItems: [DownloadedElement]) {
-		if _items.value != newItems {
-			_items.send(newItems)
-			Task { @MainActor in self.objectWillChange.send() }
-		}
-	}
-	
-	public func refresh() async throws {
-		print("Refreshing a LocalElementCache is not supported")
-	}
 }
-
 
 /// This cache is linked to an individual codable type, but is pre-loaded with a refreshing task
 
@@ -100,5 +78,11 @@ public actor TaskBasedCodableArrayCache<Downloader: PayloadDownloadingTask, Down
 			.redirects(redirect)
 		load(items: try await task.downloadArray())
 		try saveToCache()
+	}
+}
+
+extension TaskBasedCodableArrayCache where Downloader == NonfunctionalDownloadTask<DownloadedElement> {
+	init(cacheName: String? = String(describing: DownloadedElement.self) + "_cache.json", redirect: TaskRedirect? = nil) {
+		self.init(updateTask: NonfunctionalDownloadTask(), cacheName: cacheName, redirect: redirect, refresh: [])
 	}
 }

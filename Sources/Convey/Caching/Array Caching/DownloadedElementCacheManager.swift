@@ -62,7 +62,7 @@ public class DownloadedElementCacheManager {
 	func fetchCache<DownloadedElement: CacheableElement>(redirect: TaskRedirect? = nil) -> ElementCache<DownloadedElement> {
 		if let cache = caches[DownloadedElement.cacheKey] as? ElementCache<DownloadedElement> { return cache }
 		
-		let cache: CodableArrayCache<DownloadedElement> = CodableArrayCache(redirect: redirect)
+		let cache: TaskBasedCodableArrayCache<NonfunctionalDownloadTask, DownloadedElement> = TaskBasedCodableArrayCache(redirect: redirect)
 		let wrapped = ElementCache(wrapped: cache)
 		caches[DownloadedElement.cacheKey] = wrapped
 		return wrapped
