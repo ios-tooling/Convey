@@ -24,7 +24,7 @@ struct PlaceholderTask<DownloadedElement: CacheableElement>: PayloadDownloadingT
 	}
 }
 
-/// This cache is linked to an individual codable type, and is pre-loaded with a refreshing task. It can automatically refresh in response to certain system events (app launch, resume, etc)
+/// This cache is linked to an individual codable type, and is pre-loaded with a refreshing closure. It can automatically refresh in response to certain system events (app launch, resume, etc)
 
 @available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
 public actor CodableArrayCache<DownloadedElement: CacheableElement>: DownloadedElementCache {
@@ -42,13 +42,22 @@ public actor CodableArrayCache<DownloadedElement: CacheableElement>: DownloadedE
 		if let redirect, let other = downloader.wrappedRedirect, redirect != other {
 			print("Redirect mismatch for \(downloader): \(redirect) != \(other)")
 		}
-		self.init(cacheName: cacheName, redirect: redirect, refresh: refresh) {
-			try await downloader
-				.redirects(redirect)
-				.downloadArray()
-		}
+		self.init(cacheName: cacheName, redirect: redirect, refresh: refresh, update: Self.buildRefreshClosure(for: downloader))
 	}
-
+	
+	static func buildRefreshClosure<Downloader: PayloadDownloadingTask>(for downloader: Downloader, redirects: TaskRedirect? = nil) -> (() async throws -> [DownloadedElement]) where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
+		
+		{
+		  try await downloader
+			  .redirects(redirects)
+			  .downloadArray()
+	  }
+	}
+	
+	func updateRefreshClosure<Downloader: PayloadDownloadingTask>(for downloader: Downloader, redirects: TaskRedirect? = nil) where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
+		
+		updateClosure = Self.buildRefreshClosure(for: downloader, redirects: redirects)
+	}
 	
 	init(cacheName: String? = String(describing: DownloadedElement.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> [DownloadedElement])? = nil) {
 		self.cacheName = cacheName
