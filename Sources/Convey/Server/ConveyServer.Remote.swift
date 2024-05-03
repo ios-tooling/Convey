@@ -22,7 +22,7 @@ public extension ConveyServer {
 			self.url = url
 		}
 		
-		public var isEmtpy: Bool { url == Self.empty.url }
+		public var isEmpty: Bool { url == Self.empty.url }
 
 		public func hash(into hasher: inout Hasher) {
 			hasher.combine(url)

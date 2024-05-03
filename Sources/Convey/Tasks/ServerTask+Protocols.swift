@@ -40,6 +40,11 @@ public protocol CustomTimeoutTask: ServerTask {
 	var timeout: TimeInterval { get }
 }
 
+public protocol PayloadDownloadingTask<DownloadPayload>: ServerTask {
+	associatedtype DownloadPayload: Decodable & Sendable
+	func postProcess(payload: DownloadPayload) async throws
+}
+
 public protocol DataUploadingTask: ServerUploadingTask {
 	var dataToUpload: Data? { get }
 	var contentType: String? { get }
@@ -116,11 +121,6 @@ public protocol RetryableTask: ServerTask {
 }
 
 public protocol ServerSentEventTargetTask: ServerTask { }
-
-public protocol PayloadDownloadingTask: ServerTask {
-	associatedtype DownloadPayload: Decodable
-	func postProcess(payload: DownloadPayload) async throws
-}
 
 public protocol PayloadUploadingTask: DataUploadingTask, JSONPayloadTask {
 	associatedtype UploadPayload: Encodable

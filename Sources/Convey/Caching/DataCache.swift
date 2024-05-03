@@ -99,8 +99,9 @@ public actor DataCache {
 		
 	nonisolated public func fetchLocal(for provision: Provision, newerThan: Date? = nil) -> DataAndLocalCache? {
 		if provision.isLocal {
-			if let data = try? Data(contentsOf: provision.localURL) {
-				return DataAndLocalCache(data: data, url: provision.url)
+			let localURL = provision.localURL
+			if let data = try? Data(contentsOf: localURL) {
+				return DataAndLocalCache(data: data, url: provision.url, cachedAt: localURL.creationDate ?? Date())
 			}
 			return nil
 		}
@@ -112,12 +113,13 @@ public actor DataCache {
 		}
 		
 		guard let data = try? Data(contentsOf: localURL) else { return nil }
-		return DataAndLocalCache(data: data, url: localURL)
+		return DataAndLocalCache(data: data, url: localURL, cachedAt: localURL.creationDate ?? Date())
 	}
 	
 	public struct DataAndLocalCache: Sendable {
 		public let data: Data
 		public let url: URL?
+		public var cachedAt: Date
 	}
 }
 

@@ -112,15 +112,15 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 
 	open func preflight(_ task: ServerTask, request: URLRequest) async throws -> URLRequest {
 		if disabled { throw ConveyServerError.serverDisabled }
-		if remote.isEmtpy {
-			if task.url.host?.contains("about:") == false { return request }
+		if remote.isEmpty {
+			if task.wrappedTask.url.host?.contains("about:") == false { return request }
 			throw ConveyServerError.remoteNotSet
 		}
 		
 		return request
 	}
 	
-	open func postflight(_ task: ServerTask, result: ServerReturned) {
+	open func postflight(_ task: ServerTask, result: ServerResponse) {
 		
 	}
 	
@@ -184,15 +184,19 @@ public extension Int {
 }
 
 actor ActiveSessions {
-	var sessions: Set<ConveySession> = []
+	let sessions: CurrentValueSubject<Set<ConveySession>, Never> = .init([])
 	
-	var isEmpty: Bool { sessions.isEmpty }
+	nonisolated var isEmpty: Bool { sessions.value.isEmpty }
 	
 	func insert(_ session: ConveySession) {
-		sessions.insert(session)
+		var value = sessions.value
+		value.insert(session)
+		sessions.send(value)
 	}
 	
 	func remove(_ session: ConveySession) {
-		sessions.remove(session)
+		var value = sessions.value
+		value.remove(session)
+		sessions.send(value)
 	}
 }

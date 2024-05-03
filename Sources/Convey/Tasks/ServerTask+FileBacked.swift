@@ -23,14 +23,14 @@ public extension ServerTask where Self: FileBackedTask & PayloadDownloadingTask 
 public extension ServerTask {
 	var fileCachedData: Data? {
 		get {
-			guard let fileProvider = self as? FileBackedTask else { return nil }
+			guard let fileProvider = self.wrappedTask as? FileBackedTask else { return nil }
 			guard let file = fileProvider.fileURL else { return nil }
 			
 			return try? Data(contentsOf: file)
 		}
 		
 		nonmutating set {
-			guard let fileProvider = self as? FileBackedTask else { return }
+			guard let fileProvider = self.wrappedTask as? FileBackedTask else { return }
 			guard let file = fileProvider.fileURL else { return }
 			
 			if let data = newValue {

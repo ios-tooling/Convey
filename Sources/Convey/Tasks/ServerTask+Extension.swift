@@ -10,12 +10,12 @@ import Foundation
 public extension ServerTask {
 	var server: ConveyServer { ConveyServer.serverInstance ?? ConveyServer.setupDefault() }
 
-	func postProcess(response: ServerReturned) async throws { }
+	func postProcess(response: ServerResponse) async throws { }
 	var path: String { "" }
 
 	var url: URL {
-		let nonParameterized = (self as? CustomURLTask)?.customURL ?? server.url(forTask: self)
-		if let parameters = (self as? ParameterizedTask)?.parameters, !parameters.isEmpty {
+		let nonParameterized = (self.wrappedTask as? CustomURLTask)?.customURL ?? server.url(forTask: self)
+		if let parameters = (self.wrappedTask as? ParameterizedTask)?.parameters, !parameters.isEmpty {
 			var components = URLComponents(url: nonParameterized, resolvingAgainstBaseURL: true)
 			
 			if let params = parameters as? [String: String] {
@@ -72,7 +72,7 @@ public extension PayloadUploadingTask {
 	var contentType: String? { "application/json" }
 	var dataToUpload: Data? {
 		guard let payload = uploadPayload else { return nil }
-		let encoder = (self as? CustomJSONEncoderTask)?.jsonEncoder ?? server.defaultEncoder
+		let encoder = (self.wrappedTask as? CustomJSONEncoderTask)?.jsonEncoder ?? server.defaultEncoder
 		
 		do {
 			return try encoder.encode(payload)
