@@ -1,5 +1,5 @@
 //
-//  LocalElementCache.swift
+//  DownloadedArrayCache.swift
 //
 //
 //  Created by Ben Gottlieb on 5/2/24.
@@ -8,24 +8,21 @@
 import Foundation
 import Combine
 
-#if canImport(UIKit)
-	import UIKit
-#endif
-
 /// This cache is linked to an individual codable type, and is pre-loaded with a refreshing closure. It can automatically refresh in response to certain system events (app launch, resume, etc)
 
 @available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
-public actor CodableElementCache<DownloadedElement: CacheableElement>: CodableElementCacheProtocol {
-	let _items: CurrentValueSubject<[DownloadedElement], Never> = .init([])
-	public nonisolated var items: [DownloadedElement] { _items.value }
+public actor DownloadedArrayCache<DownloadedElement: CacheableElement>: DownloadedArrayCacheProtocol {
+	let _items: CurrentValueSubject<[DownloadedElement]?, Never> = .init([])
+	public nonisolated var content: [DownloadedElement]? { _items.value }
 	public private(set) var cacheName: String?
 	public var fileWatcher: FileWatcher?
 	var redirect: TaskRedirect?
+	public nonisolated var items: [DownloadedElement] { content ?? [] }
 
-	var updateClosure: (() async throws -> [DownloadedElement])?
+	var updateClosure: UpdateClosure?
 	var notificationObservers: [Any] = []
 
-	init<Downloader: PayloadDownloadingTask>(downloader: Downloader, cacheName: String? = String(describing: DownloadedElement.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
+	init<Downloader: PayloadDownloadingTask>(downloader: Downloader, cacheName: String? = String(describing: DownloadedItem.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
 	
 		if let redirect, let other = downloader.wrappedRedirect, redirect != other {
 			print("Redirect mismatch for \(downloader): \(redirect) != \(other)")
@@ -33,7 +30,7 @@ public actor CodableElementCache<DownloadedElement: CacheableElement>: CodableEl
 		self.init(cacheName: cacheName, redirect: redirect, refresh: refresh, update: Self.buildRefreshClosure(for: downloader))
 	}
 	
-	static func buildRefreshClosure<Downloader: PayloadDownloadingTask>(for downloader: Downloader, redirects: TaskRedirect? = nil) -> (() async throws -> [DownloadedElement]) where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
+	static func buildRefreshClosure<Downloader: PayloadDownloadingTask>(for downloader: Downloader, redirects: TaskRedirect? = nil) -> UpdateClosure where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
 		
 		{
 		  try await downloader
@@ -47,25 +44,15 @@ public actor CodableElementCache<DownloadedElement: CacheableElement>: CodableEl
 		updateClosure = Self.buildRefreshClosure(for: downloader, redirects: redirects)
 	}
 	
-	init(cacheName: String? = String(describing: DownloadedElement.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> [DownloadedElement])? = nil) {
+	init(cacheName: String? = String(describing: DownloadedItem.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: UpdateClosure? = nil) {
 		self.cacheName = cacheName
 		self.updateClosure = update
 		self.redirect = redirect
-		Task {
-			await setupRedirect(redirect)
-			await loadFromCache()
-			if refresh.contains(.atStartup) { try? await self.refresh() }
-			#if os(iOS)
-				if refresh.contains(.atResume) { await self.refresh(on: UIApplication.didBecomeActiveNotification) }
-			#endif
-
-			if refresh.contains(.atSignIn) { self.refresh(on: .conveyDidSignInNotification) }
-			if refresh.contains(.atSignOut) { self.refresh(on: .conveyDidSignOutNotification) }
-		}
+		updateRefreshment(redirect: redirect, refresh: refresh)
 	}
 
 	public func refresh<NewDownloader: PayloadDownloadingTask>(from task: NewDownloader) async throws where NewDownloader.DownloadPayload: WrappedDownloadArray, NewDownloader.DownloadPayload.Element == DownloadedElement {
-		load(items: try await task.downloadArray())
+		load(try await task.downloadArray())
 		try saveToCache()
 	}
 	
@@ -74,21 +61,16 @@ public actor CodableElementCache<DownloadedElement: CacheableElement>: CodableEl
 		Task { try? await saveToCache() }
 	}
 	
-	public func load(items newItems: [DownloadedElement]) {
+	public func load(_ newItems: [DownloadedElement]?) {
 		if _items.value != newItems {
 			_items.send(newItems)
 			Task { @MainActor in self.objectWillChange.send() }
 		}
 	}
-	
-	func addObserver(_ observer: Any) { notificationObservers.append(observer) }
-	nonisolated func refresh(on name: Notification.Name) {
-		Task { await addObserver(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main, using: { note in self.nonisolatedRefresh(note) })) }
-	}
-	
+
 	public func refresh() async throws {
 		guard let updateClosure else { return }
-		load(items: try await updateClosure())
+		load(try await updateClosure())
 		try saveToCache()
 	}
 	
