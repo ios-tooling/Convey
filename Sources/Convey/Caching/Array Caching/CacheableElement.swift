@@ -12,7 +12,7 @@ public typealias CacheableElement = Codable & Equatable & Sendable
 
 @available(iOS 16, macOS 13, watchOS 9, *)
 public extension Decodable where Self: CacheableElement {
-	static var downloadedCache: CodableArrayCache<Self> { DownloadedElementCacheManager.instance.fetchCache() }
-	static func downloadedCache(redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> [Self])? = nil) -> CodableArrayCache<Self> { DownloadedElementCacheManager.instance.fetchCache(redirect: redirect, refresh: refresh, update: update) }
-	static func downloadedCache<Downloader: PayloadDownloadingTask>(_ downloader: Downloader, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> CodableArrayCache<Self> where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == Self { DownloadedElementCacheManager.instance.fetchCache(downloader, redirect: redirect, refresh: refresh) }
+	static var downloadedCache: CodableElementCache<Self> { DownloadedElementCacheManager.instance.fetchCache() }
+	static func downloadedCache(redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> [Self])? = nil) -> CodableElementCache<Self> { DownloadedElementCacheManager.instance.fetchCache(redirect: redirect, refresh: refresh, update: update) }
+	static func downloadedCache<Downloader: PayloadDownloadingTask>(_ downloader: Downloader, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> CodableElementCache<Self> where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == Self { DownloadedElementCacheManager.instance.fetchCache(downloader, redirect: redirect, refresh: refresh) }
 }

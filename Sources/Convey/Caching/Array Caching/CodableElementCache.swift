@@ -12,22 +12,10 @@ import Combine
 	import UIKit
 #endif
 
-struct PlaceholderTask<DownloadedElement: CacheableElement>: PayloadDownloadingTask {
-	typealias DownloadPayload = NonfunctionalWrapper
-
-	var path: String { "" }
-	struct NonfunctionalWrapper: WrappedDownloadArray {
-		typealias Element = DownloadedElement
-		
-		static var wrappedKeypath: KeyPath<Self, [DownloadedElement]> { \.wrapped }
-		var wrapped: [DownloadedElement]
-	}
-}
-
 /// This cache is linked to an individual codable type, and is pre-loaded with a refreshing closure. It can automatically refresh in response to certain system events (app launch, resume, etc)
 
 @available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
-public actor CodableArrayCache<DownloadedElement: CacheableElement>: DownloadedElementCache {
+public actor CodableElementCache<DownloadedElement: CacheableElement>: CodableElementCacheProtocol {
 	let _items: CurrentValueSubject<[DownloadedElement], Never> = .init([])
 	public nonisolated var items: [DownloadedElement] { _items.value }
 	public private(set) var cacheName: String?

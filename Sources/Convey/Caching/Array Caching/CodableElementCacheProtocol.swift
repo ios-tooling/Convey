@@ -1,5 +1,5 @@
 //
-//  DownloadedElementCache.swift
+//  CodableElementCacheProtocol.swift
 //  ConveyTest
 //
 //  Created by Ben Gottlieb on 4/28/24.
@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-public protocol DownloadedElementCache<DownloadedElement>: Actor, ObservableObject {
+protocol CodableElementCacheProtocol<DownloadedElement>: Actor, ObservableObject {
 	associatedtype DownloadedElement: CacheableElement
 	
 	func load(items newItems: [DownloadedElement])
@@ -22,7 +22,7 @@ public protocol DownloadedElementCache<DownloadedElement>: Actor, ObservableObje
 	var fileWatcher: FileWatcher? { get set }
 }
 
-public extension DownloadedElementCache {
+extension CodableElementCacheProtocol {
 	var cacheName: String? { String(describing: DownloadedElement.self) + "_cache.json" }
 	
 	func setupRedirect(_ redirect: TaskRedirect?) {

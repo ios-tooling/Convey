@@ -12,25 +12,25 @@ import Combine
 public class DownloadedElementCacheManager {
 	public static let instance = DownloadedElementCacheManager()
 	
-	var caches: [String: any DownloadedElementCache] = [:]
+	var caches: [String: any CodableElementCacheProtocol] = [:]
 	
-	func fetchCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableElement>(_ downloader: Downloader, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> CodableArrayCache<DownloadedElement> where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
-		if let cache = caches[DownloadedElement.cacheKey] as? CodableArrayCache<DownloadedElement> {
+	func fetchCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableElement>(_ downloader: Downloader, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> CodableElementCache<DownloadedElement> where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
+		if let cache = caches[DownloadedElement.cacheKey] as? CodableElementCache<DownloadedElement> {
 			Task { await cache.updateRefreshClosure(for: downloader, redirects: redirect) }
 			return cache
 		}
 		
-		let cache = CodableArrayCache(downloader: downloader, redirect: redirect, refresh: refresh)
+		let cache = CodableElementCache(downloader: downloader, redirect: redirect, refresh: refresh)
 		caches[DownloadedElement.cacheKey] = cache
 		return cache
 	}
 	
-	func fetchCache<DownloadedElement: CacheableElement>(redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> [DownloadedElement])? = nil) -> (CodableArrayCache<DownloadedElement>) {
-		if let cache = caches[DownloadedElement.cacheKey] as? CodableArrayCache<DownloadedElement> {
+	func fetchCache<DownloadedElement: CacheableElement>(redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> [DownloadedElement])? = nil) -> (CodableElementCache<DownloadedElement>) {
+		if let cache = caches[DownloadedElement.cacheKey] as? CodableElementCache<DownloadedElement> {
 			return cache
 		}
 		
-		let cache = CodableArrayCache(redirect: redirect, refresh: refresh, update: update)
+		let cache = CodableElementCache(redirect: redirect, refresh: refresh, update: update)
 		caches[DownloadedElement.cacheKey] = cache
 		return cache
 	}
