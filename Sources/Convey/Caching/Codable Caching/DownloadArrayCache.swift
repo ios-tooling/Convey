@@ -1,5 +1,5 @@
 //
-//  DownloadedArrayCache.swift
+//  DownloadArrayCache.swift
 //
 //
 //  Created by Ben Gottlieb on 5/2/24.
@@ -11,7 +11,7 @@ import Combine
 /// This cache is linked to an individual codable type, and is pre-loaded with a refreshing closure. It can automatically refresh in response to certain system events (app launch, resume, etc)
 
 @available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
-public actor DownloadedArrayCache<DownloadedElement: CacheableContent>: DownloadedArrayCacheProtocol {
+public actor DownloadArrayCache<DownloadedElement: CacheableContent>: DownloadedArrayCacheProtocol {
 	public typealias UpdateClosure = (() async throws -> [DownloadedElement]?)
 
 	let _items: CurrentValueSubject<[DownloadedElement]?, Never> = .init([])

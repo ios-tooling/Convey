@@ -1,5 +1,5 @@
 //
-//  DownloadedCache.swift
+//  DownloadCache.swift
 //
 //
 //  Created by Ben Gottlieb on 5/3/24.
@@ -13,7 +13,7 @@ import Combine
 #endif
 
 @available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
-public actor DownloadedCache<DownloadedContent: CacheableContent>: DownloadedCacheProtocol {
+public actor DownloadCache<DownloadedContent: CacheableContent>: DownloadedCacheProtocol {
 	public typealias UpdateClosure = (() async throws -> DownloadedContent?)
 
 	let _item: CurrentValueSubject<DownloadedContent?, Never> = .init(nil)
