@@ -38,7 +38,7 @@ public actor DownloadCache<DownloadedContent: CacheableContent>: DownloadedCache
 		if let redirect, let other = downloader.wrappedRedirect, redirect != other {
 			print("Redirect mismatch for \(downloader): \(redirect) != \(other)")
 		}
-		self.init(cacheName: cacheName, redirect: redirect, refresh: refresh, update: Self.buildRefreshClosure(for: downloader))
+		self.init(cacheName: cacheName, redirect: redirect ?? downloader.wrappedRedirect, refresh: refresh, update: Self.buildRefreshClosure(for: downloader))
 	}
 	
 	static func buildRefreshClosure<Downloader: PayloadDownloadingTask>(for downloader: Downloader, redirects: TaskRedirect? = nil) -> UpdateClosure where Downloader.DownloadPayload == DownloadedContent {
