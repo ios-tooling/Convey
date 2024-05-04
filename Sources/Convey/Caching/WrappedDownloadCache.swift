@@ -11,7 +11,7 @@ import Combine
 @available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
 public actor WrappedDownloadArrayCache<Downloader: PayloadDownloadingTask>: ObservableObject where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element: Equatable {
 	let _items: CurrentValueSubject<[Downloader.DownloadPayload.Element], Never> = .init([])
-	public nonisolated var items: [Downloader.DownloadPayload.Element] { _items.value }
+	public nonisolated var content: [Downloader.DownloadPayload.Element] { _items.value }
 
 	var updateTask: Downloader
 	var redirect: TaskRedirect?
@@ -26,7 +26,7 @@ public actor WrappedDownloadArrayCache<Downloader: PayloadDownloadingTask>: Obse
 	}
 	
 	public func load<NewDownloader: PayloadDownloadingTask>(from task: NewDownloader) async throws where NewDownloader.DownloadPayload: WrappedDownloadArray, NewDownloader.DownloadPayload.Element == Downloader.DownloadPayload.Element {
-		load(items: try await task.downloadArray())
+		load(items: try await task.downloadArray() ?? [])
 	}
 	
 	public func load(items newItems: [Downloader.DownloadPayload.Element]) {
@@ -40,6 +40,6 @@ public actor WrappedDownloadArrayCache<Downloader: PayloadDownloadingTask>: Obse
 		let task = updateTask
 			.redirects(redirect)
 		
-		load(items: try await task.downloadArray())
+		load(items: try await task.downloadArray() ?? [])
 	}
 }
