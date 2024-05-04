@@ -19,7 +19,7 @@ public extension WrappedDownloadItem {
 	var wrapped: WrappedItem? { self[keyPath: Self.wrappedKeypath] }
 }
 
-public protocol WrappedDownloadArray<Element, WrappedItem>: WrappedDownloadItem where WrappedItem == [Element], Element: Decodable {
+public protocol WrappedDownloadArray<Element, WrappedItem>: WrappedDownloadItem where WrappedItem == [Element], Element: CacheableContent {
 	associatedtype Element: Decodable & Sendable
 }
 

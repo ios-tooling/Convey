@@ -23,7 +23,7 @@ public protocol DownloadedCacheProtocol<DownloadedItem>: Actor, ObservableObject
 	nonisolated func setup()
 	
 	nonisolated var content: DownloadedItem? { get }
-	var cacheName: String? { get }
+	var cacheName: String { get }
 	var redirect: TaskRedirect? { get set }
 	var fileWatcher: FileWatcher? { get set }
 	var notificationObservers: [Any] { get set }
@@ -37,7 +37,7 @@ protocol DownloadedArrayCacheProtocol<DownloadedElement>: DownloadedCacheProtoco
 }
 
 public extension DownloadedCacheProtocol {
-	var cacheName: String? { String(describing: DownloadedItem.self) + "_cache.json" }
+	var cacheName: String { String(describing: DownloadedItem.self) + "_cache" }
 	
 	func setupRedirect(_ redirect: TaskRedirect?) {
 		guard let redirect else { return }
@@ -91,16 +91,21 @@ public extension DownloadedCacheProtocol {
 	}
 
 	var cacheLocation: URL? {
-		guard let cacheName else { return nil }
-		return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent(cacheName)
+		return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent(cacheName).deletingPathExtension().appendingPathExtension(".json")
 	}
 	
 	func saveToCache() throws {
 		guard let cacheLocation else { return }
-		let data = try JSONEncoder().encode(content)
-		try? FileManager.default.removeItem(at: cacheLocation)
-		try data.write(to: cacheLocation, options: .atomic)
-		if fileWatcher == nil, let redirect { setupRedirect(redirect) }
+		if let content {
+			let data = try JSONEncoder().encode(content)
+			try? FileManager.default.removeItem(at: cacheLocation)
+			try data.write(to: cacheLocation, options: .atomic)
+			if fileWatcher == nil, let redirect { setupRedirect(redirect) }
+		} else {
+			try? FileManager.default.removeItem(at: cacheLocation)
+			fileWatcher?.finish()
+			fileWatcher = nil
+		}
 	}
 	
 	nonisolated func setup() { }

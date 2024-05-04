@@ -18,22 +18,22 @@ public actor DownloadCache<DownloadedContent: CacheableContent>: DownloadedCache
 
 	let _item: CurrentValueSubject<DownloadedContent?, Never> = .init(nil)
 	public nonisolated var content: DownloadedContent? { _item.value }
-	public private(set) var cacheName: String?
+	public private(set) var cacheName: String
 	public var fileWatcher: FileWatcher?
 	public var redirect: TaskRedirect?
 
 	public var updateClosure: UpdateClosure?
 	public var notificationObservers: [Any] = []
 
-	init<Downloader: PayloadDownloadingTask>(wrappedDownloader downloader: Downloader, cacheName: String? = String(describing: DownloadedItem.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) where Downloader.DownloadPayload: WrappedDownloadItem, Downloader.DownloadPayload.WrappedItem == DownloadedContent {
+	init<Downloader: PayloadDownloadingTask>(wrappedDownloader downloader: Downloader, cacheName: String? = nil, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) where Downloader.DownloadPayload: WrappedDownloadItem, Downloader.DownloadPayload.WrappedItem == DownloadedContent {
 	
 		if let redirect, let other = downloader.wrappedRedirect, redirect != other {
 			print("Redirect mismatch for \(downloader): \(redirect) != \(other)")
 		}
-		self.init(cacheName: cacheName, redirect: redirect, refresh: refresh, update: Self.buildRefreshClosure(for: downloader, redirects: redirect))
+		self.init(cacheName: cacheName, redirect: redirect ?? downloader.wrappedRedirect, refresh: refresh, update: Self.buildRefreshClosure(for: downloader, redirects: redirect))
 	}
 
-	init<Downloader: PayloadDownloadingTask>(downloader: Downloader, cacheName: String? = String(describing: DownloadedContent.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) where Downloader.DownloadPayload == DownloadedContent {
+	init<Downloader: PayloadDownloadingTask>(downloader: Downloader, cacheName: String? = nil, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) where Downloader.DownloadPayload == DownloadedContent {
 	
 		if let redirect, let other = downloader.wrappedRedirect, redirect != other {
 			print("Redirect mismatch for \(downloader): \(redirect) != \(other)")
@@ -69,8 +69,8 @@ public actor DownloadCache<DownloadedContent: CacheableContent>: DownloadedCache
 		updateClosure = Self.buildRefreshClosure(for: downloader, redirects: redirects)
 	}
 	
-	init(cacheName: String? = String(describing: DownloadedContent.self) + "_cache.json", redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: UpdateClosure? = nil) {
-		self.cacheName = cacheName
+	init(cacheName: String? = nil, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: UpdateClosure? = nil) {
+		self.cacheName = cacheName ?? String(describing: DownloadedContent.self) + "_cache"
 		self.updateClosure = update
 		self.redirect = redirect
 		updateRefreshment(redirect: redirect, refresh: refresh)
