@@ -35,6 +35,17 @@ public class DownloadedCacheManager {
 		return cache
 	}
 	
+	func fetchCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableContent>(_ downloader: Downloader, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> DownloadedCache<DownloadedElement> where Downloader.DownloadPayload: WrappedDownloadItem, Downloader.DownloadPayload.WrappedItem == DownloadedElement {
+		if let cache = caches[DownloadedElement.cacheKey] as? DownloadedCache<DownloadedElement> {
+			Task { await cache.updateRefreshClosure(for: downloader, redirects: redirect) }
+			return cache
+		}
+		
+		let cache = DownloadedCache(wrappedDownloader: downloader, redirect: redirect, refresh: refresh)
+		caches[DownloadedElement.cacheKey] = cache
+		return cache
+	}
+	
 	func fetchArrayCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableContent>(_ downloader: Downloader, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> DownloadedArrayCache<DownloadedElement> where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
 		if let cache = caches[DownloadedElement.cacheKey] as? DownloadedArrayCache<DownloadedElement> {
 			Task { await cache.updateRefreshClosure(for: downloader, redirects: redirect) }

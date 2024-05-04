@@ -98,6 +98,7 @@ public extension DownloadedCacheProtocol {
 	func saveToCache() throws {
 		guard let cacheLocation else { return }
 		let data = try JSONEncoder().encode(content)
+		try? FileManager.default.removeItem(at: cacheLocation)
 		try data.write(to: cacheLocation, options: .atomic)
 		if fileWatcher == nil, let redirect { setupRedirect(redirect) }
 	}

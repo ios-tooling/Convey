@@ -12,6 +12,8 @@ import Combine
 
 @available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
 public actor DownloadedArrayCache<DownloadedElement: CacheableContent>: DownloadedArrayCacheProtocol {
+	public typealias UpdateClosure = (() async throws -> [DownloadedElement]?)
+
 	let _items: CurrentValueSubject<[DownloadedElement]?, Never> = .init([])
 	public nonisolated var content: [DownloadedElement]? { _items.value }
 	public private(set) var cacheName: String?

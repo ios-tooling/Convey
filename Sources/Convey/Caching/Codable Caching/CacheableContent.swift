@@ -17,6 +17,10 @@ public extension Decodable where Self: CacheableContent {
 	static func downloadedCache(redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> Self?)? = nil) -> DownloadedCache<Self> { DownloadedCacheManager.instance.fetchCache(redirect: redirect, refresh: refresh, update: update) }
 
 	static func downloadedCache<Downloader: PayloadDownloadingTask>(_ downloader: Downloader, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> DownloadedCache<Self> where Downloader.DownloadPayload == Self { DownloadedCacheManager.instance.fetchCache(downloader, redirect: redirect, refresh: refresh) }
+	
+	static func downloadedCache<Downloader: PayloadDownloadingTask>(_ downloader: Downloader, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> DownloadedCache<Self> where Downloader.DownloadPayload: WrappedDownloadItem, Downloader.DownloadPayload.WrappedItem == Self { DownloadedCacheManager.instance.fetchCache(downloader, redirect: redirect, refresh: refresh) }
+	
+	
 
 	static func downloadedArrayCache(redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> [Self]?)? = nil) -> DownloadedArrayCache<Self> { DownloadedCacheManager.instance.fetchArrayCache(redirect: redirect, refresh: refresh, update: update) }
 
