@@ -19,7 +19,7 @@ public extension PayloadDownloadingTask where DownloadPayload: CacheableContent 
 }
 
 @available(iOS 16, macOS 13, watchOS 9, *)
-public extension PayloadDownloadingTask where DownloadPayload: WrappedDownloadArray {
+public extension PayloadDownloadingTask where DownloadPayload: WrappedDownloadArray & Encodable, DownloadPayload.Element: CacheableContent {
 	static var downloadedArrayCache: DownloadArrayCache<DownloadPayload.Element> { DownloadedCacheManager.instance.fetchArrayCache() }
 	
 	var downloadedArrayCache: DownloadArrayCache<DownloadPayload.Element> { DownloadedCacheManager.instance.fetchArrayCache(self) }

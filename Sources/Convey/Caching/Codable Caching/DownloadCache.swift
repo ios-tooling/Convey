@@ -25,7 +25,7 @@ public actor DownloadCache<DownloadedContent: CacheableContent>: DownloadedCache
 	public var updateClosure: UpdateClosure?
 	public var notificationObservers: [Any] = []
 
-	init<Downloader: PayloadDownloadingTask>(wrappedDownloader downloader: Downloader, cacheName: String? = nil, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) where Downloader.DownloadPayload: WrappedDownloadItem, Downloader.DownloadPayload.WrappedItem == DownloadedContent {
+	init<Downloader: PayloadDownloadingTask>(wrappedDownloader downloader: Downloader, cacheName: String? = nil, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) where Downloader.DownloadPayload: CacheableContainer, Downloader.DownloadPayload.ContainedContent == DownloadedContent {
 	
 		if let redirect, let other = downloader.wrappedRedirect, redirect != other {
 			print("Redirect mismatch for \(downloader): \(redirect) != \(other)")
@@ -50,7 +50,7 @@ public actor DownloadCache<DownloadedContent: CacheableContent>: DownloadedCache
 	  }
 	}
 	
-	static func buildRefreshClosure<Downloader: PayloadDownloadingTask>(for downloader: Downloader, redirects: TaskRedirect? = nil) -> UpdateClosure where Downloader.DownloadPayload: WrappedDownloadItem, Downloader.DownloadPayload.WrappedItem == DownloadedContent {
+	static func buildRefreshClosure<Downloader: PayloadDownloadingTask>(for downloader: Downloader, redirects: TaskRedirect? = nil) -> UpdateClosure where Downloader.DownloadPayload: CacheableContainer, Downloader.DownloadPayload.ContainedContent == DownloadedContent {
 		
 		{
 		  try await downloader
@@ -64,7 +64,7 @@ public actor DownloadCache<DownloadedContent: CacheableContent>: DownloadedCache
 		updateClosure = Self.buildRefreshClosure(for: downloader, redirects: redirects)
 	}
 	
-	func updateRefreshClosure<Downloader: PayloadDownloadingTask>(for downloader: Downloader, redirects: TaskRedirect? = nil) where Downloader.DownloadPayload: WrappedDownloadItem, Downloader.DownloadPayload.WrappedItem == DownloadedContent {
+	func updateRefreshClosure<Downloader: PayloadDownloadingTask>(for downloader: Downloader, redirects: TaskRedirect? = nil) where Downloader.DownloadPayload: CacheableContainer, Downloader.DownloadPayload.ContainedContent == DownloadedContent {
 		
 		updateClosure = Self.buildRefreshClosure(for: downloader, redirects: redirects)
 	}

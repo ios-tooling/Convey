@@ -17,7 +17,11 @@ public class DownloadedCacheManager {
 	func fetchCache<DownloadedElement: CacheableContent>(name: String? = nil, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> DownloadedElement?)? = nil) -> (DownloadCache<DownloadedElement>) {
 		
 		let key = name ?? DownloadedElement.cacheKey
-		if let cache = caches[key] as? DownloadCache<DownloadedElement> {
+		if let cache = caches[key] {
+			guard let cache = cache as? DownloadCache<DownloadedElement> else {
+				fatalError("Cache mismatch type: expected \(String(describing: DownloadArrayCache<DownloadedElement>.self)), got \(cache).")
+			}
+			
 			return cache
 		}
 		
@@ -28,7 +32,11 @@ public class DownloadedCacheManager {
 
 	func fetchCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableContent>(_ downloader: Downloader, name: String? = nil, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> DownloadCache<DownloadedElement> where Downloader.DownloadPayload == DownloadedElement {
 		let key = name ?? DownloadedElement.cacheKey
-		if let cache = caches[key] as? DownloadCache<DownloadedElement> {
+		if let cache = caches[key] {
+			guard let cache = cache as? DownloadCache<DownloadedElement> else {
+				fatalError("Cache mismatch type: expected \(String(describing: DownloadArrayCache<DownloadedElement>.self)), got \(cache).")
+			}
+
 			Task { await cache.updateRefreshClosure(for: downloader, redirects: redirect) }
 			return cache
 		}
@@ -38,9 +46,12 @@ public class DownloadedCacheManager {
 		return cache
 	}
 	
-	func fetchCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableContent>(_ downloader: Downloader, name: String? = nil, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> DownloadCache<DownloadedElement> where Downloader.DownloadPayload: WrappedDownloadItem, Downloader.DownloadPayload.WrappedItem == DownloadedElement {
+	func fetchCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableContent>(_ downloader: Downloader, name: String? = nil, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> DownloadCache<DownloadedElement> where Downloader.DownloadPayload: CacheableContainer, Downloader.DownloadPayload.ContainedContent == DownloadedElement {
 		let key = name ?? DownloadedElement.cacheKey
-		if let cache = caches[key] as? DownloadCache<DownloadedElement> {
+		if let cache = caches[key] {
+			guard let cache = cache as? DownloadCache<DownloadedElement> else {
+				fatalError("Cache mismatch type: expected \(String(describing: DownloadCache<DownloadedElement>.self)), got \(cache).")
+			}
 			Task { await cache.updateRefreshClosure(for: downloader, redirects: redirect) }
 			return cache
 		}
@@ -52,7 +63,11 @@ public class DownloadedCacheManager {
 	
 	func fetchArrayCache<Downloader: PayloadDownloadingTask, DownloadedElement: CacheableContent>(_ downloader: Downloader, name: String? = nil, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup) -> DownloadArrayCache<DownloadedElement> where Downloader.DownloadPayload: WrappedDownloadArray, Downloader.DownloadPayload.Element == DownloadedElement {
 		let key = name ?? DownloadedElement.cacheKey
-		if let cache = caches[key] as? DownloadArrayCache<DownloadedElement> {
+		if let cache = caches[key] {
+			guard let cache = cache as? DownloadArrayCache<DownloadedElement> else {
+				fatalError("Cache mismatch type: expected \(String(describing: DownloadArrayCache<DownloadedElement>.self)), got \(cache).")
+			}
+
 			Task { await cache.updateRefreshClosure(for: downloader, redirects: redirect) }
 			return cache
 		}
@@ -64,7 +79,11 @@ public class DownloadedCacheManager {
 	
 	func fetchArrayCache<DownloadedElement: CacheableContent>(name: String? = nil, redirect: TaskRedirect? = nil, refresh: CacheRefreshTiming = .atStartup, update: (() async throws -> [DownloadedElement]?)? = nil) -> (DownloadArrayCache<DownloadedElement>) {
 		let key = name ?? DownloadedElement.cacheKey
-		if let cache = caches[key] as? DownloadArrayCache<DownloadedElement> {
+		if let cache = caches[key] {
+			guard let cache = cache as? DownloadArrayCache<DownloadedElement> else {
+				fatalError("Cache mismatch type: expected \(String(describing: DownloadArrayCache<DownloadedElement>.self)), got \(cache).")
+			}
+
 			return cache
 		}
 		
