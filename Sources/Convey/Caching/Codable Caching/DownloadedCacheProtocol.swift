@@ -91,7 +91,7 @@ public extension DownloadedCacheProtocol {
 	}
 
 	var cacheLocation: URL? {
-		return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent(cacheName).deletingPathExtension().appendingPathExtension(".json")
+		return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent(cacheName).deletingPathExtension().appendingPathExtension("json")
 	}
 	
 	func saveToCache() throws {
