@@ -11,6 +11,7 @@ import SwiftUI
 import Cocoa
 #endif
 
+#if os(iOS) || os(macOS) || os(visionOS)
 @available(iOS 16, macOS 13.0, *)
 @MainActor public struct ConveyConsoleView: View {
 	@State var availableTasks: [any ConsoleDisplayableTask] = []
@@ -92,3 +93,4 @@ import Cocoa
 		)
 	}
 }
+#endif

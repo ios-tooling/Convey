@@ -68,7 +68,7 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 			try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
 			print("Recording tasks to \(url.path)")
 		} else {
-			if #available(iOS 16.0, macOS 13.0, *) {
+			if #available(iOS 16.0, macOS 13.0, watchOS 9, *) {
 				let name = Date.now.filename
 				taskPathURL = URL.documentsDirectory.appendingPathComponent(name)
 				try? FileManager.default.createDirectory(at: taskPathURL!, withIntermediateDirectories: true)
@@ -146,7 +146,7 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	public init(asDefault: Bool = true) {
 		super.init()
 		taskManager = .init(for: self)
-		if #available(iOS 16.0, macOS 13, *) {
+		if #available(iOS 16.0, macOS 13, watchOS 9, *) {
 			archiveURL = URL.libraryDirectory.appendingPathComponent("archived-downloads")
 			try? FileManager.default.createDirectory(at: archiveURL!, withIntermediateDirectories: true)
 		}
