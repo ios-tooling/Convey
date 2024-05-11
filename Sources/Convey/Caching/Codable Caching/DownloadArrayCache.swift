@@ -77,7 +77,6 @@ public actor DownloadArrayCache<DownloadedElement: CacheableContent>: Downloaded
 	}
 	
 	public nonisolated func nonisolatedRefresh(_ note: Notification) {
-		print("Received \(note)")
 		if note.name == .conveyDidSignOutNotification {
 			clear()
 		} else {
