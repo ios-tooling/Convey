@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-/// This cache is linked to an individual codable type, and is pre-loaded with a refreshing closure. It can automatically refresh in response to certain system events (app launch, resume, etc)
+/// This cache is linked to an individual codable type, and is pre-loaded with a reloading closure. It can automatically refresh in response to certain system events (app launch, resume, etc)
 
 @available(iOS 13, macOS 13, watchOS 8, visionOS 1, *)
 public actor DownloadArrayCache<DownloadedElement: CacheableContent>: DownloadedArrayCacheProtocol {
@@ -70,9 +70,9 @@ public actor DownloadArrayCache<DownloadedElement: CacheableContent>: Downloaded
 		}
 	}
 
-	public func refresh() async throws {
-		guard let updateClosure else { return }
-		load(try await updateClosure())
+	public func refresh(closure: (@Sendable () async throws -> [DownloadedElement]?)? = nil) async throws {
+		guard let refresh = closure ?? updateClosure else { return }
+		load(try await refresh())
 		try saveToCache()
 	}
 	

@@ -17,7 +17,7 @@ public protocol DownloadedCacheProtocol<DownloadedItem>: Actor, ObservableObject
 	typealias UpdateClosure = (() async throws -> DownloadedItem?)
 
 	func load(_ new: DownloadedItem?)
-	func refresh() async throws
+	func refresh(closure: (@Sendable () async throws -> DownloadedItem?)?) async throws
 
 	nonisolated func clear()
 	nonisolated func setup()
@@ -70,9 +70,9 @@ public extension DownloadedCacheProtocol {
 		Task { await addObserver(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main, using: { note in self.nonisolatedRefresh(note) })) }
 	}
 	
-	func refresh() async throws {
-		guard let updateClosure else { return }
-		load(try await updateClosure())
+	func refresh(closure: (@Sendable () async throws -> DownloadedItem?)? = nil) async throws {
+		guard let update = closure ?? updateClosure else { return }
+		load(try await update())
 		try saveToCache()
 	}
 	
