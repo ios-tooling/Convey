@@ -115,7 +115,19 @@ public enum HTTPError: Error, LocalizedError, Sendable {
       }
    }
    
-   func prettyString(_ title: String, _ url: URL?, _ code: Int, _ data: Data?) -> String {
+	public var url: URL? {
+		switch self {
+		case .requestFailed(let url, _, _): url
+		case .redirectError(let url, _, _): url
+		case .serverError(let url, _, _): url
+		case .unknownError(let url, _, _): url
+		case .networkError(let url, _): url
+		case .decodingError(let url, _): url
+		default: nil
+		}
+	}
+	
+   public func prettyString(_ title: String, _ url: URL?, _ code: Int, _ data: Data?) -> String {
       let prefix = url == nil ? "" : "\(url.absoluteString()): "
       if let data = data, let string = String(data: data, encoding: .utf8), !string.isEmpty {
          return "\(prefix)\(title) (\(code)): \(string)"

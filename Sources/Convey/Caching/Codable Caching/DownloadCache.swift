@@ -78,6 +78,7 @@ public actor DownloadCache<DownloadedContent: CacheableContent>: DownloadedCache
 	
 	public nonisolated func clear() {
 		_item.value = nil
+		objectWillChange.send()
 		Task { try? await saveToCache() }
 	}
 	

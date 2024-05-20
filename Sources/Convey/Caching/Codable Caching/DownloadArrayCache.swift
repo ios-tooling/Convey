@@ -60,6 +60,7 @@ public actor DownloadArrayCache<DownloadedElement: CacheableContent>: Downloaded
 	
 	public nonisolated func clear() {
 		_items.value = []
+		objectWillChange.send()
 		Task { try? await saveToCache() }
 	}
 	
