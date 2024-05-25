@@ -11,11 +11,15 @@ import Combine
 public enum EchoStyle: String, Codable, Hashable, Sendable { case full, timing }
 
 extension ServerTask {
-	var abbreviatedDescription: String {
+	public var abbreviatedDescription: String {
+		abbreviatedDescription(length: 100)
+	}
+	
+	public func abbreviatedDescription(length: Int) -> String {
 		let desc = "\(wrappedTask)"
-		if desc.count < 100 { return desc }
+		if desc.count < length { return desc }
 		
-		return desc.prefix(45) + "…" + desc.suffix(45)
+		return desc.prefix(length / 2) + "…" + desc.suffix(length / 2 - 1)
 	}
 }
 
