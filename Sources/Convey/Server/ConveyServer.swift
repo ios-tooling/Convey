@@ -45,9 +45,9 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 		}
 	}
 
-	public private(set) var taskPathURL: URL?
+	public private(set) var taskPath: TaskPath?
 	
-	var shouldRecordTaskPath: Bool { taskPathURL != nil }
+	var shouldRecordTaskPath: Bool { taskPath != nil }
 	open var disabled = false { didSet {
 		if disabled { print("#### \(String(describing: self)) DISABLED #### ")}
 	}}
@@ -62,26 +62,18 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	public private(set) var pinnedServerKeys: [String: [String]] = [:]
 	
 	public func recordTaskPath(to url: URL? = nil) {
-		pathCount = 0
 		if let url {
-			taskPathURL = url
-			try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-			print("Recording tasks to \(url.path)")
+			taskPath = .init(url: url)
 		} else {
-			if #available(iOS 16.0, macOS 13.0, watchOS 9, *) {
-				let name = Date.now.filename
-				taskPathURL = URL.documentsDirectory.appendingPathComponent(name)
-				try? FileManager.default.createDirectory(at: taskPathURL!, withIntermediateDirectories: true)
-				print("Recording tasks to \(taskPathURL!.path)")
-			} else {
-				print("Please pass a valid URL to recordTaskPath(:)")
+			if #available(iOS 16.0, macOS 13, *) {
+				taskPath = .init()
 			}
 		}
 	}
 	
-	var pathCount = 0
 	public func endTaskPathRecording() {
-		self.taskPathURL = nil
+		self.taskPath?.stop()
+		self.taskPath = nil
 	}
 	
 	public func register(publicKey: String, for server: String) {

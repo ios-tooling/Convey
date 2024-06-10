@@ -159,16 +159,11 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 	}
 	
 	func dumpRecording(for task: ServerTask) async {
-		task.server.pathCount += 1
 		let tag = task.taskTag
 		guard let recording = recordings[tag] else { return }
 		
 		if await task.isEchoing { print(recording) }
-		if let pathURL = task.server.taskPathURL {
-			let filename = String(format: "%02d", task.server.pathCount) + ". " + task.filename
-			let url = pathURL.appendingPathComponent(filename)
-			try? recording.write(to: url, atomically: true, encoding: .utf8)
-		}
+		await server.taskPath?.save(task: task, with: recording)
 		recordings.removeValue(forKey: tag)
 	}
 	
