@@ -12,7 +12,7 @@ public actor TaskPath: ObservableObject {
 	let url: URL
 	var count = 0
 	
-	public struct TaskRecording: Identifiable, Comparable {
+	public struct TaskRecording: Identifiable, Comparable, Hashable {
 		public var id: URL { url }
 		public let url: URL
 		public let date: Date
@@ -79,10 +79,11 @@ public actor TaskPath: ObservableObject {
 		Task { @MainActor in self.objectWillChange.send() }
 	}
 	
-	func save(task: ServerTask, with recording: String) {
-		let filename = String(format: "%02d", count) + ". " + task.filename
+	func save(task: RecordedTask) {
+		guard let taskName = task.task?.filename else { return }
+		let filename = String(format: "%02d", count) + ". " + taskName
 		let url = url.appendingPathComponent(filename)
-		try? recording.write(to: url, atomically: true, encoding: .utf8)
+		try? task.output.write(to: url, atomically: true, encoding: .utf8)
 		count += 1
 		var urls = recordedURLs.value
 		urls.insert(TaskRecording(url: url, date: Date()), at: 0)
