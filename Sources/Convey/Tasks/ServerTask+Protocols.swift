@@ -76,6 +76,10 @@ public protocol CustomHTTPMethodTask: ServerTask {
 	var customHTTPMethod: String { get }
 }
 
+public protocol UnrecordedTask: ServerTask {
+	var exposedComponents: [ServerTaskComponent] { get }
+}
+
 public struct ConveyHeader: Codable, Hashable, CustomStringConvertible, Sendable {
 	public let name: String
 	public let value: String

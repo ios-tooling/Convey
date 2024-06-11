@@ -20,11 +20,24 @@ public struct TaskPathScreen: View {
 			VStack {
 				List {
 					ForEach(path.urls) { url in
-						VStack(alignment: .leading) {
-							Text(url.url.deletingPathExtension().lastPathComponent)
-							Text(url.date.formatted())
-								.font(.caption)
+						NavigationLink(value: url) {
+							VStack(alignment: .leading) {
+								Text(url.fileURL.deletingPathExtension().lastPathComponent)
+								if let url = url.url {
+									Text(url.absoluteString)
+										.font(.caption2)
+								}
+								Text(url.date.formatted())
+									.font(.caption)
+							}
 						}
+					}
+				}
+			}
+			.navigationDestination(for: TaskPath.TaskRecording.self) { recording in
+				if let text = try? String(contentsOf: recording.fileURL) {
+					ScrollView {
+						Text(text)
 					}
 				}
 			}

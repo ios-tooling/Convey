@@ -73,11 +73,13 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 				taskPath = .init()
 			}
 		}
+		objectWillChange.send()
 	}
 	
 	public func endTaskPathRecording() {
 		self.taskPath?.stop()
 		self.taskPath = nil
+		objectWillChange.send()
 	}
 	
 	public func register(publicKey: String, for server: String) {

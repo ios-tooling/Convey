@@ -46,7 +46,7 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 	public var storeResults = true
 	public var logStyle = LogStyle.none
 	let oneOffTypes: CurrentValueSubject<[String], Never> = .init([])
-	public var recordings: [String: String] = [:]
+	public var recordings: [String: RecordedTask] = [:]
 	unowned var server: ConveyServer
 	
 	public enum LogStyle: String, Comparable, CaseIterable, Sendable { case none, short, steps
@@ -150,20 +150,33 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 		}
 		saveTypes(insideTypes)
 	}
+
+	func record(startedAt: Date? = nil, completedAt: Date? = nil, request: URLRequest? = nil, response: Data? = nil, cachedResponse: Data? = nil, for task: ServerTask) {
+		let tag = task.taskTag
+		var current = recordings[tag] ?? .init(task: task)
+		
+		if let startedAt { current.startedAt = startedAt }
+		if let completedAt { current.completedAt = completedAt }
+		if let request { current.request = request }
+		if let response { current.download = response }
+		if let cachedResponse { current.cachedResponse = cachedResponse }
+		recordings[tag] = current
+	}
 	
 	func record(_ string: String, for task: ServerTask) {
 		let tag = task.taskTag
-		let current = recordings[tag] ?? ""
+		var current = recordings[tag] ?? .init(task: task)
 		
-		recordings[tag] = current + string
+		current.recording = current.recording + string
+		recordings[tag] = current
 	}
 	
 	func dumpRecording(for task: ServerTask) async {
 		let tag = task.taskTag
 		guard let recording = recordings[tag] else { return }
 		
-		if await task.isEchoing { print(recording) }
-		await server.taskPath?.save(task: task, with: recording)
+		if await task.isEchoing { recording.echo() }
+		await server.taskPath?.save(task: recording)
 		recordings.removeValue(forKey: tag)
 	}
 	
@@ -264,7 +277,7 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 		}
 
 		if echo || task.server.shouldRecordTaskPath{
-			self.record("\(type(of: task.wrappedTask)): \(request)\n", for: task)
+			self.record(startedAt: date, request: request, for: task)
 		}
 		self.updateSort()
 		if self.multitargetLogging { self.saveTypes() }
@@ -293,9 +306,9 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 			let log = task.loggingOutput(startedAt: startedAt, request: request, data: bytes, response: response)
 			
 			if usingCache {
-				self.record("\(type(of: task.wrappedTask)): used cached response", for: task)
+				self.record(completedAt: Date(), cachedResponse: bytes, for: task)
 			} else {
-				self.record("\(type(of: task.wrappedTask)) Response ======================\n \(String(data: log, encoding: .utf8) ?? String(data: log, encoding: .ascii) ?? "unable to stringify response")\n======================", for: task)
+				self.record(completedAt: Date(), response: bytes, for: task)
 				if self.storeResults, response.didDownloadSuccessfully, let index {
 					self.types.value[index].store(results: log, from: startedAt, for: self) }
 			}

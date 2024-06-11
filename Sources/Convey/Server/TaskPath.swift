@@ -12,16 +12,6 @@ public actor TaskPath: ObservableObject {
 	let url: URL
 	var count = 0
 	
-	public struct TaskRecording: Identifiable, Comparable {
-		public var id: URL { url }
-		public let url: URL
-		public let date: Date
-		
-		public static func <(lhs: Self, rhs: Self) -> Bool {
-			lhs.date > rhs.date
-		}
-	}
-	
 	let recordedURLs: CurrentValueSubject<[TaskRecording], Never> = .init([])
 	nonisolated var urls: [TaskRecording] { recordedURLs.value }
 	
@@ -50,7 +40,7 @@ public actor TaskPath: ObservableObject {
 		count = 0
 		
 		for url in urls {
-			try? FileManager.default.removeItem(at: url.url)
+			try? FileManager.default.removeItem(at: url.fileURL)
 		}
 		publish()
 	}
@@ -62,7 +52,7 @@ public actor TaskPath: ObservableObject {
 		do {
 			recordedURLs.value = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil).map { url in
 				
-				TaskRecording(url: url, date: url.creationDate ?? Date())
+				TaskRecording(fileURL: url, date: url.creationDate ?? Date())
 			}.sorted()
 		} catch {
 			print("Failed to load task path URLs from \(error)")
@@ -79,13 +69,14 @@ public actor TaskPath: ObservableObject {
 		Task { @MainActor in self.objectWillChange.send() }
 	}
 	
-	func save(task: ServerTask, with recording: String) {
-		let filename = String(format: "%02d", count) + ". " + task.filename
+	func save(task: RecordedTask) {
+		guard let taskName = task.task?.filename else { return }
+		let filename = String(format: "%02d", count) + ". " + taskName
 		let url = url.appendingPathComponent(filename)
-		try? recording.write(to: url, atomically: true, encoding: .utf8)
+		try? task.output.write(to: url, atomically: true, encoding: .utf8)
 		count += 1
 		var urls = recordedURLs.value
-		urls.insert(TaskRecording(url: url, date: Date()), at: 0)
+		urls.insert(TaskRecording(fileURL: url, date: Date()), at: 0)
 		recordedURLs.value = urls
 		publish()
 	}
