@@ -44,9 +44,24 @@ public struct SimpleGETTask: ServerGETTask, CustomURLRequestTask, Sendable {
 	public var url: URL
 	public var request: URLRequest
 	
-	public var customURLRequest: URLRequest {
-		request
+	public var customURLRequest: URLRequest { request }
+	
+	public init(request: URLRequest) {
+		self.request = request
+		self.url = request.url ?? URL(string: "about:blank")!
 	}
+	
+	public init(url: URL) {
+		self.request = URLRequest(url: url)
+		self.url = url
+	}
+}
+
+public struct GetImageTask: ServerGETTask, CustomURLRequestTask, Sendable {
+	public var url: URL
+	public var request: URLRequest
+	
+	public var customURLRequest: URLRequest { request }
 	
 	public init(request: URLRequest) {
 		self.request = request
