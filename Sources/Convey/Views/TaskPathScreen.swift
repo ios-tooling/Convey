@@ -30,6 +30,8 @@ public struct TaskPathScreen: View {
 								Text(url.date.formatted())
 									.font(.caption)
 							}
+							.opacity(url.fromDisk ? 0.45 : 1.0)
+							.contentShape(.rect)
 						}
 					}
 				}

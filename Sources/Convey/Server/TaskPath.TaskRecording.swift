@@ -13,14 +13,16 @@ extension TaskPath {
 		public let fileURL: URL
 		public let date: Date
 		var url: URL?
+		public let fromDisk: Bool
 		
 		public static func <(lhs: Self, rhs: Self) -> Bool {
 			lhs.date > rhs.date
 		}
 		
-		init(fileURL: URL, date: Date) {
+		init(fileURL: URL, date: Date, fromDisk: Bool = false) {
 			self.fileURL = fileURL
 			self.date = date
+			self.fromDisk = fromDisk
 			
 			if let raw = try? String(contentsOf: fileURL) {
 				let pieces = raw.components(separatedBy: RecordedTask.separator)

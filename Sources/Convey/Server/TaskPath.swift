@@ -52,7 +52,7 @@ public actor TaskPath: ObservableObject {
 		do {
 			recordedURLs.value = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil).map { url in
 				
-				TaskRecording(fileURL: url, date: url.creationDate ?? Date())
+				TaskRecording(fileURL: url, date: url.creationDate ?? Date(), fromDisk: true)
 			}.sorted()
 		} catch {
 			print("Failed to load task path URLs from \(error)")
