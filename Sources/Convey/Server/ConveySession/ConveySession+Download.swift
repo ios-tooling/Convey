@@ -15,7 +15,7 @@ extension ConveySession {
 				if let error {
 					continuation.resume(throwing: error)
 				} else if let url {
-					try? FileManager.default.removeItem(at: destination)
+					try? FileManager.default.removeItemIfExists(at: destination)
 					do {
 						try FileManager.default.moveItem(at: url, to: destination)
 						continuation.resume()

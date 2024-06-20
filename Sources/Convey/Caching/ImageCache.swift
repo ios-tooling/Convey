@@ -39,7 +39,7 @@ public actor ImageCache {
 	public func clear(inMemory: Bool, onDisk: Bool) {
 		if inMemory { inMemoryImages.value = [:] }
 		if onDisk {
-			try? FileManager.default.removeItem(at: parentDirectory.value)
+			try? FileManager.default.removeItemIfExists(at: parentDirectory.value)
 			try? FileManager.default.createDirectory(at: parentDirectory.value, withIntermediateDirectories: true)
 		}
 	}

@@ -104,11 +104,11 @@ public extension DownloadedCacheProtocol {
 		guard let cacheLocation else { return }
 		if let content {
 			let data = try JSONEncoder().encode(content)
-			try? FileManager.default.removeItem(at: cacheLocation)
+			try FileManager.default.removeItemIfExists(at: cacheLocation)
 			try data.write(to: cacheLocation, options: .atomic)
 			if fileWatcher == nil, let redirect { setupRedirect(redirect) }
 		} else {
-			try? FileManager.default.removeItem(at: cacheLocation)
+			try FileManager.default.removeItemIfExists(at: cacheLocation)
 			fileWatcher?.finish()
 			fileWatcher = nil
 		}
