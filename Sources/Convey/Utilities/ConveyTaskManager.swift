@@ -276,7 +276,7 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 			self.types.value.append(newTask)
 		}
 
-		if echo || task.server.shouldRecordTaskPath{
+		if echo || task.server.shouldRecordTaskPath {
 			self.record(startedAt: date, request: request, for: task)
 		}
 		self.updateSort()

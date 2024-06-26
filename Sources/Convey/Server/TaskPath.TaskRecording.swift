@@ -12,6 +12,7 @@ extension TaskPath {
 		public var id: URL { fileURL }
 		public let fileURL: URL
 		public let date: Date
+		public let payloadSize: Int64?
 		var url: URL?
 		public let fromDisk: Bool
 		
@@ -25,8 +26,15 @@ extension TaskPath {
 			self.fromDisk = fromDisk
 			
 			if let raw = try? String(contentsOf: fileURL) {
-				let pieces = raw.components(separatedBy: RecordedTask.separator)
+				let pieces = raw.components(separatedBy: RecordedTask.separator).filter { !$0.isEmpty }
 				url = URL(string: pieces.first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")
+				if pieces.count > 2 {
+					payloadSize = Int64(pieces[pieces.count - 2].count)
+				} else {
+					payloadSize = nil
+				}
+			} else {
+				payloadSize = nil
 			}
 		}
 	}

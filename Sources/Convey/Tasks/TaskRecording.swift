@@ -50,7 +50,13 @@ public struct RecordedTask {
 			
 			case .upload:
 				if let body = request?.httpBody {
-					let output = String(data: body, encoding: .utf8) ?? String(data: body, encoding: .ascii) ?? "unable to stringify response"
+					let output: String
+					if task is GZipEncodedUploadingTask, let data = try? body.gunzipped() {
+						output = String(data: data, encoding: .utf8) ?? String(data: body, encoding: .ascii) ?? "unable to stringify response"
+					} else {
+						output = String(data: body, encoding: .utf8) ?? String(data: body, encoding: .ascii) ?? "unable to stringify response"
+					}
+					
 					results += output + Self.separator
 				}
 
