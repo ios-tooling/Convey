@@ -58,12 +58,14 @@ public struct TaskPathScreen: View {
 				}
 			}
 			.toolbar {
-				ToolbarItem(placement: .bottomBar) {
-					Button("Clear Recordings") {
-						Task { await path.clear() }
+				#if os(iOS)
+					ToolbarItem(placement: .bottomBar) {
+						Button("Clear Recordings") {
+							Task { await path.clear() }
+						}
+						.buttonStyle(.bordered)
 					}
-					.buttonStyle(.bordered)
-				}
+				#endif
 			}
 		}
 		.frame(maxWidth: .infinity, maxHeight: .infinity)

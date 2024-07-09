@@ -38,7 +38,7 @@ public enum TaskRedirect: Sendable, Equatable { case bundle(name: String, enable
 		do {
 			try response.data.write(to: dataURL)
 			try response.response.write(to: responseURL)
-			if #available(iOS 16.0, watchOS 9, *) {
+			if #available(iOS 16.0, macOS 13.0, watchOS 9, *) {
 				print("💾 Saved data to \(dataURL.path(percentEncoded: false))")
 			} else {
 				print("💾 Saved data to \(dataURL.path)")
@@ -55,7 +55,7 @@ public enum TaskRedirect: Sendable, Equatable { case bundle(name: String, enable
 			let data = try Data(contentsOf: dataURL)
 			let response: HTTPURLResponse = (try? .load(from: responseURL)) ?? .init(url: dataURL, mimeType: nil, expectedContentLength: 0, textEncodingName: nil)
 			
-			if #available(iOS 16.0, watchOS 9, *) {
+			if #available(iOS 16.0, macOS 13.0, watchOS 9, *) {
 				print("💾 Restored data from \(dataURL.path(percentEncoded: false))")
 			} else {
 				print("💾 Restored data from \(dataURL.path)")
