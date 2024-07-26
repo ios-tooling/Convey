@@ -11,7 +11,7 @@ extension ServerTask {
 	public func requestResponse() async throws -> ServerResponse {
 		if wrappedCaching == .localOnly, self.wrappedTask is ServerCacheableTask {
 			if let cache = DataCache.instance.fetchLocal(for: url) {
-				return ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, startedAt: cache.cachedAt)
+				return ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, startedAt: cache.cachedAt, retryCount: nil)
 			}
 			throw HTTPError.offline
 		}
@@ -23,7 +23,7 @@ extension ServerTask {
 				return try await requestResponse()
 			}
 			if error.isOffline, self.wrappedTask is FileBackedTask, let cache = DataCache.instance.fetchLocal(for: url) {
-				return ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, startedAt: cache.cachedAt)
+				return ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, startedAt: cache.cachedAt, retryCount: nil)
 			}
 			throw error
 		}
@@ -72,11 +72,12 @@ extension ServerTask {
 					server.postflight(self, result: result)
 					wrappedRedirect?.cache(response: result)
 					if wrappedEcho == .timing { logTiming(abs(startedAt.timeIntervalSinceNow)) }
-					return result
+					return result.withRetryCount(attemptCount)
 				} catch {
 					if let delay = (self.wrappedTask as? RetryableTask)?.retryInterval(after: error, attemptNumber: attemptCount) {
 						attemptCount += 1
 						try await Task.sleep(nanoseconds: UInt64(delay) * 1_000_000_000)
+						print("Retry Attemp #\(attemptCount) for \(self)")
 					} else {
 						server.taskFailed(self, error: error)
 						throw error

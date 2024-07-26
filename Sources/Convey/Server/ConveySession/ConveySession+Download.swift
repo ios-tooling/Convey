@@ -44,7 +44,7 @@ extension ConveySession {
 					return continuation.resume(throwing: ConveyServerError.unknownResponse(data, response))
 				}
 				
-				continuation.resume(returning: ServerResponse(response: httpResponse, data: data, fromCache: false, duration: abs(startedAt.timeIntervalSinceNow), startedAt: startedAt))
+				continuation.resume(returning: ServerResponse(response: httpResponse, data: data, fromCache: false, duration: abs(startedAt.timeIntervalSinceNow), startedAt: startedAt, retryCount: 0))
 			}
 			
 			task.resume()
