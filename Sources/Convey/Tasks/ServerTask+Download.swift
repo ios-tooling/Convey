@@ -29,7 +29,7 @@ extension PayloadDownloadingTask {
 		do {
 			let decoded = try actualDecoder.decode(DownloadPayload.self, from: result.data)
 			try await postProcess(payload: decoded)
-			return DownloadResult(payload: decoded, response: result)
+			return DownloadResult(payload: decoded, response: result, retryCount: result.retryCount)
 		} catch {
 			print("Error when decoding \(DownloadPayload.self) in \(self), \(String(data: result.data, encoding: .utf8) ?? "--unparseable--"): \(error)")
 			throw error

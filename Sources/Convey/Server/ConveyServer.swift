@@ -12,7 +12,11 @@ import Foundation
 	import UIKit
 #endif
 
-extension CurrentValueSubject: @unchecked Sendable { }
+#if swift(>=6)
+	extension CurrentValueSubject: @retroactive @unchecked Sendable { }
+#else
+	extension CurrentValueSubject: @unchecked Sendable { }
+#endif
 
 open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	public static var serverInstance: ConveyServer! {
@@ -45,9 +49,9 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 		}
 	}
 
-	public private(set) var taskPathURL: URL?
+	public private(set) var taskPath: TaskPath?
 	
-	var shouldRecordTaskPath: Bool { taskPathURL != nil }
+	var shouldRecordTaskPath: Bool { taskPath != nil }
 	open var disabled = false { didSet {
 		if disabled { print("#### \(String(describing: self)) DISABLED #### ")}
 	}}
@@ -62,26 +66,20 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	public private(set) var pinnedServerKeys: [String: [String]] = [:]
 	
 	public func recordTaskPath(to url: URL? = nil) {
-		pathCount = 0
 		if let url {
-			taskPathURL = url
-			try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-			print("Recording tasks to \(url.path)")
+			taskPath = .init(url: url)
 		} else {
-			if #available(iOS 16.0, macOS 13.0, *) {
-				let name = Date.now.filename
-				taskPathURL = URL.documentsDirectory.appendingPathComponent(name)
-				try? FileManager.default.createDirectory(at: taskPathURL!, withIntermediateDirectories: true)
-				print("Recording tasks to \(taskPathURL!.path)")
-			} else {
-				print("Please pass a valid URL to recordTaskPath(:)")
+			if #available(iOS 16.0, macOS 13, *) {
+				taskPath = .init()
 			}
 		}
+		objectWillChange.send()
 	}
 	
-	var pathCount = 0
 	public func endTaskPathRecording() {
-		self.taskPathURL = nil
+		self.taskPath?.stop()
+		self.taskPath = nil
+		objectWillChange.send()
 	}
 	
 	public func register(publicKey: String, for server: String) {
@@ -146,7 +144,7 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	public init(asDefault: Bool = true) {
 		super.init()
 		taskManager = .init(for: self)
-		if #available(iOS 16.0, macOS 13, *) {
+		if #available(iOS 16.0, macOS 13, watchOS 9, *) {
 			archiveURL = URL.libraryDirectory.appendingPathComponent("archived-downloads")
 			try? FileManager.default.createDirectory(at: archiveURL!, withIntermediateDirectories: true)
 		}

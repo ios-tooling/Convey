@@ -18,7 +18,7 @@ extension URLAuthenticationChallenge {
 		#else
 		
 		let certificate: SecCertificate
-		if #available(iOS 15, macOS 12, *) {
+		if #available(iOS 15, macOS 12, watchOS 8, *) {
 			guard let certificates = SecTrustCopyCertificateChain(serverTrust) as? [SecCertificate], let cert = certificates.first else { return nil }
 			certificate = cert
 		} else {

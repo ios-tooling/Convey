@@ -39,7 +39,7 @@ public actor ImageCache {
 	public func clear(inMemory: Bool, onDisk: Bool) {
 		if inMemory { inMemoryImages.value = [:] }
 		if onDisk {
-			try? FileManager.default.removeItem(at: parentDirectory.value)
+			try? FileManager.default.removeItemIfExists(at: parentDirectory.value)
 			try? FileManager.default.createDirectory(at: parentDirectory.value, withIntermediateDirectories: true)
 		}
 	}
@@ -154,7 +154,11 @@ public actor ImageCache {
 	}
 	
 	public func fetch(from provision: DataCache.Provision, caching: DataCache.Caching = .localFirst, size: ImageSize? = nil) async throws -> PlatformImage? {
-		try await fetchInfo(using: SimpleGETTask(url: provision.url), caching: caching, kind: provision.kind, size: size).image
+		try await fetchInfo(using: GetImageTask(url: provision.url), caching: caching, kind: provision.kind, size: size).image
+	}
+	
+	public func fetch(from url: URL, kind: DataCache.CacheKind = .default, caching: DataCache.Caching = .localFirst, size: ImageSize? = nil) async throws -> PlatformImage? {
+		try await fetchInfo(using: GetImageTask(url: url), caching: caching, kind: .default, size: size).image
 	}
 
 	public func prune(location: DataCache.CacheKind) {

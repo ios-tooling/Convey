@@ -63,7 +63,7 @@ extension ConveyTaskManager {
 		}
 		
 		func clearStoredFiles(for manager: ConveyTaskManager) {
-			try? FileManager.default.removeItem(at: directory(for: manager))
+			try? FileManager.default.removeItemIfExists(at: directory(for: manager))
 		}
 		
 		func storedURLs(for manager: ConveyTaskManager) -> [URL] { (try? FileManager.default.contentsOfDirectory(at: directory(for: manager), includingPropertiesForKeys: nil, options: .skipsHiddenFiles)) ?? [] }

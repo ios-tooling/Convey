@@ -7,26 +7,26 @@
 
 import Foundation
 
-public protocol WrappedDownloadItem<WrappedItem>: Decodable, Sendable {
-	associatedtype WrappedItem: Decodable & Sendable
+public protocol CacheableContainer<ContainedContent>: CacheableContent {
+	associatedtype ContainedContent: CacheableContent
 	
-	static var wrappedKeypath: KeyPath<Self, WrappedItem> { get }
-	
-	var wrapped: WrappedItem { get }
+	var wrapped: ContainedContent? { get }
 }
 
-public extension WrappedDownloadItem {
-	var wrapped: WrappedItem { self[keyPath: Self.wrappedKeypath] }
-}
-
-public protocol WrappedDownloadArray<Element, WrappedItem>: WrappedDownloadItem where WrappedItem == [Element], Element: Decodable {
+public protocol WrappedDownloadArray<Element, ContainedContent>: CacheableContainer where ContainedContent == [Element] {
 	associatedtype Element: Decodable & Sendable
 }
 
-
 public extension PayloadDownloadingTask where DownloadPayload: WrappedDownloadArray {
-	func downloadArray() async throws -> [DownloadPayload.Element] {
+	func downloadArray() async throws -> [DownloadPayload.Element]? {
 		try await downloadPayload().wrapped
 	}
 }
+
+public extension PayloadDownloadingTask where DownloadPayload: CacheableContainer {
+	func downloadItem() async throws -> DownloadPayload.ContainedContent? {
+		try await downloadPayload().wrapped
+	}
+}
+
 

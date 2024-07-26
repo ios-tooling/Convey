@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+#if os(iOS) || os(macOS) || os(visionOS)
 @available(iOS 16, macOS 13.0, *)
 @MainActor struct ConsoleTaskConfigurationSheet: View {
 	let taskType: any ConfigurableConsoleDisplayableTask.Type
@@ -58,3 +59,4 @@ import SwiftUI
 		}
 	}
 }
+#endif

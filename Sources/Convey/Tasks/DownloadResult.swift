@@ -11,14 +11,16 @@ import Foundation
 public typealias ServerReturned = ServerResponse
 
 public struct DownloadResult<Payload: Sendable>: Sendable {
-	public init(payload: Payload, response: ServerResponse) {
+	public init(payload: Payload, response: ServerResponse, retryCount: Int?) {
 		self.payload = payload
 		self.response = response
+		self.retryCount = retryCount
 	}
 	
 	public let payload: Payload
 	public let response: ServerResponse
 	public var statusCode: Int { response.statusCode }
+	public let retryCount: Int?
 }
 
 public struct ServerResponse: Sendable {
@@ -27,6 +29,13 @@ public struct ServerResponse: Sendable {
 	public var fromCache: Bool
 	public var duration: TimeInterval?
 	public var startedAt: Date
-	
+	public var retryCount: Int?
+
 	public var statusCode: Int { response.statusCode }
+	
+	func withRetryCount(_ count: Int) -> Self {
+		var result = self
+		result.retryCount = count
+		return result
+	}
 }

@@ -15,7 +15,7 @@ extension ConveySession {
 				if let error {
 					continuation.resume(throwing: error)
 				} else if let url {
-					try? FileManager.default.removeItem(at: destination)
+					try? FileManager.default.removeItemIfExists(at: destination)
 					do {
 						try FileManager.default.moveItem(at: url, to: destination)
 						continuation.resume()
@@ -44,7 +44,7 @@ extension ConveySession {
 					return continuation.resume(throwing: ConveyServerError.unknownResponse(data, response))
 				}
 				
-				continuation.resume(returning: ServerResponse(response: httpResponse, data: data, fromCache: false, duration: abs(startedAt.timeIntervalSinceNow), startedAt: startedAt))
+				continuation.resume(returning: ServerResponse(response: httpResponse, data: data, fromCache: false, duration: abs(startedAt.timeIntervalSinceNow), startedAt: startedAt, retryCount: 0))
 			}
 			
 			task.resume()

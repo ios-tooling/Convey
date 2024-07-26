@@ -34,13 +34,13 @@ public actor DataCache {
 	}
 	
 	public func clear() {
-		try? FileManager.default.removeItem(at: cachesDirectory)
+		try? FileManager.default.removeItemIfExists(at: cachesDirectory)
 		try? FileManager.default.createDirectory(at: cachesDirectory, withIntermediateDirectories: true)
 	}
 	
 	public func prune(kind: CacheKind) {
 		if let url = kind.container(relativeTo: cachesDirectory) {
-			try? FileManager.default.removeItem(at: url)
+			try? FileManager.default.removeItemIfExists(at: url)
 		}
 	}
 
@@ -49,7 +49,7 @@ public actor DataCache {
 	}
 	
 	public func removeItem(for provision: Provision) {
-		try? FileManager.default.removeItem(at: provision.localURL)
+		try? FileManager.default.removeItemIfExists(at: provision.localURL)
 	}
 
 	@discardableResult func cache(data: Data, for url: URL) -> URL {
@@ -73,7 +73,7 @@ public actor DataCache {
 
 	public func replace(data: Data, for provision: Provision) throws {
 		let localURL = provision.localURL
-		try? FileManager.default.removeItem(at: localURL)
+		try? FileManager.default.removeItemIfExists(at: localURL)
 		try? FileManager.default.createDirectory(at: localURL.deletingLastPathComponent(), withIntermediateDirectories: true)
 		try data.write(to: localURL)
 	}
