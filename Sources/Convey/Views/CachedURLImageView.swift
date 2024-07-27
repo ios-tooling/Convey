@@ -55,7 +55,7 @@ public struct CachedURLImage: View {
 	
 	var platformImage: PlatformImage? {
 		if cacheInfo?.remoteURL != imageURL {
-			DispatchQueue.main.async { updateCache() }
+			Task { @MainActor in updateCache() }
 			return nil
 		}
 		

@@ -67,7 +67,7 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 			try? data.write(to: typesURL)
 		}
 
-		DispatchQueue.main.async { self.objectWillChange.send() }
+		Task { @MainActor in self.objectWillChange.send() }
 	}
 	
 	var typesURL: URL { directory.appendingPathComponent(typesFilename) }
