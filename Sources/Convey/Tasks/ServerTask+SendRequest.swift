@@ -11,7 +11,7 @@ extension ServerTask {
 	public func requestResponse() async throws -> ServerResponse {
 		if wrappedCaching == .localOnly, self.wrappedTask is ServerCacheableTask {
 			if let cache = DataCache.instance.fetchLocal(for: url) {
-				return ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, startedAt: cache.cachedAt, retryCount: nil)
+                return ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, duration: 0, startedAt: cache.cachedAt, retryCount: nil)
 			}
 			throw HTTPError.offline
 		}
@@ -23,7 +23,7 @@ extension ServerTask {
 				return try await requestResponse()
 			}
 			if error.isOffline, self.wrappedTask is FileBackedTask, let cache = DataCache.instance.fetchLocal(for: url) {
-				return ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, startedAt: cache.cachedAt, retryCount: nil)
+                return ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, duration: 0, startedAt: cache.cachedAt, retryCount: nil)
 			}
 			throw error
 		}
