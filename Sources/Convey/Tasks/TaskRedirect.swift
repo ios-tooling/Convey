@@ -60,7 +60,7 @@ public enum TaskRedirect: Sendable, Equatable { case bundle(name: String, enable
 			} else {
 				print("💾 Restored data from \(dataURL.path)")
 			}
-			return ServerResponse(response: response, data: data, fromCache: true, startedAt: Date(), retryCount: nil)
+            return ServerResponse(response: response, data: data, fromCache: true, duration: 0, startedAt: Date(), retryCount: nil)
 		} catch {
 			return nil
 		}
