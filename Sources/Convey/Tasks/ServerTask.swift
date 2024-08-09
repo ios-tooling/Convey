@@ -16,4 +16,22 @@ public protocol ServerTask: Sendable {
 	var server: ConveyServer { get }
 	var url: URL { get }
 	var taskTag: String { get }
+	
+	func willStart() async
+	func didStart() async
+	
+	func willComplete(with: ServerResponse) async
+	func didComplete(with: ServerResponse) async
+	
+	func didFail(with error: Error) async
+}
+
+public extension ServerTask {
+	func willStart() async { }
+	func didStart() async { }
+	
+	func willComplete(with: ServerResponse) async { }
+	func didComplete(with: ServerResponse) async { }
+	
+	func didFail(with error: Error) async { }
 }

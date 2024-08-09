@@ -9,31 +9,52 @@ import Foundation
 
 extension ServerTask {
 	public func requestResponse() async throws -> ServerResponse {
+		await willStart()
+		await didStart()
+		
 		if wrappedCaching == .localOnly, self.wrappedTask is ServerCacheableTask {
 			if let cache = DataCache.instance.fetchLocal(for: url) {
-                return ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, duration: 0, startedAt: cache.cachedAt, retryCount: nil)
+				let response = ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, duration: 0, startedAt: cache.cachedAt, retryCount: nil)
+				await willComplete(with: response)
+				await didComplete(with: response)
+				return response
 			}
+			await didFail(with: HTTPError.offline)
 			throw HTTPError.offline
 		}
 		
 		do {
-			return try await sendRequest()
+			return try await sendRequest(sendStart: false)
 		} catch {
 			if error.isOffline, self.wrappedTask is ServerCacheableTask {
 				return try await requestResponse()
 			}
 			if error.isOffline, self.wrappedTask is FileBackedTask, let cache = DataCache.instance.fetchLocal(for: url) {
-                return ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, duration: 0, startedAt: cache.cachedAt, retryCount: nil)
+				let response = ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, duration: 0, startedAt: cache.cachedAt, retryCount: nil)
+				await willComplete(with: response)
+				await didComplete(with: response)
+				return response
 			}
+			await didFail(with: error)
+			
 			throw error
 		}
 	}
 	
-	func sendRequest() async throws -> ServerResponse {
-		try await handleThreadAndBackgrounding {
+	func sendRequest(sendStart: Bool = true) async throws -> ServerResponse {
+		if sendStart {
+			await willStart()
+			await didStart()
+		}
+		
+		return try await handleThreadAndBackgrounding {
 			var attemptCount = 1
 			
-			if let response = wrappedRedirect?.cached { return response }
+			if let response = wrappedRedirect?.cached { 
+				await willComplete(with: response)
+				await didComplete(with: response)
+				return response
+			}
 			
 			while true {
 				do {
@@ -41,7 +62,7 @@ extension ServerTask {
 					
 					let request = try await beginRequest(at: startedAt)
 					let session = ConveySession(task: self.wrappedTask)
-
+					
 					var result = try await session.data(for: request)
 					(self.wrappedTask as? ArchivingTask)?.archive(result)
 					
@@ -64,6 +85,7 @@ extension ServerTask {
 						if result.data.isEmpty || (result.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
 							let error = HTTPError.serverError(request.url, result.statusCode, result.data)
 							server.taskFailed(self, error: error)
+							await didFail(with: error)
 							throw error
 						}
 					}
@@ -72,13 +94,17 @@ extension ServerTask {
 					server.postflight(self, result: result)
 					wrappedRedirect?.cache(response: result)
 					if wrappedEcho == .timing { logTiming(abs(startedAt.timeIntervalSinceNow)) }
-					return result.withRetryCount(attemptCount)
+					let retryResult = result.withRetryCount(attemptCount)
+					await willComplete(with: retryResult)
+					await didComplete(with: retryResult)
+					return retryResult
 				} catch {
 					if let delay = (self.wrappedTask as? RetryableTask)?.retryInterval(after: error, attemptNumber: attemptCount) {
 						attemptCount += 1
 						try await Task.sleep(nanoseconds: UInt64(delay) * 1_000_000_000)
 						print("Retry Attempt #\(attemptCount) for \(self)")
 					} else {
+						await didFail(with: error)
 						server.taskFailed(self, error: error)
 						throw error
 					}
