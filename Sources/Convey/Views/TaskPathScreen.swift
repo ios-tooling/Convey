@@ -39,6 +39,9 @@ public struct TaskPathScreen: View {
 										Text(ByteCountFormatter().string(fromByteCount: size))
 											.bold()
 									}
+									if let duration = url.duration {
+										Text(duration.formatted() + " s")
+									}
 								}
 								.font(.caption)
 							}

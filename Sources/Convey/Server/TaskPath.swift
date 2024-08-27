@@ -52,7 +52,7 @@ public actor TaskPath: ObservableObject {
 		do {
 			recordedURLs.value = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil).map { url in
 				
-				TaskRecording(fileURL: url, date: url.creationDate ?? Date(), fromDisk: true)
+				TaskRecording(fileURL: url, date: url.creationDate ?? Date(), fromDisk: true, duration: nil)
 			}.sorted()
 		} catch {
 			print("Failed to load task path URLs from \(error)")
@@ -76,7 +76,8 @@ public actor TaskPath: ObservableObject {
 		try? task.output.write(to: url, atomically: true, encoding: .utf8)
 		count += 1
 		var urls = recordedURLs.value
-		urls.insert(TaskRecording(fileURL: url, date: Date()), at: 0)
+		let duration = task.completedAt?.timeIntervalSince(task.startedAt ?? Date())
+		urls.insert(TaskRecording(fileURL: url, date: Date(), duration: duration), at: 0)
 		recordedURLs.value = urls
 		publish()
 	}

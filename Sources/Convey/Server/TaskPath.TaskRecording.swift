@@ -13,6 +13,7 @@ extension TaskPath {
 		public let fileURL: URL
 		public let date: Date
 		public let payloadSize: Int64?
+		public let duration: TimeInterval?
 		var url: URL?
 		public let fromDisk: Bool
 		
@@ -20,10 +21,11 @@ extension TaskPath {
 			lhs.date > rhs.date
 		}
 		
-		init(fileURL: URL, date: Date, fromDisk: Bool = false) {
+		init(fileURL: URL, date: Date, fromDisk: Bool = false, duration: TimeInterval?) {
 			self.fileURL = fileURL
 			self.date = date
 			self.fromDisk = fromDisk
+			self.duration = duration
 			
 			if let raw = try? String(contentsOf: fileURL) {
 				let pieces = raw.components(separatedBy: RecordedTask.separator).filter { !$0.isEmpty }
