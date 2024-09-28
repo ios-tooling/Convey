@@ -29,8 +29,8 @@ extension ServerTask {
 		
 		await server.wait(forThread: (self.wrappedTask as? ThreadedServerTask)?.threadName)
 		let token = await requestBackgroundTime()
+		defer { Task { await finishBackgroundTime(token) }}
 		let result = try await closure()
-		await finishBackgroundTime(token)
 		await server.stopWaiting(forThread: (self.wrappedTask as? ThreadedServerTask)?.threadName)
 		if oneOffLogging { await server.taskManager.decrementOneOffLog(for: self) }
 		return result
