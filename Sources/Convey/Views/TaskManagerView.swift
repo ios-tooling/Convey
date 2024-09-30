@@ -13,7 +13,8 @@ import SwiftUI
 	@ObservedObject private var manager: ConveyTaskManager
 	@State private var sort: ConveyTaskManager.Sort
 	
-	public init(server: ConveyServer = ConveyServer.serverInstance) {
+	public init(server incoming: ConveyServer?) {
+		let server = incoming ?? ConveyServer.serverInstance!
 		manager = server.taskManager
 		sort = server.taskManager.sort.value
 	}

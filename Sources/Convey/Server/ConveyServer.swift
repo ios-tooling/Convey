@@ -12,6 +12,11 @@ import Foundation
 	import UIKit
 #endif
 
+@globalActor public actor ConveyServerActor : GlobalActor {
+	public static let shared = ConveyServerActor()
+}
+
+
 extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 
 open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
@@ -22,51 +27,46 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	
 	private static let _serverInstance: CurrentValueSubject<ConveyServer?, Never> = .init(nil)
 	
-	@Published open var remote: Remote = .empty
+	@Published public var remote: Remote = .empty
 	
-	open var baseURL: URL { remote.url }
-	open var defaultEncoder = JSONEncoder()
-	open var defaultDecoder = JSONDecoder()
-	open var logDirectory: URL?
-	open var reportBadHTTPStatusAsError = true
-	open var configuration = URLSessionConfiguration.default
-	open var enableGZipDownloads = false
-	open var archiveURL: URL?
-	open var defaultTimeout = 30.0
-	open var allowsExpensiveNetworkAccess = true
-	open var allowsConstrainedNetworkAccess = true
-	open var waitsForConnectivity = true
-	open var taskManager: ConveyTaskManager!
-	public var logStyle: ConveyTaskManager.LogStyle?
-	internal var effectiveLogStyle: ConveyTaskManager.LogStyle {
-		get async { 
-			if let logStyle { return logStyle }
-			return await taskManager.logStyle
-		}
-	}
+	nonisolated let _defaultEncoder: CurrentValueSubject<JSONEncoder, Never> = .init(JSONEncoder())
+	nonisolated let _defaultDecoder: CurrentValueSubject<JSONDecoder, Never> = .init(JSONDecoder())
+	nonisolated let _logDirectory: CurrentValueSubject<URL?, Never> = .init(nil)
+	nonisolated let _reportBadHTTPStatusAsError: CurrentValueSubject<Bool, Never> = .init(true)
+	nonisolated let _configuration: CurrentValueSubject<URLSessionConfiguration, Never> = .init(.default)
+	nonisolated let _enableGZipDownloads: CurrentValueSubject<Bool, Never> = .init(false)
+	nonisolated let _archiveURL: CurrentValueSubject<URL?, Never> = .init(nil)
+	nonisolated let _defaultTimeout: CurrentValueSubject<TimeInterval, Never> = .init(30.0)
+	nonisolated let _allowsExpensiveNetworkAccess: CurrentValueSubject<Bool, Never> = .init(true)
+	nonisolated let _allowsConstrainedNetworkAccess: CurrentValueSubject<Bool, Never> = .init(true)
+	nonisolated let _waitsForConnectivity: CurrentValueSubject<Bool, Never> = .init(true)
+	nonisolated let _taskManager: CurrentValueSubject<ConveyTaskManager?, Never> = .init(nil)
+	nonisolated let _logStyle: CurrentValueSubject<ConveyTaskManager.LogStyle?, Never> = .init(nil)
+	nonisolated let _taskPath: CurrentValueSubject<TaskPath?, Never> = .init(nil)
+	nonisolated let _maxLoggedDownloadSize: CurrentValueSubject<Int, Never> = .init(1024 * 1024 * 10)
+	nonisolated let _maxLoggedUploadSize: CurrentValueSubject<Int, Never> = .init(1024 * 4)
+	nonisolated let _pinnedServerKeys: CurrentValueSubject<[String: [String]], Never> = .init([:])
 
-	public private(set) var taskPath: TaskPath?
-	
-	var shouldRecordTaskPath: Bool { taskPath != nil }
-	open var disabled = false { didSet {
+	#if os(iOS)
+		public var application: UIApplication?
+	#endif
+
+	public var disabled = false { didSet {
 		if disabled { print("#### \(String(describing: self)) DISABLED #### ")}
 	}}
 	public var userAgent: String? { didSet {
 		updateUserAgentHeader()
 		print("User agent set to: \(userAgent ?? "--")")
 	}}
-	open var maxLoggedDownloadSize = 1024 * 1024 * 10
-	open var maxLoggedUploadSize = 1024 * 4
-	open var launchedAt = Date()
+	public let launchedAt = Date()
 	var activeSessions = ActiveSessions()
-	public private(set) var pinnedServerKeys: [String: [String]] = [:]
 	
 	public func recordTaskPath(to url: URL? = nil) {
 		if let url {
-			taskPath = .init(url: url)
+			_taskPath.value = .init(url: url)
 		} else {
 			if #available(iOS 16.0, macOS 13, *) {
-				taskPath = .init()
+				_taskPath.value = .init()
 			}
 		}
 		objectWillChange.send()
@@ -74,27 +74,21 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	
 	public func endTaskPathRecording() {
 		self.taskPath?.stop()
-		self.taskPath = nil
+		_taskPath.value = nil
 		objectWillChange.send()
 	}
 	
 	public func register(publicKey: String, for server: String) {
 		var keys = pinnedServerKeys[server, default: []]
 		keys.append(publicKey)
-		pinnedServerKeys[server] = keys
+		_pinnedServerKeys.value[server] = keys
 	}
 
 	private var defaultHeaders: [String: String] = [
 		ServerConstants.Headers.accept: "*/*"
 	]
 	let threadManager = ThreadManager()
-	#if os(iOS)
-		public var application: UIApplication?
-	#endif
 	
-	public var defaultUserAgent: String {
-		"\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)/\(Device.rawDeviceType)/CFNetwork/1325.0.1 Darwin/21.1.0"
-	}
 	public func clearLogs() {
 		if let dir = logDirectory { try? FileManager.default.removeItem(at: dir) }
 	}
