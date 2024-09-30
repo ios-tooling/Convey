@@ -12,11 +12,7 @@ import Foundation
 	import UIKit
 #endif
 
-#if swift(>=6)
-	extension CurrentValueSubject: @retroactive @unchecked Sendable { }
-#else
-	extension CurrentValueSubject: @unchecked Sendable { }
-#endif
+extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 
 open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	public static var serverInstance: ConveyServer! {
