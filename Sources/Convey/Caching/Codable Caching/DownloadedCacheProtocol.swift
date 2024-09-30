@@ -58,11 +58,7 @@ public extension DownloadedCacheProtocol {
 			if refresh.contains(.atStartup) { try? await self.refresh() }
 			#if os(iOS)
 			if refresh.contains(.atResume) {
-				#if swift(>=6)
-					self.refresh(on: UIApplication.didBecomeActiveNotification)
-				#else
-					await self.refresh(on: UIApplication.didBecomeActiveNotification)
-				#endif
+				self.refresh(on: UIApplication.didBecomeActiveNotification)
 			}
 			#endif
 
