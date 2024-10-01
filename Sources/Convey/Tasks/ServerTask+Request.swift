@@ -88,8 +88,6 @@ public extension ServerTask {
 	}
 
 	var httpMethod: String {
-		if let custom = self.wrappedTask as? CustomHTTPMethodTask { return custom.customHTTPMethod }
-		
 		if self.wrappedTask is ServerPOSTTask { return "POST" }
 		if self.wrappedTask is ServerPUTTask { return "PUT" }
 		if self.wrappedTask is ServerPATCHTask { return "PATCH" }

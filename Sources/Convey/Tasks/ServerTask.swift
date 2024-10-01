@@ -30,6 +30,7 @@ public protocol ServerTask: Sendable {
 	
 	func buildRequest() async throws -> URLRequest
 	var cookies: [HTTPCookie]? { get }
+	var jsonEncoder: JSONEncoder? { get }
 }
 
 public extension ServerTask {
@@ -45,4 +46,5 @@ public extension ServerTask {
 	
 	func preFlight() async throws { }
 	func postFlight() async throws { }
+	var jsonEncoder: JSONEncoder? { nil }
 }

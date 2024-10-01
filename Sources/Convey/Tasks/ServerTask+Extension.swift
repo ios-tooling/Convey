@@ -72,7 +72,7 @@ public extension PayloadUploadingTask {
 	var contentType: String? { "application/json" }
 	var dataToUpload: Data? {
 		guard let payload = uploadPayload else { return nil }
-		let encoder = (self.wrappedTask as? CustomJSONEncoderTask)?.jsonEncoder ?? server.defaultEncoder
+		let encoder = jsonEncoder ?? server.defaultEncoder
 		
 		do {
 			return try encoder.encode(payload)

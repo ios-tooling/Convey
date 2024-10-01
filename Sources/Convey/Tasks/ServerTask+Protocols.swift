@@ -23,6 +23,7 @@ public protocol ServerSentEventTargetTask: ServerTask { }
 public protocol ETagCachedTask: ServerGETTask { }
 public protocol JSONPayloadTask: ServerTask { }
 public protocol GZipEncodedUploadingTask: DataUploadingTask { }
+public protocol EchoingTask: ServerTask { }
 
 
 
@@ -66,34 +67,14 @@ public protocol JSONUploadingTask: DataUploadingTask, JSONPayloadTask {
 	var jsonToUpload: [String: any Sendable]? { get }
 }
 
-public protocol CustomJSONEncoderTask: ServerTask {
-	var jsonEncoder: JSONEncoder? { get }
-}
-
-public protocol CustomHTTPMethodTask: ServerTask {
-	var customHTTPMethod: String { get }
-}
-
 public protocol UnrecordedTask: ServerTask {
 	var exposedComponents: [ServerTaskComponent] { get }
 }
-
-public struct ConveyHeader: Codable, Hashable, CustomStringConvertible, Sendable {
-	public let name: String
-	public let value: String
-	public var description: String {
-		"\(name): \(value)"
-	}
-}
-public protocol ConveyHeaders { }
-extension [String: String]: ConveyHeaders { }
-extension [ConveyHeader]: ConveyHeaders { }
 
 public protocol CustomHTTPHeaders: ServerTask {
 	var customHTTPHeaders: ConveyHeaders { get }
 }
 
-public protocol EchoingTask: ServerTask { }
 public protocol ArchivingTask: ServerTask {
 	var archiveURL: URL? { get }
 }
