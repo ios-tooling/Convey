@@ -10,11 +10,11 @@ import Foundation
 
 public extension ServerTask {
 	static var shouldEcho: Bool {
-		get async { await ConveyServer.serverInstance.taskManager.shouldEcho(self as! ServerTask) }
+		get async { await DefaultServer.server.taskManager.shouldEcho(self as! ServerTask) }
 	}
 	
 	static func setShouldEcho(_ shouldEcho: Bool) async {
-		await ConveyServer.serverInstance.taskManager.task(self, shouldEcho: shouldEcho)
+		await DefaultServer.server.taskManager.task(self, shouldEcho: shouldEcho)
 	}
 }
 

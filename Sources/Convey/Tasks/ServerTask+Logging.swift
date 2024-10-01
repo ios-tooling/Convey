@@ -8,7 +8,7 @@
 import Foundation
 
 extension ConveyServer {
-	func setupLoggingDirectory() -> URL? {
+	nonisolated func setupLoggingDirectory() -> URL? {
 		guard let url = logDirectory else { return nil }
 		
 		try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
@@ -25,7 +25,7 @@ extension ServerTask {
 		get async { server.taskManager.oneOffTypes.value.contains(String(describing: type(of: self))) }
 	}
 	
-	func logFilename(for date: Date) -> String {
+	nonisolated func logFilename(for date: Date) -> String {
 		let timestamp = date.timeIntervalSince(server.launchedAt)
         let name = "\(Int(timestamp)).txt"
         if #available(iOS 15, macOS 12, watchOS 8, tvOS 15.0, *) {
@@ -34,7 +34,7 @@ extension ServerTask {
         return name
 	}
 	
-	func preLog(startedAt: Date, request: URLRequest) async {
+	nonisolated func preLog(startedAt: Date, request: URLRequest) async {
 		if await self.isEchoing {
 			print(" ====================== Echoing Request \(type(of: self)) ======================\n \(request)\n============================================")
 		}

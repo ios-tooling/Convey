@@ -21,7 +21,7 @@ final class ConveyTests: XCTestCase {
 	
 	func testSessionCleanup() async throws {
 		let _ = try await SimpleGETTask(url: URL(string: "https://apple.com")!).downloadData()
-		XCTAssert(ConveyServer.serverInstance.activeSessions.isEmpty, "Active sessions should be empty")
+		XCTAssert(DefaultServer.server.activeSessions.isEmpty, "Active sessions should be empty")
 	}
 	
     static var allTests = [

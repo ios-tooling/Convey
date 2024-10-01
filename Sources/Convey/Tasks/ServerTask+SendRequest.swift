@@ -81,7 +81,7 @@ extension ServerTask {
 					wrappedPreview?(result)
 					try await postProcess(response: result)
 					if !result.response.didDownloadSuccessfully {
-						server.reportConnectionError(self, result.statusCode, String(data: result.data, encoding: .utf8))
+						await server.reportConnectionError(self, result.statusCode, String(data: result.data, encoding: .utf8))
 						if result.data.isEmpty || (result.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
 							let error = HTTPError.serverError(request.url, result.statusCode, result.data)
 							server.taskFailed(self, error: error)
@@ -91,7 +91,7 @@ extension ServerTask {
 					}
 					
 					try await (self.wrappedTask as? PostFlightTask)?.postFlight()
-					server.postflight(self, result: result)
+					await server.postflight(self, result: result)
 					wrappedRedirect?.cache(response: result)
 					if wrappedEcho == .timing { logTiming(abs(startedAt.timeIntervalSinceNow)) }
 					let retryResult = result.withRetryCount(attemptCount)

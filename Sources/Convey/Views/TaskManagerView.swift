@@ -14,7 +14,7 @@ import SwiftUI
 	@State private var sort: ConveyTaskManager.Sort
 	
 	public init(server incoming: ConveyServer?) {
-		let server = incoming ?? ConveyServer.serverInstance!
+		let server = incoming ?? DefaultServer.server
 		manager = server.taskManager
 		sort = server.taskManager.sort.value
 	}
@@ -113,7 +113,7 @@ import SwiftUI
 @available(watchOS, unavailable)
 struct TaskManagerView_Previews: PreviewProvider {
     static var previews: some View {
-		 TaskManagerView(server: ConveyServer.serverInstance)
+		 TaskManagerView(server: DefaultServer.server)
     }
 }
 

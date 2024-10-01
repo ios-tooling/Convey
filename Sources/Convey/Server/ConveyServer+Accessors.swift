@@ -8,7 +8,15 @@
 import Foundation
 
 public extension ConveyServer {
-	var baseURL: URL { remote.url }
+	nonisolated var remote: Remote {
+		get { _remote.value }
+		set {
+			_remote.value = newValue
+			objectWillChange.send()
+		}
+	}
+	
+	nonisolated var baseURL: URL { remote.url }
 	nonisolated var defaultEncoder: JSONEncoder {
 		get { _defaultEncoder.value }
 		set { _defaultEncoder.value = newValue }
@@ -89,6 +97,6 @@ extension ConveyServer {
 		}
 	}
 	
-	var shouldRecordTaskPath: Bool { taskPath != nil }
+	nonisolated var shouldRecordTaskPath: Bool { taskPath != nil }
 
 }
