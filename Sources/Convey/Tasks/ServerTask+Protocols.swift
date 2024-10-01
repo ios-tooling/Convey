@@ -36,10 +36,6 @@ public protocol CookieSendingTask: ServerTask {
 	var cookies: [HTTPCookie]? { get }
 }
 
-public protocol CustomTimeoutTask: ServerTask {
-	var timeout: TimeInterval { get }
-}
-
 public protocol PayloadDownloadingTask<DownloadPayload>: ServerTask {
 	associatedtype DownloadPayload: Decodable & Sendable
 	func postProcess(payload: DownloadPayload) async throws

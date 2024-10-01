@@ -54,7 +54,7 @@ actor ConveySession: NSObject {
 			queue = OperationQueue()
 		}
 		
-		let timeout = (task.wrappedTask as? CustomTimeoutTask)?.timeout ?? task.server.defaultTimeout
+		let timeout = task.timeout
 		
 		config.timeoutIntervalForRequest = timeout
 		config.timeoutIntervalForResource = timeout
