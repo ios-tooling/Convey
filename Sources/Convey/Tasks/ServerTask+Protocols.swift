@@ -7,8 +7,24 @@
 
 import Foundation
 
+// marker protocols
+public protocol ServerCacheableTask { }
+public protocol ServerUploadingTask: ServerTask { }
+public protocol ServerGETTask: ServerTask { }
+public protocol ServerPUTTask: ServerUploadingTask { }
+public protocol ServerPOSTTask: ServerUploadingTask { }
+public protocol ServerPATCHTask: ServerUploadingTask { }
+public protocol ServerDELETETask: ServerTask { }
+
 public protocol AllowedOnExpensiveNetworkTask: ServerTask { }
 public protocol AllowedOnConstrainedNetworkTask: ServerTask { }
+public protocol RefreshableCachedTask: ServerTask { }
+public protocol ServerSentEventTargetTask: ServerTask { }
+public protocol ETagCachedTask: ServerGETTask { }
+public protocol JSONPayloadTask: ServerTask { }
+public protocol GZipEncodedUploadingTask: DataUploadingTask { }
+
+
 
 public protocol ParameterizedTask: ServerTask {
 	var parameters: TaskURLParameters? { get }
@@ -24,16 +40,6 @@ public protocol CustomURLTask: ServerTask {
 
 public protocol TaggedTask: ServerTask {
 	var requestTag: String { get }
-}
-
-public protocol CustomURLRequestTask: ServerTask {
-	 var customURLRequest: URLRequest { get async throws }
-}
-
-public protocol RefreshableCachedTask: ServerTask { }
-
-public protocol CookieSendingTask: ServerTask {
-	var cookies: [HTTPCookie]? { get }
 }
 
 public protocol PayloadDownloadingTask<DownloadPayload>: ServerTask {
@@ -55,10 +61,6 @@ public protocol MIMEUploadingTask: DataUploadingTask {
 public protocol FormURLEncodedUploadingTask: DataUploadingTask {
 	var formFields: [String: any Sendable] { get }
 }
-
-public protocol ETagCachedTask: ServerGETTask { }
-public protocol JSONPayloadTask: ServerTask { }
-public protocol GZipEncodedUploadingTask: DataUploadingTask { }
 
 public protocol JSONUploadingTask: DataUploadingTask, JSONPayloadTask {
 	var jsonToUpload: [String: any Sendable]? { get }
@@ -96,31 +98,13 @@ public protocol ArchivingTask: ServerTask {
 	var archiveURL: URL? { get }
 }
 
-public protocol ServerCacheableTask { }
-public protocol ServerUploadingTask: ServerTask { }
-public protocol ServerGETTask: ServerTask { }
-public protocol ServerPUTTask: ServerUploadingTask { }
-public protocol ServerPOSTTask: ServerUploadingTask { }
-public protocol ServerPATCHTask: ServerUploadingTask { }
-public protocol ServerDELETETask: ServerTask { }
-
 public protocol ThreadedServerTask: ServerTask {
 	var threadName: String? { get }
-}
-
-public protocol PreFlightTask: ServerTask {
-	 func preFlight() async throws
-}
-
-public protocol PostFlightTask: ServerTask {
-	 func postFlight() async throws
 }
 
 public protocol RetryableTask: ServerTask {
 	func retryInterval(after error: Error, attemptNumber: Int) -> TimeInterval?
 }
-
-public protocol ServerSentEventTargetTask: ServerTask { }
 
 public protocol PayloadUploadingTask: DataUploadingTask, JSONPayloadTask {
 	associatedtype UploadPayload: Encodable

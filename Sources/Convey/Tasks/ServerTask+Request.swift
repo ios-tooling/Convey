@@ -14,7 +14,7 @@ public extension ServerTask {
 	}
 	
 	func beginRequest(at startedAt: Date) async throws -> URLRequest {
-		try await (self.wrappedTask as? PreFlightTask)?.preFlight()
+		try await preFlight()
 
 		var request = try await buildRequest()
 		request = try await server.preflight(self, request: request)
@@ -23,11 +23,7 @@ public extension ServerTask {
 	}
 
 	func buildRequest() async throws -> URLRequest {
-		if let custom = self.wrappedTask as? CustomURLRequestTask {
-			return try await custom.customURLRequest
-		}
-
-		return try await defaultRequest()
+		try await defaultRequest()
 	}
 
 	func defaultRequest() async throws -> URLRequest {
@@ -81,7 +77,7 @@ public extension ServerTask {
 			request.addValue(etag, forHTTPHeaderField: ServerConstants.Headers.ifNoneMatch)
 		}
 		
-		if let cookies = (self.wrappedTask as? CookieSendingTask)?.cookies {
+		if let cookies {
 			let fields = HTTPCookie.requestHeaderFields(with: cookies)
 			for (key, value) in fields {
 				request.addValue(value, forHTTPHeaderField: key)

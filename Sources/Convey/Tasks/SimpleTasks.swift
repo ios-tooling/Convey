@@ -21,13 +21,13 @@ public struct SimpleMIMETask: ServerPOSTTask, MIMEUploadingTask, Sendable {
 	}
 }
 
-public struct SimplePOSTTask: ServerPOSTTask, CustomURLRequestTask, DataUploadingTask, Sendable {
+public struct SimplePOSTTask: ServerPOSTTask, DataUploadingTask, Sendable {
 	let payloadString: String
 	public let url: URL
 	public var dataToUpload: Data? { payloadString.data(using: .utf8) }
 	public var contentType: String? { "text/plain" }
 	
-	public var customURLRequest: URLRequest {
+	public func buildRequest() async throws -> URLRequest {
 		var request = URLRequest(url: url)
 		request.httpMethod = "POST"
 		request.httpBody = payloadString.data(using: .utf8)
@@ -40,11 +40,11 @@ public struct SimplePOSTTask: ServerPOSTTask, CustomURLRequestTask, DataUploadin
 	}
 }
 
-public struct SimpleGETTask: ServerGETTask, CustomURLRequestTask, Sendable {
+public struct SimpleGETTask: ServerGETTask, Sendable {
 	public var url: URL
 	public var request: URLRequest
 	
-	public var customURLRequest: URLRequest { request }
+	public func buildRequest() async throws -> URLRequest { request }
 	
 	public init(request: URLRequest) {
 		self.request = request
@@ -57,11 +57,11 @@ public struct SimpleGETTask: ServerGETTask, CustomURLRequestTask, Sendable {
 	}
 }
 
-public struct GetImageTask: ServerGETTask, CustomURLRequestTask, Sendable {
+public struct GetImageTask: ServerGETTask, Sendable {
 	public var url: URL
 	public var request: URLRequest
 	
-	public var customURLRequest: URLRequest { request }
+	public func buildRequest() async throws -> URLRequest { request }
 	
 	public init(request: URLRequest) {
 		self.request = request

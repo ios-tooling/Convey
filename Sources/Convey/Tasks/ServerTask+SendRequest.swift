@@ -90,7 +90,7 @@ extension ServerTask {
 						}
 					}
 					
-					try await (self.wrappedTask as? PostFlightTask)?.postFlight()
+					try await postFlight()
 					server.postflight(self, result: result)
 					wrappedRedirect?.cache(response: result)
 					if wrappedEcho == .timing { logTiming(abs(startedAt.timeIntervalSinceNow)) }

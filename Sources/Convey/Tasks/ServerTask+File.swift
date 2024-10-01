@@ -20,7 +20,7 @@ public extension ServerTask {
 					let session = ConveySession(task: self)
 					try await session.downloadFile(from: request, to: destination)
 					
-					try await (self.wrappedTask as? PostFlightTask)?.postFlight()
+					try await postFlight()
 				} catch {
 					if let delay = (self.wrappedTask as? RetryableTask)?.retryInterval(after: error, attemptNumber: attemptCount) {
 						attemptCount += 1

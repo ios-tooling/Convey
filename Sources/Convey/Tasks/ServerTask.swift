@@ -20,11 +20,16 @@ public protocol ServerTask: Sendable {
 
 	func willStart() async
 	func didStart() async
-	
+	func preFlight() async throws
+	func postFlight() async throws
+
 	func willComplete(with: ServerResponse) async
 	func didComplete(with: ServerResponse) async
 	
 	func didFail(with error: Error) async
+	
+	func buildRequest() async throws -> URLRequest
+	var cookies: [HTTPCookie]? { get }
 }
 
 public extension ServerTask {
@@ -36,4 +41,8 @@ public extension ServerTask {
 	
 	func didFail(with error: Error) async { }
 	var timeout: TimeInterval { server.defaultTimeout }
+	var cookies: [HTTPCookie]? { nil }
+	
+	func preFlight() async throws { }
+	func postFlight() async throws { }
 }
