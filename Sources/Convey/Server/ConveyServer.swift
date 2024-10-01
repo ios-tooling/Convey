@@ -12,6 +12,10 @@ import Foundation
 	import UIKit
 #endif
 
+@globalActor public actor ConveyActor: GlobalActor {
+	public static let shared = ConveyActor()
+}
+
 extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 
 open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
