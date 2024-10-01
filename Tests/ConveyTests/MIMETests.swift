@@ -10,8 +10,8 @@ import Convey
 
 extension Bundle {
 	static var testBundle: Bundle {
-		let url = Bundle(for: MIMETests.self).bundleURL
-		return Bundle(url: url.appendingPathComponent("Convey_Convey.bundle"))!
+		let url = Bundle(for: MIMETests.self).bundleURL.deletingLastPathComponent()
+		return Bundle(url: url.appendingPathComponent("Convey_ConveyTests.bundle"))!
 	}
 }
 
@@ -33,7 +33,7 @@ final class MIMETests: XCTestCase {
 
 		 let task = SimpleMIMETask(url: URL(string: "http://test.com")!, components: components)
 		 
-		 let data = task.mimeData(base64Encoded: false)!
+		 let data = task.dataToUpload!
 		 let text = String(data: data, encoding: .ascii)!
 		 print(text)
     }
