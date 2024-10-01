@@ -1,5 +1,5 @@
 //
-//  TaskResultsListView.swift
+//  TaskReporter.swift
 //  
 //
 //  Created by Ben Gottlieb on 6/19/22.
@@ -10,13 +10,13 @@ import SwiftUI
 #if canImport(UIKit)
 
 @available(watchOS, unavailable)
-extension TaskManagerView {
+extension TaskReporterView {
 	@MainActor struct TaskResultsListView: View {
-		let taskType: ConveyTaskManager.LoggedTaskInfo
+		let taskType: ConveyTaskReporter.LoggedTaskInfo
 		let urls: [URL]
-		let manager: ConveyTaskManager
+		let manager: ConveyTaskReporter
 		
-		init(taskType: ConveyTaskManager.LoggedTaskInfo, manager: ConveyTaskManager) {
+		init(taskType: ConveyTaskReporter.LoggedTaskInfo, manager: ConveyTaskReporter) {
 			self.taskType = taskType
 			self.manager = manager
 			self.urls = taskType.storedURLs(for: manager).sorted { $0.absoluteString > $1.absoluteString }

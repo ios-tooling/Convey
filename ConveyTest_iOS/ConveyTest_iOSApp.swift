@@ -11,7 +11,7 @@ import SwiftUI
 struct ConveyTest_iOSApp: App {
 	init() {
 		ConveyServer.serverInstance = ConveyServer()
-		ConveyServer.serverInstance.taskManager.setIsEnabled()
+		ConveyTaskReporter.instance.setIsEnabled()
 		
 		Task { await Self.testLinks() }
 	}

@@ -1,5 +1,5 @@
 //
-//  SwiftUIView.swift
+//  TaskReporter.swift
 //  
 //
 //  Created by Ben Gottlieb on 6/19/22.
@@ -10,7 +10,7 @@ import SwiftUI
 #if canImport(UIKit)
 
 @available(watchOS, unavailable)
-extension TaskManagerView {
+extension TaskReporterView {
 	@MainActor struct TaskResultsDetails: View {
 		let url: URL
 		

@@ -32,7 +32,7 @@ extension ServerTask {
 		defer { Task { await finishBackgroundTime(token) }}
 		let result = try await closure()
 		await server.stopWaiting(forThread: (self.wrappedTask as? ThreadedServerTask)?.threadName)
-		if oneOffLogging { await server.taskManager.decrementOneOffLog(for: self) }
+		if oneOffLogging { await ConveyTaskReporter.instance.decrementOneOffLog(for: self) }
 		return result
 	}
 }

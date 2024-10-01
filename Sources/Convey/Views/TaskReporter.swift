@@ -1,6 +1,6 @@
 //
-//  TaskManagerView.swift
-//  
+//  TaskReporterView.swift
+//
 //
 //  Created by Ben Gottlieb on 6/18/22.
 //
@@ -9,23 +9,22 @@ import SwiftUI
 
 #if canImport(UIKit)
 @available(watchOS, unavailable)
-@MainActor public struct TaskManagerView: View {
-	@ObservedObject private var manager: ConveyTaskManager
-	@State private var sort: ConveyTaskManager.Sort
+@MainActor public struct TaskReporterView: View {
+	@ObservedObject private var manager = ConveyTaskReporter.instance
+	@State private var sort: ConveyTaskReporter.Sort
 	
-	public init(server: ConveyServer = ConveyServer.serverInstance) {
-		manager = server.taskManager
-		sort = server.taskManager.sort.value
+	public init() {
+		sort = ConveyTaskReporter.instance.sort.value
 	}
 	
 	public var body: some View {
 		 VStack() {
 			 Picker("", selection: $sort.animation()) {
-				 Text("Alpha").tag(ConveyTaskManager.Sort.alpha)
-				 Text("Count").tag(ConveyTaskManager.Sort.count)
-				 Text("Size").tag(ConveyTaskManager.Sort.size)
-				 Text("Date").tag(ConveyTaskManager.Sort.recent)
-				 Text("On").tag(ConveyTaskManager.Sort.enabled)
+				 Text("Alpha").tag(ConveyTaskReporter.Sort.alpha)
+				 Text("Count").tag(ConveyTaskReporter.Sort.count)
+				 Text("Size").tag(ConveyTaskReporter.Sort.size)
+				 Text("Date").tag(ConveyTaskReporter.Sort.recent)
+				 Text("On").tag(ConveyTaskReporter.Sort.enabled)
 			 }
 			 .pickerStyle(.segmented)
 			 .padding()
@@ -56,8 +55,8 @@ import SwiftUI
     }
 	
 	@MainActor struct TaskTypeRow: View {
-		var taskType: ConveyTaskManager.LoggedTaskInfo
-		let manager: ConveyTaskManager
+		var taskType: ConveyTaskReporter.LoggedTaskInfo
+		let manager: ConveyTaskReporter
 		
 		var body: some View {
 			Group {
@@ -110,9 +109,9 @@ import SwiftUI
 }
 
 @available(watchOS, unavailable)
-struct TaskManagerView_Previews: PreviewProvider {
+struct TaskReporterView_Previews: PreviewProvider {
     static var previews: some View {
-		 TaskManagerView(server: ConveyServer.serverInstance)
+		 TaskReporterView()
     }
 }
 

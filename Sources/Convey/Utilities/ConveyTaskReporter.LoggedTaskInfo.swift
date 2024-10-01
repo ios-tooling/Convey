@@ -1,5 +1,5 @@
 //
-//  ConveyTaskManager.swift
+//  ConveyTaskReporter.swift
 //  
 //
 //  Created by Ben Gottlieb on 6/19/22.
@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-extension ConveyTaskManager {
+extension ConveyTaskReporter {
 	struct LoggedTaskInfo: Codable, Identifiable, Sendable {
 		enum CodingKeys: String, CodingKey { case taskName, totalCount, dates, totalBytes, thisRunBytes, manuallyEcho, suppressCompiledEcho }
 		
@@ -26,11 +26,11 @@ extension ConveyTaskManager {
 		var mostRecent: Date? { dates.last }
 		var viewID: String { taskName + String(describing: manuallyEcho) }
 		
-		func hasStoredResults(for manager: ConveyTaskManager) -> Bool {
+		func hasStoredResults(for manager: ConveyTaskReporter) -> Bool {
 			!storedURLs(for: manager).isEmpty
 		}
 		
-		func shouldEcho(_ task: ServerTask.Type? = nil, for manager: ConveyTaskManager) -> Bool {
+		func shouldEcho(_ task: ServerTask.Type? = nil, for manager: ConveyTaskReporter) -> Bool {
 			if let task, task is EchoingTask.Type, !suppressCompiledEcho { return true }
 			if manager.oneOffTypes.value.contains(taskName) { return true }
 			if let manual = manuallyEcho { return manual }
@@ -52,7 +52,7 @@ extension ConveyTaskManager {
 		}
 		
 		
-		func store(results: Data, from date: Date, for manager: ConveyTaskManager) {
+		func store(results: Data, from date: Date, for manager: ConveyTaskReporter) {
 			if shouldEcho(nil, for: manager) {
 				print("Storing data for \(name) at \(date.filename)")
 				let typeURL = directory(for: manager)
@@ -62,13 +62,13 @@ extension ConveyTaskManager {
 			}
 		}
 		
-		func clearStoredFiles(for manager: ConveyTaskManager) {
+		func clearStoredFiles(for manager: ConveyTaskReporter) {
 			try? FileManager.default.removeItemIfExists(at: directory(for: manager))
 		}
 		
-		func storedURLs(for manager: ConveyTaskManager) -> [URL] { (try? FileManager.default.contentsOfDirectory(at: directory(for: manager), includingPropertiesForKeys: nil, options: .skipsHiddenFiles)) ?? [] }
+		func storedURLs(for manager: ConveyTaskReporter) -> [URL] { (try? FileManager.default.contentsOfDirectory(at: directory(for: manager), includingPropertiesForKeys: nil, options: .skipsHiddenFiles)) ?? [] }
 		
-		func directory(for manager: ConveyTaskManager) -> URL {
+		func directory(for manager: ConveyTaskReporter) -> URL {
 			manager.directory.appendingPathComponent(taskName)
 		}
 		

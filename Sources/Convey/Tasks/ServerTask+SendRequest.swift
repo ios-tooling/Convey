@@ -68,9 +68,9 @@ extension ServerTask {
 					
 					if result.statusCode == 304, let data = DataCache.instance.fetchLocal(for: url), !data.data.isEmpty {
 						result.data = data.data
-						await server.taskManager.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: true)
+						await ConveyTaskReporter.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: true)
 					} else {
-						await server.taskManager.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: false)
+						await ConveyTaskReporter.instance.complete(task: self, request: request, response: result.response, bytes: result.data, startedAt: startedAt, usingCache: false)
 						if self.wrappedTask is FileBackedTask { self.fileCachedData = result.data }
 					}
 					

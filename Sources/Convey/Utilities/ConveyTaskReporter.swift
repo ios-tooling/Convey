@@ -1,5 +1,5 @@
 //
-//  ConveyTaskManager.swift
+//  ConveyTaskReporter.swift
 //  
 //
 //  Created by Ben Gottlieb on 6/18/22.
@@ -10,15 +10,17 @@ import Foundation
 
 public extension ServerTask {
 	static var shouldEcho: Bool {
-		get async { await ConveyServer.serverInstance.taskManager.shouldEcho(self as! ServerTask) }
+		get async { await ConveyTaskReporter.instance.shouldEcho(self as! ServerTask) }
 	}
 	
 	static func setShouldEcho(_ shouldEcho: Bool) async {
-		await ConveyServer.serverInstance.taskManager.task(self, shouldEcho: shouldEcho)
+		await ConveyTaskReporter.instance.task(self, shouldEcho: shouldEcho)
 	}
 }
 
-public actor ConveyTaskManager: NSObject, ObservableObject {
+public actor ConveyTaskReporter: ObservableObject {
+	public static let instance = ConveyTaskReporter()
+	
 	public var enabled = false { didSet { setup() }}
 	public nonisolated var directory: URL {
 		get { directoryValue.value }
@@ -47,7 +49,6 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 	public var logStyle = LogStyle.none
 	let oneOffTypes: CurrentValueSubject<[String], Never> = .init([])
 	public var recordings: [String: RecordedTask] = [:]
-	unowned var server: ConveyServer
 	
 	public enum LogStyle: String, Comparable, CaseIterable, Sendable { case none, short, steps
 		public static func <(lhs: Self, rhs: Self) -> Bool {
@@ -73,13 +74,11 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 	var typesURL: URL { directory.appendingPathComponent(typesFilename) }
 	func validateDirectories() { try? FileManager.default.createDirectory(at: typesURL.deletingLastPathComponent(), withIntermediateDirectories: true) }
 
-	let sort: CurrentValueSubject<ConveyTaskManager.Sort, Never> = .init(.alpha)
+	let sort: CurrentValueSubject<ConveyTaskReporter.Sort, Never> = .init(.alpha)
 	
-	var queue = DispatchQueue(label: "ConveyTaskManager")
-	init(for server: ConveyServer) {
-		typesFilename = "convey_task_types_\(String(describing: type(of: server))).txt"
-		self.server = server
-		super.init()
+	var queue = DispatchQueue(label: "ConveyTaskReporter")
+	init() {
+		typesFilename = "convey_task_types.txt"
 		if !enabled { return }
 		Task { await setup() }
 	}
@@ -176,7 +175,7 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 		guard let recording = recordings[tag] else { return }
 		
 		if await task.isEchoing { recording.echo() }
-		await server.taskPath?.save(task: recording)
+		await task.server.taskPath?.save(task: recording)
 		recordings.removeValue(forKey: tag)
 	}
 	
@@ -257,7 +256,7 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 
 	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async {
 		if !enabled { return }
-		if await task.server.effectiveLogStyle > .none { print("☎️ Begin \(task.abbreviatedDescription)") }
+		if await ConveyTaskReporter.instance.logStyle > .none { print("☎️ Begin \(task.abbreviatedDescription)") }
 		if multitargetLogging { await loadTypes(resetting: false) }
 
 		let echo: Bool
@@ -294,7 +293,7 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 			shouldEcho = false
 		}
 		if multitargetLogging { await loadTypes(resetting: false) }
-		if await task.server.effectiveLogStyle > .short { print("☎︎ End \(task.abbreviatedDescription)")}
+		if await ConveyTaskReporter.instance.logStyle > .short { print("☎︎ End \(task.abbreviatedDescription)")}
 
 	let index = self.index(of: task)
 		if let index {
@@ -317,7 +316,7 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 		}
 	}
 	
-	func updateSort(by: ConveyTaskManager.Sort? = nil) {
+	func updateSort(by: ConveyTaskReporter.Sort? = nil) {
 		let sort = by ?? self.sort.value
 		self.sort.value = sort
 		var insideTypes = types.value
@@ -337,12 +336,12 @@ public actor ConveyTaskManager: NSObject, ObservableObject {
 	}
 }
 
-extension ConveyTaskManager {
+extension ConveyTaskReporter {
 	enum Sort: String, Sendable { case alpha, count, size, recent, enabled }
 }
 
-extension Array where Element == ConveyTaskManager.LoggedTaskInfo {
-	mutating func resetTaskTypes(for manager: ConveyTaskManager) {
+extension Array where Element == ConveyTaskReporter.LoggedTaskInfo {
+	mutating func resetTaskTypes(for manager: ConveyTaskReporter) {
 		for i in indices {
 			self[i].dates = []
 			self[i].thisRunBytes = 0

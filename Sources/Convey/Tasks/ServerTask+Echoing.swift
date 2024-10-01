@@ -27,7 +27,7 @@ extension ServerTask {
 	var isEchoing: Bool {
 		get async {
 			if let wrappedEcho { return wrappedEcho == .full }
-			return await server.taskManager.shouldEcho(self)
+			return await ConveyTaskReporter.instance.shouldEcho(self)
 		}
 	}
 }

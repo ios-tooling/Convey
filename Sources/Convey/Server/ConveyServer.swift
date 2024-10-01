@@ -40,14 +40,6 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	open var allowsExpensiveNetworkAccess = true
 	open var allowsConstrainedNetworkAccess = true
 	open var waitsForConnectivity = true
-	open var taskManager: ConveyTaskManager!
-	public var logStyle: ConveyTaskManager.LogStyle?
-	internal var effectiveLogStyle: ConveyTaskManager.LogStyle {
-		get async { 
-			if let logStyle { return logStyle }
-			return await taskManager.logStyle
-		}
-	}
 
 	public private(set) var taskPath: TaskPath?
 	
@@ -143,7 +135,6 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 
 	public init(asDefault: Bool = true) {
 		super.init()
-		taskManager = .init(for: self)
 		if #available(iOS 16.0, macOS 13, watchOS 9, *) {
 			archiveURL = URL.libraryDirectory.appendingPathComponent("archived-downloads")
 			try? FileManager.default.createDirectory(at: archiveURL!, withIntermediateDirectories: true)

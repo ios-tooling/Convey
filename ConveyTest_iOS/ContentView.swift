@@ -36,7 +36,7 @@ struct ContentView: View {
 	@State var showBig = false
 	@State var imageURL = enterprise
 	@State var counter = 0
-	@State private var showingTaskManager = false
+	@State private var showingTaskReporter = false
 
 	var body: some View {
 		VStack() {
@@ -64,8 +64,8 @@ struct ContentView: View {
 				Text("Cache count: \(ImageCache.instance.cacheCount())")
 			}
 			Button("Show Big") { showBig.toggle() }
-			Button("Tasks") { showingTaskManager.toggle() }
-				.sheet(isPresented: $showingTaskManager) { TaskManagerView() }
+			Button("Tasks") { showingTaskReporter.toggle() }
+				.sheet(isPresented: $showingTaskReporter) { TaskReporterView() }
 
 		}
 		.task {

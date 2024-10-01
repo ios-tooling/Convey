@@ -81,7 +81,7 @@ It's recommended that you setup your server early in your launch process, and as
 
 - should URLSession wait for a remote connection when running, or fail immediately if there isn't one
 
-`var logStyle: ConveyTaskManager.LogStyle`
+`var logStyle: ConveyTaskReporter.LogStyle`
 
 - can be `none`, `short`, or `steps`. Controls how much data about active tasks is logged to the console.
 

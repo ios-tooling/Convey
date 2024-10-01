@@ -18,7 +18,7 @@ public extension ServerTask {
 
 		var request = try await buildRequest()
 		request = try await server.preflight(self, request: request)
-		await server.taskManager.begin(task: self, request: request, startedAt: startedAt)
+		await ConveyTaskReporter.instance.begin(task: self, request: request, startedAt: startedAt)
 		return request
 	}
 
