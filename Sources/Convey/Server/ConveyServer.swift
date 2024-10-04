@@ -18,15 +18,16 @@ import UIKit
 
 extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 
-open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
-	// static vars
-	public static var serverInstance: ConveyServer! {
-		get { _serverInstance.value }
-		set { _serverInstance.value = newValue }
+@ConveyActor public class SharedServer {
+	public static nonisolated var instance: ConveyServer! {
+		get { SharedServer._serverInstance.value }
+		set { SharedServer._serverInstance.value = newValue }
 	}
 	
-	private static let _serverInstance: CurrentValueSubject<ConveyServer?, Never> = .init(nil)
-	
+	nonisolated static let _serverInstance: CurrentValueSubject<ConveyServer?, Never> = .init(nil)
+}
+
+open class ConveyServer: ObservableObject, @unchecked Sendable {
 	// public vars
 	@Published open var remote: Remote = .empty
 	public var configuration = Configuration()
@@ -46,17 +47,13 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	let threadManager = ThreadManager()
 	
 	
-	public convenience override init() { self.init(asDefault: true) }
-	
 	public init(asDefault: Bool = true) {
-		super.init()
 		if #available(iOS 16.0, macOS 13, watchOS 9, *) {
 			configuration.archiveURL = URL.libraryDirectory.appendingPathComponent("archived-downloads")
 			try? FileManager.default.createDirectory(at: configuration.archiveURL!, withIntermediateDirectories: true)
 		}
-		if asDefault { Self.serverInstance = self }
+		if asDefault { SharedServer.instance = self }
 	}
-	
 	
 	open func preflight(_ task: ServerTask, request: URLRequest) async throws -> URLRequest {
 		if disabled { throw ConveyServerError.serverDisabled }
@@ -71,14 +68,6 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	open func postflight(_ task: ServerTask, result: ServerResponse) { }
 	
 	open func taskFailed(_ task: ServerTask, error: Error) { print("Error: \(error) from \(task)") }
-	
-	public static func setupDefault() -> ConveyServer {
-		if _serverInstance.value == nil {
-			let server = ConveyServer()
-			return server
-		}
-		return serverInstance
-	}
 	
 	open func standardHeaders(for task: ServerTask) async throws -> [String: String] {
 		var headers = configuration.defaultHeaders

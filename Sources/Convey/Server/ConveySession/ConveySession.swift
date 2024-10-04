@@ -17,7 +17,7 @@ actor ConveySession: NSObject {
 	nonisolated let streamContinuation: CurrentValueSubject<AsyncStream<ServerEvent>.Continuation?, Never> = .init(nil)
 	
 	override init() {
-		server = ConveyServer.serverInstance
+		server = SharedServer.instance
 		super.init()
 		session = URLSession(configuration: .default, delegate: self, delegateQueue: queue)
 	}

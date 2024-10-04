@@ -8,7 +8,7 @@
 import Foundation
 
 public extension ServerTask {
-	var server: ConveyServer { ConveyServer.serverInstance ?? ConveyServer.setupDefault() }
+	var server: ConveyServer { SharedServer.instance }
 
 	func postProcess(response: ServerResponse) async throws { }
 	var path: String { "" }
