@@ -26,20 +26,20 @@ actor ConveySession: NSObject {
 		server = task.server
 		super.init()
 
-		let config = task.server.configuration
+		let config = task.server.configuration.urlSessionConfiguration
 		
 		if task.wrappedTask is AllowedOnExpensiveNetworkTask {
 			config.allowsCellularAccess = true
 			config.allowsExpensiveNetworkAccess = true
 		} else {
-			config.allowsCellularAccess = server.allowsExpensiveNetworkAccess
-			config.allowsExpensiveNetworkAccess = server.allowsExpensiveNetworkAccess
+			config.allowsCellularAccess = server.configuration.allowsExpensiveNetworkAccess
+			config.allowsExpensiveNetworkAccess = server.configuration.allowsExpensiveNetworkAccess
 		}
 		
 		if task.wrappedTask is AllowedOnConstrainedNetworkTask {
 			config.allowsConstrainedNetworkAccess = true
 		} else {
-			config.allowsConstrainedNetworkAccess = server.allowsConstrainedNetworkAccess
+			config.allowsConstrainedNetworkAccess = server.configuration.allowsConstrainedNetworkAccess
 		}
 
 		if task.wrappedTask is ServerSentEventTargetTask {
@@ -59,7 +59,7 @@ actor ConveySession: NSObject {
 		config.timeoutIntervalForRequest = timeout
 		config.timeoutIntervalForResource = timeout
 
-		config.waitsForConnectivity = server.waitsForConnectivity
+		config.waitsForConnectivity = server.configuration.waitsForConnectivity
 		session = URLSession(configuration: config, delegate: self, delegateQueue: queue)
 	}
 	

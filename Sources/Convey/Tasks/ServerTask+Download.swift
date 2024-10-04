@@ -25,7 +25,7 @@ public extension PayloadDownloadingTask {
 extension PayloadDownloadingTask {
 	func requestPayload() async throws -> DownloadResult<DownloadPayload> {
 		let result = try await requestResponse()
-		let actualDecoder = wrappedDecoder ?? server.defaultDecoder
+		let actualDecoder = wrappedDecoder ?? server.configuration.defaultDecoder
 		do {
 			let decoded = try actualDecoder.decode(DownloadPayload.self, from: result.data)
 			try await postProcess(payload: decoded)

@@ -41,7 +41,7 @@ public extension ServerTask {
 	func didComplete(with: ServerResponse) async { }
 	
 	func didFail(with error: Error) async { }
-	var timeout: TimeInterval { server.defaultTimeout }
+	var timeout: TimeInterval { server.configuration.defaultTimeout }
 	var cookies: [HTTPCookie]? { nil }
 	
 	func preFlight() async throws { }

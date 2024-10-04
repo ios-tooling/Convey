@@ -29,17 +29,7 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	@Published open var remote: Remote = .empty
 	
 	open var baseURL: URL { remote.url }
-	open var defaultEncoder = JSONEncoder()
-	open var defaultDecoder = JSONDecoder()
-	open var logDirectory: URL?
-	open var reportBadHTTPStatusAsError = true
-	open var configuration = URLSessionConfiguration.default
-	open var enableGZipDownloads = false
-	open var archiveURL: URL?
-	open var defaultTimeout = 30.0
-	open var allowsExpensiveNetworkAccess = true
-	open var allowsConstrainedNetworkAccess = true
-	open var waitsForConnectivity = true
+	public var configuration = Configuration()
 
 	public private(set) var taskPath: TaskPath?
 	
@@ -92,7 +82,7 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 		"\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)/\(Device.rawDeviceType)/CFNetwork/1325.0.1 Darwin/21.1.0"
 	}
 	public func clearLogs() {
-		if let dir = logDirectory { try? FileManager.default.removeItem(at: dir) }
+		if let dir = configuration.logDirectory { try? FileManager.default.removeItem(at: dir) }
 	}
 	
 	public func setStandardHeaders(_ headers: [String: String]) {
@@ -136,15 +126,15 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	public init(asDefault: Bool = true) {
 		super.init()
 		if #available(iOS 16.0, macOS 13, watchOS 9, *) {
-			archiveURL = URL.libraryDirectory.appendingPathComponent("archived-downloads")
-			try? FileManager.default.createDirectory(at: archiveURL!, withIntermediateDirectories: true)
+			configuration.archiveURL = URL.libraryDirectory.appendingPathComponent("archived-downloads")
+			try? FileManager.default.createDirectory(at: configuration.archiveURL!, withIntermediateDirectories: true)
 		}
 		if asDefault { Self.serverInstance = self }
 	}
 	
 	open func standardHeaders(for task: ServerTask) async throws -> [String: String] {
 		var headers = defaultHeaders
-		if enableGZipDownloads {
+		if configuration.enableGZipDownloads {
 			headers[ServerConstants.Headers.acceptEncoding] = "gzip, deflate"
 		}
 		return headers

@@ -82,7 +82,7 @@ extension ServerTask {
 					try await postProcess(response: result)
 					if !result.response.didDownloadSuccessfully {
 						server.reportConnectionError(self, result.statusCode, String(data: result.data, encoding: .utf8))
-						if result.data.isEmpty || (result.statusCode.isHTTPError && server.reportBadHTTPStatusAsError) {
+						if result.data.isEmpty || (result.statusCode.isHTTPError && server.configuration.reportBadHTTPStatusAsError) {
 							let error = HTTPError.serverError(request.url, result.statusCode, result.data)
 							server.taskFailed(self, error: error)
 							await didFail(with: error)

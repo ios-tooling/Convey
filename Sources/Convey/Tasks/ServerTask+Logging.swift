@@ -9,7 +9,7 @@ import Foundation
 
 extension ConveyServer {
 	func setupLoggingDirectory() -> URL? {
-		guard let url = logDirectory else { return nil }
+		guard let url = configuration.logDirectory else { return nil }
 		
 		try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
 		return url

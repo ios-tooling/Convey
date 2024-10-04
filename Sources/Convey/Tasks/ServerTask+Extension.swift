@@ -39,7 +39,7 @@ public extension PayloadDownloadingTask {
 	func postProcess(payload: DownloadPayload) async throws { }
 	
 	func decode(data: Data, decoder possible: JSONDecoder? = nil) throws -> DownloadPayload {
-		let decoder = possible ?? server.defaultDecoder
+		let decoder = possible ?? server.configuration.defaultDecoder
 		return try decoder.decode(DownloadPayload.self, from: data)
 	}
 	
@@ -72,7 +72,7 @@ public extension PayloadUploadingTask {
 	var contentType: String? { "application/json" }
 	var dataToUpload: Data? {
 		guard let payload = uploadPayload else { return nil }
-		let encoder = jsonEncoder ?? server.defaultEncoder
+		let encoder = jsonEncoder ?? server.configuration.defaultEncoder
 		
 		do {
 			return try encoder.encode(payload)

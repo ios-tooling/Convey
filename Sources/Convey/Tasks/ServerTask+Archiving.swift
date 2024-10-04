@@ -9,7 +9,7 @@ import Foundation
 
 public extension ArchivingTask {
 	var archiveURL: URL? {
-		server.archiveURL?.appendingPathComponent(String(cString: (String(describing: self) as NSString).fileSystemRepresentation) + ".json")
+		server.configuration.archiveURL?.appendingPathComponent(String(cString: (String(describing: self) as NSString).fileSystemRepresentation) + ".json")
 	}
 	
 	func archive(_ result: ServerResponse) {
