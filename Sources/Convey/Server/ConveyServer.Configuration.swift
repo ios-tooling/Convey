@@ -8,7 +8,7 @@
 import Foundation
 
 extension ConveyServer {
-	public struct Configuration {
+	public struct Configuration: Sendable {
 		public var defaultEncoder = JSONEncoder()
 		public var defaultDecoder = JSONDecoder()
 		public var logDirectory: URL?
