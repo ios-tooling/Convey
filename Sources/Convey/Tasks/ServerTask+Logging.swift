@@ -40,7 +40,7 @@ extension ServerTask {
 		}
 		guard let url = server.setupLoggingDirectory()?.appendingPathComponent(logFilename(for: startedAt)) else { return }
 		
-		let data = request.descriptionData(maxUploadSize: server.maxLoggedUploadSize)
+		let data = request.descriptionData(maxUploadSize: server.configuration.maxLoggedUploadSize)
 		try? data.write(to: url)
 	}
 	
@@ -65,14 +65,14 @@ extension ServerTask {
 			output = "Started at: \(startedAt.timeLabel), took: \(abs(startedAt.timeIntervalSinceNow))s\n".data(using: .utf8) ?? Data()
 		}
 		
-		output += (request?.descriptionData(maxUploadSize: server.maxLoggedUploadSize)) ?? Data()
+		output += (request?.descriptionData(maxUploadSize: server.configuration.maxLoggedUploadSize)) ?? Data()
 		
 		if let responseData = response?.descriptionData {
 			if includeMarkers { output += "\n\n⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗\n\n".data(using: .utf8) ?? Data() }
 			output += responseData
 		}
 		
-		if let body = data, body.count < server.maxLoggedDownloadSize {
+		if let body = data, body.count < server.configuration.maxLoggedDownloadSize {
 			if includeMarkers { output += "\n\n⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗⍗\n\n".data(using: .utf8) ?? Data() }
 			do {
 				let json = try JSONSerialization.jsonObject(with: body, options: [])

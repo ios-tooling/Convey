@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 #if os(iOS)
-	import UIKit
+import UIKit
 #endif
 
 @globalActor public actor ConveyActor: GlobalActor {
@@ -19,6 +19,7 @@ import Foundation
 extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 
 open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
+	// static vars
 	public static var serverInstance: ConveyServer! {
 		get { _serverInstance.value }
 		set { _serverInstance.value = newValue }
@@ -26,70 +27,37 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	
 	private static let _serverInstance: CurrentValueSubject<ConveyServer?, Never> = .init(nil)
 	
+	// public vars
 	@Published open var remote: Remote = .empty
-	
-	open var baseURL: URL { remote.url }
 	public var configuration = Configuration()
+	public var disabled = false { didSet { if disabled { print("#### \(String(describing: self)) DISABLED #### ")} }}
 
-	public private(set) var taskPath: TaskPath?
-	
-	var shouldRecordTaskPath: Bool { taskPath != nil }
-	open var disabled = false { didSet {
-		if disabled { print("#### \(String(describing: self)) DISABLED #### ")}
-	}}
-	public var userAgent: String? { didSet {
-		updateUserAgentHeader()
-		print("User agent set to: \(userAgent ?? "--")")
-	}}
-	open var maxLoggedDownloadSize = 1024 * 1024 * 10
-	open var maxLoggedUploadSize = 1024 * 4
-	open var launchedAt = Date()
-	var activeSessions = ActiveSessions()
-	public private(set) var pinnedServerKeys: [String: [String]] = [:]
-	
-	public func recordTaskPath(to url: URL? = nil) {
-		if let url {
-			taskPath = .init(url: url)
-		} else {
-			if #available(iOS 16.0, macOS 13, *) {
-				taskPath = .init()
-			}
-		}
-		objectWillChange.send()
-	}
-	
-	public func endTaskPathRecording() {
-		self.taskPath?.stop()
-		self.taskPath = nil
-		objectWillChange.send()
-	}
-	
-	public func register(publicKey: String, for server: String) {
-		var keys = pinnedServerKeys[server, default: []]
-		keys.append(publicKey)
-		pinnedServerKeys[server] = keys
-	}
-
-	private var defaultHeaders: [String: String] = [
-		ServerConstants.Headers.accept: "*/*"
-	]
-	let threadManager = ThreadManager()
+	public let launchedAt = Date()
+	public var baseURL: URL { remote.url }
+	public internal(set) var taskPath: TaskPath?
+	public internal(set) var pinnedServerKeys: [String: [String]] = [:]
 	#if os(iOS)
 		public var application: UIApplication?
 	#endif
 	
-	public var defaultUserAgent: String {
-		"\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)/\(Device.rawDeviceType)/CFNetwork/1325.0.1 Darwin/21.1.0"
-	}
-	public func clearLogs() {
-		if let dir = configuration.logDirectory { try? FileManager.default.removeItem(at: dir) }
+	// internal vars
+	var shouldRecordTaskPath: Bool { taskPath != nil }
+	var activeSessions = ActiveSessions()
+	let threadManager = ThreadManager()
+	
+	
+	public convenience override init() { self.init(asDefault: true) }
+	
+	public init(asDefault: Bool = true) {
+		super.init()
+		if #available(iOS 16.0, macOS 13, watchOS 9, *) {
+			configuration.archiveURL = URL.libraryDirectory.appendingPathComponent("archived-downloads")
+			try? FileManager.default.createDirectory(at: configuration.archiveURL!, withIntermediateDirectories: true)
+		}
+		if asDefault { Self.serverInstance = self }
 	}
 	
-	public func setStandardHeaders(_ headers: [String: String]) {
-		self.defaultHeaders = headers
-		updateUserAgentHeader()
-	}
-
+	
 	open func preflight(_ task: ServerTask, request: URLRequest) async throws -> URLRequest {
 		if disabled { throw ConveyServerError.serverDisabled }
 		if remote.isEmpty {
@@ -100,40 +68,21 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 		return request
 	}
 	
-	open func postflight(_ task: ServerTask, result: ServerResponse) {
-		
-	}
+	open func postflight(_ task: ServerTask, result: ServerResponse) { }
 	
-	open func taskFailed(_ task: ServerTask, error: Error) {
-		print("Error: \(error) from \(task)")
-	}
+	open func taskFailed(_ task: ServerTask, error: Error) { print("Error: \(error) from \(task)") }
 	
 	public static func setupDefault() -> ConveyServer {
-		_ = ConveyServer()
+		if _serverInstance.value == nil {
+			let server = ConveyServer()
+			return server
+		}
 		return serverInstance
 	}
 	
-	func updateUserAgentHeader() {
-		if let agent = userAgent {
-			defaultHeaders[ServerConstants.Headers.userAgent] = agent
-		} else {
-			defaultHeaders.removeValue(forKey: ServerConstants.Headers.userAgent)
-		}
-	}
-
-	public convenience override init() { self.init(asDefault: true) }
-
-	public init(asDefault: Bool = true) {
-		super.init()
-		if #available(iOS 16.0, macOS 13, watchOS 9, *) {
-			configuration.archiveURL = URL.libraryDirectory.appendingPathComponent("archived-downloads")
-			try? FileManager.default.createDirectory(at: configuration.archiveURL!, withIntermediateDirectories: true)
-		}
-		if asDefault { Self.serverInstance = self }
-	}
-	
 	open func standardHeaders(for task: ServerTask) async throws -> [String: String] {
-		var headers = defaultHeaders
+		var headers = configuration.defaultHeaders
+		if let agent = configuration.userAgent { headers[ServerConstants.Headers.userAgent] = agent }
 		if configuration.enableGZipDownloads {
 			headers[ServerConstants.Headers.acceptEncoding] = "gzip, deflate"
 		}
@@ -147,35 +96,7 @@ open class ConveyServer: NSObject, ObservableObject, @unchecked Sendable {
 	}
 	
 	open var reportConnectionError: (ServerTask, Int, String?) -> Void = { task, code, description in
-		  print("\(type(of: task)), \(task.url) Connection error: \(code): \(description ?? "Unparseable error")")
+		print("\(type(of: task)), \(task.url) Connection error: \(code): \(description ?? "Unparseable error")")
 	}
 	
-}
-
-public extension Int {
-	var isHTTPError: Bool {
-		(self / 100) > 3
-	}
-	
-	var isHTTPSuccess: Bool {
-		(self / 100) == 2
-	}
-}
-
-actor ActiveSessions {
-	let sessions: CurrentValueSubject<Set<ConveySession>, Never> = .init([])
-	
-	nonisolated var isEmpty: Bool { sessions.value.isEmpty }
-	
-	func insert(_ session: ConveySession) {
-		var value = sessions.value
-		value.insert(session)
-		sessions.send(value)
-	}
-	
-	func remove(_ session: ConveySession) {
-		var value = sessions.value
-		value.remove(session)
-		sessions.send(value)
-	}
 }

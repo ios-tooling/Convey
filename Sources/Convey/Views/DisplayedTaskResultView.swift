@@ -49,7 +49,7 @@ import SwiftUI
 					}
 					if let result {
 						if showSubmitted {
-							if let requestData = request?.descriptionData(maxUploadSize: task.server.maxLoggedUploadSize), let requestString = String(data: requestData, encoding: .utf8) {
+							if let requestData = request?.descriptionData(maxUploadSize: task.server.configuration.maxLoggedUploadSize), let requestString = String(data: requestData, encoding: .utf8) {
 								Text(requestString)
 									.multilineTextAlignment(.leading)
 									.font(.system(size: 14, weight: .regular, design: .monospaced))
@@ -65,7 +65,7 @@ import SwiftUI
 						}
 					} else if let error {
 						if showSubmitted {
-							if let requestData = request?.descriptionData(maxUploadSize: task.server.maxLoggedUploadSize), let requestString = String(data: requestData, encoding: .utf8) {
+							if let requestData = request?.descriptionData(maxUploadSize: task.server.configuration.maxLoggedUploadSize), let requestString = String(data: requestData, encoding: .utf8) {
 								Text(requestString)
 									.multilineTextAlignment(.leading)
 									.font(.system(size: 14, weight: .regular, design: .monospaced))

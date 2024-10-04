@@ -26,7 +26,7 @@ actor ConveySession: NSObject {
 		server = task.server
 		super.init()
 
-		let config = task.server.configuration.urlSessionConfiguration
+		let config = task.server.configuration.urlSessionConfiguration.copy() as! URLSessionConfiguration
 		
 		if task.wrappedTask is AllowedOnExpensiveNetworkTask {
 			config.allowsCellularAccess = true

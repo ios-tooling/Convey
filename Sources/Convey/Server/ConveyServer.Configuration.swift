@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  ConveyServer.Configuration.swift
 //  Convey
 //
 //  Created by Ben Gottlieb on 10/3/24.
@@ -20,5 +20,11 @@ extension ConveyServer {
 		public var allowsExpensiveNetworkAccess = true
 		public var allowsConstrainedNetworkAccess = true
 		public var waitsForConnectivity = true
+		public var maxLoggedDownloadSize = 1024 * 1024 * 10
+		public var maxLoggedUploadSize = 1024 * 4
+		public var defaultHeaders: [String: String] = [ ServerConstants.Headers.accept: "*/*" ]
+		public var userAgent: String? =
+			"\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)/\(Device.rawDeviceType)/CFNetwork/1325.0.1 Darwin/21.1.0"
+		
 	}
 }
