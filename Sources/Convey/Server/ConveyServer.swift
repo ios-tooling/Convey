@@ -41,7 +41,12 @@ extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 	public let launchedAt = Date()
 	public var baseURL: URL { remote.url }
 	public internal(set) var taskPath: TaskPath?
-	public internal(set) var pinnedServerKeys: [String: [String]] = [:]
+
+	nonisolated let pinnedServerKeysSubject = CurrentValueSubject<[String: [String]], Never>(.init())
+	public nonisolated var pinnedServerKeys: [String: [String]] {
+		get { pinnedServerKeysSubject.value }
+		set { pinnedServerKeysSubject.value = newValue }
+	}
 	#if os(iOS)
 		nonisolated let applicationSubject = CurrentValueSubject<UIApplication?, Never>(nil)
 	#endif

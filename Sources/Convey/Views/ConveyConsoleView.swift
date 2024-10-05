@@ -21,47 +21,49 @@ import Cocoa
 	@ObservedObject var responses = ConsoleTaskResponseCache()
 	@State private var isConsoleDisplayable = false
 	@State private var taskTag = UUID().uuidString
+	@State private var currentTask: (any ConsoleDisplayableTask)?
 	
 	public init(tasks: [any ConsoleDisplayableTask]) {
 		_availableTasks = State(initialValue: tasks)
 	}
 	
 	public var body: some View {
-		let task = responses.task(matching: availableTasks[currentTaskIndex])
-
 		VStack {
-			HStack {
-				Picker("Task", selection: $currentTaskIndex) {
-					ForEach(0..<availableTasks.count, id: \.self) { index in
-						TaskRow(task: availableTasks[index]).tag(index)
+			if let currentTask {
+				HStack {
+					Picker("Task", selection: $currentTaskIndex) {
+						ForEach(0..<availableTasks.count, id: \.self) { index in
+							TaskRow(task: availableTasks[index]).tag(index)
+						}
+						
 					}
 					
+					viewOnMacButton
+					
+					Button("Configure") {
+						isShowingConfigurationSheet.toggle()
+					}
+					.disabled(isFetching || !isConsoleDisplayable)
+					
+					Button(action: {
+						responses.clearResults(for: currentTask)
+					}) {
+						Image(systemName: "arrow.counterclockwise")
+					}
+					.disabled(isFetching)
 				}
-
-				viewOnMacButton
-
-				Button("Configure") {
-					isShowingConfigurationSheet.toggle()
-				}
-				.disabled(isFetching || !isConsoleDisplayable)
 				
-				Button(action: {
-					responses.clearResults(for: task)
-				}) {
-					Image(systemName: "arrow.counterclockwise")
-				}
-				.disabled(isFetching)
+				DisplayedTaskResultView(task: currentTask, isFetching: $isFetching)
+					.id(taskTag)
+				
 			}
-			
-			DisplayedTaskResultView(task: task, isFetching: $isFetching)
-				.id(taskTag)
 			Spacer()
-			
 		}
 		.onAppear {
 			Task {
+				currentTask = await responses.task(matching: availableTasks[currentTaskIndex])
 				isConsoleDisplayable = await availableTasks[currentTaskIndex].wrappedTask is ConfigurableConsoleDisplayableTask
-				taskTag = await task.taskTag
+				taskTag = await currentTask?.taskTag ?? ""
 			}
 		}
 		.sheet(isPresented: $isShowingConfigurationSheet) {

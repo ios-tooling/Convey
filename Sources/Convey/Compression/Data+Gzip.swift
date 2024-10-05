@@ -114,7 +114,7 @@ public struct GzipError: Swift.Error {
     
     internal init(code: Int32, msg: UnsafePointer<CChar>?) {
         
-        self.message = msg.flatMap { String(validatingUTF8: $0) } ?? "Unknown gzip error"
+        self.message = msg.flatMap { String(validatingCString: $0) } ?? "Unknown gzip error"
         
         self.kind = {
             switch code {

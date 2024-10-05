@@ -57,9 +57,9 @@ import SwiftUI
 		)
 	}
 	
-	func task(matching: any ConsoleDisplayableTask) -> any ConsoleDisplayableTask {
+	func task(matching: any ConsoleDisplayableTask) async -> any ConsoleDisplayableTask {
 		if let configurable = matching as? (any ConfigurableConsoleDisplayableTask), let opts = configurations[configurable.resultsKey] {
-			return type(of: configurable).init(configuration: opts) ?? matching
+			return await type(of: configurable).init(configuration: opts) ?? matching
 		}
 		
 		return matching
