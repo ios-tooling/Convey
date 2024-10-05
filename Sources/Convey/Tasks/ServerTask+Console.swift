@@ -11,7 +11,7 @@ public protocol ConsoleDisplayableTask: ServerTask {
 	var displayString: String { get }
 }
 
-public struct ConsoleConfigurationField: Identifiable {
+public struct ConsoleConfigurationField: Identifiable, Sendable {
 	public let id = UUID()
 	public enum Kind: Sendable { case string, integer }
 	public let label: String

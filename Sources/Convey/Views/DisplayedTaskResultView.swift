@@ -109,7 +109,7 @@ import SwiftUI
 		isFetching = true
 		request = try? await task.buildRequest()
 		do {
-			print("Fetching \(task.displayString)")
+			print("Fetching \(await task.displayString)")
 			let response = try await task.downloadDataWithResponse()
 			responses.save(response, for: task)
 			print("Fetched task")

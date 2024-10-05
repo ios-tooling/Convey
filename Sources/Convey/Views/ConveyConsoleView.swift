@@ -33,7 +33,7 @@ import Cocoa
 			HStack {
 				Picker("Task", selection: $currentTaskIndex) {
 					ForEach(0..<availableTasks.count, id: \.self) { index in
-						Text(availableTasks[index].displayString).tag(index)
+						TaskRow(task: availableTasks[index]).tag(index)
 					}
 					
 				}
@@ -70,6 +70,18 @@ import Cocoa
 		}
 		.padding()
 		.environmentObject(responses)
+	}
+	
+	struct TaskRow: View {
+		let task: any ConsoleDisplayableTask
+		@State var text = ""
+		
+		var body: some View {
+			Text(text)
+				.task {
+					text = await task.displayString
+				}
+		}
 	}
 	
 	@ViewBuilder var viewOnMacButton: some View {

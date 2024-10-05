@@ -14,6 +14,7 @@ import SwiftUI
 	@Binding var fields: [String: String]
 	@Environment(\.dismiss) private var dismiss
 	@Binding var newTask: (any ConfigurableConsoleDisplayableTask)?
+	@State var configFields: [ConsoleConfigurationField] = []
 	
 	func binding(forField field: ConsoleConfigurationField) -> Binding<String> {
 		Binding<String>(
@@ -25,7 +26,7 @@ import SwiftUI
 	
 	var body: some View {
 		VStack {
-			ForEach(taskType.configurationFields) { field in
+			ForEach(configFields) { field in
 				LabeledContent {
 					TextField(field.label, text: binding(forField: field))
 				} label: {
@@ -34,6 +35,9 @@ import SwiftUI
 				.onSubmit {
 					save()
 				}
+			}
+			.task {
+				configFields = await taskType.configurationFields
 			}
 			
 			Spacer()
@@ -53,9 +57,11 @@ import SwiftUI
 	}
 	
 	func save() {
-		if let task = taskType.init(configuration: fields) {
-			newTask = task
-			dismiss()
+		Task {
+			if let task = await taskType.init(configuration: fields) {
+				newTask = task
+				dismiss()
+			}
 		}
 	}
 }
