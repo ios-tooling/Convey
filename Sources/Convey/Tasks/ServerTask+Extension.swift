@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension ServerTask {
+@ConveyActor public extension ServerTask {
 	var server: ConveyServer { SharedServer.instance }
 
 	func postProcess(response: ServerResponse) async throws { }
@@ -35,15 +35,15 @@ public extension ServerTask {
 	}
 }
 
-public extension PayloadDownloadingTask {
+@ConveyActor public extension PayloadDownloadingTask {
 	func postProcess(payload: DownloadPayload) async throws { }
 	
-	func decode(data: Data, decoder possible: JSONDecoder? = nil) throws -> DownloadPayload {
+	@ConveyActor func decode(data: Data, decoder possible: JSONDecoder? = nil) throws -> DownloadPayload {
 		let decoder = possible ?? server.configuration.defaultDecoder
 		return try decoder.decode(DownloadPayload.self, from: data)
 	}
 	
-	func cachedPayload(decoder: JSONDecoder? = nil) -> DownloadPayload? {
+	@ConveyActor func cachedPayload(decoder: JSONDecoder? = nil) -> DownloadPayload? {
 		guard let data = cachedData else { return nil }
 
 		do {
@@ -55,7 +55,7 @@ public extension PayloadDownloadingTask {
 	}
 }
 
-public extension JSONUploadingTask {
+@ConveyActor public extension JSONUploadingTask {
 	var contentType: String? { "application/json" }
 	var dataToUpload: Data? {
 		do {
@@ -68,9 +68,9 @@ public extension JSONUploadingTask {
 	}
 }
 
-public extension PayloadUploadingTask {
+@ConveyActor public extension PayloadUploadingTask {
 	var contentType: String? { "application/json" }
-	var dataToUpload: Data? {
+	@ConveyActor var dataToUpload: Data? {
 		guard let payload = uploadPayload else { return nil }
 		let encoder = jsonEncoder ?? server.configuration.defaultEncoder
 		

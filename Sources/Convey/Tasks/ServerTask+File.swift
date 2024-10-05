@@ -8,7 +8,7 @@
 import Foundation
 
 public extension ServerTask {
-	func downloadFile(to destination: URL) async throws {
+	@ConveyActor func downloadFile(to destination: URL) async throws {
 		try await handleThreadAndBackgrounding {
 			var attemptCount = 1
 			

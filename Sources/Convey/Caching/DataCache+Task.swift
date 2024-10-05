@@ -9,7 +9,8 @@ import Foundation
 
 extension DataCache {
 	public func fetch<FetchTask: ServerTask>(using task: FetchTask, caching: Caching = .localFirst, provision: Provision? = nil) async throws -> Data? {
-		try await fetchDataAndCache(using: task, caching: caching, provision: provision ?? self.provision(url: task.url))?.data
+		let url = await task.url
+		return try await fetchDataAndCache(using: task, caching: caching, provision: provision ?? self.provision(url: url))?.data
 	}
 
 	public func fetchCachedLocation<FetchTask: ServerTask>(using task: FetchTask, caching: Caching = .localFirst, provision: Provision) async throws -> URL? {
@@ -45,7 +46,8 @@ extension DataCache {
 		return DataAndLocalCache(data: data, url: nil, cachedAt: Date())
 	}
 	
-	public func replace<Task: ServerTask>(data: Data, for task: Task, provision: Provision? = nil) throws {
-		try replace(data: data, for: provision ?? self.provision(url: task.url))
+	public func replace<Task: ServerTask>(data: Data, for task: Task, provision: Provision? = nil) async throws {
+		let url = await task.url
+		return try replace(data: data, for: provision ?? self.provision(url: url))
 	}
 }

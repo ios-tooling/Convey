@@ -8,7 +8,7 @@
 import Foundation
 
 extension ServerTask {
-	public func requestResponse() async throws -> ServerResponse {
+	@ConveyActor public func requestResponse() async throws -> ServerResponse {
 		await willStart()
 		await didStart()
 		
@@ -41,7 +41,7 @@ extension ServerTask {
 		}
 	}
 	
-	func sendRequest(sendStart: Bool = true) async throws -> ServerResponse {
+	@ConveyActor func sendRequest(sendStart: Bool = true) async throws -> ServerResponse {
 		if sendStart {
 			await willStart()
 			await didStart()
@@ -76,7 +76,7 @@ extension ServerTask {
 					
 					if self.wrappedTask is ETagCachedTask, let tag = result.response.etag {
 						await DataCache.instance.cache(data: result.data, for: url)
-						await ETagStore.instance.store(etag: tag, for: url)
+						ETagStore.instance.store(etag: tag, for: url)
 					}
 					wrappedPreview?(result)
 					try await postProcess(response: result)

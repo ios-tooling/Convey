@@ -8,7 +8,7 @@
 import Foundation
 
 public extension ArchivingTask {
-	var archiveURL: URL? {
+	@ConveyActor var archiveURL: URL? {
 		server.configuration.archiveURL?.appendingPathComponent(String(cString: (String(describing: self) as NSString).fileSystemRepresentation) + ".json")
 	}
 	

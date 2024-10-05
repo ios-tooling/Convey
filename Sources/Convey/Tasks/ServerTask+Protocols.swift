@@ -27,67 +27,67 @@ public protocol EchoingTask: ServerTask { }
 
 
 
-public protocol ParameterizedTask: ServerTask {
+@ConveyActor public protocol ParameterizedTask: ServerTask {
 	var parameters: TaskURLParameters? { get }
 }
 
-public protocol FileBackedTask: ServerTask {
+@ConveyActor public protocol FileBackedTask: ServerTask {
 	var fileURL: URL? { get }
 }
 
-public protocol CustomURLTask: ServerTask {
+@ConveyActor public protocol CustomURLTask: ServerTask {
 	var customURL: URL? { get }
 }
 
-public protocol TaggedTask: ServerTask {
+@ConveyActor public protocol TaggedTask: ServerTask {
 	var requestTag: String { get }
 }
 
-public protocol PayloadDownloadingTask<DownloadPayload>: ServerTask {
+@ConveyActor public protocol PayloadDownloadingTask<DownloadPayload>: ServerTask {
 	associatedtype DownloadPayload: Decodable & Sendable
 	func postProcess(payload: DownloadPayload) async throws
 }
 
-public protocol DataUploadingTask: ServerUploadingTask {
+@ConveyActor public protocol DataUploadingTask: ServerUploadingTask {
 	var dataToUpload: Data? { get }
 	var contentType: String? { get }
 }
 
-public protocol MIMEUploadingTask: DataUploadingTask {
+@ConveyActor public protocol MIMEUploadingTask: DataUploadingTask {
 	var mimeBoundary: String { get }
 	var mimeFields: [MIMEMessageComponent]? { get }
 	var base64EncodeBody: Bool { get }
 }
 
-public protocol FormURLEncodedUploadingTask: DataUploadingTask {
+@ConveyActor public protocol FormURLEncodedUploadingTask: DataUploadingTask {
 	var formFields: [String: any Sendable] { get }
 }
 
-public protocol JSONUploadingTask: DataUploadingTask, JSONPayloadTask {
+@ConveyActor public protocol JSONUploadingTask: DataUploadingTask, JSONPayloadTask {
 	var jsonToUpload: [String: any Sendable]? { get }
 }
 
-public protocol UnrecordedTask: ServerTask {
+@ConveyActor public protocol UnrecordedTask: ServerTask {
 	var exposedComponents: [ServerTaskComponent] { get }
 }
 
-public protocol CustomHTTPHeaders: ServerTask {
+@ConveyActor public protocol CustomHTTPHeaders: ServerTask {
 	var customHTTPHeaders: ConveyHeaders { get }
 }
 
-public protocol ArchivingTask: ServerTask {
+@ConveyActor public protocol ArchivingTask: ServerTask {
 	var archiveURL: URL? { get }
 }
 
-public protocol ThreadedServerTask: ServerTask {
+@ConveyActor public protocol ThreadedServerTask: ServerTask {
 	var threadName: String? { get }
 }
 
-public protocol RetryableTask: ServerTask {
+@ConveyActor public protocol RetryableTask: ServerTask {
 	func retryInterval(after error: Error, attemptNumber: Int) -> TimeInterval?
 }
 
-public protocol PayloadUploadingTask: DataUploadingTask, JSONPayloadTask {
+@ConveyActor public protocol PayloadUploadingTask: DataUploadingTask, JSONPayloadTask {
 	associatedtype UploadPayload: Encodable
 	var uploadPayload: UploadPayload? { get }
 }

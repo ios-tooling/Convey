@@ -13,11 +13,11 @@ import UIKit
 extension ServerTask {
 #if os(iOS)
 	@MainActor func requestBackgroundTime() async -> UIBackgroundTaskIdentifier? {
-		server.application?.beginBackgroundTask(withName: "") {  }
+		SharedServer.instance.application?.beginBackgroundTask(withName: "") {  }
 	}
 	@MainActor func finishBackgroundTime(_ token: UIBackgroundTaskIdentifier?) {
 		guard let token else { return }
-		server.application?.endBackgroundTask(token)
+		SharedServer.instance.application?.endBackgroundTask(token)
 	}
 #else
 	func requestBackgroundTime() async -> Int { 0 }
@@ -32,7 +32,7 @@ extension ServerTask {
 		defer { Task { await finishBackgroundTime(token) }}
 		let result = try await closure()
 		await server.stopWaiting(forThread: (self.wrappedTask as? ThreadedServerTask)?.threadName)
-		if oneOffLogging { await ConveyTaskReporter.instance.decrementOneOffLog(for: self) }
+		if oneOffLogging { ConveyTaskReporter.instance.decrementOneOffLog(for: self) }
 		return result
 	}
 }

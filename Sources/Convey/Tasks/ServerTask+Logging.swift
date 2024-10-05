@@ -17,7 +17,7 @@ extension ConveyServer {
 }
 extension ServerTask {
 	public func logged() async -> Self {
-		await ConveyTaskReporter.instance.incrementOneOffLog(for: self)
+		ConveyTaskReporter.instance.incrementOneOffLog(for: self)
 		return self
 	}
 	

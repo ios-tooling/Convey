@@ -27,10 +27,15 @@ extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 	nonisolated static let _serverInstance: CurrentValueSubject<ConveyServer?, Never> = .init(nil)
 }
 
-open class ConveyServer: ObservableObject, @unchecked Sendable {
+@ConveyActor open class ConveyServer: ObservableObject, @unchecked Sendable {
 	// public vars
-	@Published open var remote: Remote = .empty
-	public var configuration = Configuration()
+	open var remote: Remote = .empty
+
+	nonisolated let configurationSubject = CurrentValueSubject<Configuration, Never>(.init())
+	public nonisolated var configuration: Configuration {
+		get { configurationSubject.value }
+		set { configurationSubject.value = newValue }
+	}
 	public var disabled = false { didSet { if disabled { print("#### \(String(describing: self)) DISABLED #### ")} }}
 
 	public let launchedAt = Date()
@@ -38,7 +43,7 @@ open class ConveyServer: ObservableObject, @unchecked Sendable {
 	public internal(set) var taskPath: TaskPath?
 	public internal(set) var pinnedServerKeys: [String: [String]] = [:]
 	#if os(iOS)
-		public var application: UIApplication?
+		nonisolated let applicationSubject = CurrentValueSubject<UIApplication?, Never>(nil)
 	#endif
 	
 	// internal vars
@@ -88,4 +93,7 @@ open class ConveyServer: ObservableObject, @unchecked Sendable {
 		print("\(type(of: task)), \(task.url) Connection error: \(code): \(description ?? "Unparseable error")")
 	}
 	
+	public func setRemote(_ remote: Remote) {
+		self.remote = remote
+	}
 }

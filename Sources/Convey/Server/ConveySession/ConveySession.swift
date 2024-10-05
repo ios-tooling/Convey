@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-actor ConveySession: NSObject {
+@ConveyActor class ConveySession: NSObject {
 	var session: URLSession!
 	let server: ConveyServer
 	var queue: OperationQueue?
@@ -79,23 +79,24 @@ actor ConveySession: NSObject {
 
 extension ConveySession: URLSessionDelegate {
 	public nonisolated func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-		
-		if let keys = server.pinnedServerKeys[challenge.host] {
-			guard let key = challenge.publicKey, keys.contains(key) else {
-				print("Failed to verify public key for \(challenge.host)")
-				completionHandler(.cancelAuthenticationChallenge, nil)
-				return
+		Task {
+			if let keys = await server.pinnedServerKeys[challenge.host] {
+				guard let key = challenge.publicKey, keys.contains(key) else {
+					print("Failed to verify public key for \(challenge.host)")
+					completionHandler(.cancelAuthenticationChallenge, nil)
+					return
+				}
 			}
-		}
-		
-		if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-			if let serverTrust = challenge.protectionSpace.serverTrust {
-				let credential = URLCredential(trust: serverTrust)
-				completionHandler(URLSession.AuthChallengeDisposition.useCredential, credential)
-				return
+			
+			if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
+				if let serverTrust = challenge.protectionSpace.serverTrust {
+					let credential = URLCredential(trust: serverTrust)
+					completionHandler(URLSession.AuthChallengeDisposition.useCredential, credential)
+					return
+				}
 			}
+			completionHandler(.useCredential, challenge.proposedCredential)
 		}
-		completionHandler(.useCredential, challenge.proposedCredential)
 	}
 }
 

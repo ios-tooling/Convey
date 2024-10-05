@@ -10,7 +10,7 @@ import Combine
 
 public extension ServerTask {
 	var cachedEtag: String? {
-		get async { await ETagStore.instance.eTag(for: url) }
+		get { ETagStore.instance.eTag(for: url) }
 	}
 	
 	func beginRequest(at startedAt: Date) async throws -> URLRequest {
@@ -73,7 +73,7 @@ public extension ServerTask {
 			}
 		}
 
-		if self.wrappedTask is ETagCachedTask, let etag = await cachedEtag, DataCache.instance.hasCachedValue(for: url) {
+		if self.wrappedTask is ETagCachedTask, let etag = cachedEtag, DataCache.instance.hasCachedValue(for: url) {
 			request.addValue(etag, forHTTPHeaderField: ServerConstants.Headers.ifNoneMatch)
 		}
 		

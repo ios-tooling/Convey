@@ -27,7 +27,7 @@ extension ServerTask {
 	var isEchoing: Bool {
 		get async {
 			if let wrappedEcho { return wrappedEcho == .full }
-			return await ConveyTaskReporter.instance.shouldEcho(self)
+			return ConveyTaskReporter.instance.shouldEcho(self)
 		}
 	}
 }
@@ -37,7 +37,7 @@ public extension ServerTask {
 		print(String(format: "%@ took %.2fs", abbreviatedDescription, duration))
 	}
 
-	var taskTag: String {
+	@ConveyActor var taskTag: String {
 		if let tag = (self.wrappedTask as? (any TaggedTask))?.requestTag { return tag }
 		return String(describing: self)
 	}

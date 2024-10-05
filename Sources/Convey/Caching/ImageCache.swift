@@ -12,7 +12,7 @@ import Combine
 #else
 	import UIKit
 #endif
-
+ 
 public actor ImageCache {
 	public static let instance = ImageCache()
 	public var cachesDirectory = ImageCache.defaultDirectory { didSet {
@@ -30,7 +30,7 @@ public actor ImageCache {
 		static let empty = ImageInfo(image: nil, localURL: nil, remoteURL: nil)
 	}
 
-	static let defaultDirectory = URL.systemDirectoryURL(which: .cachesDirectory)!.appendingPathComponent("images")
+	static nonisolated let defaultDirectory = URL.systemDirectoryURL(which: .cachesDirectory)!.appendingPathComponent("images")
 	var currentSizeLimit: Int? = 1_000_000 * 100
 	var totalSize: Int {
 		inMemoryImages.value.values.map { $0.size }.reduce(0) { $0 + $1 }

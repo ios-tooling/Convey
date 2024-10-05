@@ -67,5 +67,5 @@ import SwiftUI
 }
 
 fileprivate extension ServerTask {
-	var resultsKey: String { String(describing: type(of: self)) }
+	nonisolated var resultsKey: String { String(describing: type(of: self)) }
 }

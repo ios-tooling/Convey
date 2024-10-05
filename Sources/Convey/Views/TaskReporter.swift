@@ -10,52 +10,66 @@ import SwiftUI
 #if canImport(UIKit)
 @available(watchOS, unavailable)
 @MainActor public struct TaskReporterView: View {
-	@ObservedObject private var manager = ConveyTaskReporter.instance
-	@State private var sort: ConveyTaskReporter.Sort
+	@ObservedObject private var observer = TaskReporterObserver()
+	@State private var sort: ConveyTaskReporter.Sort = .alpha
+	@State private var reporter: ConveyTaskReporter?
 	
 	public init() {
-		sort = ConveyTaskReporter.instance.sort.value
 	}
 	
 	public var body: some View {
-		 VStack() {
-			 Picker("", selection: $sort.animation()) {
-				 Text("Alpha").tag(ConveyTaskReporter.Sort.alpha)
-				 Text("Count").tag(ConveyTaskReporter.Sort.count)
-				 Text("Size").tag(ConveyTaskReporter.Sort.size)
-				 Text("Date").tag(ConveyTaskReporter.Sort.recent)
-				 Text("On").tag(ConveyTaskReporter.Sort.enabled)
-			 }
-			 .pickerStyle(.segmented)
-			 .padding()
-			 
-			 let types = manager.sortedTypes
-			 List(types.indices, id: \.self) { index in
-				 TaskTypeRow(taskType: types[index], manager: manager)
-			 }
-			 .listStyle(.plain)
+		VStack() {
+			Picker("", selection: $sort.animation()) {
+				Text("Alpha").tag(ConveyTaskReporter.Sort.alpha)
+				Text("Count").tag(ConveyTaskReporter.Sort.count)
+				Text("Size").tag(ConveyTaskReporter.Sort.size)
+				Text("Date").tag(ConveyTaskReporter.Sort.recent)
+				Text("On").tag(ConveyTaskReporter.Sort.enabled)
+			}
+			.pickerStyle(.segmented)
+			.padding()
 			
-			 HStack() {
-				 Button("All Off") { manager.turnAllOff() }.padding()
-					 .disabled(manager.areAllOff)
-				 Button("Reset All") { manager.resetAll() }.padding()
-					 .disabled(!manager.canResetAll)
-				 
-				 //#FIXME
-				 //Button("Reset Current") { sortedTypes.resetTaskTypes(for: manager) }.padding()
-			 }
-		 }
+			if let reporter {
+				let types = reporter.sortedTypes
+				List(types.indices, id: \.self) { index in
+					TaskTypeRow(taskType: types[index], manager: reporter)
+				}
+				.listStyle(.plain)
+				
+				HStack() {
+					Button("All Off") { reporter.turnAllOff() }.padding()
+						.disabled(reporter.areAllOff)
+					Button("Reset All") { reporter.resetAll() }.padding()
+						.disabled(!reporter.canResetAll)
+					
+					Button("Reset Current") {
+						Task {
+							var sortedTypes = reporter.sortedTypes
+							sortedTypes.resetTaskTypes(for: reporter)
+							reporter.sortedTypes = sortedTypes
+						}
+					}
+					.padding()
+				}
+			}
+		}
 		 .navigationBarTitle("Network Tasks")
 		 .onChange(of: sort) { newValue in
 			 Task { @MainActor in
-				 await manager.updateSort(by: newValue)
-				 manager.objectWillChange.send()
+				 reporter = await ConveyTaskReporter.instance
+				 await ConveyTaskReporter.instance.updateSort(by: newValue)
+				 observer.objectWillChange.send()
+			 }
+		 }
+		 .onAppear {
+			 Task {
+				 sort = await ConveyTaskReporter.instance.sort.value
 			 }
 		 }
     }
 	
 	@MainActor struct TaskTypeRow: View {
-		var taskType: ConveyTaskReporter.LoggedTaskInfo
+		@State var taskType: ConveyTaskReporter.LoggedTaskInfo
 		let manager: ConveyTaskReporter
 		
 		var body: some View {
@@ -76,8 +90,7 @@ import SwiftUI
 			HStack(spacing: 20) {
 				VStack(spacing: 0) {
 					Button(action: {
-						//#FIXME
-						//	taskType.setShouldEcho(!taskType.shouldEcho(nil, for: manager))
+						taskType.setShouldEcho(!taskType.shouldEcho(nil, for: manager))
 					}) {
 						Text("Echo")
 							.font(.system(size: 12, weight: .bold).smallCaps())

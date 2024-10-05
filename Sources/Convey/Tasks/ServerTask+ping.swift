@@ -8,7 +8,7 @@
 import Foundation
 
 extension ServerTask {
-	public func head() async throws -> [ConveyHeader] {
+	@ConveyActor public func head() async throws -> [ConveyHeader] {
 		var request = try await self.buildRequest()
 		request.httpMethod = "HEAD"
 		request.httpBody = nil

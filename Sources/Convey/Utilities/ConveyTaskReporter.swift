@@ -10,15 +10,29 @@ import Foundation
 
 public extension ServerTask {
 	static var shouldEcho: Bool {
-		get async { await ConveyTaskReporter.instance.shouldEcho(self as! ServerTask) }
+		get async { ConveyTaskReporter.instance.shouldEcho(self as! ServerTask) }
 	}
 	
 	static func setShouldEcho(_ shouldEcho: Bool) async {
-		await ConveyTaskReporter.instance.task(self, shouldEcho: shouldEcho)
+		ConveyTaskReporter.instance.task(self, shouldEcho: shouldEcho)
 	}
 }
 
-public actor ConveyTaskReporter: ObservableObject {
+@MainActor class TaskReporterObserver: ObservableObject {
+	var cancellable: AnyCancellable?
+	
+	init() {
+		Task {
+			cancellable = await ConveyTaskReporter.instance.objectWillChange
+				.receive(on: RunLoop.main)
+				.sink {
+					self.objectWillChange.send()
+				}
+		}
+	}
+}
+
+@ConveyActor public class ConveyTaskReporter: ObservableObject {
 	public static let instance = ConveyTaskReporter()
 	
 	public var enabled = false { didSet { setup() }}
@@ -58,7 +72,11 @@ public actor ConveyTaskReporter: ObservableObject {
 
 	let typesFilename: String
 	let types: CurrentValueSubject<[LoggedTaskInfo], Never> = .init([])
-	nonisolated var sortedTypes: [LoggedTaskInfo] { types.value }
+	nonisolated var sortedTypes: [LoggedTaskInfo] {
+		get { types.value }
+		set { types.value = newValue }
+	}
+	
 	func saveTypes(_ types: [LoggedTaskInfo]? = nil) {
 		if let types { self.types.value = types }
 		
@@ -74,13 +92,13 @@ public actor ConveyTaskReporter: ObservableObject {
 	var typesURL: URL { directory.appendingPathComponent(typesFilename) }
 	func validateDirectories() { try? FileManager.default.createDirectory(at: typesURL.deletingLastPathComponent(), withIntermediateDirectories: true) }
 
-	let sort: CurrentValueSubject<ConveyTaskReporter.Sort, Never> = .init(.alpha)
+	nonisolated let sort: CurrentValueSubject<ConveyTaskReporter.Sort, Never> = .init(.alpha)
 	
 	var queue = DispatchQueue(label: "ConveyTaskReporter")
 	init() {
 		typesFilename = "convey_task_types.txt"
 		if !enabled { return }
-		Task { await setup() }
+		setup()
 	}
 	
 	func setup() {
@@ -256,7 +274,7 @@ public actor ConveyTaskReporter: ObservableObject {
 
 	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async {
 		if !enabled { return }
-		if await ConveyTaskReporter.instance.logStyle > .none { print("☎️ Begin \(task.abbreviatedDescription)") }
+		if ConveyTaskReporter.instance.logStyle > .none { print("☎️ Begin \(task.abbreviatedDescription)") }
 		if multitargetLogging { await loadTypes(resetting: false) }
 
 		let echo: Bool
@@ -293,7 +311,7 @@ public actor ConveyTaskReporter: ObservableObject {
 			shouldEcho = false
 		}
 		if multitargetLogging { await loadTypes(resetting: false) }
-		if await ConveyTaskReporter.instance.logStyle > .short { print("☎︎ End \(task.abbreviatedDescription)")}
+		if ConveyTaskReporter.instance.logStyle > .short { print("☎︎ End \(task.abbreviatedDescription)")}
 
 	let index = self.index(of: task)
 		if let index {

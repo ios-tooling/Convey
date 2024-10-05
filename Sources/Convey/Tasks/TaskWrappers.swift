@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol WrappedServerTask: ServerTask, Sendable {
+@ConveyActor public protocol WrappedServerTask: ServerTask, Sendable {
 	associatedtype Wrapped: ServerTask
 	var wrapped: Wrapped { get }
 	
@@ -87,7 +87,7 @@ public extension ServerTask {
 	func timeout(_ timeout: TimeInterval) -> any ServerTask { copy(timeout: timeout) }
 }
 
-public extension PayloadDownloadingTask {
+@ConveyActor public extension PayloadDownloadingTask {
 	func decoder(_ decoder: JSONDecoder) -> any PayloadDownloadingTask<DownloadPayload> { copy(decoder: decoder) }
 	func caching(_ caching: DataCache.Caching) -> any PayloadDownloadingTask<DownloadPayload> { copy(caching: caching) }
 	func preview(_ preview: @escaping PreviewClosure) -> any PayloadDownloadingTask<DownloadPayload> { copy(preview: preview) }
@@ -96,7 +96,7 @@ public extension PayloadDownloadingTask {
 	func timeout(_ timeout: TimeInterval) -> any PayloadDownloadingTask<DownloadPayload> { copy(timeout: timeout) }
 }
 
-extension WrappedServerTask {
+@ConveyActor extension WrappedServerTask {
 	public var path: String { wrapped.path }
 	public func postProcess(response: ServerResponse) async throws { try await wrapped.postProcess(response: response) }
 	public var httpMethod: String { wrapped.httpMethod }
@@ -106,7 +106,7 @@ extension WrappedServerTask {
 	public var localFileSource: URL? { nil }
 }
 
-extension PayloadDownloadingTask {
+@ConveyActor extension PayloadDownloadingTask {
 	func copy(caching: DataCache.Caching? = nil, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil, echo: EchoStyle? = nil, redirect: TaskRedirect? = nil, timeout: TimeInterval? = nil) -> any PayloadDownloadingTask<DownloadPayload> {
 		WrappedPayloadDownloadingTask(wrapped: self, caching: caching ?? wrappedCaching, decoder: decoder ?? wrappedDecoder, preview: preview ?? wrappedPreview, echo: echo ?? wrappedEcho, redirect: redirect ?? wrappedRedirect, timeout: timeout ?? wrappedTimeout)
 	}

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct RecordedTask {
+@ConveyActor public struct RecordedTask {
 	public var task: (any ServerTask)?
 	public var recording: String = ""
 	
@@ -20,7 +20,7 @@ public struct RecordedTask {
 
 	var fields: [ServerTaskComponent] { (task as? UnrecordedTask)?.exposedComponents ?? ServerTaskComponent.allCases }
 	
-	static var separator = "\n\n################################\n\n"
+	static nonisolated let separator = "\n\n################################\n\n"
 	var output: String {
 		var results = ""
 		

@@ -17,6 +17,8 @@ import SwiftUI
 	@EnvironmentObject var responses: ConsoleTaskResponseCache
 	@AppStorage("show_convey_console_submitted") var showSubmitted = true
 	@AppStorage("show_convey_console_returned") var showReturned = true
+	@State var header: String?
+	@State var requestData: Data?
 
 	public init(task: any ConsoleDisplayableTask, isFetching: Binding<Bool>) {
 		self.task = task
@@ -47,25 +49,26 @@ import SwiftUI
 								.frame(height: 20)
 						}
 					}
-					if let result {
-						if showSubmitted {
-							if let requestData = request?.descriptionData(maxUploadSize: task.server.configuration.maxLoggedUploadSize), let requestString = String(data: requestData, encoding: .utf8) {
-								Text(requestString)
-									.multilineTextAlignment(.leading)
-									.font(.system(size: 14, weight: .regular, design: .monospaced))
-							}
-							if let header = String(data: task.loggingOutput(request: nil, data: nil, response: result.response, includeMarkers: false), encoding: .utf8) {
-								Text(header)
-									.multilineTextAlignment(.leading)
-									.font(.system(size: 14, weight: .semibold, design: .monospaced))
-							}
+					
+					if showSubmitted {
+						if let requestData = request?.descriptionData(maxUploadSize: SharedServer.instance.configuration.maxLoggedUploadSize), let requestString = String(data: requestData, encoding: .utf8) {
+							Text(requestString)
+								.multilineTextAlignment(.leading)
+								.font(.system(size: 14, weight: .regular, design: .monospaced))
 						}
-						if showReturned {
-							resultBody
+						if let header {
+							Text(header)
+								.multilineTextAlignment(.leading)
+								.font(.system(size: 14, weight: .semibold, design: .monospaced))
 						}
-					} else if let error {
+					}
+					if showReturned {
+						resultBody
+					}
+
+					if let error {
 						if showSubmitted {
-							if let requestData = request?.descriptionData(maxUploadSize: task.server.configuration.maxLoggedUploadSize), let requestString = String(data: requestData, encoding: .utf8) {
+							if let requestData, let requestString = String(data: requestData, encoding: .utf8) {
 								Text(requestString)
 									.multilineTextAlignment(.leading)
 									.font(.system(size: 14, weight: .regular, design: .monospaced))
@@ -79,6 +82,8 @@ import SwiftUI
 		}
 		.task {
 			if result == nil { await fetchResult() }
+			header = await String(data: task.loggingOutput(request: nil, data: nil, response: result?.response, includeMarkers: false), encoding: .utf8)
+			requestData = await request?.descriptionData(maxUploadSize: task.server.configuration.maxLoggedUploadSize)
 		}
 		.onReceive(responses.objectWillChange) { _ in
 			if !isFetching, response == nil {

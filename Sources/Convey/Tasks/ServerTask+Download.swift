@@ -23,7 +23,7 @@ public extension PayloadDownloadingTask {
 }
 
 extension PayloadDownloadingTask {
-	func requestPayload() async throws -> DownloadResult<DownloadPayload> {
+	@ConveyActor func requestPayload() async throws -> DownloadResult<DownloadPayload> {
 		let result = try await requestResponse()
 		let actualDecoder = wrappedDecoder ?? server.configuration.defaultDecoder
 		do {

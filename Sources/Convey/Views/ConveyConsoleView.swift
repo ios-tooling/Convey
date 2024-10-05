@@ -19,6 +19,8 @@ import Cocoa
 	@State private var isShowingConfigurationSheet = false
 	@State private var isFetching = false
 	@ObservedObject var responses = ConsoleTaskResponseCache()
+	@State private var isConsoleDisplayable = false
+	@State private var taskTag = UUID().uuidString
 	
 	public init(tasks: [any ConsoleDisplayableTask]) {
 		_availableTasks = State(initialValue: tasks)
@@ -41,7 +43,7 @@ import Cocoa
 				Button("Configure") {
 					isShowingConfigurationSheet.toggle()
 				}
-				.disabled(isFetching || !(availableTasks[currentTaskIndex].wrappedTask is ConfigurableConsoleDisplayableTask))
+				.disabled(isFetching || !isConsoleDisplayable)
 				
 				Button(action: {
 					responses.clearResults(for: task)
@@ -52,9 +54,15 @@ import Cocoa
 			}
 			
 			DisplayedTaskResultView(task: task, isFetching: $isFetching)
-				.id(task.taskTag)
+				.id(taskTag)
 			Spacer()
 			
+		}
+		.onAppear {
+			Task {
+				isConsoleDisplayable = await availableTasks[currentTaskIndex].wrappedTask is ConfigurableConsoleDisplayableTask
+				taskTag = await task.taskTag
+			}
 		}
 		.sheet(isPresented: $isShowingConfigurationSheet) {
 			let task = availableTasks[currentTaskIndex] as! ConfigurableConsoleDisplayableTask

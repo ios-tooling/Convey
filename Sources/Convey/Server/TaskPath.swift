@@ -69,11 +69,11 @@ public actor TaskPath: ObservableObject {
 		Task { @MainActor in self.objectWillChange.send() }
 	}
 	
-	func save(task: RecordedTask) {
-		guard let taskName = task.task?.filename else { return }
+	func save(task: RecordedTask) async {
+		guard let taskName = await task.task?.filename else { return }
 		let filename = String(format: "%02d", count) + ". " + taskName
 		let url = url.appendingPathComponent(filename)
-		try? task.output.write(to: url, atomically: true, encoding: .utf8)
+		try? await task.output.write(to: url, atomically: true, encoding: .utf8)
 		count += 1
 		var urls = recordedURLs.value
 		let duration = task.completedAt?.timeIntervalSince(task.startedAt ?? Date())
