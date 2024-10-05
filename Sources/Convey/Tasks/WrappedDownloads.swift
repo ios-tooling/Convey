@@ -7,6 +7,8 @@
 
 import Foundation
 
+public typealias CacheableContent = Codable & Equatable & Sendable
+
 public protocol CacheableContainer<ContainedContent>: CacheableContent {
 	associatedtype ContainedContent: CacheableContent
 	

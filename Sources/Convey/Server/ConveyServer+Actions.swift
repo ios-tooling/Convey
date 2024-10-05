@@ -9,11 +9,6 @@ import Combine
 import UIKit
 
 public extension ConveyServer {
-	nonisolated var application: UIApplication? {
-		get { applicationSubject.value }
-		set { applicationSubject.value = newValue }
-	}
-
 	func recordTaskPath(to url: URL? = nil) {
 		if let url {
 			taskPath = .init(url: url)

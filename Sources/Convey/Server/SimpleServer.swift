@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class SimpleServer: ConveyServer, @unchecked Sendable {
+@ConveyActor public class SimpleServer: ConveyServer, @unchecked Sendable {
 	public init(baseURL: URL) {
 		super.init(asDefault: false)
 		remote = .init(baseURL)

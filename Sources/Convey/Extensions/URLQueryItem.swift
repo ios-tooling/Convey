@@ -12,7 +12,7 @@ public extension Array where Element == URLQueryItem {
 		contains { $0.name == name }
 	}
 	
-	mutating func replace(name: String, with value: String) {
+	mutating func replaceFirst(name: String, with value: String) {
 		if let index = firstIndex(where: { $0.name == name }) {
 			self[index] = URLQueryItem(name: name, value: value)
 		} else {

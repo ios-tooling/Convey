@@ -31,31 +31,24 @@ extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 	// public vars
 	open var remote: Remote = .empty
 
-	nonisolated let configurationSubject = CurrentValueSubject<Configuration, Never>(.init())
-	public nonisolated var configuration: Configuration {
-		get { configurationSubject.value }
-		set { configurationSubject.value = newValue }
-	}
 	public var disabled = false { didSet { if disabled { print("#### \(String(describing: self)) DISABLED #### ")} }}
 
 	public let launchedAt = Date()
 	public var baseURL: URL { remote.url }
 	public internal(set) var taskPath: TaskPath?
 
-	nonisolated let pinnedServerKeysSubject = CurrentValueSubject<[String: [String]], Never>(.init())
-	public nonisolated var pinnedServerKeys: [String: [String]] {
-		get { pinnedServerKeysSubject.value }
-		set { pinnedServerKeysSubject.value = newValue }
-	}
-	#if os(iOS)
-		nonisolated let applicationSubject = CurrentValueSubject<UIApplication?, Never>(nil)
-	#endif
-	
 	// internal vars
 	var shouldRecordTaskPath: Bool { taskPath != nil }
 	var activeSessions = ActiveSessions()
 	let threadManager = ThreadManager()
+
+	nonisolated let configurationSubject = CurrentValueSubject<Configuration, Never>(.init())
+	nonisolated let pinnedServerKeysSubject = CurrentValueSubject<[String: [String]], Never>(.init())
+	#if os(iOS)
+		nonisolated let applicationSubject = CurrentValueSubject<UIApplication?, Never>(nil)
+	#endif
 	
+
 	
 	public init(asDefault: Bool = true) {
 		if #available(iOS 16.0, macOS 13, watchOS 9, *) {

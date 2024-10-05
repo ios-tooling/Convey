@@ -8,7 +8,7 @@
 import Foundation
 
 extension TaskPath {
-	public struct TaskRecording: Identifiable, Comparable, Hashable {
+	public struct TaskRecording: Identifiable, Comparable, Hashable, Sendable {
 		public var id: URL { fileURL }
 		public let fileURL: URL
 		public let date: Date
