@@ -27,7 +27,7 @@ extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 	nonisolated static let _serverInstance: CurrentValueSubject<ConveyServer?, Never> = .init(nil)
 }
 
-@ConveyActor open class ConveyServer: ObservableObject, @unchecked Sendable {
+@ConveyActor open class ConveyServer: ObservableObject {
 	// public vars
 	open var remote: Remote = .empty
 

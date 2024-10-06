@@ -24,6 +24,7 @@ public protocol ETagCachedTask: ServerGETTask { }
 public protocol JSONPayloadTask: ServerTask { }
 public protocol GZipEncodedUploadingTask: DataUploadingTask { }
 public protocol EchoingTask: ServerTask { }
+public protocol DisabledShortEchoTask: ServerTask { }
 
 
 

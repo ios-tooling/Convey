@@ -45,45 +45,66 @@ It's recommended that you setup your server early in your launch process, and as
 
 - the remote URL information for this server
 
-`var defaultEncoder: JSONEncoder`	
+`var configuration: Configuration`
 
-- the default JSON encoder to use for uploads
+- various configuration options for this server, including:
 
-`var defaultDecoder: JSONDecoder`	
+    `var defaultEncoder: JSONEncoder`	
 
-- the default JSON decoder to use for downloads
+    - the default JSON encoder to use for uploads
 
-`var reportBadHTTPStatusAsError: Bool`
+    `var defaultDecoder: JSONDecoder`	
 
-- if a non-200 is receive from the server, should an error be thrown?
+    - the default JSON decoder to use for downloads
 
-`var configuration: URLSessionConfiguration`
+    `var reportBadHTTPStatusAsError: Bool`
 
-- the default URLConfiguration to use when creating a new URLSession
+    - if a non-200 is receive from the server, should an error be thrown?
 
-`var enableGZipDownloads: Bool`
+    `var configuration: URLSessionConfiguration`
 
-- should we request GZip encoding from the server
+    - the default URLConfiguration to use when creating a new URLSession
 
-`var defaultTimeout: TimeInterval`
+    `var enableGZipDownloads: Bool`
 
-- what's the default timeout for the server, for both resource and request timeouts
+    - should we request GZip encoding from the server
 
-`var allowsExpensiveNetworkAccess: Bool`
+    `var defaultTimeout: TimeInterval`
 
-- should tasks on this server use 'expensive' networks, such as cellular
+    - what's the default timeout for the server, for both resource and request timeouts
 
-`var allowsConstrainedNetworkAccess: Bool`
+    `var allowsExpensiveNetworkAccess: Bool`
 
-- should tasks on this server run in 'low data' mode
+    - should tasks on this server use 'expensive' networks, such as cellular
 
-`var waitsForConnectivity: Bool`
+    `var allowsConstrainedNetworkAccess: Bool`
 
-- should URLSession wait for a remote connection when running, or fail immediately if there isn't one
+    - should tasks on this server run in 'low data' mode
 
-`var logStyle: ConveyTaskReporter.LogStyle`
+    `var waitsForConnectivity: Bool`
 
-- can be `none`, `short`, or `steps`. Controls how much data about active tasks is logged to the console.
+    - should URLSession wait for a remote connection when running, or fail immediately if there isn't one
+
+    `var logStyle: ConveyTaskReporter.LogStyle`
+
+    - can be `none`, `short`, or `steps`. Controls how much data about active tasks is logged to the console.
+
+    `var userAgent: String?`
+
+    - set the user agent to override with. By default, it uses `defaultUserAgent`
+
+    `var maxLoggedDownloadSize: Int`
+
+    - when logging downloads, how much data should we show before just using a placeholder
+
+    `var maxLoggedUploadSize: Int`
+
+    - when logging uploads, how much data should we show before just using a placeholder
+
+    `var defaultHeaders: [String: String]`
+
+    - what headers should be included with each request
+
 
 `var taskPathURL: URL?`
 
@@ -93,25 +114,10 @@ It's recommended that you setup your server early in your launch process, and as
 
 - if set, all tasks using this server will fail immediately
 
-`var userAgent: String?`
-
-- set the user agent to override with. By default, it uses `defaultUserAgent`
-
-`var maxLoggedDownloadSize: Int`
-
-- when logging downloads, how much data should we show before just using a placeholder
-
-`var maxLoggedUploadSize: Int`
-
-- when logging uploads, how much data should we show before just using a placeholder
 
 `func register(publicKey: String, for server: String)`
 
 - if using server pinning, you can set the key for a given host here.
-
-`func setStandardHeaders([String: String])`
-
-- if using static headers for all requests, set them here
 
 `func standardHeaders(for task: ServerTask) async throws -> [String: String]`
 
@@ -120,6 +126,10 @@ It's recommended that you setup your server early in your launch process, and as
 `func preflight(_ task: ServerTask, request: URLRequest) async throws -> URLRequest`
 
 - to generate a custom URLRequest for a given task, override this.
+
+`func postflight(_ task: ServerTask, result: ServerResponse)`
+
+- gets called after each request
 
 
 

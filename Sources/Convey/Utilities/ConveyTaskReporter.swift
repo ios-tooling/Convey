@@ -7,6 +7,7 @@
 
 import Combine
 import Foundation
+import OSLog
 
 public extension ServerTask {
 	static var shouldEcho: Bool {
@@ -274,7 +275,7 @@ public extension ServerTask {
 
 	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async {
 		if !enabled { return }
-		if ConveyTaskReporter.instance.logStyle > .none { print("☎️ Begin \(task.abbreviatedDescription)") }
+		if ConveyTaskReporter.instance.logStyle > .none, !(task is DisabledShortEchoTask) { print("☎️ Begin \(task.abbreviatedDescription)") }
 		if multitargetLogging { await loadTypes(resetting: false) }
 
 		let echo: Bool
