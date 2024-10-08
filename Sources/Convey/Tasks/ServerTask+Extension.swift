@@ -72,7 +72,7 @@ import Foundation
 	var contentType: String? { "application/json" }
 	@ConveyActor var dataToUpload: Data? {
 		guard let payload = uploadPayload else { return nil }
-		let encoder = jsonEncoder ?? server.configuration.defaultEncoder
+		let encoder = wrappedEncoder ?? server.configuration.defaultEncoder
 		
 		do {
 			return try encoder.encode(payload)

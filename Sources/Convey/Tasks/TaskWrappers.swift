@@ -13,6 +13,7 @@ import Foundation
 	
 	var caching: DataCache.Caching { get }
 	var decoder: JSONDecoder? { get }
+	var encoder: JSONEncoder? { get }
 	var preview: PreviewClosure? { get }
 	var localFileSource: URL? { get }
 	var echo: EchoStyle? { get }
@@ -27,14 +28,16 @@ public struct WrappedPayloadDownloadingTask<Wrapped: PayloadDownloadingTask>: Wr
 	
 	public let caching: DataCache.Caching
 	public let decoder: JSONDecoder?
+	public let encoder: JSONEncoder?
 	public let preview: PreviewClosure?
 	public let echo: EchoStyle?
 	public let redirect: TaskRedirect?
 	public let timeout: TimeInterval?
 
-	init(wrapped: Wrapped, caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil, echo: EchoStyle? = nil, redirect: TaskRedirect? = nil, timeout: TimeInterval? = nil) {
+	init(wrapped: Wrapped, caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, encoder: JSONEncoder? = nil, preview: PreviewClosure? = nil, echo: EchoStyle? = nil, redirect: TaskRedirect? = nil, timeout: TimeInterval? = nil) {
 		self.wrapped = wrapped
 		self.caching = caching
+		self.encoder = encoder
 		self.decoder = decoder
 		self.preview = preview
 		self.echo = echo
@@ -48,15 +51,17 @@ struct WrappedDataDownloadingTask<Wrapped: ServerTask>: WrappedServerTask, Senda
 	
 	let caching: DataCache.Caching
 	let decoder: JSONDecoder?
+	let encoder: JSONEncoder?
 	let preview: PreviewClosure?
 	let echo: EchoStyle?
 	let redirect: TaskRedirect?
 	let timeout: TimeInterval?
 
-	init(wrapped: Wrapped, caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil, echo: EchoStyle? = nil, redirect: TaskRedirect? = nil, timeout: TimeInterval? = nil) {
+	init(wrapped: Wrapped, caching: DataCache.Caching = .skipLocal, decoder: JSONDecoder? = nil, encoder: JSONEncoder? = nil, preview: PreviewClosure? = nil, echo: EchoStyle? = nil, redirect: TaskRedirect? = nil, timeout: TimeInterval? = nil) {
 		self.wrapped = wrapped
 		self.caching = caching
 		self.decoder = decoder
+		self.encoder = encoder
 		self.preview = preview
 		self.echo = echo
 		self.redirect = redirect
@@ -65,6 +70,7 @@ struct WrappedDataDownloadingTask<Wrapped: ServerTask>: WrappedServerTask, Senda
 }
 
 extension ServerTask {
+	var wrappedEncoder: JSONEncoder? { (self as? (any WrappedServerTask))?.encoder ?? self.encoder }
 	var wrappedDecoder: JSONDecoder? { (self as? (any WrappedServerTask))?.decoder ?? self.decoder }
 	var wrappedCaching: DataCache.Caching { (self as? (any WrappedServerTask))?.caching ?? .skipLocal }
 	var wrappedPreview: PreviewClosure? { (self as? (any WrappedServerTask))?.preview }
@@ -80,6 +86,7 @@ extension ServerTask {
 	
 public extension ServerTask {
 	func decoder(_ decoder: JSONDecoder) -> any ServerTask { copy(decoder: decoder) }
+	func encoder(_ encoder: JSONEncoder) -> any ServerTask { copy(encoder: encoder) }
 	func caching(_ caching: DataCache.Caching) -> any ServerTask { copy(caching: caching) }
 	func preview(_ preview: @escaping PreviewClosure) -> any ServerTask { copy(preview: preview) }
 	func echo(_ echo: EchoStyle?) -> any ServerTask { copy(echo: echo) }
@@ -89,6 +96,7 @@ public extension ServerTask {
 
 @ConveyActor public extension PayloadDownloadingTask {
 	func decoder(_ decoder: JSONDecoder) -> any PayloadDownloadingTask<DownloadPayload> { copy(decoder: decoder) }
+	func encoder(_ encoder: JSONEncoder) -> any PayloadDownloadingTask<DownloadPayload> { copy(encoder: encoder) }
 	func caching(_ caching: DataCache.Caching) -> any PayloadDownloadingTask<DownloadPayload> { copy(caching: caching) }
 	func preview(_ preview: @escaping PreviewClosure) -> any PayloadDownloadingTask<DownloadPayload> { copy(preview: preview) }
 	func echo(_ echo: EchoStyle?) -> any PayloadDownloadingTask<DownloadPayload> { copy(echo: echo) }
@@ -107,13 +115,13 @@ public extension ServerTask {
 }
 
 @ConveyActor extension PayloadDownloadingTask {
-	func copy(caching: DataCache.Caching? = nil, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil, echo: EchoStyle? = nil, redirect: TaskRedirect? = nil, timeout: TimeInterval? = nil) -> any PayloadDownloadingTask<DownloadPayload> {
-		WrappedPayloadDownloadingTask(wrapped: self, caching: caching ?? wrappedCaching, decoder: decoder ?? wrappedDecoder, preview: preview ?? wrappedPreview, echo: echo ?? wrappedEcho, redirect: redirect ?? wrappedRedirect, timeout: timeout ?? wrappedTimeout)
+	func copy(caching: DataCache.Caching? = nil, decoder: JSONDecoder? = nil, encoder: JSONEncoder? = nil, preview: PreviewClosure? = nil, echo: EchoStyle? = nil, redirect: TaskRedirect? = nil, timeout: TimeInterval? = nil) -> any PayloadDownloadingTask<DownloadPayload> {
+		WrappedPayloadDownloadingTask(wrapped: self, caching: caching ?? wrappedCaching, decoder: decoder ?? wrappedDecoder, encoder: encoder ?? wrappedEncoder, preview: preview ?? wrappedPreview, echo: echo ?? wrappedEcho, redirect: redirect ?? wrappedRedirect, timeout: timeout ?? wrappedTimeout)
 	}
 }
 
 extension ServerTask {
-	func copy(caching: DataCache.Caching? = nil, decoder: JSONDecoder? = nil, preview: PreviewClosure? = nil, echo: EchoStyle? = nil, redirect: TaskRedirect? = nil, timeout: TimeInterval? = nil) -> any ServerTask {
-		WrappedDataDownloadingTask(wrapped: self, caching: caching ?? wrappedCaching, decoder: decoder ?? wrappedDecoder, preview: preview ?? wrappedPreview, echo: echo ?? wrappedEcho, redirect: redirect ?? wrappedRedirect, timeout: timeout ?? wrappedTimeout)
+	func copy(caching: DataCache.Caching? = nil, decoder: JSONDecoder? = nil, encoder: JSONEncoder? = nil, preview: PreviewClosure? = nil, echo: EchoStyle? = nil, redirect: TaskRedirect? = nil, timeout: TimeInterval? = nil) -> any ServerTask {
+		WrappedDataDownloadingTask(wrapped: self, caching: caching ?? wrappedCaching, decoder: decoder ?? wrappedDecoder, encoder: encoder ?? wrappedEncoder, preview: preview ?? wrappedPreview, echo: echo ?? wrappedEcho, redirect: redirect ?? wrappedRedirect, timeout: timeout ?? wrappedTimeout)
 	}
 }
