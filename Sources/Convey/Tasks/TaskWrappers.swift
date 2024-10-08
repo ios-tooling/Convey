@@ -65,7 +65,7 @@ struct WrappedDataDownloadingTask<Wrapped: ServerTask>: WrappedServerTask, Senda
 }
 
 extension ServerTask {
-	var wrappedDecoder: JSONDecoder? { (self as? (any WrappedServerTask))?.decoder }
+	var wrappedDecoder: JSONDecoder? { (self as? (any WrappedServerTask))?.decoder ?? self.decoder }
 	var wrappedCaching: DataCache.Caching { (self as? (any WrappedServerTask))?.caching ?? .skipLocal }
 	var wrappedPreview: PreviewClosure? { (self as? (any WrappedServerTask))?.preview }
 	var wrappedEcho: EchoStyle? { (self as? (any WrappedServerTask))?.echo }

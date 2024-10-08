@@ -31,6 +31,7 @@ public typealias PreviewClosure = @Sendable (ServerResponse) -> Void
 	func buildRequest() async throws -> URLRequest
 	var cookies: [HTTPCookie]? { get }
 	var jsonEncoder: JSONEncoder? { get }
+	var decoder: JSONDecoder? { get }
 }
 
 public extension ServerTask {
@@ -47,4 +48,5 @@ public extension ServerTask {
 	func preFlight() async throws { }
 	func postFlight() async throws { }
 	var jsonEncoder: JSONEncoder? { nil }
+	var decoder: JSONDecoder? { nil }
 }
