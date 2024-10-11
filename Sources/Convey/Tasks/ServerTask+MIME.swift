@@ -17,7 +17,7 @@ extension String {
 	}
 	
 	public static func createBoundary() -> String {
-		 var str = "----------==-Boundary-=--"
+		 var str = "----------bndry----------------"
 		 let length = arc4random_uniform(11) + 30
 		 let charSet = [Character]("-_1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
@@ -28,7 +28,7 @@ extension String {
 	}
 	
 	public static func contentType(for boundary: String) -> String {
-		"multipart/form-data;boundary=" + boundary
+		"multipart/form-data; boundary=" + boundary
 	}
 }
 
@@ -50,7 +50,6 @@ public extension [MIMEMessageComponent] {
 	func mimeData(boundary mimeBoundary: String, base64Encoded: Bool = false) -> Data? {
 		let boundary = "--" + mimeBoundary
 		var data = Data()
-		data.append("Content-Type: multipart/form-data;boundary=\(mimeBoundary)" + lineBreak + lineBreak)
 		data.append(boundary + lineBreak)
 		
 		zip(self, self.indices).forEach { field, index in
@@ -61,11 +60,10 @@ public extension [MIMEMessageComponent] {
 			data.append(text)
 			
 			if !base64Encoded, let fieldData = field.dataContent {
-				if !field.isFormData {
-					data.append("Content-Transfer-Encoding: binary\(lineBreak)\(lineBreak)")
-				} else {
+				if field.isFormData {
 					data.append("\(lineBreak)\(lineBreak)")
 				}
+				data.append(lineBreak)
 				data.append(fieldData)
 			}
 			data.append(lineBreak)
@@ -81,12 +79,12 @@ public extension [MIMEMessageComponent] {
 public enum MIMEMessageComponent: Sendable {
 	public enum FormDataFormat: String, Sendable { case form, json }
 	
-	case text(name: String, content: String)
-	case file(name: String, contentType: String, url: URL)
-	case data(name: String, contentType: String, data: Data)
+	case text(content: String)
+	case file(contentType: String, url: URL)
+	case data(contentType: String, data: Data)
 	case image(name: String, image: PlatformImage, quality: Double)
 	case formData(fields: [String: Sendable], format: FormDataFormat = FormDataFormat.form)
-	case fileData(name: String, contentType: String, data: Data, filename: String)
+	case fileData(contentType: String, data: Data, filename: String)
 	
 	var isFormData: Bool {
 		if case .formData = self { return true }
@@ -111,21 +109,21 @@ public enum MIMEMessageComponent: Sendable {
 	
 	var disposition: String {
 		switch self {
-		case .formData: return "form-data; name=\"content\""
-		case .data(let name, _, _): return "form-data; name=\"\(name)\""
-		case .text(let name, _): return "form-data; name=\"\(name)\""
-		case .file(let name, _, let url): return "attachment; filename=\"\(url.lastPathComponent)\"; name=\"\(name)\""
-		case .fileData(let name, _, _, let filename): return "attachment; filename=\"\(filename)\"; name=\"\(name)\""
-		case .image(let name, _, _): return "attachment; filename=\"\(name).jpeg\"; name=\"\(name)\""
+		case .formData: return "form-data; name=\"file\""
+		case .data(_, _): return "form-data; name=\"file\""
+		case .text(_): return "form-data; name=\"file\""
+		case .file(_, let url): return "form-data; filename=\"\(url.lastPathComponent)\"; name=\"file\""
+		case .fileData(_, _, let filename): return "form-data; filename=\"\(filename)\"; name=\"file\""
+		case .image(let name, _, _): return "attachment; filename=\"\(name).jpeg\"; name=\"file\""
 		}
 	}
 	
 	var dataContent: Data? {
 		switch self {
 		case .image(_, let image, let quality): image.jpegData(compressionQuality: quality)
-		case .file(_, _, let url): try? Data(contentsOf: url)
-		case .fileData(_, _, let data, _): data
-		case .data(_, _, let data): data
+		case .file(_, let url): try? Data(contentsOf: url)
+		case .fileData(_, let data, _): data
+		case .data(_, let data): data
 		case .formData(let fields, let format):
 			switch format {
 			case .json: (try? JSONSerialization.data(withJSONObject: fields))
@@ -138,7 +136,7 @@ public enum MIMEMessageComponent: Sendable {
 	
 	var textContent: String? {
 		switch self {
-		case .text(_, let content): return content
+		case .text(let content): return content
 		default: return nil
 		}
 	}
@@ -155,26 +153,15 @@ public enum MIMEMessageComponent: Sendable {
 	var rawContentType: String {
 		switch self {
 		case .text: return "text/plain"
-		case .file(_, let contentType, _): return contentType
-		case .fileData(_, let contentType, _, _): return contentType
-		case .data(_, let contentType, _): return contentType
+		case .file(let contentType, _): return contentType
+		case .fileData(let contentType, _, _): return contentType
+		case .data(let contentType, _): return contentType
 		case .image: return "image/jpeg"
 		case .formData(_, let format):
 			switch format {
 			case .json: return "application/json"
 			case .form: return "application/x-www-form-urlencoded"
 			}
-		}
-	}
-	
-	var name: String {
-		switch self {
-		case .text(let name, _): return name
-		case .data(let name, _, _): return name
-		case .file(let name, _, _): return name
-		case .fileData(let name, _, _, _): return name
-		case .image(let name, _, _): return name
-		case .formData: return "content"
 		}
 	}
 }
