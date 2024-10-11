@@ -84,7 +84,7 @@ extension ServerTask {
 						server.reportConnectionError(self, result.statusCode, String(data: result.data, encoding: .utf8))
 						if result.data.isEmpty || (result.statusCode.isHTTPError && server.configuration.reportBadHTTPStatusAsError) {
 							let error = HTTPError.serverError(request.url, result.statusCode, result.data)
-							server.taskFailed(self, error: error)
+							await server.taskFailed(self, error: error)
 							await didFail(with: error)
 							throw error
 						}
@@ -105,7 +105,7 @@ extension ServerTask {
 						print("Retry Attempt #\(attemptCount) for \(self)")
 					} else {
 						await didFail(with: error)
-						server.taskFailed(self, error: error)
+						await server.taskFailed(self, error: error)
 						throw error
 					}
 				}

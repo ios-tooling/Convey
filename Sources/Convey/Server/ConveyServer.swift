@@ -70,7 +70,7 @@ extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 	
 	open func postflight(_ task: ServerTask, result: ServerResponse) { }
 	
-	open func taskFailed(_ task: ServerTask, error: Error) { print("Error: \(error) from \(task)") }
+	open func taskFailed(_ task: ServerTask, error: Error) async { print("Error: \(error) from \(task)") }
 	
 	open func standardHeaders(for task: ServerTask) async throws -> [String: String] {
 		var headers = configuration.defaultHeaders

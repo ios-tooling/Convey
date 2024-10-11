@@ -77,7 +77,7 @@ import Foundation
 		do {
 			return try encoder.encode(payload)
 		} catch {
-			server.taskFailed(self, error: error)
+			Task { await server.taskFailed(self, error: error) }
 			return nil
 		}
 	}

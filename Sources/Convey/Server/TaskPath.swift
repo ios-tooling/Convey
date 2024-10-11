@@ -8,8 +8,8 @@
 import Foundation
 import Combine
 
-public actor TaskPath: ObservableObject {
-	let url: URL
+public actor TaskPath: ObservableObject, CustomStringConvertible {
+	nonisolated let url: URL
 	var count = 0
 	
 	let recordedURLs: CurrentValueSubject<[TaskRecording], Never> = .init([])
@@ -63,6 +63,14 @@ public actor TaskPath: ObservableObject {
 	
 	nonisolated func stop() {
 		
+	}
+	
+	public nonisolated var description: String {
+		"Tasks stored at \(url.path)"
+	}
+	
+	public nonisolated var logCount: Int {
+		(try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles]))?.count ?? 0
 	}
 	
 	func publish() {

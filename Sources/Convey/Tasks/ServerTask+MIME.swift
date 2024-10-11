@@ -61,7 +61,11 @@ public extension [MIMEMessageComponent] {
 			data.append(text)
 			
 			if !base64Encoded, let fieldData = field.dataContent {
-				data.append("Content-Transfer-Encoding: binary\(lineBreak)\(lineBreak)")
+				if !field.isFormData {
+					data.append("Content-Transfer-Encoding: binary\(lineBreak)\(lineBreak)")
+				} else {
+					data.append("\(lineBreak)\(lineBreak)")
+				}
 				data.append(fieldData)
 			}
 			data.append(lineBreak)
@@ -83,6 +87,11 @@ public enum MIMEMessageComponent: Sendable {
 	case image(name: String, image: PlatformImage, quality: Double)
 	case formData(fields: [String: Sendable], format: FormDataFormat = FormDataFormat.form)
 	case fileData(name: String, contentType: String, data: Data, filename: String)
+	
+	var isFormData: Bool {
+		if case .formData = self { return true }
+		return false
+	}
 
 	func mimeString(base64Encoded: Bool) -> String {
 		var result = ""
