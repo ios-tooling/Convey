@@ -75,9 +75,13 @@ public extension [MIMEMessageComponent] {
 }
 
 public enum MIMEMessageComponent: Sendable {
+	public enum FormDataFormat: String, Sendable { case form, json }
+	
 	case text(name: String, content: String)
 	case file(name: String, contentType: String, url: URL)
+	case data(name: String, contentType: String, data: Data)
 	case image(name: String, image: PlatformImage, quality: Double)
+	case formData(fields: [String: Sendable], format: FormDataFormat = FormDataFormat.form)
 	case fileData(name: String, contentType: String, data: Data, filename: String)
 
 	func mimeString(base64Encoded: Bool) -> String {
@@ -98,6 +102,8 @@ public enum MIMEMessageComponent: Sendable {
 	
 	var disposition: String {
 		switch self {
+		case .formData: return "form-data; name=\"content\""
+		case .data(let name, _, _): return "form-data; name=\"\(name)\""
 		case .text(let name, _): return "form-data; name=\"\(name)\""
 		case .file(let name, _, let url): return "attachment; filename=\"\(url.lastPathComponent)\"; name=\"\(name)\""
 		case .fileData(let name, _, _, let filename): return "attachment; filename=\"\(filename)\"; name=\"\(name)\""
@@ -107,10 +113,17 @@ public enum MIMEMessageComponent: Sendable {
 	
 	var dataContent: Data? {
 		switch self {
-		case .image(_, let image, let quality): return image.jpegData(compressionQuality: quality)
-		case .file(_, _, let url): return try? Data(contentsOf: url)
-		case .fileData(_, _, let data, _): return data
-		default: return nil
+		case .image(_, let image, let quality): image.jpegData(compressionQuality: quality)
+		case .file(_, _, let url): try? Data(contentsOf: url)
+		case .fileData(_, _, let data, _): data
+		case .data(_, _, let data): data
+		case .formData(let fields, let format):
+			switch format {
+			case .json: (try? JSONSerialization.data(withJSONObject: fields))
+			case .form:
+				fields.reduce("") { r, d in r + "\(d.key)=\(d.value)&" }.data(using: .utf8)
+			}
+		default: nil
 		}
 	}
 	
@@ -135,16 +148,24 @@ public enum MIMEMessageComponent: Sendable {
 		case .text: return "text/plain"
 		case .file(_, let contentType, _): return contentType
 		case .fileData(_, let contentType, _, _): return contentType
+		case .data(_, let contentType, _): return contentType
 		case .image: return "image/jpeg"
+		case .formData(_, let format):
+			switch format {
+			case .json: return "application/json"
+			case .form: return "application/x-www-form-urlencoded"
+			}
 		}
 	}
 	
 	var name: String {
 		switch self {
 		case .text(let name, _): return name
+		case .data(let name, _, _): return name
 		case .file(let name, _, _): return name
 		case .fileData(let name, _, _, _): return name
 		case .image(let name, _, _): return name
+		case .formData: return "content"
 		}
 	}
 }

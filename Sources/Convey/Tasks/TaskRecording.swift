@@ -52,9 +52,9 @@ import Foundation
 				if let body = request?.httpBody {
 					let output: String
 					if task is GZipEncodedUploadingTask, let data = try? body.gunzipped() {
-						output = String(data: data, encoding: .utf8) ?? String(data: body, encoding: .ascii) ?? "unable to stringify response"
+						output = String(data: data, encoding: .utf8) ?? String(data: body, encoding: .ascii) ?? "unable to stringify payload"
 					} else {
-						output = String(data: body, encoding: .utf8) ?? String(data: body, encoding: .ascii) ?? "unable to stringify response"
+						output = String(data: body, encoding: .utf8) ?? String(data: body, encoding: .ascii) ?? "unable to stringify payload"
 					}
 					
 					results += output + Self.separator
