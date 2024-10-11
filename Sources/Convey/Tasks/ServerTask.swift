@@ -25,7 +25,9 @@ public typealias PreviewClosure = @Sendable (ServerResponse) -> Void
 
 	func willComplete(with: ServerResponse) async
 	func didComplete(with: ServerResponse) async
-	
+	var headers: ConveyHeaders { get }
+	var parameters: TaskURLParameters? { get }
+
 	func didFail(with error: Error) async
 	
 	func buildRequest() async throws -> URLRequest
@@ -49,4 +51,6 @@ public extension ServerTask {
 	func postFlight() async throws { }
 	var encoder: JSONEncoder? { nil }
 	var decoder: JSONDecoder? { nil }
+	var headers: ConveyHeaders { [String: String]() }
+	var parameters: TaskURLParameters? { nil }
 }

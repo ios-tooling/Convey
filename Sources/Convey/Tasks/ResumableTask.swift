@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol ResumableTask: CustomHTTPHeaders, ServerPATCHTask {
+public protocol ResumableTask: ServerPATCHTask {
 	var bytesUploaded: Int { get }
 	var chunkSize: Int? { get }
 	var fullData: Data? { get }
@@ -17,7 +17,7 @@ public protocol ResumableTask: CustomHTTPHeaders, ServerPATCHTask {
 public extension ResumableTask {
 	var contentType: String? { "application/offset+octet-stream" }
 	
-	var customHTTPHeaders: ConveyHeaders {
+	var headers: ConveyHeaders {
 		[
 			"Tus-Resumable": "1.0.0",
 			"Upload-Offset": "\(bytesUploaded)",

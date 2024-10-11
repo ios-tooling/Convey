@@ -28,10 +28,6 @@ public protocol DisabledShortEchoTask: ServerTask { }
 
 
 
-@ConveyActor public protocol ParameterizedTask: ServerTask {
-	var parameters: TaskURLParameters? { get }
-}
-
 @ConveyActor public protocol FileBackedTask: ServerTask {
 	var fileURL: URL? { get }
 }
@@ -70,10 +66,6 @@ public protocol DisabledShortEchoTask: ServerTask { }
 
 @ConveyActor public protocol UnrecordedTask: ServerTask {
 	var exposedComponents: [ServerTaskComponent] { get }
-}
-
-@ConveyActor public protocol CustomHTTPHeaders: ServerTask {
-	var customHTTPHeaders: ConveyHeaders { get }
 }
 
 @ConveyActor public protocol ArchivingTask: ServerTask {

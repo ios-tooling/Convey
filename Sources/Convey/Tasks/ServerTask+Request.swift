@@ -61,13 +61,13 @@ public extension ServerTask {
 			request.addValue(tagged.requestTag, forHTTPHeaderField: ServerConstants.Headers.tag)
 		}
 		
-		if let additionalHeaders = (self.wrappedTask as? CustomHTTPHeaders)?.customHTTPHeaders as? [String: String] {
+		if let additionalHeaders = self.headers as? [String: String] {
 			for (value, header) in additionalHeaders {
 				request.addValue(header, forHTTPHeaderField: value)
 			}
 		}
 
-		if let additionalHeaders = (self.wrappedTask as? CustomHTTPHeaders)?.customHTTPHeaders as? [ConveyHeader] {
+		if let additionalHeaders = self.headers as? [ConveyHeader] {
 			for header in additionalHeaders {
 				request.addValue(header.value, forHTTPHeaderField: header.name)
 			}

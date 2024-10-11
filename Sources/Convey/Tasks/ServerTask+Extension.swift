@@ -15,7 +15,7 @@ import Foundation
 
 	var url: URL {
 		let nonParameterized = (self.wrappedTask as? CustomURLTask)?.customURL ?? server.url(forTask: self)
-		if let parameters = (self.wrappedTask as? ParameterizedTask)?.parameters, !parameters.isEmpty {
+		if let parameters = self.wrappedTask.parameters, !parameters.isEmpty {
 			var components = URLComponents(url: nonParameterized, resolvingAgainstBaseURL: true)
 			
 			if let params = parameters as? [String: String] {
