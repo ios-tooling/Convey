@@ -5,6 +5,7 @@
 //  Created by Ben Gottlieb on 10/4/24.
 //
 
+#if canImport(UIKit)
 import Combine
 import UIKit
 
@@ -36,3 +37,5 @@ public extension ConveyServer {
 		if let dir = configuration.logDirectory { try? FileManager.default.removeItem(at: dir) }
 	}
 }
+
+#endif
