@@ -29,8 +29,8 @@ public extension PayloadDownloadingTask where Self: DataUploadingTask {
 		try await uploadWithResponse().payload
 	}
 
-	 func uploadWithResponse() async throws -> DownloadResult<DownloadPayload> {
-		  let result: DownloadResult<DownloadPayload> = try await requestPayload()
+	 func uploadWithResponse() async throws -> PayloadServerResponse<DownloadPayload> {
+		  let result: PayloadServerResponse<DownloadPayload> = try await requestPayload()
 		  try await postProcess(payload: result.payload)
 		  return result
 	}
@@ -41,8 +41,8 @@ public extension WrappedPayloadDownloadingTask where Wrapped: DataUploadingTask 
 		try await uploadWithResponse().payload
 	}
 
-	 func uploadWithResponse() async throws -> DownloadResult<DownloadPayload> {
-		  let result: DownloadResult<DownloadPayload> = try await requestPayload()
+	 func uploadWithResponse() async throws -> PayloadServerResponse<DownloadPayload> {
+		  let result: PayloadServerResponse<DownloadPayload> = try await requestPayload()
 		  try await postProcess(payload: result.payload)
 		  return result
 	}

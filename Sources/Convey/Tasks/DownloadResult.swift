@@ -10,19 +10,26 @@ import Foundation
 @available(iOS, deprecated: 1, renamed: "ServerResponse", message: "ServerReturned has been renamed to ServerResponse")
 public typealias ServerReturned = ServerResponse
 
-public struct DownloadResult<Payload: Sendable>: Sendable {
-    public init(payload: Payload, response: ServerResponse, retryCount: Int?, duration: TimeInterval) {
+public struct PayloadServerResponse<Payload: Sendable>: Sendable {
+	init(payload: Payload, response: ServerResponse) {
 		self.payload = payload
-		self.response = response
-		self.retryCount = retryCount
-        self.duration = duration
+		self.response = response.response
+		self.data = response.data
+		self.startedAt = response.startedAt
+		self.fromCache = response.fromCache
+		self.retryCount = response.retryCount
+		self.duration = response.duration
 	}
 	
 	public let payload: Payload
-	public let response: ServerResponse
 	public var statusCode: Int { response.statusCode }
 	public let retryCount: Int?
-    public let duration: TimeInterval
+	public let duration: TimeInterval
+	
+	public let response: HTTPURLResponse
+	public let data: Data
+	public let fromCache: Bool
+	public let startedAt: Date
 }
 
 public struct ServerResponse: Sendable {
@@ -32,7 +39,7 @@ public struct ServerResponse: Sendable {
 	public var duration: TimeInterval
 	public var startedAt: Date
 	public var retryCount: Int?
-
+	
 	public var statusCode: Int { response.statusCode }
 	
 	func withRetryCount(_ count: Int) -> Self {

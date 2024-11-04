@@ -10,26 +10,22 @@ import Combine
 
 public extension PayloadDownloadingTask {
 	func download() async throws -> DownloadPayload {
-		try await downloadPayloadWithResponse().payload
+		try await downloadWithResponse().payload
 	}
 	
-	func downloadPayload() async throws -> DownloadPayload {
-		try await downloadPayloadWithResponse().payload
-	}
-	
-	func downloadPayloadWithResponse() async throws -> DownloadResult<DownloadPayload> {
+	func downloadWithResponse() async throws -> PayloadServerResponse<DownloadPayload> {
 		try await requestPayload()
 	}
 }
 
 extension PayloadDownloadingTask {
-	@ConveyActor func requestPayload() async throws -> DownloadResult<DownloadPayload> {
+	@ConveyActor func requestPayload() async throws -> PayloadServerResponse<DownloadPayload> {
 		let result = try await requestResponse()
 		let actualDecoder = wrappedDecoder ?? server.configuration.defaultDecoder
 		do {
 			let decoded = try actualDecoder.decode(DownloadPayload.self, from: result.data)
 			try await postProcess(payload: decoded)
-            return DownloadResult(payload: decoded, response: result, retryCount: result.retryCount, duration:  result.duration)
+            return PayloadServerResponse(payload: decoded, response: result)
 		} catch {
 			print("Error when decoding \(DownloadPayload.self) in \(self), \(String(data: result.data, encoding: .utf8) ?? "--unparseable--"): \(error)")
 			throw error

@@ -21,13 +21,13 @@ public protocol WrappedDownloadArray<Element, ContainedContent>: CacheableContai
 
 public extension PayloadDownloadingTask where DownloadPayload: WrappedDownloadArray {
 	func downloadArray() async throws -> [DownloadPayload.Element]? {
-		try await downloadPayload().wrapped
+		try await download().wrapped
 	}
 }
 
 public extension PayloadDownloadingTask where DownloadPayload: CacheableContainer {
 	func downloadItem() async throws -> DownloadPayload.ContainedContent? {
-		try await downloadPayload().wrapped
+		try await download().wrapped
 	}
 }
 
