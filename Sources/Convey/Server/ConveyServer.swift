@@ -29,8 +29,12 @@ extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 
 @ConveyActor open class ConveyServer: ObservableObject {
 	// public vars
-	open var remote: Remote = .empty
-
+	public nonisolated var remote: Remote {
+		get { _remote.value }
+		set { _remote.value = newValue }
+	}
+	nonisolated private let _remote: CurrentValueSubject<Remote, Never> = .init(.empty)
+	
 	public var disabled = false { didSet { if disabled { print("#### \(String(describing: self)) DISABLED #### ")} }}
 
 	public let launchedAt = Date()
