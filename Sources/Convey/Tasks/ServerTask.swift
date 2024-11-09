@@ -16,7 +16,7 @@ public typealias PreviewClosure = @Sendable (ServerResponse) -> Void
 	var server: ConveyServer { get }
 	var url: URL { get }
 	var taskTag: String { get }
-	var timeout: TimeInterval { get }
+	var timeout: TimeInterval { get async }
 
 	func willStart() async
 	func didStart() async
@@ -44,7 +44,7 @@ public extension ServerTask {
 	func didComplete(with: ServerResponse) async { }
 	
 	func didFail(with error: Error) async { }
-	var timeout: TimeInterval { server.configuration.defaultTimeout }
+	var timeout: TimeInterval { get async { server.configuration.defaultTimeout }}
 	var cookies: [HTTPCookie]? { nil }
 	
 	func preFlight() async throws { }

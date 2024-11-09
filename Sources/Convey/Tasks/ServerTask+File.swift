@@ -17,7 +17,7 @@ public extension ServerTask {
 					let startedAt = Date()
 					let request = try await beginRequest(at: startedAt)
 					
-					let session = ConveySession(task: self)
+					let session = await ConveySession(task: self)
 					try await session.downloadFile(from: request, to: destination)
 					
 					try await postFlight()

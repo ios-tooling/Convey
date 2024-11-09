@@ -13,7 +13,7 @@ extension ServerTask {
 		request.httpMethod = "HEAD"
 		request.httpBody = nil
 		
-		let session = ConveySession(task: self)
+		let session = await ConveySession(task: self)
 
 		let result = try await session.data(for: request)
 

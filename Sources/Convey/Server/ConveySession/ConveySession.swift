@@ -22,7 +22,7 @@ import Combine
 		session = URLSession(configuration: .default, delegate: self, delegateQueue: queue)
 	}
 	
-	init(task: ServerTask) {
+	init(task: ServerTask) async {
 		server = task.server
 		super.init()
 
@@ -54,7 +54,7 @@ import Combine
 			queue = OperationQueue()
 		}
 		
-		let timeout = task.timeout
+		let timeout = await task.timeout
 		
 		config.timeoutIntervalForRequest = timeout
 		config.timeoutIntervalForResource = timeout

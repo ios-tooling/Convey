@@ -15,7 +15,7 @@ extension ServerTask where Self: ServerSentEventTargetTask {
 			let startedAt = Date()
 			
 			let request = try await beginRequest(at: startedAt)
-			let session = ConveySession(task: self)
+			let session = await ConveySession(task: self)
 			
 			return try session.start(request: request)
 		}

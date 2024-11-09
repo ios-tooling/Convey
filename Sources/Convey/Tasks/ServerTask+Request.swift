@@ -30,7 +30,7 @@ public extension ServerTask {
 		var request = URLRequest(url: url)
 		var isGzipped = self is GZipEncodedUploadingTask
 		
-		request.timeoutInterval = timeout
+		request.timeoutInterval = await timeout
 		request.httpMethod = httpMethod
 		request.cachePolicy = .reloadIgnoringLocalCacheData
 		if let dataProvider = self.wrappedTask as? DataUploadingTask {
