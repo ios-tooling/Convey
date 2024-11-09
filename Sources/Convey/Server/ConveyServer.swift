@@ -29,7 +29,7 @@ extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 
 @ConveyActor open class ConveyServer: ObservableObject {
 	// public vars
-	public nonisolated var remote: Remote {
+	open nonisolated var remote: Remote {
 		get { _remote.value }
 		set { _remote.value = newValue }
 	}
