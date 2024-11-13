@@ -11,7 +11,7 @@ import Foundation
 public typealias ServerReturned = ServerResponse
 
 public struct PayloadServerResponse<Payload: Sendable>: Sendable {
-	init(payload: Payload, response: ServerResponse) {
+	public init(payload: Payload, response: ServerResponse) {
 		self.payload = payload
 		self.response = response.response
 		self.data = response.data
@@ -19,12 +19,14 @@ public struct PayloadServerResponse<Payload: Sendable>: Sendable {
 		self.fromCache = response.fromCache
 		self.retryCount = response.retryCount
 		self.duration = response.duration
+		self.serverResponse = response
 	}
 	
 	public let payload: Payload
 	public var statusCode: Int { response.statusCode }
 	public let retryCount: Int?
 	public let duration: TimeInterval
+	public let serverResponse: ServerResponse
 	
 	public let response: HTTPURLResponse
 	public let data: Data

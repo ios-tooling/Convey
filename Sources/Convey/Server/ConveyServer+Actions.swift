@@ -14,7 +14,7 @@ public extension ConveyServer {
 		if let url {
 			taskPath = .init(url: url)
 		} else {
-			if #available(iOS 16.0, macOS 13, *) {
+			if #available(iOS 16.0, macOS 13, watchOS 9, *) {
 				taskPath = .init()
 			}
 		}

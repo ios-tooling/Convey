@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-@available(iOS 16.0, macOS 13, *)
+@available(iOS 16.0, macOS 13, watchOS 9, *)
 public struct TaskPathScreen: View {
 	@ObservedObject var path: TaskPath
 	@State private var navPath = NavigationPath()
