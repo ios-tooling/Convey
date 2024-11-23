@@ -1,16 +1,16 @@
 //
 //  ContentView.swift
-//  ConveyTest
+//  ConveyTestHarness
 //
-//  Created by Ben Gottlieb on 9/11/21.
+//  Created by Ben Gottlieb on 11/23/24.
 //
 
 import SwiftUI
 import Suite
+import CrossPlatformKit
 
-@MainActor
 struct ContentView: View {
-	@State var image: NSImage?
+	@State var image: UXImage?
 	@State var index = 0
 	@State var totalSize = 0
 	@State var fetching = false
@@ -25,7 +25,7 @@ struct ContentView: View {
 			NetworkIndicator()
 			Text("Hello, world!")
 			if let image = image {
-				Image(nsImage: image)
+				Image(uxImage: image)
 					.resizable()
 					.aspectRatio(contentMode: .fit)
 					.frame(minWidth: 300, minHeight: 300)
@@ -43,8 +43,15 @@ struct ContentView: View {
 		.onTapGesture() {
 			Task { await fetchNewImage() }
 		}
-		.task {
-			await fetchNewImage()
+		.onAppear {
+			Task {
+//				await ConveyTaskReporter.instance.setEnabled(true)
+				await fetchNewImage()
+				
+				let simpleTask = await SimpleGETTask(url: URL(string: "https://www.example.re")!)
+				let result = try await simpleTask.echo(.always).downloadData()
+				print(result.count)
+			}
 		}
 		.padding()
 	}
@@ -53,7 +60,7 @@ struct ContentView: View {
 		fetching = true
 		//let key = "\(index)"
 		index += 1
-		let url = URL("https://source.unsplash.com/user/c_v_r/500x500")
+		let url = URL("https://picsum.photos/500")
 		//image = try? await imageCache.fetch(from: imageCache.provision(url: url), caching: .localFirst, location: .grouped("images", key))
 		do {
 			image = try await imageCache.fetch(from: imageCache.provision(url: url))

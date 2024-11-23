@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-public extension PayloadDownloadingTask {
+public extension ServerDownloadConveyable {
 	func download() async throws -> DownloadPayload {
 		try await downloadWithResponse().payload
 	}
@@ -18,12 +18,11 @@ public extension PayloadDownloadingTask {
 	}
 }
 
-extension PayloadDownloadingTask {
+extension ServerDownloadConveyable {
 	@ConveyActor func requestPayload() async throws -> PayloadServerResponse<DownloadPayload> {
 		let result = try await requestResponse()
-		let actualDecoder = wrappedDecoder ?? server.configuration.defaultDecoder
 		do {
-			let decoded = try actualDecoder.decode(DownloadPayload.self, from: result.data)
+			let decoded = try decoder.decode(DownloadPayload.self, from: result.data)
 			try await postProcess(payload: decoded)
             return PayloadServerResponse(payload: decoded, response: result)
 		} catch {
@@ -33,21 +32,16 @@ extension PayloadDownloadingTask {
 	}
 }
 
-public extension ServerTask where Self: ServerDELETETask {
+public extension ServerConveyable where UnderlyingTask: ServerDELETETask {
 	@discardableResult func delete() async throws -> ServerResponse {
 		try await self.downloadDataWithResponse()
 	}
 }
 
-public extension WrappedServerTask where Wrapped: ServerDELETETask {
-	@discardableResult func delete() async throws -> ServerResponse {
-		try await self.downloadDataWithResponse()
-	}
-}
-
-public extension ServerTask {
+public extension ServerConveyable {
 	@available(iOS, deprecated: 1, renamed: "downloadDataWithResponse", message: "requestData has been renamed to downloadDataWithResponse()")
-	func requestData(caching: DataCache.Caching = .skipLocal) async throws -> ServerResponse { try await self.caching(caching).downloadDataWithResponse() }
+	
+	func requestData() async throws -> ServerResponse { try await self.downloadDataWithResponse() }
 
 	func downloadData() async throws -> Data {
 		try await downloadDataWithResponse().data

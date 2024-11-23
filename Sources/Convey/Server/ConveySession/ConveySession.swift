@@ -22,13 +22,13 @@ import Combine
 		session = URLSession(configuration: .default, delegate: self, delegateQueue: queue)
 	}
 	
-	init(task: ServerTask) async {
+	init(task: any ServerConveyable) async {
 		server = task.server
 		super.init()
 
 		let config = task.server.configuration.urlSessionConfiguration.copy() as! URLSessionConfiguration
 		
-		if task.wrappedTask is AllowedOnExpensiveNetworkTask {
+		if task.wrappedTask is any AllowedOnExpensiveNetworkTask {
 			config.allowsCellularAccess = true
 			config.allowsExpensiveNetworkAccess = true
 		} else {
@@ -36,13 +36,13 @@ import Combine
 			config.allowsExpensiveNetworkAccess = server.configuration.allowsExpensiveNetworkAccess
 		}
 		
-		if task.wrappedTask is AllowedOnConstrainedNetworkTask {
+		if task.wrappedTask is any AllowedOnConstrainedNetworkTask {
 			config.allowsConstrainedNetworkAccess = true
 		} else {
 			config.allowsConstrainedNetworkAccess = server.configuration.allowsConstrainedNetworkAccess
 		}
 
-		if task.wrappedTask is ServerSentEventTargetTask {
+		if task.wrappedTask is any ServerSentEventTargetTask {
 			var additionalHeaders: [String: String] = [:]
 			additionalHeaders["Accept"] = "text/event-stream"
 			additionalHeaders["Cache-Control"] = "no-cache"

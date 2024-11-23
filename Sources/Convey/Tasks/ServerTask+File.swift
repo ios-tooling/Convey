@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension ServerTask {
+public extension ServerConveyable {
 	@ConveyActor func downloadFile(to destination: URL) async throws {
 		try await handleThreadAndBackgrounding {
 			var attemptCount = 1
@@ -22,7 +22,7 @@ public extension ServerTask {
 					
 					try await postFlight()
 				} catch {
-					if let delay = (self.wrappedTask as? RetryableTask)?.retryInterval(after: error, attemptNumber: attemptCount) {
+					if let delay = (self.wrappedTask as? any RetryableTask)?.retryInterval(after: error, attemptNumber: attemptCount) {
 						attemptCount += 1
 						try await Task.sleep(nanoseconds: UInt64(delay) * 1_000_000_000)
 					} else {

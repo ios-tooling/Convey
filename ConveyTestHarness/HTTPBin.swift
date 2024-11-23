@@ -1,8 +1,8 @@
 //
 //  HTTPBin.swift
-//  ConveyTest_iOS
+//  ConveyTestHarness
 //
-//  Created by Ben Gottlieb on 5/22/22.
+//  Created by Ben Gottlieb on 11/23/24.
 //
 
 import Foundation
@@ -16,7 +16,7 @@ class HTTPBinServer: ConveyServer {
 	}
 }
 
-struct SampleHTTPBinPOST: ServerTask, ServerPOSTTask, DataUploadingTask, ThreadedServerTask, PostFlightTask {
+struct SampleHTTPBinPOST: ServerTask, ServerPOSTTask, DataUploadingTask, ThreadedServerTask {
 	var contentType: String?
 	
 	var path: String = "post"
@@ -28,7 +28,7 @@ struct SampleHTTPBinPOST: ServerTask, ServerPOSTTask, DataUploadingTask, Threade
 		dataToUpload = "\(index)".data(using: .utf8)
 	}
 	
-	func postProcess(response: ServerReturned) async throws {
+	func postProcess(response: ServerResponse) async throws {
 		do {
 			if let json = try JSONSerialization.jsonObject(with: response.data) as? [String: Any], let index = json["data"] as? String {
 				print("\(index): HTTPBin Post")

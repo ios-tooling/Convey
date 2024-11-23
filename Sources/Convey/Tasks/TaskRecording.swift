@@ -8,7 +8,7 @@
 import Foundation
 
 @ConveyActor public struct RecordedTask {
-	public var task: (any ServerTask)?
+	public var task: (any ServerConveyable)?
 	public var recording: String = ""
 	
 	public var startedAt: Date?
@@ -18,7 +18,7 @@ import Foundation
 	public var download: Data?
 	public var cachedResponse: Data?
 
-	var fields: [ServerTaskComponent] { (task as? UnrecordedTask)?.exposedComponents ?? ServerTaskComponent.allCases }
+	var fields: [ServerTaskComponent] { (task as? any UnrecordedTask)?.exposedComponents ?? ServerTaskComponent.allCases }
 	
 	static nonisolated let separator = "\n\n################################\n\n"
 	var output: String {
@@ -51,7 +51,7 @@ import Foundation
 			case .upload:
 				if let body = request?.httpBody {
 					let output: String
-					if task is GZipEncodedUploadingTask, let data = try? body.gunzipped() {
+					if task is any GZipEncodedUploadingTask, let data = try? body.gunzipped() {
 						output = String(data: data, encoding: .utf8) ?? String(data: body, encoding: .ascii) ?? "unable to stringify payload"
 					} else {
 						output = String(data: body, encoding: .utf8) ?? String(data: body, encoding: .ascii) ?? "unable to stringify payload"

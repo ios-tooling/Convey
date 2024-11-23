@@ -30,8 +30,8 @@ extension ConveyTaskReporter {
 			!storedURLs(for: manager).isEmpty
 		}
 		
-		func shouldEcho(_ task: ServerTask.Type? = nil, for manager: ConveyTaskReporter) -> Bool {
-			if let task, task is EchoingTask.Type, !suppressCompiledEcho { return true }
+		func shouldEcho(_ task: (any ServerTask.Type)? = nil, for manager: ConveyTaskReporter) -> Bool {
+			if let task, task is any EchoingTask.Type, !suppressCompiledEcho { return true }
 			if manager.oneOffTypes.value.contains(taskName) { return true }
 			if let manual = manuallyEcho { return manual }
 			if !suppressCompiledEcho, compiledEcho { return true }

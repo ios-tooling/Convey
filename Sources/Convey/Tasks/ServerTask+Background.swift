@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 #endif
 
-extension ServerTask {
+extension ServerConveyable {
 #if os(iOS)
 	@MainActor func requestBackgroundTime() async -> UIBackgroundTaskIdentifier? {
 		SharedServer.instance.application?.beginBackgroundTask(withName: "") {  }
@@ -27,11 +27,11 @@ extension ServerTask {
 	func handleThreadAndBackgrounding<Result: Sendable>(closure: () async throws -> Result) async throws -> Result {
 		let oneOffLogging = await isOneOffLogged
 		
-		await server.wait(forThread: (self.wrappedTask as? ThreadedServerTask)?.threadName)
+		await server.wait(forThread: (self.wrappedTask as? any ThreadedServerTask)?.threadName)
 		let token = await requestBackgroundTime()
 		defer { Task { await finishBackgroundTime(token) }}
 		let result = try await closure()
-		await server.stopWaiting(forThread: (self.wrappedTask as? ThreadedServerTask)?.threadName)
+		await server.stopWaiting(forThread: (self.wrappedTask as? any ThreadedServerTask)?.threadName)
 		if oneOffLogging { ConveyTaskReporter.instance.decrementOneOffLog(for: self) }
 		return result
 	}

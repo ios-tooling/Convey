@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 public extension ServerTask where Self: FileBackedTask & PayloadDownloadingTask {
-	func fileCachedDownload(using decoder: JSONDecoder? = nil) throws -> DownloadPayload? {
+	func fileCachedDownload() throws -> DownloadPayload? {
 		guard let data = fileCachedData else { return nil }
 		do {
 			return try decode(data: data, decoder: decoder)
@@ -20,17 +20,17 @@ public extension ServerTask where Self: FileBackedTask & PayloadDownloadingTask 
 	}
 }
 
-public extension ServerTask {
+public extension ServerConveyable {
 	var fileCachedData: Data? {
 		get {
-			guard let fileProvider = self.wrappedTask as? FileBackedTask else { return nil }
+			guard let fileProvider = self.wrappedTask as? any FileBackedTask else { return nil }
 			guard let file = fileProvider.fileURL else { return nil }
 			
 			return try? Data(contentsOf: file)
 		}
 		
 		nonmutating set {
-			guard let fileProvider = self.wrappedTask as? FileBackedTask else { return }
+			guard let fileProvider = self.wrappedTask as? any FileBackedTask else { return }
 			guard let file = fileProvider.fileURL else { return }
 			
 			if let data = newValue {

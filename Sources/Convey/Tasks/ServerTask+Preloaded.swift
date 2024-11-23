@@ -16,7 +16,7 @@ public extension PayloadDownloadingTask {
 	
 	@ConveyActor func preloadedSource(filename: String?) -> URL {
 		if let filename { return Bundle.main.bundleURL.appendingPathComponent(filename + ".json") }
-		if let url = (self.wrappedTask as? ArchivingTask)?.archiveURL, FileManager.default.fileExists(atPath: url.path) { return url }
+		if let url = (self.wrappedTask as? any ArchivingTask)?.archiveURL, FileManager.default.fileExists(atPath: url.path) { return url }
 		return Bundle.main.bundleURL.appendingPathComponent(String(describing: Self.self) + ".json")
 	}
 }

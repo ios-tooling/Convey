@@ -9,34 +9,18 @@ import Foundation
 
 public typealias PreviewClosure = @Sendable (ServerResponse) -> Void
 
-@ConveyActor public protocol ServerTask: Sendable {
-	var path: String { get }
-	func postProcess(response: ServerResponse) async throws
-	var httpMethod: String { get }
-	var server: ConveyServer { get }
-	var url: URL { get }
-	var taskTag: String { get }
-	var timeout: TimeInterval { get async }
-
-	func willStart() async
-	func didStart() async
-	func preFlight() async throws
-	func postFlight() async throws
-
-	func willComplete(with: ServerResponse) async
-	func didComplete(with: ServerResponse) async
-	var headers: ConveyHeaders { get }
-	var parameters: TaskURLParameters? { get }
-
-	func didFail(with error: Error) async
-	
-	func buildRequest() async throws -> URLRequest
-	var cookies: [HTTPCookie]? { get }
-	var encoder: JSONEncoder? { get }
-	var decoder: JSONDecoder? { get }
+@ConveyActor public protocol ServerTask: ServerConveyable where UnderlyingTask == Self {
 }
 
+
+
 public extension ServerTask {
+	
+	var wrappedTask: Self { self }
+	var caching: DataCache.Caching { .skipLocal }
+	var customURL: URL? { nil }
+	var preview: PreviewClosure? { nil }
+
 	func willStart() async { }
 	func didStart() async { }
 	
@@ -49,8 +33,41 @@ public extension ServerTask {
 	
 	func preFlight() async throws { }
 	func postFlight() async throws { }
-	var encoder: JSONEncoder? { nil }
-	var decoder: JSONDecoder? { nil }
+	var encoder: JSONEncoder { server.configuration.defaultEncoder }
+	var decoder: JSONDecoder { server.configuration.defaultDecoder }
 	var headers: ConveyHeaders { [String: String]() }
 	var parameters: TaskURLParameters? { nil }
+	var reportBadHTTPStatusAsError: Bool { server.configuration.reportBadHTTPStatusAsError }
+	var echoing: ConveyEchoStyle? { nil }
+	
+	func add(echoing: ConveyEchoStyle? = nil, timeout: TimeInterval? = nil, caching: DataCache.Caching? = nil, headers: ConveyHeaders? = nil, parameters: TaskURLParameters? = nil, reportBadHTTPStatusAsError: Bool? = nil, encoder: JSONEncoder? = nil, decoder: JSONDecoder? = nil, willStart: (() -> Void)? = nil, didComplete: ((ServerResponse) -> Void)? = nil) -> ServerTaskContainer<Self> {
+		var copy = ServerTaskContainer(root: self)
+		
+		if let echoing { copy.echoingOverride = echoing }
+		if let timeout { copy.timeoutOverride = timeout }
+		if let caching { copy.cachingOverride = caching }
+		if let headers { copy.additionalHeaders = headers }
+		if let parameters { copy.additionalParameters = parameters }
+		if let encoder { copy.overrideEncoder = encoder }
+		if let decoder { copy.overrideDecoder = decoder }
+		if let willStart { copy.extraWillStart = willStart }
+		if let didComplete { copy.extraDidComplete = didComplete }
+		
+		return copy
+	}
+
+}
+
+extension ServerTask {
+	public func echo(_ echoing: ConveyEchoStyle? = .always) -> ServerTaskContainer<Self> { add(echoing: echoing) }
+	public func timeout(_ timeout: TimeInterval?) -> ServerTaskContainer<Self> { add(timeout: timeout) }
+	public func caching(_ caching: DataCache.Caching?) -> ServerTaskContainer<Self> { add(caching: caching) }
+	public func headers(_ headers: ConveyHeaders?) -> ServerTaskContainer<Self> { add(headers: headers) }
+	public func parameters(_ parameters: TaskURLParameters?) -> ServerTaskContainer<Self> { add(parameters: parameters) }
+	public func reportBadHTTPStatusAsError(_ report: Bool? = true) -> ServerTaskContainer<Self> { add(reportBadHTTPStatusAsError: report) }
+	public func encoder(_ encoder: JSONEncoder?) -> ServerTaskContainer<Self> { add(encoder: encoder) }
+	public func decoder(_ decoder: JSONDecoder?) -> ServerTaskContainer<Self> { add(decoder: decoder) }
+	public func didComplete(_ didComplete: ((ServerResponse) -> Void)?) -> ServerTaskContainer<Self> { add(didComplete: didComplete) }
+	public func willStart(_ willStart: (() -> Void)?) -> ServerTaskContainer<Self> { add(willStart: willStart) }
+
 }

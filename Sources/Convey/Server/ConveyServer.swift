@@ -62,7 +62,7 @@ extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 		if asDefault { SharedServer.instance = self }
 	}
 	
-	open func preflight(_ task: ServerTask, request: URLRequest) async throws -> URLRequest {
+	open func preflight(_ task: any ServerConveyable, request: URLRequest) async throws -> URLRequest {
 		if disabled { throw ConveyServerError.serverDisabled }
 		if remote.isEmpty {
 			if task.wrappedTask.url.host?.contains("about:") == false { return request }
@@ -72,11 +72,11 @@ extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 		return request
 	}
 	
-	open func postflight(_ task: ServerTask, result: ServerResponse) { }
+	open func postflight(_ task: any ServerConveyable, result: ServerResponse) { }
 	
-	open func taskFailed(_ task: ServerTask, error: Error) async { print("Error: \(error) from \(task)") }
+	open func taskFailed(_ task: any ServerConveyable, error: Error) async { print("Error: \(error) from \(task)") }
 	
-	open func standardHeaders(for task: ServerTask) async throws -> [String: String] {
+	open func standardHeaders(for task: any ServerConveyable) async throws -> [String: String] {
 		var headers = configuration.defaultHeaders
 		if let agent = configuration.userAgent { headers[ServerConstants.Headers.userAgent] = agent }
 		if configuration.enableGZipDownloads {
@@ -85,13 +85,13 @@ extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 		return headers
 	}
 	
-	open func url(forTask task: ServerTask) -> URL {
+	open func url(forTask task: any ServerConveyable) -> URL {
 		var path = task.path
 		if path.hasPrefix("/") { path.removeFirst() }
 		return baseURL.appendingPathComponent(path)
 	}
 	
-	open var reportConnectionError: (ServerTask, Int, String?) -> Void = { task, code, description in
+	open var reportConnectionError: (any ServerConveyable, Int, String?) -> Void = { task, code, description in
 		print("\(type(of: task)), \(task.url) Connection error: \(code): \(description ?? "Unparseable error")")
 	}
 	

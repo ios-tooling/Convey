@@ -9,14 +9,15 @@ import Combine
 import Foundation
 import OSLog
 
-public extension ServerTask {
-	static var shouldEcho: Bool {
-		get async { ConveyTaskReporter.instance.shouldEcho(self as! ServerTask) }
-	}
-	
-	static func setShouldEcho(_ shouldEcho: Bool) async {
-		ConveyTaskReporter.instance.task(self, shouldEcho: shouldEcho)
-	}
+public extension ServerConveyable {
+// #FIXME
+//	static var shouldEcho: Bool {
+//		get async { ConveyTaskReporter.instance.shouldEcho(self as! ServerTask) }
+//	}
+//	
+//	static func setShouldEcho(_ shouldEcho: Bool) async {
+//		ConveyTaskReporter.instance.task(self, shouldEcho: shouldEcho)
+//	}
 }
 
 @MainActor class TaskReporterObserver: ObservableObject {
@@ -132,32 +133,32 @@ public extension ServerTask {
 		saveTypes()
 	}
 	
-	func incrementOneOffLog(for task: ServerTask) {
+	func incrementOneOffLog(for task: any ServerConveyable) {
 		enabled = true
 		oneOffTypes.value.append(String(describing: type(of: task.wrappedTask)))
 	}
 
-	func decrementOneOffLog(for task: ServerTask) {
+	func decrementOneOffLog(for task: any ServerConveyable) {
 		if let index = oneOffTypes.value.firstIndex(of: String(describing: type(of: task.wrappedTask))) {
 			oneOffTypes.value.remove(at: index)
 		}
 	}
 
-	func shouldEcho(_ task: ServerTask.Type, isEchoing: Bool) -> Bool {
-		guard enabled, let index = index(ofType: task, isEchoing: isEchoing) else { return task.self is EchoingTask.Type }
+	func shouldEcho(_ task: any ServerTask.Type, isEchoing: Bool) -> Bool {
+		guard enabled, let index = index(ofType: task, isEchoing: isEchoing) else { return task.self is any EchoingTask.Type }
 		return types.value[index].shouldEcho(task, for: self)
 	}
 	
-	func task(_ task: ServerTask.Type, shouldEcho: Bool) {
+	func task(_ task: any ServerTask.Type, shouldEcho: Bool) {
 		guard enabled else { return }
 		
 		var insideTypes = types.value
 		
-		if let index = index(ofType: task, isEchoing: task is EchoingTask, noMatterWhat: true) {
+		if let index = index(ofType: task, isEchoing: task is any EchoingTask, noMatterWhat: true) {
 			if shouldEcho {
 				insideTypes[index].manuallyEcho = true
 			} else {
-				let compiledEcho = !insideTypes[index].suppressCompiledEcho && task is EchoingTask
+				let compiledEcho = !insideTypes[index].suppressCompiledEcho && task is any EchoingTask
 				if compiledEcho || insideTypes[index].manuallyEcho == true || insideTypes[index].thisRunOnlyEcho {
 					insideTypes[index].manuallyEcho = false
 					insideTypes[index].thisRunOnlyEcho = false
@@ -169,7 +170,7 @@ public extension ServerTask {
 		saveTypes(insideTypes)
 	}
 
-	func record(startedAt: Date? = nil, completedAt: Date? = nil, request: URLRequest? = nil, response: Data? = nil, cachedResponse: Data? = nil, for task: ServerTask) {
+	func record(startedAt: Date? = nil, completedAt: Date? = nil, request: URLRequest? = nil, response: Data? = nil, cachedResponse: Data? = nil, for task: any ServerConveyable) {
 		let tag = task.taskTag
 		var current = recordings[tag] ?? .init(task: task)
 		
@@ -181,7 +182,7 @@ public extension ServerTask {
 		recordings[tag] = current
 	}
 	
-	func record(_ string: String, for task: ServerTask) {
+	func record(_ string: String, for task: any ServerConveyable) {
 		let tag = task.taskTag
 		var current = recordings[tag] ?? .init(task: task)
 		
@@ -189,17 +190,17 @@ public extension ServerTask {
 		recordings[tag] = current
 	}
 	
-	func dumpRecording(for task: ServerTask) async {
+	func dumpRecording(for task: any ServerConveyable) async {
 		let tag = task.taskTag
 		guard let recording = recordings[tag] else { return }
 		
-		if await task.isEchoing { recording.echo() }
+		if await task.shouldEchoFull { recording.echo() }
 		await task.server.taskPath?.save(task: recording)
 		recordings.removeValue(forKey: tag)
 	}
 	
-	func shouldEcho(_ task: ServerTask) -> Bool {
-		guard enabled, let index = index(of: task) else { return task.wrappedTask is EchoingTask }
+	func shouldEcho(_ task: any ServerConveyable) -> Bool {
+		guard enabled, let index = index(of: task) else { return task.wrappedTask is any EchoingTask }
 		
 		return types.value[index].shouldEcho(type(of: task.wrappedTask), for: self)
 	}
@@ -253,7 +254,7 @@ public extension ServerTask {
 		types.value = filtered
 	}
 	
-	func index(ofType task: ServerTask.Type, isEchoing: Bool, noMatterWhat: Bool = false) -> Int? {
+	func index(ofType task: any ServerTask.Type, isEchoing: Bool, noMatterWhat: Bool = false) -> Int? {
 		let name = String(describing: task.self)
 		if let index = index(of: name) { 
 			types.value[index].compiledEcho = isEchoing
@@ -262,7 +263,7 @@ public extension ServerTask {
 		
 		if !noMatterWhat { return nil }
 		var newTask = LoggedTaskInfo(taskName: name)
-		newTask.compiledEcho = task is EchoingTask
+		newTask.compiledEcho = task is any EchoingTask
 		self.types.value.append(newTask)
 		return self.types.value.count - 1
 	}
@@ -271,16 +272,16 @@ public extension ServerTask {
 		return types.value.firstIndex(where: { $0.taskName == taskName })
 	}
 	
-	func index(of task: ServerTask) -> Int? { index(ofType: type(of: task.wrappedTask), isEchoing: task.wrappedTask is EchoingTask) }
+	func index(of task: any ServerConveyable) -> Int? { index(ofType: type(of: task.wrappedTask), isEchoing: task.wrappedTask is any EchoingTask) }
 
-	func begin(task: ServerTask, request: URLRequest, startedAt date: Date) async {
-		if !enabled { return }
-		if ConveyTaskReporter.instance.logStyle > .none, !(task is DisabledShortEchoTask) { print("☎️ Begin \(task.abbreviatedDescription)") }
+	func begin(task: any ServerConveyable, request: URLRequest, startedAt date: Date) async {
+		if !(enabled || task.echoing == .always) { return }
+		if task.echoing == .always || (ConveyTaskReporter.instance.logStyle > .none && !(task is any DisabledShortEchoTask)) { print("☎️ Begin \(task.abbreviatedDescription)") }
 		if multitargetLogging { await loadTypes(resetting: false) }
 
 		let echo: Bool
 
-		if task.wrappedEcho == .full {
+		if task.echoing == .full || task.echoing == .always {
 			echo = true
 		} else if let index = self.index(of: task.wrappedTask) {
 			self.types.value[index].dates.append(date)
@@ -289,7 +290,7 @@ public extension ServerTask {
 		} else {
 			let name = String(describing: type(of: task.wrappedTask))
 			var newTask = LoggedTaskInfo(taskName: name)
-			newTask.compiledEcho = task.wrappedTask.wrappedTask is EchoingTask
+			newTask.compiledEcho = task.wrappedTask.wrappedTask is any EchoingTask
 			echo = newTask.shouldEcho(type(of: task.wrappedTask), for: self)
 			self.types.value.append(newTask)
 		}
@@ -301,10 +302,10 @@ public extension ServerTask {
 		if self.multitargetLogging { self.saveTypes() }
 	}
 	
-	func complete(task: ServerTask, request: URLRequest, response: HTTPURLResponse, bytes: Data, startedAt: Date, usingCache: Bool) async {
+	func complete(task: any ServerConveyable, request: URLRequest, response: HTTPURLResponse, bytes: Data, startedAt: Date, usingCache: Bool) async {
 		let shouldEcho: Bool
 		
-		if task.wrappedEcho == .full {
+		if task.echoing == .full || task.echoing == .always {
 			shouldEcho = true
 		} else if let index = self.index(of: task) {
 			shouldEcho = self.types.value[index].shouldEcho(type(of: task.wrappedTask), for: self)

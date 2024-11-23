@@ -15,7 +15,7 @@ extension ConveyServer {
 		return url
 	}
 }
-extension ServerTask {
+extension ServerConveyable {
 	public func logged() async -> Self {
 		ConveyTaskReporter.instance.incrementOneOffLog(for: self)
 		return self
@@ -35,7 +35,7 @@ extension ServerTask {
 	}
 	
 	func preLog(startedAt: Date, request: URLRequest) async {
-		if await self.isEchoing {
+		if await self.shouldEchoFull {
 			print(" ====================== Echoing Request \(type(of: self)) ======================\n \(request)\n============================================")
 		}
 		guard let url = server.setupLoggingDirectory()?.appendingPathComponent(logFilename(for: startedAt)) else { return }

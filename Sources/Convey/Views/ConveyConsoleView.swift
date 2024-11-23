@@ -62,12 +62,12 @@ import Cocoa
 		.onAppear {
 			Task {
 				currentTask = await responses.task(matching: availableTasks[currentTaskIndex])
-				isConsoleDisplayable = await availableTasks[currentTaskIndex].wrappedTask is ConfigurableConsoleDisplayableTask
+				isConsoleDisplayable = await availableTasks[currentTaskIndex].wrappedTask is any ConfigurableConsoleDisplayableTask
 				taskTag = await currentTask?.taskTag ?? ""
 			}
 		}
 		.sheet(isPresented: $isShowingConfigurationSheet) {
-			let task = availableTasks[currentTaskIndex] as! ConfigurableConsoleDisplayableTask
+			let task = availableTasks[currentTaskIndex] as! any ConfigurableConsoleDisplayableTask
 			ConsoleTaskConfigurationSheet(taskType: type(of: task), fields: responses.configurationBinding(for: task), newTask: newTaskBinding)
 		}
 		.padding()

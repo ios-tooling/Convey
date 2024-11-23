@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension ServerTask {
+extension ServerConveyable {
 	@ConveyActor public func head() async throws -> [ConveyHeader] {
 		var request = try await self.buildRequest()
 		request.httpMethod = "HEAD"
