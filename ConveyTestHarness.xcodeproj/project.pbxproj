@@ -11,7 +11,6 @@
 		B54E0AD12CF1EFA900D78EE2 /* ConveyTaskReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54E0AB82CF1EFA900D78EE2 /* ConveyTaskReporter.swift */; };
 		B54E0AD22CF1EFA900D78EE2 /* MD5.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54E0A7B2CF1EFA900D78EE2 /* MD5.swift */; };
 		B54E0AD32CF1EFA900D78EE2 /* DataCache.Provision.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54E0A692CF1EFA900D78EE2 /* DataCache.Provision.swift */; };
-		B54E0AD42CF1EFA900D78EE2 /* TaskWrappers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54E0AB32CF1EFA900D78EE2 /* TaskWrappers.swift */; };
 		B54E0AD52CF1EFA900D78EE2 /* ETagStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54E0A6C2CF1EFA900D78EE2 /* ETagStore.swift */; };
 		B54E0AD62CF1EFA900D78EE2 /* URLRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54E0A832CF1EFA900D78EE2 /* URLRequest.swift */; };
 		B54E0AD72CF1EFA900D78EE2 /* anchor.c in Sources */ = {isa = PBXBuildFile; fileRef = B54E0ACE2CF1EFA900D78EE2 /* anchor.c */; };
@@ -194,7 +193,6 @@
 		B54E0AB02CF1EFA900D78EE2 /* TaskRecording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskRecording.swift; sourceTree = "<group>"; };
 		B54E0AB12CF1EFA900D78EE2 /* TaskRedirect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskRedirect.swift; sourceTree = "<group>"; };
 		B54E0AB22CF1EFA900D78EE2 /* TaskURLParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskURLParameters.swift; sourceTree = "<group>"; };
-		B54E0AB32CF1EFA900D78EE2 /* TaskWrappers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskWrappers.swift; sourceTree = "<group>"; };
 		B54E0AB42CF1EFA900D78EE2 /* WrappedDownloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WrappedDownloads.swift; sourceTree = "<group>"; };
 		B54E0AB62CF1EFA900D78EE2 /* CommandLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLine.swift; sourceTree = "<group>"; };
 		B54E0AB72CF1EFA900D78EE2 /* ConveyNonIsolatedValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConveyNonIsolatedValue.swift; sourceTree = "<group>"; };
@@ -396,7 +394,6 @@
 				B54E0AB02CF1EFA900D78EE2 /* TaskRecording.swift */,
 				B54E0AB12CF1EFA900D78EE2 /* TaskRedirect.swift */,
 				B54E0AB22CF1EFA900D78EE2 /* TaskURLParameters.swift */,
-				B54E0AB32CF1EFA900D78EE2 /* TaskWrappers.swift */,
 				B54E0AB42CF1EFA900D78EE2 /* WrappedDownloads.swift */,
 			);
 			path = Tasks;
@@ -628,7 +625,6 @@
 				B54E0AD12CF1EFA900D78EE2 /* ConveyTaskReporter.swift in Sources */,
 				B54E0AD22CF1EFA900D78EE2 /* MD5.swift in Sources */,
 				B54E0AD32CF1EFA900D78EE2 /* DataCache.Provision.swift in Sources */,
-				B54E0AD42CF1EFA900D78EE2 /* TaskWrappers.swift in Sources */,
 				B54E0AD52CF1EFA900D78EE2 /* ETagStore.swift in Sources */,
 				B54E0AD62CF1EFA900D78EE2 /* URLRequest.swift in Sources */,
 				B54E0AD72CF1EFA900D78EE2 /* anchor.c in Sources */,

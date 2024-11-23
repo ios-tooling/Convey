@@ -8,7 +8,7 @@
 import Foundation
 
 @ConveyActor public struct RecordedTask {
-	public var task: (any ServerTask)?
+	public var task: (any ServerConveyable)?
 	public var recording: String = ""
 	
 	public var startedAt: Date?

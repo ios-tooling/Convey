@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension ServerTask {
+public extension ServerConveyable {
 	@ConveyActor func downloadFile(to destination: URL) async throws {
 		try await handleThreadAndBackgrounding {
 			var attemptCount = 1

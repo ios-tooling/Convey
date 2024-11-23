@@ -22,7 +22,7 @@ import Combine
 		session = URLSession(configuration: .default, delegate: self, delegateQueue: queue)
 	}
 	
-	init(task: ServerTask) async {
+	init(task: ServerConveyable) async {
 		server = task.server
 		super.init()
 

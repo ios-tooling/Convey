@@ -7,21 +7,22 @@
 
 import Foundation
 
-extension ServerTask {
+extension ServerConveyable {
 	@ConveyActor public func requestResponse() async throws -> ServerResponse {
 		await willStart()
 		await didStart()
 		
-		if wrappedCaching == .localOnly, self.wrappedTask is ServerCacheableTask {
-			if let cache = DataCache.instance.fetchLocal(for: url) {
-				let response = ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, duration: 0, startedAt: cache.cachedAt, retryCount: nil)
-				await willComplete(with: response)
-				await didComplete(with: response)
-				return response
-			}
-			await didFail(with: HTTPError.offline)
-			throw HTTPError.offline
-		}
+// #FIXME
+//		if wrappedCaching == .localOnly, self.wrappedTask is ServerCacheableTask {
+//			if let cache = DataCache.instance.fetchLocal(for: url) {
+//				let response = ServerResponse(response: HTTPURLResponse(cachedFor: url, data: cache.data), data: cache.data, fromCache: true, duration: 0, startedAt: cache.cachedAt, retryCount: nil)
+//				await willComplete(with: response)
+//				await didComplete(with: response)
+//				return response
+//			}
+//			await didFail(with: HTTPError.offline)
+//			throw HTTPError.offline
+//		}
 		
 		do {
 			return try await sendRequest(sendStart: false)
@@ -49,12 +50,12 @@ extension ServerTask {
 		
 		return try await handleThreadAndBackgrounding {
 			var attemptCount = 1
-			
-			if let response = wrappedRedirect?.cached { 
-				await willComplete(with: response)
-				await didComplete(with: response)
-				return response
-			}
+//#FIXME
+//			if let response = wrappedRedirect?.cached {
+//				await willComplete(with: response)
+//				await didComplete(with: response)
+//				return response
+//			}
 			
 			while true {
 				do {
@@ -78,7 +79,7 @@ extension ServerTask {
 						await DataCache.instance.cache(data: result.data, for: url)
 						ETagStore.instance.store(etag: tag, for: url)
 					}
-					wrappedPreview?(result)
+					preview?(result)
 					try await postProcess(response: result)
 					if !result.response.didDownloadSuccessfully {
 						server.reportConnectionError(self, result.statusCode, String(data: result.data, encoding: .utf8))
@@ -92,8 +93,8 @@ extension ServerTask {
 					
 					try await postFlight()
 					server.postflight(self, result: result)
-					wrappedRedirect?.cache(response: result)
-					if wrappedEcho == .timing { logTiming(abs(startedAt.timeIntervalSinceNow)) }
+				//	wrappedRedirect?.cache(response: result)
+					if echoing == .minimal { logTiming(abs(startedAt.timeIntervalSinceNow)) }
 					let retryResult = result.withRetryCount(attemptCount)
 					await willComplete(with: retryResult)
 					await didComplete(with: retryResult)

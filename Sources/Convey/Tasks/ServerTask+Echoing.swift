@@ -10,7 +10,7 @@ import Combine
 
 public enum EchoStyle: String, Codable, Hashable, Sendable { case full, timing }
 
-extension ServerTask {
+extension ServerConveyable {
 	public var abbreviatedDescription: String {
 		abbreviatedDescription(length: 100)
 	}
@@ -23,16 +23,16 @@ extension ServerTask {
 	}
 }
 
-extension ServerTask {
+extension ServerConveyable {
 	var isEchoing: Bool {
 		get async {
-			if let wrappedEcho { return wrappedEcho == .full }
+//#FIXME			if let wrappedEcho { return wrappedEcho == .full }
 			return ConveyTaskReporter.instance.shouldEcho(self)
 		}
 	}
 }
 
-public extension ServerTask {
+public extension ServerConveyable {
 	func logTiming(_ duration: TimeInterval) {
 		print(String(format: "%@ took %.2fs", abbreviatedDescription, duration))
 	}

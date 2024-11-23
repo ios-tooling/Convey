@@ -32,17 +32,11 @@ public protocol DisabledShortEchoTask: ServerTask { }
 	var fileURL: URL? { get }
 }
 
-@ConveyActor public protocol CustomURLTask: ServerTask {
-	var customURL: URL? { get }
-}
-
 @ConveyActor public protocol TaggedTask: ServerTask {
 	var requestTag: String { get }
 }
 
-@ConveyActor public protocol PayloadDownloadingTask<DownloadPayload>: ServerTask {
-	associatedtype DownloadPayload: Decodable & Sendable
-	func postProcess(payload: DownloadPayload) async throws
+@ConveyActor public protocol PayloadDownloadingTask<DownloadPayload>: ServerTask, ServerDownloadConveyable {
 }
 
 @ConveyActor public protocol DataUploadingTask: ServerUploadingTask {
@@ -80,8 +74,6 @@ public protocol DisabledShortEchoTask: ServerTask { }
 	func retryInterval(after error: Error, attemptNumber: Int) -> TimeInterval?
 }
 
-@ConveyActor public protocol PayloadUploadingTask: DataUploadingTask, JSONPayloadTask {
-	associatedtype UploadPayload: Encodable
-	var uploadPayload: UploadPayload? { get }
+@ConveyActor public protocol PayloadUploadingTask: DataUploadingTask, JSONPayloadTask, ServerUploadConveyable {
 }
 

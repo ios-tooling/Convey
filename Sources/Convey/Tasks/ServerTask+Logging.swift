@@ -15,7 +15,7 @@ extension ConveyServer {
 		return url
 	}
 }
-extension ServerTask {
+extension ServerConveyable {
 	public func logged() async -> Self {
 		ConveyTaskReporter.instance.incrementOneOffLog(for: self)
 		return self

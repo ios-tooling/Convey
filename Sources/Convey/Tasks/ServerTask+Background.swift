@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 #endif
 
-extension ServerTask {
+extension ServerConveyable {
 #if os(iOS)
 	@MainActor func requestBackgroundTime() async -> UIBackgroundTaskIdentifier? {
 		SharedServer.instance.application?.beginBackgroundTask(withName: "") {  }

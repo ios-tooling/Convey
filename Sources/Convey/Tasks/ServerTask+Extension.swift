@@ -7,15 +7,15 @@
 
 import Foundation
 
-@ConveyActor public extension ServerTask {
+@ConveyActor public extension ServerConveyable {
 	var server: ConveyServer { SharedServer.instance }
 
 	func postProcess(response: ServerResponse) async throws { }
 	var path: String { "" }
 
 	var url: URL {
-		let nonParameterized = (self.wrappedTask as? CustomURLTask)?.customURL ?? server.url(forTask: self)
-		if let parameters = self.wrappedTask.parameters, !parameters.isEmpty {
+		let nonParameterized = customURL ?? server.url(forTask: self)
+		if let parameters = self.parameters, !parameters.isEmpty {
 			var components = URLComponents(url: nonParameterized, resolvingAgainstBaseURL: true)
 			
 			if let params = parameters as? [String: String] {
@@ -72,7 +72,7 @@ import Foundation
 	var contentType: String? { "application/json" }
 	@ConveyActor var dataToUpload: Data? {
 		guard let payload = uploadPayload else { return nil }
-		let encoder = wrappedEncoder ?? server.configuration.defaultEncoder
+		let encoder = encoder ?? server.configuration.defaultEncoder
 		
 		do {
 			return try encoder.encode(payload)

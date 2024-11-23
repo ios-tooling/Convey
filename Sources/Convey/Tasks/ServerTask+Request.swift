@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-public extension ServerTask {
+public extension ServerConveyable {
 	var cachedEtag: String? {
 		get { ETagStore.instance.eTag(for: url) }
 	}

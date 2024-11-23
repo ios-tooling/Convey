@@ -9,34 +9,17 @@ import Foundation
 
 public typealias PreviewClosure = @Sendable (ServerResponse) -> Void
 
-@ConveyActor public protocol ServerTask: Sendable {
-	var path: String { get }
-	func postProcess(response: ServerResponse) async throws
-	var httpMethod: String { get }
-	var server: ConveyServer { get }
-	var url: URL { get }
-	var taskTag: String { get }
-	var timeout: TimeInterval { get async }
-
-	func willStart() async
-	func didStart() async
-	func preFlight() async throws
-	func postFlight() async throws
-
-	func willComplete(with: ServerResponse) async
-	func didComplete(with: ServerResponse) async
-	var headers: ConveyHeaders { get }
-	var parameters: TaskURLParameters? { get }
-
-	func didFail(with error: Error) async
-	
-	func buildRequest() async throws -> URLRequest
-	var cookies: [HTTPCookie]? { get }
-	var encoder: JSONEncoder? { get }
-	var decoder: JSONDecoder? { get }
+@ConveyActor public protocol ServerTask: ServerConveyable {
 }
 
+
+
 public extension ServerTask {
+	var wrappedTask: any ServerTask { self }
+	var caching: DataCache.Caching { .skipLocal }
+	var customURL: URL? { nil }
+	var preview: PreviewClosure? { nil }
+
 	func willStart() async { }
 	func didStart() async { }
 	
@@ -53,4 +36,6 @@ public extension ServerTask {
 	var decoder: JSONDecoder? { nil }
 	var headers: ConveyHeaders { [String: String]() }
 	var parameters: TaskURLParameters? { nil }
+	var reportBadHTTPStatusAsError: Bool { server.configuration.reportBadHTTPStatusAsError }
+	var echoing: ConveyEchoStyle? { nil }
 }

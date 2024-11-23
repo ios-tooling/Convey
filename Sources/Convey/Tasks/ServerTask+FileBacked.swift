@@ -20,7 +20,7 @@ public extension ServerTask where Self: FileBackedTask & PayloadDownloadingTask 
 	}
 }
 
-public extension ServerTask {
+public extension ServerConveyable {
 	var fileCachedData: Data? {
 		get {
 			guard let fileProvider = self.wrappedTask as? FileBackedTask else { return nil }
