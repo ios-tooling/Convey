@@ -9,7 +9,7 @@ import Foundation
 
 // marker protocols
 public protocol ServerCacheableTask { }
-public protocol ServerUploadingTask: ServerTask { }
+public protocol ServerUploadingTask: ServerTask, ServerUploadConveyable { }
 public protocol ServerGETTask: ServerTask { }
 public protocol ServerPUTTask: ServerUploadingTask { }
 public protocol ServerPOSTTask: ServerUploadingTask { }
@@ -36,7 +36,7 @@ public protocol DisabledShortEchoTask: ServerTask { }
 	var requestTag: String { get }
 }
 
-@ConveyActor public protocol PayloadDownloadingTask<DownloadPayload>: ServerTask, ServerDownloadConveyable {
+@ConveyActor public protocol PayloadDownloadingTask<DownloadPayload>: ServerTask, ServerPayloadDownloadConveyable {
 }
 
 @ConveyActor public protocol DataUploadingTask: ServerUploadingTask {
@@ -74,6 +74,6 @@ public protocol DisabledShortEchoTask: ServerTask { }
 	func retryInterval(after error: Error, attemptNumber: Int) -> TimeInterval?
 }
 
-@ConveyActor public protocol PayloadUploadingTask: DataUploadingTask, JSONPayloadTask, ServerUploadConveyable {
+@ConveyActor public protocol PayloadUploadingTask: DataUploadingTask, JSONPayloadTask, ServerPayloadUploadConveyable {
 }
 

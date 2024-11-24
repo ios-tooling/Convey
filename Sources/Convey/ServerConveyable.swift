@@ -44,12 +44,14 @@ public enum ConveyEchoStyle: Sendable { case dontEcho, minimal, full, always }
 }
 
 
-public protocol ServerDownloadConveyable: ServerConveyable {
+public protocol ServerPayloadDownloadConveyable: ServerConveyable {
 	associatedtype DownloadPayload: Decodable & Sendable
 	func postProcess(payload: DownloadPayload) async throws
 }
 
-public protocol ServerUploadConveyable: ServerConveyable {
+public protocol ServerUploadConveyable: ServerConveyable {}
+
+public protocol ServerPayloadUploadConveyable: ServerConveyable {
 	associatedtype UploadPayload: Encodable & Sendable
 	var uploadPayload: UploadPayload? { get }
 }

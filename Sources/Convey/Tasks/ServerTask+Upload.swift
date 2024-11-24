@@ -21,7 +21,7 @@ public extension ServerConveyable where Self: ServerUploadConveyable {
 //	func uploadWithResponse() async throws -> ServerResponse { try await sendRequest() }
 //}
 
-public extension ServerDownloadConveyable where Self: ServerUploadConveyable {
+public extension ServerPayloadDownloadConveyable where Self: ServerUploadConveyable {
 	func upload() async throws -> DownloadPayload {
 		try await uploadWithResponse().payload
 	}

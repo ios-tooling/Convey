@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-public extension ServerDownloadConveyable {
+public extension ServerPayloadDownloadConveyable {
 	func download() async throws -> DownloadPayload {
 		try await downloadWithResponse().payload
 	}
@@ -18,7 +18,7 @@ public extension ServerDownloadConveyable {
 	}
 }
 
-extension ServerDownloadConveyable {
+extension ServerPayloadDownloadConveyable {
 	@ConveyActor func requestPayload() async throws -> PayloadServerResponse<DownloadPayload> {
 		let result = try await requestResponse()
 		do {
