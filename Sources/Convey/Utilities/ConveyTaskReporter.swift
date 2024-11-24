@@ -276,7 +276,7 @@ public extension ServerConveyable {
 
 	func begin(task: any ServerConveyable, request: URLRequest, startedAt date: Date) async {
 		if !(enabled || task.echoing == .always) { return }
-		if task.echoing == .always || (ConveyTaskReporter.instance.logStyle > .none && !(task is any DisabledShortEchoTask)) { print("☎️ Begin \(task.abbreviatedDescription)") }
+		if task.echoing == .always || (ConveyTaskReporter.instance.logStyle > .none && !(task is any DisabledShortEchoTask)) { print("☎️ Begin \(task.abbreviatedDescription) \(Date())") }
 		if multitargetLogging { await loadTypes(resetting: false) }
 
 		let echo: Bool

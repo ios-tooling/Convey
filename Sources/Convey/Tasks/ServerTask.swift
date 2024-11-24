@@ -38,7 +38,7 @@ public extension ServerTask {
 	var headers: ConveyHeaders { [String: String]() }
 	var parameters: TaskURLParameters? { nil }
 	var reportBadHTTPStatusAsError: Bool { server.configuration.reportBadHTTPStatusAsError }
-	var echoing: ConveyEchoStyle? { nil }
+	var echoing: ConveyEchoStyle? { (self is any EchoingTask) ? .always : nil }
 	
 	func add(echoing: ConveyEchoStyle? = nil, timeout: TimeInterval? = nil, caching: DataCache.Caching? = nil, headers: ConveyHeaders? = nil, parameters: TaskURLParameters? = nil, reportBadHTTPStatusAsError: Bool? = nil, encoder: JSONEncoder? = nil, decoder: JSONDecoder? = nil, willStart: (() -> Void)? = nil, didComplete: ((ServerResponse) -> Void)? = nil) -> ServerTaskContainer<Self> {
 		var copy = ServerTaskContainer(root: self)

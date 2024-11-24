@@ -20,9 +20,16 @@ import Foundation
 
 	var fields: [ServerTaskComponent] { (task as? any UnrecordedTask)?.exposedComponents ?? ServerTaskComponent.allCases }
 	
-	static nonisolated let separator = "\n\n################################\n\n"
+	static nonisolated let separator = "\n=====================================\n"
 	var output: String {
-		var results = ""
+		var results = "====================================="
+		
+		if let task {
+			results += " Echoing Request \(type(of: task))\n"
+		} else {
+			results += "\n"
+		}
+		
 		
 		for field in fields {
 			switch field {
@@ -35,7 +42,7 @@ import Foundation
 				if let headers = request?.allHTTPHeaderFields, !headers.isEmpty {
 					results += "Headers\n"
 					for (key, value) in headers {
-						results = results + "\t" + key + ": " + value + "\n"
+						results = results + "\t• " + key + ": " + value + "\n"
 					}
 					results += Self.separator
 				}
@@ -62,8 +69,12 @@ import Foundation
 
 			case .download:
 				if let body = download ?? cachedResponse {
-					let output = String(data: body, encoding: .utf8) ?? String(data: body, encoding: .ascii) ?? "unable to stringify response"
-					results += output + Self.separator
+					if let json = body.prettyJSON {
+						results += json + Self.separator
+					} else {
+						let output = String(data: body, encoding: .utf8) ?? String(data: body, encoding: .ascii) ?? "unable to stringify response"
+						results += output + Self.separator
+					}
 				}
 			}
 
