@@ -35,3 +35,12 @@ public extension ConveyServer {
 }
 
 #endif
+
+public extension ConveyServer {
+	nonisolated func enableTaskLogging(style: ConveyTaskReporter.LogStyle? = .noLogging) {
+		Task {
+			await ConveyTaskReporter.instance.setLogStyle(style ?? .noLogging)
+			await ConveyTaskReporter.instance.setEnabled(style != nil)
+		}
+	}
+}

@@ -62,11 +62,11 @@ public extension ServerConveyable {
 	let directoryValue: CurrentValueSubject<URL, Never> = .init(URL.systemDirectoryURL(which: .cachesDirectory)!.appendingPathComponent("convey_tasks"))
 	public var multitargetLogging = false
 	public var storeResults = true
-	public var logStyle = LogStyle.none
+	public var logStyle = LogStyle.noLogging
 	let oneOffTypes: CurrentValueSubject<[String], Never> = .init([])
 	public var recordings: [String: RecordedTask] = [:]
 	
-	public enum LogStyle: String, Comparable, CaseIterable, Sendable { case none, short, steps
+	public enum LogStyle: String, Comparable, CaseIterable, Sendable { case noLogging, short, steps
 		public static func <(lhs: Self, rhs: Self) -> Bool {
 			Self.allCases.firstIndex(of: lhs)! < Self.allCases.firstIndex(of: rhs)!
 		}
@@ -108,7 +108,7 @@ public extension ServerConveyable {
 			Task {
 				await loadTypes(resetting: true)
 				if CommandLine.bool(for: "conveyShortLog") || ProcessInfo.bool(for: "conveyShortLog") { logStyle = .short }
-				if let raw = CommandLine.string(for: "conveyLogStyle") ?? ProcessInfo.string(for: "conveyLogStyle") { logStyle = LogStyle(rawValue: raw) ?? .none }
+				if let raw = CommandLine.string(for: "conveyLogStyle") ?? ProcessInfo.string(for: "conveyLogStyle") { logStyle = LogStyle(rawValue: raw) ?? .noLogging }
 
 				if let echos = CommandLine.string(for: "conveyEcho") ?? CommandLine.string(for: "conveyEchos") ?? ProcessInfo.string(for: "conveyEcho") ?? ProcessInfo.string(for: "conveyEchos") {
 					print("Echoing: \(echos)")
@@ -276,7 +276,7 @@ public extension ServerConveyable {
 
 	func begin(task: any ServerConveyable, request: URLRequest, startedAt date: Date) async {
 		if !(enabled || task.echoing == .always) { return }
-		if task.echoing == .always || (ConveyTaskReporter.instance.logStyle > .none && !(task is any DisabledShortEchoTask)) { print("☎️ Begin \(task.abbreviatedDescription) \(Date())") }
+		if task.echoing == .always || (ConveyTaskReporter.instance.logStyle > .noLogging && !(task is any DisabledShortEchoTask)) { print("☎️ Begin \(task.abbreviatedDescription) \(Date())") }
 		if multitargetLogging { await loadTypes(resetting: false) }
 
 		let echo: Bool

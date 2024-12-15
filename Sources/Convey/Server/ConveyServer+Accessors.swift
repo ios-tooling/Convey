@@ -30,9 +30,18 @@ public extension ConveyServer {
 		set { pinnedServerKeysSubject.value = newValue }
 	}
 	
+	nonisolated func configurationWillChange(from old: Configuration, to new: Configuration) {
+		if new.enableTaskLoggingAtLaunch, !old.enableTaskLoggingAtLaunch {
+			enableTaskLogging()
+		}
+	}
+	
 	nonisolated var configuration: Configuration {
 		get { configurationSubject.value }
-		set { configurationSubject.value = newValue }
+		set {
+			configurationWillChange(from: configurationSubject.value, to: newValue)
+			configurationSubject.value = newValue
+		}
 	}
 	
 	#if os(iOS)
