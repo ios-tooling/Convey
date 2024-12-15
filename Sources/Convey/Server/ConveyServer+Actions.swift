@@ -5,8 +5,10 @@
 //  Created by Ben Gottlieb on 10/4/24.
 //
 
-#if canImport(UIKit)
 import Combine
+import Foundation
+
+#if canImport(UIKit)
 import UIKit
 
 public extension ConveyServer {
@@ -25,12 +27,6 @@ public extension ConveyServer {
 		self.taskPath?.stop()
 		self.taskPath = nil
 		objectWillChange.send()
-	}
-	
-	func register(publicKey: String, for server: String) {
-		var keys = pinnedServerKeys[server, default: []]
-		keys.append(publicKey)
-		pinnedServerKeys[server] = keys
 	}
 	
 	func clearLogs() {

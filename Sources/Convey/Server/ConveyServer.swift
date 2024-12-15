@@ -47,7 +47,7 @@ extension CurrentValueSubject: @retroactive @unchecked Sendable { }
 	let threadManager = ThreadManager()
 
 	nonisolated let configurationSubject = CurrentValueSubject<Configuration, Never>(.init())
-	nonisolated let pinnedServerKeysSubject = CurrentValueSubject<[String: [String]], Never>(.init())
+	nonisolated let pinnedServerKeysSubject = CurrentValueSubject<[String: [PinnedServerKey]], Never>(.init())
 	#if os(iOS)
 		nonisolated let applicationSubject = CurrentValueSubject<UIApplication?, Never>(nil)
 	#endif

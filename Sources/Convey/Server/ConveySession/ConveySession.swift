@@ -79,14 +79,18 @@ import Combine
 
 extension ConveySession: URLSessionDelegate {
 	public nonisolated func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-		if let keys = server.pinnedServerKeys[challenge.host] {
-			guard let key = challenge.publicKey, keys.contains(key) else {
-				print("Failed to verify public key for \(challenge.host)")
+		if let keys = server.pinnedServerKeys[challenge.host], !keys.isEmpty, let challengeKey = challenge.publicKey {
+			let graceDate = Date().addingTimeInterval(server.configuration.pinExpiredToleranceInDays * 1440 * 60)
+	
+			let hasValidUnexpiredKey = keys.contains(where: { $0.key == challengeKey && $0.validUntil > Date() })
+			let hasValidKey = hasValidUnexpiredKey || keys.contains(where: { $0.key == challengeKey && $0.validUntil > graceDate })
+			
+			guard hasValidKey else {
 				completionHandler(.cancelAuthenticationChallenge, nil)
 				return
 			}
 		}
-		
+
 		if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
 			if let serverTrust = challenge.protectionSpace.serverTrust {
 				let credential = URLCredential(trust: serverTrust)
