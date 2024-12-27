@@ -57,7 +57,7 @@ public struct SimpleGETTask: ServerGETTask, Sendable {
 	}
 }
 
-public struct GetImageTask: ServerGETTask, Sendable, EchoingTask {
+public struct GetImageTask: ServerGETTask, Sendable {
 	public var url: URL
 	public var request: URLRequest
 	
