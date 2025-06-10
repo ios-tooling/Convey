@@ -21,7 +21,7 @@ final class NonIsolatedWrapper<Value: Sendable>: Sendable {
 
 	 }
 
-	 nonisolated(unsafe) var value: Value {
+	 nonisolated var value: Value {
 		  get {
 				os_unfair_lock_lock(lock)
 				let v = _value

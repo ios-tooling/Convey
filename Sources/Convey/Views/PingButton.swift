@@ -9,7 +9,7 @@ import SwiftUI
 import Combine
 
 @available(iOS 14.0, macOS 12, watchOS 8, *)
-@MainActor public struct PingButton<TaskKind: ServerTask, Content: View>: View {
+@MainActor public struct PingButton<TaskKind: ServerTask & Sendable, Content: View>: View {
 	let target: TaskKind
 	@State private var lastDuration: TimeInterval?
 	@State private var error: Error?
