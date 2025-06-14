@@ -11,6 +11,7 @@ import Combine
 public actor TaskPath: ObservableObject, CustomStringConvertible {
 	nonisolated let url: URL
 	var count = 0
+	public nonisolated var displayedCount: Int { recordedURLs.value.count }
 	
 	let recordedURLs: CurrentValueSubject<[TaskRecording], Never> = .init([])
 	nonisolated var urls: [TaskRecording] { recordedURLs.value }

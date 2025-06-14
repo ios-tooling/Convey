@@ -11,6 +11,7 @@ import SwiftUI
 public struct TaskPathScreen: View {
 	@ObservedObject var path: TaskPath
 	@State private var navPath = NavigationPath()
+	@Environment(\.dismiss) var dismiss
 	
 	public init(path: TaskPath) {
 		self.path = path
@@ -63,8 +64,11 @@ public struct TaskPathScreen: View {
 			.toolbar {
 				#if os(iOS)
 					ToolbarItem(placement: .bottomBar) {
-						Button("Clear Recordings") {
-							Task { await path.clear() }
+						Button("Clear Recordings (\(path.displayedCount))") {
+							Task {
+								await path.clear()
+								dismiss()
+							}
 						}
 						.buttonStyle(.bordered)
 					}
