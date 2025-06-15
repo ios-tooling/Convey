@@ -64,10 +64,19 @@ public struct TaskPathScreen: View {
 			.toolbar {
 				#if os(iOS)
 					ToolbarItem(placement: .bottomBar) {
-						Button("Clear Recordings (\(path.displayedCount))") {
+						Button(action: {
 							Task {
 								await path.clear()
 								dismiss()
+							}
+						}) {
+							HStack {
+								Text("Clear Recordings")
+								if path.isUpdating.value {
+									Text("(Loading…)")
+								} else {
+									Text("(\(path.displayedCount))")
+								}
 							}
 						}
 						.buttonStyle(.bordered)

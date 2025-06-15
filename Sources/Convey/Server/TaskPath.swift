@@ -12,6 +12,7 @@ public actor TaskPath: ObservableObject, CustomStringConvertible {
 	nonisolated let url: URL
 	var count = 0
 	public nonisolated var displayedCount: Int { recordedURLs.value.count }
+	public nonisolated let isUpdating = CurrentValueSubject<Bool, Never>(false)
 	
 	let recordedURLs: CurrentValueSubject<[TaskRecording], Never> = .init([])
 	nonisolated var urls: [TaskRecording] { recordedURLs.value }
@@ -49,7 +50,8 @@ public actor TaskPath: ObservableObject, CustomStringConvertible {
 	func load(_ url: URL) {
 		try? FileManager.default.createDirectory(at: self.url, withIntermediateDirectories: true)
 		print("Recording tasks to \(self.url.path)")
-		
+		isUpdating.value = true
+		Task { @MainActor in objectWillChange.send() }
 		do {
 			recordedURLs.value = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil).map { url in
 				
@@ -59,6 +61,8 @@ public actor TaskPath: ObservableObject, CustomStringConvertible {
 			print("Failed to load task path URLs from \(error)")
 		}
 		count = recordedURLs.value.count
+		isUpdating.value = false
+		Task { @MainActor in objectWillChange.send() }
 	}
 	
 	
