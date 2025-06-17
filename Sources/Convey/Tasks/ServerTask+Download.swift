@@ -8,6 +8,27 @@
 import Foundation
 import Combine
 
+
+@available(iOS 16.0.0, *)
+public extension ServerConveyable where UnderlyingTask: PayloadDownloadingTask {
+	func download() async throws -> UnderlyingTask.DownloadPayload {
+		try await requestPayload().payload
+	}
+	
+	@ConveyActor func requestPayload() async throws -> PayloadServerResponse<UnderlyingTask.DownloadPayload> {
+		let result = try await requestResponse()
+		do {
+			let decoded = try decoder.decode(UnderlyingTask.DownloadPayload.self, from: result.data)
+			let response = PayloadServerResponse(payload: decoded, response: result)
+			try await(self as? (any ServerPayloadDownloadConveyable<UnderlyingTask.DownloadPayload>))?.postProcess(payload: decoded)
+			return response
+		} catch {
+			print("Error when decoding \(UnderlyingTask.DownloadPayload.self) in \(self), \(String(data: result.data, encoding: .utf8) ?? "--unparseable--"): \(error)")
+			throw error
+		}
+	}
+}
+
 public extension ServerPayloadDownloadConveyable {
 	func download() async throws -> DownloadPayload {
 		try await downloadWithResponse().payload

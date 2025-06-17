@@ -7,6 +7,14 @@
 
 import Foundation
 
+public struct RequestOptions {
+	let sourceFileURL: URL?
+	
+	public init(sourceURL: URL? = nil) {
+		self.sourceFileURL = sourceURL
+	}
+}
+
 @ConveyActor public struct ServerTaskContainer<RootTask: ServerTask>: ServerConveyable, Sendable {
 	public typealias UnderlyingTask = RootTask
 	let root: RootTask
@@ -51,7 +59,8 @@ import Foundation
 	public var decoder: JSONDecoder { overrideDecoder ?? root.decoder }
 	public var reportBadHTTPStatusAsError: Bool { overridReportBadHTTPStatusAsError ?? root.reportBadHTTPStatusAsError }
 	public var echoing: ConveyEchoStyle? { echoingOverride ?? root.echoing }
-	
+	public var requestOptions: RequestOptions? { requestOptionsOverride ?? root.requestOptions }
+
 	
 	public func add(echoing: ConveyEchoStyle? = nil, timeout: TimeInterval? = nil, caching: DataCache.Caching? = nil, headers: ConveyHeaders? = nil, parameters: TaskURLParameters? = nil, reportBadHTTPStatusAsError: Bool? = nil, encoder: JSONEncoder? = nil, decoder: JSONDecoder? = nil, willStart: (() -> Void)? = nil, didComplete: ((ServerResponse) -> Void)? = nil) -> ServerTaskContainer {
 		var copy = self
@@ -66,7 +75,8 @@ import Foundation
 		if let decoder { copy.overrideDecoder = decoder }
 		if let willStart { copy.extraWillStart = willStart }
 		if let didComplete { copy.extraDidComplete = didComplete }
-		
+		if let requestOptions { copy.requestOptionsOverride = requestOptions }
+
 		return copy
 	}
 	
@@ -91,5 +101,6 @@ import Foundation
 	var overrideDecoder: JSONDecoder?
 	var extraDidComplete: ((ServerResponse) -> Void)?
 	var extraWillStart: (() -> Void)?
+	var requestOptionsOverride: RequestOptions?
 
 }

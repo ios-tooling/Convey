@@ -41,10 +41,11 @@ public enum ConveyEchoStyle: Sendable { case dontEcho, minimal, full, always }
 	var decoder: JSONDecoder { get }
 	var reportBadHTTPStatusAsError: Bool { get }
 	var echoing: ConveyEchoStyle? { get }
+	var requestOptions: RequestOptions? { get }
 }
 
 
-public protocol ServerPayloadDownloadConveyable: ServerConveyable {
+public protocol ServerPayloadDownloadConveyable<DownloadPayload>: ServerConveyable {
 	associatedtype DownloadPayload: Decodable & Sendable
 	func postProcess(payload: DownloadPayload) async throws
 }

@@ -15,7 +15,6 @@ public typealias PreviewClosure = @Sendable (ServerResponse) -> Void
 
 
 public extension ServerTask {
-	
 	var wrappedTask: Self { self }
 	var caching: DataCache.Caching { .skipLocal }
 	var customURL: URL? { nil }
@@ -39,8 +38,9 @@ public extension ServerTask {
 	var parameters: TaskURLParameters? { nil }
 	var reportBadHTTPStatusAsError: Bool { server.configuration.reportBadHTTPStatusAsError }
 	var echoing: ConveyEchoStyle? { (self is any EchoingTask) ? .always : nil }
+	var requestOptions: RequestOptions? { nil }
 	
-	func add(echoing: ConveyEchoStyle? = nil, timeout: TimeInterval? = nil, caching: DataCache.Caching? = nil, headers: ConveyHeaders? = nil, parameters: TaskURLParameters? = nil, reportBadHTTPStatusAsError: Bool? = nil, encoder: JSONEncoder? = nil, decoder: JSONDecoder? = nil, willStart: (() -> Void)? = nil, didComplete: ((ServerResponse) -> Void)? = nil) -> ServerTaskContainer<Self> {
+	func add(echoing: ConveyEchoStyle? = nil, timeout: TimeInterval? = nil, caching: DataCache.Caching? = nil, headers: ConveyHeaders? = nil, parameters: TaskURLParameters? = nil, reportBadHTTPStatusAsError: Bool? = nil, encoder: JSONEncoder? = nil, decoder: JSONDecoder? = nil, willStart: (() -> Void)? = nil, didComplete: ((ServerResponse) -> Void)? = nil, requestOptions: RequestOptions? = nil) -> ServerTaskContainer<Self> {
 		var copy = ServerTaskContainer(root: self)
 		
 		if let echoing { copy.echoingOverride = echoing }
@@ -52,6 +52,7 @@ public extension ServerTask {
 		if let decoder { copy.overrideDecoder = decoder }
 		if let willStart { copy.extraWillStart = willStart }
 		if let didComplete { copy.extraDidComplete = didComplete }
+		if let requestOptions { copy.requestOptionsOverride = requestOptions }
 		
 		return copy
 	}
@@ -69,5 +70,5 @@ extension ServerTask {
 	public func decoder(_ decoder: JSONDecoder?) -> ServerTaskContainer<Self> { add(decoder: decoder) }
 	public func didComplete(_ didComplete: ((ServerResponse) -> Void)?) -> ServerTaskContainer<Self> { add(didComplete: didComplete) }
 	public func willStart(_ willStart: (() -> Void)?) -> ServerTaskContainer<Self> { add(willStart: willStart) }
-
+	public func addRequestOptions(_ options: RequestOptions?) -> ServerTaskContainer<Self> { add(requestOptions: options) }
 }

@@ -48,6 +48,13 @@ extension ServerConveyable {
 			await didStart()
 		}
 		
+		if let url = requestOptions?.sourceFileURL, let data = try? Data(contentsOf: url) {
+			let response = ServerResponse(response: HTTPURLResponse(cachedFor: url, data: data), data: data, fromCache: true, duration: 0, startedAt: Date(), retryCount: nil)
+			await willComplete(with: response)
+			await didComplete(with: response)
+			return response
+		}
+		
 		return try await handleThreadAndBackgrounding {
 			var attemptCount = 1
 //#FIXME
