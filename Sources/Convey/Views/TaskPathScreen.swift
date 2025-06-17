@@ -54,11 +54,10 @@ public struct TaskPathScreen: View {
 			}
 			.navigationDestination(for: TaskPath.TaskRecording.self) { recording in
 				if let text = try? String(contentsOf: recording.fileURL) {
-					ScrollView {
-						Text(text)
-							.padding()
-							.font(.caption.monospaced())
-					}
+					TextEditor(text: .constant(text))   // <- This is the solution
+						.lineLimit(nil)
+						.multilineTextAlignment(.leading)
+						.font(.caption.monospaced())
 				}
 			}
 			.toolbar {
