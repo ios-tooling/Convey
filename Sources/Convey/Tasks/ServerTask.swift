@@ -71,4 +71,9 @@ extension ServerTask {
 	public func didComplete(_ didComplete: ((ServerResponse) -> Void)?) -> ServerTaskContainer<Self> { add(didComplete: didComplete) }
 	public func willStart(_ willStart: (() -> Void)?) -> ServerTaskContainer<Self> { add(willStart: willStart) }
 	public func addRequestOptions(_ options: RequestOptions?) -> ServerTaskContainer<Self> { add(requestOptions: options) }
+	public func addSourceURL(_ url: URL) -> ServerTaskContainer<Self> {
+		var opts = requestOptions ?? RequestOptions()
+		opts.sourceFileURL = url
+		return add(requestOptions: opts)
+	}
 }

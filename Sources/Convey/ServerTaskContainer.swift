@@ -8,7 +8,7 @@
 import Foundation
 
 public struct RequestOptions {
-	let sourceFileURL: URL?
+	var sourceFileURL: URL?
 	
 	public init(sourceURL: URL? = nil) {
 		self.sourceFileURL = sourceURL
