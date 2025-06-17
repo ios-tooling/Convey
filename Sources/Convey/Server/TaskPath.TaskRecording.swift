@@ -32,15 +32,22 @@ extension TaskPath {
 				if let raw = try? String(contentsOf: fileURL) {
 					let pieces = raw.components(separatedBy: RecordedTask.separator).filter { !$0.isEmpty }
 					url = URL(string: pieces.first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")
-					if pieces.count > 2 {
-						payloadSize = Int64(pieces[pieces.count - 2].count)
-					} else {
-						payloadSize = nil
-					}
+					payloadSize = pieces.payloadSize
 				} else {
 					payloadSize = nil
 				}
 			}
 		}
+	}
+}
+
+extension [String] {
+	var payloadSize: Int64? {
+		var max: Int64 = 0
+		
+		for piece in self {
+			if !piece.hasPrefix("Header") { max = Swift.max(max, Int64(piece.count)) }
+		}
+		return max == 0 ? nil : max
 	}
 }
