@@ -35,7 +35,7 @@ import Foundation
 			switch field {
 			case .url:
 				if let url = request?.url {
-					results += url.absoluteString + Self.separator
+					results += "[\(request?.httpMethod ?? "UNKNOWN METHOD")] \(url.absoluteString)\(Self.separator)"
 				}
 				
 			case .headers:
@@ -52,7 +52,7 @@ import Foundation
 					request.allHTTPHeaderFields = [:]
 					request.httpBody = nil
 				
-					results += request.description + Self.separator
+					results += "[\(request.httpMethod ?? "UNKNOWN METHOD")] \(request.description)\(Self.separator)"
 				}
 			
 			case .upload:
