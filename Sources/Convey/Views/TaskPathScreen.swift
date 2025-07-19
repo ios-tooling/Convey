@@ -11,6 +11,7 @@ import SwiftUI
 public struct TaskPathScreen: View {
 	@ObservedObject var path: TaskPath
 	@State private var navPath = NavigationPath()
+	@Environment(\.dismiss) var dismiss
 	
 	public init(path: TaskPath) {
 		self.path = path
@@ -53,18 +54,29 @@ public struct TaskPathScreen: View {
 			}
 			.navigationDestination(for: TaskPath.TaskRecording.self) { recording in
 				if let text = try? String(contentsOf: recording.fileURL) {
-					ScrollView {
-						Text(text)
-							.padding()
-							.font(.caption.monospaced())
-					}
+					TextEditor(text: .constant(text))   // <- This is the solution
+						.lineLimit(nil)
+						.multilineTextAlignment(.leading)
+						.font(.caption.monospaced())
 				}
 			}
 			.toolbar {
 				#if os(iOS)
 					ToolbarItem(placement: .bottomBar) {
-						Button("Clear Recordings") {
-							Task { await path.clear() }
+						Button(action: {
+							Task {
+								await path.clear()
+								dismiss()
+							}
+						}) {
+							HStack {
+								Text("Clear Recordings")
+								if path.isUpdating.value {
+									Text("(Loading…)")
+								} else {
+									Text("(\(path.displayedCount))")
+								}
+							}
 						}
 						.buttonStyle(.bordered)
 					}
