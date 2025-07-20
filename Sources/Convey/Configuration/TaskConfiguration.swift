@@ -1,0 +1,38 @@
+//
+//  TaskConfiguration.swift
+//  Convey
+//
+//  Created by Ben Gottlieb on 7/19/25.
+//
+
+import Foundation
+
+public struct TaskConfiguration: Sendable {
+	public var timeout: TimeInterval?
+	public var headers: Headers?
+	public var cookies: [HTTPCookie]?
+	public var localSourceURL: URL?
+	public var echoStyle: EchoStyle?
+	public var gzip: Bool?
+	
+	public static let `default` = TaskConfiguration()
+}
+
+extension TaskConfiguration {
+	public enum EchoStyle: Sendable { case minimal, full }
+}
+
+extension TaskConfiguration {
+	func merged(with other: Self) -> Self {
+		var result = self
+		
+		if let timeout = other.timeout { result.timeout = timeout }
+		if let headers = other.headers { result.headers = headers + (self.headers ?? []) }
+		if let cookies = other.cookies { result.cookies = cookies + (self.cookies ?? []) }
+		if let sourceURL = other.localSourceURL { result.localSourceURL = sourceURL }
+		if let echoStyle = other.echoStyle { result.echoStyle = echoStyle }
+		if let gzip = other.gzip { result.gzip = gzip }
+
+		return other
+	}
+}

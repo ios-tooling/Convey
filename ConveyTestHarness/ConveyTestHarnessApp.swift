@@ -10,9 +10,9 @@ import SwiftUI
 @main
 struct ConveyTestHarnessApp: App {
 	init() {
-		Task { @ConveyActor in
-			SharedServer.instance = ConveyServer()
-		}
+//		Task { @ConveyActor in
+//			SharedServer.instance = ConveyServer()
+//		}
 	}
 	
     var body: some Scene {

@@ -8,16 +8,17 @@
 import SwiftUI
 import Suite
 import CrossPlatformKit
+import Convey
 
 struct ContentView: View {
 	@State var image: UXImage?
 	@State var index = 0
 	@State var totalSize = 0
 	@State var fetching = false
-	let imageCache = ImageCache.instance
+//	let imageCache = ImageCache.instance
 	
 	init() {
-		Task { await ImageCache.instance.setCacheLimit(1_000_000 / 3) }
+//		Task { await ImageCache.instance.setCacheLimit(1_000_000 / 3) }
 	}
 	
 	var body: some View {
@@ -36,8 +37,8 @@ struct ContentView: View {
 			}
 			
 			AsyncButton("Clear Cache") {
-				await ImageCache.instance.prune(location: .grouped("images", nil))
-				totalSize = await imageCache.fetchTotalSize()
+//				await ImageCache.instance.prune(location: .grouped("images", nil))
+//				totalSize = await imageCache.fetchTotalSize()
 			}
 		}
 		.onTapGesture() {
@@ -49,8 +50,12 @@ struct ContentView: View {
 				await fetchNewImage()
 				
 				let simpleTask = await SimpleGETTask(url: URL(string: "https://www.example.re")!)
-				let result = try await simpleTask.echo(.always).downloadData()
-				print(result.count)
+				do {
+					let result = try await simpleTask/*.echo(.always)*/.download()
+					print(result.data.count)
+				} catch {
+					print("Failed to download: \(error)")
+				}
 			}
 		}
 		.padding()
@@ -63,8 +68,8 @@ struct ContentView: View {
 		let url = URL("https://picsum.photos/500")
 		//image = try? await imageCache.fetch(from: imageCache.provision(url: url), caching: .localFirst, location: .grouped("images", key))
 		do {
-			image = try await imageCache.fetch(from: imageCache.provision(url: url))
-			totalSize = await imageCache.fetchTotalSize()
+//			image = try await imageCache.fetch(from: imageCache.provision(url: url))
+//			totalSize = await imageCache.fetchTotalSize()
 		} catch {
 			print("Failed to fetch image: \(error)")
 		}
