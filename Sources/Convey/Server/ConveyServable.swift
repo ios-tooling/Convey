@@ -15,8 +15,9 @@ import Foundation
 	var defaultDecoder: JSONDecoder { get }
 	var downloadQueue: OperationQueue { get }
 	
-	func url(for path: String) async -> URL
+	func url(for task: DownloadingTask) async -> URL
 	func session(for task: DownloadingTask) async throws -> ConveySession
+	func headers(for task: DownloadingTask) async -> Headers
 }
 
 public extension ConveyServerable {
@@ -25,12 +26,16 @@ public extension ConveyServerable {
 	var defaultDecoder: JSONDecoder { .init() }
 	var downloadQueue: OperationQueue { .main }
 	
-	func url(for path: String) async -> URL {
-		baseURL.appendingPathComponent(path)
+	func url(for task: DownloadingTask) async -> URL {
+		await baseURL.appendingPathComponent(task.path)
 	}
 	
 	func session(for task: DownloadingTask) async throws -> ConveySession {
 		try await .init(server: self, task: task)
+	}
+	
+	func headers(for task: DownloadingTask) async -> Headers {
+		configuration.defaultHeaders
 	}
 }
 

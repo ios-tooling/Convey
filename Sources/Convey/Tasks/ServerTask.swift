@@ -59,7 +59,7 @@ public extension DownloadingTask {
 	var timeoutIntervalForRequest: TimeInterval? { server.configuration.defaultTimeout }
 	var timeoutIntervalForResource: TimeInterval? { nil }
 	var retryCount: Int { 0 }
-	var headers: Headers { server.configuration.defaultHeaders }
+	var headers: Headers { get async { await server.headers(for: self) }}
 
 	func willSendRequest(request: URLRequest) async throws { }
 	func didReceiveResponse(response: HTTPURLResponse, data: Data) async throws { }
