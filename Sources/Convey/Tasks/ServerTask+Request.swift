@@ -20,7 +20,7 @@ public extension DownloadingTask {
 				request.addValue(header.value, forHTTPHeaderField: header.name)
 			}
 			
-			if let uploader = (self as? UploadingTask), let uploadData = try await uploader.uploadData {
+			if let uploader = (self as? any UploadingTask), let uploadData = try await uploader.uploadData {
 				request.httpBody = uploadData
 				
 				if await configuration.gzip ?? uploader.gzip {
@@ -28,7 +28,7 @@ public extension DownloadingTask {
 					request.addValue("gzip", forHTTPHeaderField: Constants.Headers.contentEncoding)
 				}
 			}
-			if request.allHTTPHeaderFields?[Constants.Headers.contentType] == nil, let type = (self as? UploadingTask)?.contentType {
+			if request.allHTTPHeaderFields?[Constants.Headers.contentType] == nil, let type = (self as? any UploadingTask)?.contentType {
 				request.addValue(type, forHTTPHeaderField: Constants.Headers.contentType)
 			}
 			

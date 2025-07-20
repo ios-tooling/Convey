@@ -28,11 +28,12 @@ public typealias ServerTask = DataDownloadingTask
 	var requestTag: String? { get }
 
 	func willSendRequest(request: URLRequest) async throws
-	func didReceiveResponse(response: HTTPURLResponse, data: Data) async throws
+	func didReceiveResponse(response: URLResponse, data: Data) async throws
+	func didFail(with error: any Error) async
 }
 
 public protocol DataDownloadingTask: DownloadingTask where DownloadPayload == Data { }
-public protocol ResultIgnoredTask: DownloadingTask where DownloadPayload == Data { }
+public protocol IgnoredResultsTask: DownloadingTask where DownloadPayload == Data { }
 
 public protocol UploadingTask<UploadPayload>: DownloadingTask {
 	associatedtype UploadPayload: Encodable & Sendable
@@ -65,5 +66,6 @@ public extension DownloadingTask {
 	var requestTag: String? { nil }
 
 	func willSendRequest(request: URLRequest) async throws { }
-	func didReceiveResponse(response: HTTPURLResponse, data: Data) async throws { }
+	func didReceiveResponse(response: URLResponse, data: Data) async throws { }
+	func didFail(with error: any Error) async { }
 }

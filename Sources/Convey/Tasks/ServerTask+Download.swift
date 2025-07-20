@@ -37,13 +37,19 @@ public extension DownloadingTask {
 	}
 	
 	func downloadData() async throws -> ServerResponse<Data> {
-		let session = try await server.session(for: self)
-		try await willSendRequest(request: request)
-		let startedAt = Date()
-		
-		let (data, response, attemptNumber) = try await session.fetchData()
-		let duration = abs(startedAt.timeIntervalSinceNow)
-		
-		return ServerResponse(payload: data, response: response, data: data, startedAt: startedAt, duration: duration, attemptNumber: attemptNumber)
+		do {
+			let session = try await server.session(for: self)
+			try await willSendRequest(request: request)
+			let startedAt = Date()
+			
+			let (data, response, attemptNumber) = try await session.fetchData()
+			let duration = abs(startedAt.timeIntervalSinceNow)
+			
+			try await didReceiveResponse(response: response, data: data)
+			return ServerResponse(payload: data, response: response, data: data, startedAt: startedAt, duration: duration, attemptNumber: attemptNumber)
+		} catch {
+			await didFail(with: error)
+			throw error
+		}
 	}
 }
