@@ -24,14 +24,15 @@ public typealias ServerTask = DataDownloadingTask
 	var timeoutIntervalForResource: TimeInterval? { get }
 	var retryCount: Int { get }
 	var headers: Headers { get async }
+	var queryParameters: (any TaskQueryParameters)? { get async }
+	var requestTag: String? { get }
 
 	func willSendRequest(request: URLRequest) async throws
 	func didReceiveResponse(response: HTTPURLResponse, data: Data) async throws
 }
 
-public protocol DataDownloadingTask: DownloadingTask {
-	typealias DownloadPayload = Data
-}
+public protocol DataDownloadingTask: DownloadingTask where DownloadPayload == Data { }
+public protocol ResultIgnoredTask: DownloadingTask where DownloadPayload == Data { }
 
 public protocol UploadingTask<UploadPayload>: DownloadingTask {
 	associatedtype UploadPayload: Encodable & Sendable
@@ -60,6 +61,8 @@ public extension DownloadingTask {
 	var timeoutIntervalForResource: TimeInterval? { nil }
 	var retryCount: Int { 0 }
 	var headers: Headers { get async { await server.headers(for: self) }}
+	var queryParameters: (any TaskQueryParameters)? { nil }
+	var requestTag: String? { nil }
 
 	func willSendRequest(request: URLRequest) async throws { }
 	func didReceiveResponse(response: HTTPURLResponse, data: Data) async throws { }

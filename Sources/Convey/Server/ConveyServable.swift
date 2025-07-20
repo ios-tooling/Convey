@@ -15,9 +15,9 @@ import Foundation
 	var defaultDecoder: JSONDecoder { get }
 	var downloadQueue: OperationQueue { get }
 	
-	func url(for task: DownloadingTask) async -> URL
-	func session(for task: DownloadingTask) async throws -> ConveySession
-	func headers(for task: DownloadingTask) async -> Headers
+	func url(for task: any DownloadingTask) async -> URL
+	func session(for task: any DownloadingTask) async throws -> ConveySession
+	func headers(for task: any DownloadingTask) async -> Headers
 }
 
 public extension ConveyServerable {
@@ -26,15 +26,28 @@ public extension ConveyServerable {
 	var defaultDecoder: JSONDecoder { .init() }
 	var downloadQueue: OperationQueue { .main }
 	
-	func url(for task: DownloadingTask) async -> URL {
-		await baseURL.appendingPathComponent(task.path)
+	func url(for task: any DownloadingTask) async -> URL {
+		let base = await baseURL.appendingPathComponent(task.path)
+		
+		if let parameters = await task.queryParameters, !parameters.isEmpty {
+			var components = URLComponents(url: base, resolvingAgainstBaseURL: true)
+			
+			if let params = parameters as? [String: String] {
+				components?.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }.sorted { $0.name < $1.name }
+			} else if let params = parameters as? [URLQueryItem] {
+				components?.queryItems = params.sorted { $0.name < $1.name }
+			}
+
+			if let newURL = components?.url { return newURL }
+		}
+		return base
 	}
 	
-	func session(for task: DownloadingTask) async throws -> ConveySession {
+	func session(for task: any DownloadingTask) async throws -> ConveySession {
 		try await .init(server: self, task: task)
 	}
 	
-	func headers(for task: DownloadingTask) async -> Headers {
+	func headers(for task: any DownloadingTask) async -> Headers {
 		configuration.defaultHeaders
 	}
 }

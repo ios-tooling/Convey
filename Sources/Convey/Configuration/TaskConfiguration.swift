@@ -14,8 +14,13 @@ public struct TaskConfiguration: Sendable {
 	public var localSourceURL: URL?
 	public var echoStyle: EchoStyle?
 	public var gzip: Bool?
+	public var queryParameters: (any TaskQueryParameters)?
 	
 	public static let `default` = TaskConfiguration()
+	
+	public init() {
+		
+	}
 }
 
 extension TaskConfiguration {
@@ -32,6 +37,7 @@ extension TaskConfiguration {
 		if let sourceURL = other.localSourceURL { result.localSourceURL = sourceURL }
 		if let echoStyle = other.echoStyle { result.echoStyle = echoStyle }
 		if let gzip = other.gzip { result.gzip = gzip }
+		result.queryParameters = queryParameters + other.queryParameters
 
 		return other
 	}

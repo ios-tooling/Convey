@@ -27,4 +27,7 @@ public struct ServerConfiguration: Sendable {
 	
 	public static let `default` = ServerConfiguration()
 
+	public init() {
+		
+	}
 }
