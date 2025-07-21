@@ -23,7 +23,7 @@ import Foundation
 public extension ConveyServerable {
 	var baseURL: URL { remote.url }
 	var defaultTaskConfiguration: TaskConfiguration { .default }
-	var defaultDecoder: JSONDecoder { .init() }
+	var defaultDecoder: JSONDecoder { configuration.defaultDecoder }
 	var downloadQueue: OperationQueue? { nil }
 	
 	func cancelTasks(with tags: [String]) async {

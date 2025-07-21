@@ -17,7 +17,7 @@ public struct ServerResponse<Payload: Decodable & Sendable>: Sendable {
 	public let duration: TimeInterval
 	public let attemptNumber: Int
 
-	func decoding<T: Decodable & Sendable>(using decoder: JSONDecoder) throws -> ServerResponse<T> {
+	public func decoding<T: Decodable & Sendable>(using decoder: JSONDecoder) throws -> ServerResponse<T> {
 		
 		let payload = try decoder.decode(T.self, from: data)
 		return .init(payload: payload, response: response, data: data, startedAt: startedAt, duration: duration, attemptNumber: attemptNumber)
