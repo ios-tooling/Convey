@@ -13,18 +13,23 @@ import Foundation
 	var configuration: ServerConfiguration { get set }
 	var defaultTaskConfiguration: TaskConfiguration { get }
 	var defaultDecoder: JSONDecoder { get }
-	var downloadQueue: OperationQueue { get }
+	var downloadQueue: OperationQueue? { get }
 	
 	func url(for task: any DownloadingTask) async -> URL
 	func session(for task: any DownloadingTask) async throws -> ConveySession
-	func headers(for task: any DownloadingTask) async -> Headers
+	func headers(for task: any DownloadingTask) async throws -> Headers
 }
 
 public extension ConveyServerable {
 	var baseURL: URL { remote.url }
 	var defaultTaskConfiguration: TaskConfiguration { .default }
 	var defaultDecoder: JSONDecoder { .init() }
-	var downloadQueue: OperationQueue { .main }
+	var downloadQueue: OperationQueue? { nil }
+	
+	func cancelTasks(with tags: [String]) async {
+		// #FIXME
+		print("Cancelling tasks tagged with \(tags)...")
+	}
 	
 	func url(for task: any DownloadingTask) async -> URL {
 		let base = await baseURL.appendingPathComponent(task.path)
@@ -47,7 +52,7 @@ public extension ConveyServerable {
 		try await .init(server: self, task: task)
 	}
 	
-	func headers(for task: any DownloadingTask) async -> Headers {
+	func headers(for task: any DownloadingTask) async throws -> Headers {
 		configuration.defaultHeaders
 	}
 }

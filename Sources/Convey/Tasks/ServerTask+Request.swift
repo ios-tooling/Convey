@@ -14,7 +14,7 @@ public extension DownloadingTask {
 			var request = URLRequest(url: url)
 			request.httpMethod = method.rawValue
 			
-			let allHeaders: [Header] = await (configuration.headers?.headersArray ?? []) + headers.headersArray
+			let allHeaders: [Header] = try await (configuration.headers?.headersArray ?? []) + headers.headersArray
 			
 			for header in allHeaders {
 				request.addValue(header.value, forHTTPHeaderField: header.name)

@@ -13,6 +13,10 @@ public struct Header: Codable, Hashable, CustomStringConvertible, Sendable {
 	public var description: String {
 		"\(name): \(value)"
 	}
+	public init(name: String, value: String) {
+		self.name = name
+		self.value = value
+	}
 }
 public protocol Headers: Sendable {
 	var headersArray: [Header] { get }

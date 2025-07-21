@@ -18,7 +18,7 @@ import Foundation
 		self.task = task
 		self.request = try await task.request
 		
-		var configuration = URLSessionConfiguration.default
+		let configuration = URLSessionConfiguration.default
 		
 		if let expensive = task.allowsExpensiveNetworkAccess { configuration.allowsExpensiveNetworkAccess = expensive }
 		if let constrained = task.allowsConstrainedNetworkAccess { configuration.allowsConstrainedNetworkAccess = constrained }

@@ -12,5 +12,5 @@ public class ConveyServer: ConveyServerable {
 	
 	public var remote = Remote.empty
 	public var configuration = ServerConfiguration()
-	public var downloadQueue: OperationQueue = .init()
+	public var downloadQueue: OperationQueue? = .init()
 }

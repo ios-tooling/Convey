@@ -23,9 +23,10 @@ public typealias ServerTask = DataDownloadingTask
 	var timeoutIntervalForRequest: TimeInterval? { get }
 	var timeoutIntervalForResource: TimeInterval? { get }
 	var retryCount: Int { get }
-	var headers: Headers { get async }
+	var headers: Headers { get async throws }
 	var queryParameters: (any TaskQueryParameters)? { get async }
 	var requestTag: String? { get }
+	var server: ConveyServerable { get }
 
 	func willSendRequest(request: URLRequest) async throws
 	func didReceiveResponse(response: URLResponse, data: Data) async throws
@@ -52,7 +53,7 @@ public protocol DataUploadingTask: UploadingTask {
 public extension DownloadingTask {
 	var server: ConveyServerable { ConveyServer.default }
 	var configuration: TaskConfiguration { server.defaultTaskConfiguration }
-	var url: URL { URL(string: "")! }
+	var url: URL { get async { await server.url(for: self) }}
 	var method: HTTPMethod { .get }
 	var path: String { "" }
 	var decoder: JSONDecoder { server.defaultDecoder }
@@ -61,7 +62,7 @@ public extension DownloadingTask {
 	var timeoutIntervalForRequest: TimeInterval? { server.configuration.defaultTimeout }
 	var timeoutIntervalForResource: TimeInterval? { nil }
 	var retryCount: Int { 0 }
-	var headers: Headers { get async { await server.headers(for: self) }}
+	var headers: Headers { get async throws { try await server.headers(for: self) }}
 	var queryParameters: (any TaskQueryParameters)? { nil }
 	var requestTag: String? { nil }
 

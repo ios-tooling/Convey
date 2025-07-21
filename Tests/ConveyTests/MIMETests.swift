@@ -35,7 +35,6 @@ final class MIMETests: XCTestCase {
 		 
 		 let data = task.dataToUpload!
 		 let text = String(data: data, encoding: .ascii)!
-		 print(text)
     }
 
     func testPerformanceExample() throws {
