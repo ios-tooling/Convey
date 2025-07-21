@@ -45,9 +45,7 @@ public protocol UploadingTask<UploadPayload>: DownloadingTask {
 	var contentType: String? { get }
 }
 
-public protocol DataUploadingTask: UploadingTask {
-	typealias UploadPayload = Data
-	typealias DownloadPayload = Data
+public protocol DataUploadingTask: UploadingTask where UploadPayload == Data, DownloadPayload == Data {
 }
 
 public extension DownloadingTask {

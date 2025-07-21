@@ -27,7 +27,7 @@ final class MIMETests: XCTestCase {
 
     func testExample() throws {
 		 let components: [MIMEMessageComponent] = [
-			.text(name: "field #1", content: "Here is the first field"),
+			.text(content: "Here is the first field"),
 			.image(name: "test image", image: PlatformImage(named: "small_black_square", in: .testBundle, with: nil)!, quality: 0.9)
 		 ]
 

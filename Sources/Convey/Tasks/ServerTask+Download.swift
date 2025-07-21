@@ -9,6 +9,7 @@ import Foundation
 
 public struct ServerResponse<Payload: Decodable & Sendable>: Sendable {
 	public let payload: Payload
+	public let request: URLRequest
 	public let response: URLResponse
 	public var httpResponse: HTTPURLResponse? { response as? HTTPURLResponse }
 	public var statusCode: Int { httpResponse?.statusCode ?? 0 }
@@ -20,7 +21,7 @@ public struct ServerResponse<Payload: Decodable & Sendable>: Sendable {
 	public func decoding<T: Decodable & Sendable>(using decoder: JSONDecoder) throws -> ServerResponse<T> {
 		
 		let payload = try decoder.decode(T.self, from: data)
-		return .init(payload: payload, response: response, data: data, startedAt: startedAt, duration: duration, attemptNumber: attemptNumber)
+		return .init(payload: payload, request: request, response: response, data: data, startedAt: startedAt, duration: duration, attemptNumber: attemptNumber)
 	}
 }
 
@@ -33,7 +34,7 @@ public extension DownloadingTask {
 		let result = try await downloadData()
 		
 		if DownloadPayload.self == Data.self {
-			return .init(payload: result.data as! DownloadPayload, response: result.response, data: result.data, startedAt: result.startedAt, duration: result.duration, attemptNumber: result.attemptNumber)
+			return .init(payload: result.data as! DownloadPayload, request: result.request, response: result.response, data: result.data, startedAt: result.startedAt, duration: result.duration, attemptNumber: result.attemptNumber)
 		}
 		
 		let decoded: ServerResponse<DownloadPayload> = try result.decoding(using: decoder)
@@ -41,17 +42,28 @@ public extension DownloadingTask {
 	}
 	
 	func downloadData() async throws -> ServerResponse<Data> {
+		var info = RequestTrackingInfo(self)
+
 		do {
 			let session = try await server.session(for: self)
+			info.urlRequest = session.request
+			
 			try await willSendRequest(request: request)
 			let startedAt = Date()
 			
 			let (data, response, attemptNumber) = try await session.fetchData()
+			info.urlResponse = response
+			info.data = data
+			
 			let duration = abs(startedAt.timeIntervalSinceNow)
+			info.duration = duration
+			echo(info)
 
 			try await didReceiveResponse(response: response, data: data)
-			return ServerResponse(payload: data, response: response, data: data, startedAt: startedAt, duration: duration, attemptNumber: attemptNumber)
+			return ServerResponse(payload: data, request: session.request, response: response, data: data, startedAt: startedAt, duration: duration, attemptNumber: attemptNumber)
 		} catch {
+			info.error = error.localizedDescription
+			echo(info)
 			await didFail(with: error)
 			throw error
 		}
