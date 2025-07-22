@@ -53,15 +53,20 @@ import Foundation
 extension ConveySession {
 	func fetchData() async throws -> (Data, URLResponse, Int) {
 		var attemptNumber = 0
-		let retryCount = task.retryCount
 		
-		while attemptNumber <= retryCount {
+		while true {
 			do {
 				let (data, response) = try await session.data(for: request)
 				return (data, response, attemptNumber + 1)
 			} catch let error as URLError {
 				if error.code != .timedOut { throw error }
 				attemptNumber += 1
+				guard let delay = task.retryInterval(afterCount: attemptNumber) else { break }
+				if #available(iOS 16.0, *) {
+					try await Task.sleep(for: .seconds(delay))
+				} else {
+					try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+				}
 			} catch {
 				throw error
 			}

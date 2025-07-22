@@ -22,11 +22,11 @@ public typealias ServerTask = DataDownloadingTask
 	var allowsExpensiveNetworkAccess: Bool? { get }
 	var timeoutIntervalForRequest: TimeInterval? { get }
 	var timeoutIntervalForResource: TimeInterval? { get }
-	var retryCount: Int { get }
 	var headers: Headers { get async throws }
 	var queryParameters: (any TaskQueryParameters)? { get async }
 	var requestTag: String? { get }
 	var server: ConveyServerable { get }
+	func retryInterval(afterCount: Int) -> TimeInterval?
 
 	func willSendRequest(request: URLRequest) async throws
 	func didReceiveResponse(response: URLResponse, data: Data) async throws
@@ -59,10 +59,10 @@ public extension DownloadingTask {
 	var allowsExpensiveNetworkAccess: Bool? { nil }
 	var timeoutIntervalForRequest: TimeInterval? { server.configuration.defaultTimeout }
 	var timeoutIntervalForResource: TimeInterval? { nil }
-	var retryCount: Int { 0 }
 	var headers: Headers { get async throws { try await server.headers(for: self) }}
 	var queryParameters: (any TaskQueryParameters)? { nil }
 	var requestTag: String? { nil }
+	func retryInterval(afterCount: Int) -> TimeInterval? { nil }
 
 	func willSendRequest(request: URLRequest) async throws { }
 	func didReceiveResponse(response: URLResponse, data: Data) async throws { }
