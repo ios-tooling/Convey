@@ -44,7 +44,7 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 			}
 		}
 		
-		if let data = httpBody, let string = String(data: data, encoding: .utf8) {
+		if let data = httpBody, let string = data.reportedData(limit: 500) {
 			result += "\n" + string
 		}
 		

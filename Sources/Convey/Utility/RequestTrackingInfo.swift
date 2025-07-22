@@ -10,12 +10,15 @@ import Foundation
 public struct RequestTrackingInfo: Sendable, Codable {
 	let taskName: String
 	let taskDescription: String
-	
+	var startedAt = Date()
 	var request: CodableURLRequest?
 	var response: CodableURLResponse?
 	var duration: TimeInterval?
 	var error: String?
 	
+	var separator = 		"\n##============================================================##\n"
+	var endSeparator = 	"\n################################################################\n"
+
 	var urlRequest: URLRequest? {
 		get { nil }
 		set { if let newValue { request = .init(newValue) }}
@@ -44,16 +47,23 @@ public struct RequestTrackingInfo: Sendable, Codable {
 	}
 	
 	var fullDescription: String {
-		var result = minimalDescription
+		var result = endSeparator + minimalDescription
 		
 		if let error {
 			result += "\n⚠️ \(error)"
 		}
+		result += separator
 
 		if let request {
-			result += "\n\(request.description)"
+			result += "\(request.description)"
+			result += separator
 		}
 		
+		if let data, let visible = data.reportedData(limit: 2048) {
+			result += "\(visible.debugDescription)"
+		}
+		
+		result += endSeparator
 		return result
 	}
 }

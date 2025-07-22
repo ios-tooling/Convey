@@ -31,6 +31,12 @@ public extension ConveyServerable {
 		print("Cancelling tasks tagged with \(tags)...")
 	}
 	
+	func defaultHeaders() async -> Headers {
+		var headers = configuration.defaultHeaders.headersArray
+		if let userAgent = configuration.userAgent { headers.append(Header(name: Constants.Headers.userAgent, value: userAgent)) }
+		return headers
+	}
+	
 	func url(for task: any DownloadingTask) async -> URL {
 		let base = await baseURL.appendingPathComponent(task.path)
 		

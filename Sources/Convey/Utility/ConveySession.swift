@@ -19,11 +19,12 @@ import Foundation
 		self.request = try await task.request
 		
 		let configuration = URLSessionConfiguration.default
+		let taskConfig = await task.configuration
 		
 		if let expensive = task.allowsExpensiveNetworkAccess { configuration.allowsExpensiveNetworkAccess = expensive }
 		if let constrained = task.allowsConstrainedNetworkAccess { configuration.allowsConstrainedNetworkAccess = constrained }
-		if let requestTimeout = task.timeoutIntervalForRequest { configuration.timeoutIntervalForRequest = requestTimeout }
-		if let resourceTimeout = task.timeoutIntervalForResource { configuration.timeoutIntervalForResource = resourceTimeout }
+		configuration.timeoutIntervalForRequest = task.timeoutIntervalForRequest ?? taskConfig.timeout ?? server.configuration.defaultTimeout
+		configuration.timeoutIntervalForResource = task.timeoutIntervalForResource ?? taskConfig.timeout ?? server.configuration.defaultTimeout
 
 		super.init()
 		self.session = URLSession(configuration: configuration, delegate: self, delegateQueue: server.downloadQueue)
@@ -35,7 +36,7 @@ extension ConveySession {
 		var attemptNumber = 0
 		let retryCount = task.retryCount
 		
-		while retryCount <= attemptNumber {
+		while attemptNumber <= retryCount {
 			do {
 				let (data, response) = try await session.data(for: request)
 				return (data, response, attemptNumber + 1)

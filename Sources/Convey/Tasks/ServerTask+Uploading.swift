@@ -19,7 +19,7 @@ public extension UploadingTask {
 		guard let uploadPayload else { return nil }
 		let data = try encoder.encode(uploadPayload)
 		
-		if await configuration.gzip ?? gzip {
+		if server.configuration.enableGZipDownloads, await configuration.gzip ?? gzip {
 			return try data.gzipped()
 		}
 		

@@ -12,7 +12,7 @@ public extension DownloadingTask {
 		get async throws {
 			let url = await url
 			var request = URLRequest(url: url)
-			request.httpMethod = method.rawValue
+			request.httpMethod = method.rawValue.uppercased()
 			
 			let allHeaders: [Header] = try await (configuration.headers?.headersArray ?? []) + headers.headersArray
 			
@@ -23,7 +23,7 @@ public extension DownloadingTask {
 			if let uploader = (self as? any UploadingTask), let uploadData = try await uploader.uploadData {
 				request.httpBody = uploadData
 				
-				if await configuration.gzip ?? uploader.gzip {
+				if server.configuration.enableGZipDownloads, await configuration.gzip ?? uploader.gzip {
 					request.addValue("\(uploadData.count)", forHTTPHeaderField: Constants.Headers.contentLength)
 					request.addValue("gzip", forHTTPHeaderField: Constants.Headers.contentEncoding)
 				}
@@ -38,6 +38,8 @@ public extension DownloadingTask {
 					request.addValue(value, forHTTPHeaderField: key)
 				}
 			}
+			
+			request.timeoutInterval = await configuration.timeout ?? server.configuration.defaultTimeout
 
 			return request
 		}
