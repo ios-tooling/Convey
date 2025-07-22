@@ -59,6 +59,11 @@ public struct RequestTrackingInfo: Sendable, Codable {
 			result += separator
 		}
 		
+		if let headers = response?.allHeaderFields as? Headers {
+			result += headers.description
+			result += separator
+		}
+		
 		if let data, let visible = data.reportedData(limit: 2048) {
 			result += "\(visible.debugDescription)"
 		}

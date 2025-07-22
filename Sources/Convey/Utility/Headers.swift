@@ -24,6 +24,11 @@ public protocol Headers: Sendable {
 extension [String: String]: Headers { }
 extension [Header]: Headers { }
 
+extension Headers {
+	public var description: String {
+		headersArray.map(\.description).joined(separator: "\n")
+	}
+}
 
 extension [Header] {
 	init(_ dict: [String: String]) {

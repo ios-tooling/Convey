@@ -39,9 +39,7 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 		
 		if let headers = allHTTPHeaderFields {
 			result += "Headers\n"
-			for (header, value) in headers {
-				result += "\t\(header): \(value)\n"
-			}
+			result += headers.description
 		}
 		
 		if let data = httpBody, let string = data.reportedData(limit: 500) {
