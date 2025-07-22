@@ -12,6 +12,17 @@ import Foundation
 	var session: URLSession!
 	let task: any DownloadingTask
 	let request: URLRequest
+	var tag: String? { task.requestTag }
+	
+	static func session(for tag: String) -> ConveySession? {
+		activeSessions.first { $0.tag == tag }
+	}
+	
+	static func cancel(sessionWithTag tag: String) {
+		session(for: tag)?.cancel()
+	}
+	
+	static var activeSessions: Set<ConveySession> = []
 	
 	init<Task: DownloadingTask>(server: ConveyServerable, task: Task) async throws {
 		self.server = server
@@ -28,6 +39,14 @@ import Foundation
 
 		super.init()
 		self.session = URLSession(configuration: configuration, delegate: self, delegateQueue: server.downloadQueue)
+	}
+	
+	func cancel() {
+		session.invalidateAndCancel()
+	}
+	
+	func finish() {
+		Self.activeSessions.remove(self)
 	}
 }
 

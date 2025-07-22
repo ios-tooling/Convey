@@ -27,8 +27,9 @@ public extension ConveyServerable {
 	var downloadQueue: OperationQueue? { nil }
 	
 	func cancelTasks(with tags: [String]) async {
-		// #FIXME
-		print("Cancelling tasks tagged with \(tags)...")
+		for tag in tags {
+			ConveySession.cancel(sessionWithTag: tag)
+		}
 	}
 	
 	func defaultHeaders() async -> Headers {

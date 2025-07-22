@@ -58,12 +58,15 @@ public extension DownloadingTask {
 			echo(info)
 
 			try await didReceiveResponse(response: response, data: data)
-			return ServerResponse(payload: data, request: session.request, response: response, data: data, startedAt: info.startedAt, duration: info.duration!, attemptNumber: attemptNumber)
+			let result = ServerResponse(payload: data, request: session.request, response: response, data: data, startedAt: info.startedAt, duration: info.duration!, attemptNumber: attemptNumber)
+			session.finish()
+			return result
 		} catch {
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
 			info.error = error.localizedDescription
 			echo(info)
 			await didFail(with: error)
+			session.finish()
 			throw error
 		}
 	}
