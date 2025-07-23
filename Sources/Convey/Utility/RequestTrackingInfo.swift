@@ -10,6 +10,7 @@ import Foundation
 public struct RequestTrackingInfo: Sendable, Codable {
 	let taskName: String
 	let taskDescription: String
+	var url: URL?
 	var startedAt = Date()
 	var request: CodableURLRequest?
 	var response: CodableURLResponse?
@@ -34,6 +35,12 @@ public struct RequestTrackingInfo: Sendable, Codable {
 	init<T: DownloadingTask>(_ task: T) {
 		taskName = String(describing: type(of: task))
 		taskDescription = String(describing: task)
+	}
+	
+	func save() async {
+		if #available(iOS 17, *) {
+			await TaskRecorder.instance.record(info: self)
+		}
 	}
 	
 	var minimalDescription: String {

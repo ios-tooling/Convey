@@ -47,6 +47,7 @@ public extension DownloadingTask {
 
 		do {
 			info.urlRequest = session.request
+			info.url = session.request.url
 			
 			try await willSendRequest(request: request)
 			
@@ -60,6 +61,7 @@ public extension DownloadingTask {
 			try await didReceiveResponse(response: response, data: data)
 			let result = ServerResponse(payload: data, request: session.request, response: response, data: data, startedAt: info.startedAt, duration: info.duration!, attemptNumber: attemptNumber)
 			session.finish()
+			await info.save()
 			return result
 		} catch {
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
@@ -67,6 +69,7 @@ public extension DownloadingTask {
 			echo(info)
 			await didFail(with: error)
 			session.finish()
+			await info.save()
 			throw error
 		}
 	}
