@@ -11,7 +11,8 @@ public struct ServerConfiguration: Sendable {
 	public var defaultEncoder = JSONEncoder()
 	public var defaultDecoder = JSONDecoder()
 	public var urlSessionConfiguration = URLSessionConfiguration.default
-	public var enableGZipDownloads = false
+	public var enableGZipDownloads = true
+	public var enableGZipUploads = false
 	public var defaultTimeout = 30.0
 	public var allowsExpensiveNetworkAccess = true
 	public var allowsConstrainedNetworkAccess = true
@@ -27,7 +28,5 @@ public struct ServerConfiguration: Sendable {
 	
 	public static let `default` = ServerConfiguration()
 
-	public init() {
-		
-	}
+	public init() { }
 }

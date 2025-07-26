@@ -16,12 +16,23 @@ extension RecordedTasksScreen.TaskList {
 		var body: some View {
 			VStack(alignment: .leading) {
 				HStack {
+					let isDelete = task.method == "DELETE"
+					Text(task.method)
+						.padding(2)
+						.padding(.horizontal, 4)
+						.font(.system(size: 12))
+						.background { RoundedRectangle(cornerRadius: 4).fill((isDelete ? Color.red : Color.gray).opacity(0.4)) }
 					Text(task.name).bold()
 						.font(.system(size: 13))
 					Spacer()
 					if let size = task.data?.count {
 						Text(Self.formatter.string(fromByteCount: Int64(size)))
+							.padding(2)
+							.padding(.horizontal, 4)
 							.font(.system(size: 12))
+							.background { RoundedRectangle(cornerRadius: 4).stroke(.black.opacity(0.4)) }
+							.opacity(0.6)
+
 					}
 				}
 				

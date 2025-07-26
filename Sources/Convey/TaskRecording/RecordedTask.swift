@@ -22,6 +22,8 @@ import Foundation
 	var downloadSize: Int?
 	var appLaunchedAt: TimeInterval
 	var sessionStartedAt: TimeInterval?
+	var isGzipped = false
+	var method: String
 	
 	var sessionStartedAtDate: Date? { sessionStartedAt == nil ? nil : Date(timeIntervalSinceReferenceDate: sessionStartedAt!) }
 	var appLaunchedAtDate: Date { Date(timeIntervalSinceReferenceDate: appLaunchedAt) }
@@ -36,10 +38,12 @@ import Foundation
 		error = info.error
 		downloadSize = info.data?.count
 		data = info.data
+		method = info.method
 		appLaunchedAt = launchedAt.timeIntervalSinceReferenceDate
 		
 		if let request = info.request {
 			requestData = try? JSONEncoder().encode(request)
+			isGzipped = info.isGzipped
 		}
 
 		if let response = info.response {

@@ -8,6 +8,15 @@
 import Foundation
 
 public extension DownloadingTask {
+	var shouldGZIPUploads: Bool {
+		guard let uploader = (self as? any UploadingTask) else { return false }
+		
+		if server.configuration.enableGZipUploads, configuration?.gzip ?? uploader.gzip {
+			return true
+		}
+		return false
+	}
+	
 	var request: URLRequest {
 		get async throws {
 			let url = await url
@@ -20,10 +29,12 @@ public extension DownloadingTask {
 				request.addValue(header.value, forHTTPHeaderField: header.name)
 			}
 			
-			if let uploader = (self as? any UploadingTask), let uploadData = try await uploader.uploadData {
+			if let uploader = (self as? any UploadingTask), var uploadData = try await uploader.uploadData {
+				if shouldGZIPUploads { uploadData = try uploadData.gzipped() }
+
 				request.httpBody = uploadData
 				
-				if server.configuration.enableGZipDownloads, await configuration.gzip ?? uploader.gzip {
+				if server.configuration.enableGZipUploads, configuration.gzip ?? uploader.gzip {
 					request.addValue("\(uploadData.count)", forHTTPHeaderField: Constants.Headers.contentLength)
 					request.addValue("gzip", forHTTPHeaderField: Constants.Headers.contentEncoding)
 				}
@@ -32,14 +43,14 @@ public extension DownloadingTask {
 				request.addValue(type, forHTTPHeaderField: Constants.Headers.contentType)
 			}
 			
-			if let cookies = await configuration.cookies {
+			if let cookies = configuration.cookies {
 				let fields = HTTPCookie.requestHeaderFields(with: cookies)
 				for (key, value) in fields {
 					request.addValue(value, forHTTPHeaderField: key)
 				}
 			}
 			
-			request.timeoutInterval = await configuration.timeout ?? server.configuration.defaultTimeout
+			request.timeoutInterval = configuration.timeout ?? server.configuration.defaultTimeout
 
 			return request
 		}

@@ -12,6 +12,7 @@ import Foundation
 	var session: URLSession!
 	let task: any DownloadingTask
 	let request: URLRequest
+	let ungzippedRequest: URLRequest?
 	var tag: String? { task.requestTag }
 	
 	static func session(for tag: String) -> ConveySession? {
@@ -28,14 +29,16 @@ import Foundation
 		self.server = server
 		self.task = task
 		self.request = try await task.request
-		
+		self.ungzippedRequest = task.shouldGZIPUploads ? try await task.gzipped(false).request : nil
+
 		let configuration = URLSessionConfiguration.default
-		let taskConfig = await task.configuration
+		let taskConfig = task.configuration
 		
 		if let expensive = task.allowsExpensiveNetworkAccess { configuration.allowsExpensiveNetworkAccess = expensive }
 		if let constrained = task.allowsConstrainedNetworkAccess { configuration.allowsConstrainedNetworkAccess = constrained }
-		configuration.timeoutIntervalForRequest = task.timeoutIntervalForRequest ?? taskConfig.timeout ?? server.configuration.defaultTimeout
-		configuration.timeoutIntervalForResource = task.timeoutIntervalForResource ?? taskConfig.timeout ?? server.configuration.defaultTimeout
+		configuration.timeoutIntervalForRequest = task.timeoutIntervalForRequest ?? taskConfig?.timeout ?? server.configuration.defaultTimeout
+		
+		configuration.timeoutIntervalForResource = task.timeoutIntervalForResource ?? taskConfig?.timeout ?? server.configuration.defaultTimeout
 
 		super.init()
 		self.session = URLSession(configuration: configuration, delegate: self, delegateQueue: server.downloadQueue)

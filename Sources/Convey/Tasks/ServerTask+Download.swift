@@ -47,6 +47,7 @@ public extension DownloadingTask {
 
 		do {
 			info.urlRequest = session.request
+			info.ungzippedRequest = session.ungzippedRequest
 			info.url = session.request.url
 			
 			try await willSendRequest(request: request)

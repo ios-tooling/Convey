@@ -12,7 +12,7 @@ public typealias ServerTask = DataDownloadingTask
 @ConveyActor public protocol DownloadingTask<DownloadPayload>: Sendable {
 	associatedtype DownloadPayload: Decodable & Sendable
 	
-	var configuration: TaskConfiguration { get async }
+	var configuration: TaskConfiguration? { get set }
 	var path: String { get async }
 	var url: URL { get async }
 	var request: URLRequest { get async throws }

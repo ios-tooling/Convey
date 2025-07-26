@@ -35,6 +35,7 @@ struct RecordedTaskDetailScreen: View {
 			var result = ""
 			if let submit = task.requestData?.prettyJSON {
 				result = submit
+				if task.isGzipped { result += "\n(gzipped)" }
 			}
 			
 			if let response = task.data?.prettyJSON {

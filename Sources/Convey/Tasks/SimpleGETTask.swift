@@ -10,9 +10,8 @@ import Foundation
 public struct SimpleGETTask: DataDownloadingTask, Sendable {
 	public var url: URL
 	public var request: URLRequest
-	
-	public func buildRequest() async throws -> URLRequest { request }
-	
+	public var configuration: TaskConfiguration?
+		
 	public init(request: URLRequest) {
 		self.request = request
 		self.url = request.url ?? URL(string: "about:blank")!

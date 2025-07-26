@@ -7,12 +7,14 @@
 
 import Foundation
 
-public struct RequestTrackingInfo: Sendable, Codable {
+@ConveyActor public struct RequestTrackingInfo: Sendable, Codable {
 	let taskName: String
 	let taskDescription: String
+	let method: String
 	var url: URL?
 	var startedAt = Date()
 	var request: CodableURLRequest?
+	var isGzipped = false
 	var response: CodableURLResponse?
 	var duration: TimeInterval?
 	var error: String?
@@ -25,6 +27,14 @@ public struct RequestTrackingInfo: Sendable, Codable {
 		set { if let newValue { request = .init(newValue) }}
 	}
 
+	var ungzippedRequest: URLRequest? {
+		get { nil }
+		set { if let newValue {
+			isGzipped = true
+			request = .init(newValue)
+		}}
+	}
+
 	var urlResponse: URLResponse? {
 		get { nil }
 		set { if let newValue { response = .init(newValue) }}
@@ -35,6 +45,7 @@ public struct RequestTrackingInfo: Sendable, Codable {
 	init<T: DownloadingTask>(_ task: T) {
 		taskName = String(describing: type(of: task))
 		taskDescription = String(describing: task)
+		method = task.method.rawValue.uppercased()
 	}
 	
 	func save() async {

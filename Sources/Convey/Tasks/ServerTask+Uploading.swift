@@ -19,12 +19,9 @@ public extension UploadingTask {
 		guard let uploadPayload else { return nil }
 		let data = try encoder.encode(uploadPayload)
 		
-		if server.configuration.enableGZipDownloads, await configuration.gzip ?? gzip {
-			return try data.gzipped()
-		}
-		
 		return data
 	} }
+	
 	var encoder: JSONEncoder { server.configuration.defaultEncoder }
 	var contentType: String? { UploadPayload.self == Data.self ? "application/json" : nil }
 }

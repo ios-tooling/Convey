@@ -10,7 +10,8 @@ import Foundation
 public struct GetImageTask: DataDownloadingTask {
 	public var url: URL
 	public var request: URLRequest
-	
+	public var configuration: TaskConfiguration?
+
 	public init(request: URLRequest) {
 		self.request = request
 		self.url = request.url ?? URL(string: "about:blank")!
