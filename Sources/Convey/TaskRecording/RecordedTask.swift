@@ -25,6 +25,11 @@ import Foundation
 	var isGzipped = false
 	var method: String
 	
+	var request: CodableURLRequest? {
+		guard let requestData else { return nil }
+		return try? JSONDecoder().decode(CodableURLRequest.self, from: requestData)
+	}
+	
 	var sessionStartedAtDate: Date? { sessionStartedAt == nil ? nil : Date(timeIntervalSinceReferenceDate: sessionStartedAt!) }
 	var appLaunchedAtDate: Date { Date(timeIntervalSinceReferenceDate: appLaunchedAt) }
 

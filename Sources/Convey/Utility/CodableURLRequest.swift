@@ -30,7 +30,7 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 	public var description: String {
 		var result = ""
 		
-		result += "\(httpMethod ?? "[MISSING]") \(url?.absoluteString ?? "NO URL")\n"
+		result += "[\(httpMethod ?? "MISSING")] \(url?.absoluteString ?? "NO URL")\n"
 		if let timeoutInterval { result += "Timeout: \(timeoutInterval)\n" }
 		if let main = mainDocumentURL {
 			result += "Main Document URL: \(main.absoluteString)\n"
@@ -39,10 +39,13 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 		
 		if let headers = allHTTPHeaderFields {
 			result += "Headers\n"
-			result += headers.description
+			for key in headers.keys.sorted() {
+				result += "\t• \(key): \(headers[key] ?? "")\n"
+			}
 		}
 		
 		if let data = httpBody, let string = data.reportedData(limit: 500) {
+			result += "Body:\n"
 			result += "\n" + string
 		}
 		

@@ -15,9 +15,9 @@ public extension JSONUploadingTask {
 	var contentType: String? { "application/json" }
 	var json: [String: Sendable]? { nil }
 	var uploadPayload: Data? { nil }
-	var uploadData: Data? { get async throws {
-		guard let uploadPayload else { return nil }
-		return try JSONSerialization.data(withJSONObject: uploadPayload, options: [])
+	var uploadData: Data? { get throws {
+		guard let json else { return nil }
+		return try JSONSerialization.data(withJSONObject: json, options: [])
 	}}
 }
 

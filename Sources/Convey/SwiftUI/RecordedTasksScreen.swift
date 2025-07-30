@@ -41,6 +41,7 @@ extension RecordedTasksScreen {
 		var currentAppLaunchDate: Date?
 		var currentSessionStartDate: Date?
 		
+		@Environment(\.modelContext) var modelContext
 		@Query(sort: \RecordedTask.startedAt, order: .reverse) var tasks: [RecordedTask]
 		
 		
@@ -54,6 +55,13 @@ extension RecordedTasksScreen {
 							TaskRow(task: task)
 								.opacity(currentSessionStartDate != task.sessionStartedAtDate ? 0.3 : 1)
 						}
+					}
+					.onDelete { indices in
+						for index in indices.reversed() {
+							let task = tasks[index]
+							modelContext.delete(task)
+						}
+						try? modelContext.save()
 					}
 				}
 				.listStyle(.plain)

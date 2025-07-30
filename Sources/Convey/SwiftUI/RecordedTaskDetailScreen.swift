@@ -14,38 +14,37 @@ struct RecordedTaskDetailScreen: View {
 	@State var json = "no data"
 	
 	var body: some View {
-		VStack {
-			ScrollView {
-				TextEditor(text: .constant(json))
-					.font(.system(size: 10))
-					.lineLimit(nil)
-					.fixedSize(horizontal: false, vertical: true)
-					.multilineTextAlignment(.leading)
-					.monospaced()
-			}
-			HStack {
-				Button("Delete", role: .destructive) {
-					task.modelContext?.delete(task)
-					dismiss()
+		TextEditor(text: .constant(json))
+			.font(.system(size: 10))
+			.lineLimit(nil)
+//			.fixedSize(horizontal: false, vertical: true)
+			.multilineTextAlignment(.leading)
+			.monospaced()
+			.safeAreaInset(edge: .bottom) {
+				HStack {
+					Button("Delete", role: .destructive) {
+						task.modelContext?.delete(task)
+						dismiss()
+					}
 				}
 			}
-		}
-		.navigationTitle(task.name)
-		.onAppear {
-			var result = ""
-			if let submit = task.requestData?.prettyJSON {
-				result = submit
-				if task.isGzipped { result += "\n(gzipped)" }
-			}
-			
-			if let response = task.data?.prettyJSON {
-				if !result.isEmpty {
-					result += "\n\n====== RESPONSE ==================================\n\n"
+			.navigationTitle(task.name)
+			.onAppear {
+				var result = ""
+				if let request = task.request {
+					result = request.description
+					if task.isGzipped { result += "\n(gzipped)" }
 				}
-				result += response
+				
+				if let response = task.data?.prettyJSON {
+					if !result.isEmpty {
+						result += "\n\n====== RESPONSE ==================================\n\n"
+					}
+					result += response
+					result += "\n"
+				}
+				self.json = result
 			}
-			self.json = result
-		}
 	}
 }
 
