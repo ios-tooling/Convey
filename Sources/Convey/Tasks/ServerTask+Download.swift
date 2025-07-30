@@ -8,6 +8,8 @@
 import Foundation
 
 public struct ServerResponse<Payload: Decodable & Sendable>: Sendable {
+	public enum ResponseType: Int { case unknown = 0, info = 100, success = 200, redirect = 300, clientError = 400, serverError = 500 }
+	
 	public let payload: Payload
 	public let request: URLRequest
 	public let response: URLResponse
@@ -17,6 +19,20 @@ public struct ServerResponse<Payload: Decodable & Sendable>: Sendable {
 	public let startedAt: Date
 	public let duration: TimeInterval
 	public let attemptNumber: Int
+	public let stringResult: String
+	
+	public var responseType: ResponseType { ResponseType(rawValue: (statusCode / 100) * 100) ?? .unknown }
+	
+	init(payload: Payload, request: URLRequest, response: URLResponse, data: Data, startedAt: Date, duration: TimeInterval, attemptNumber: Int) {
+		self.payload = payload
+		self.request = request
+		self.response = response
+		self.data = data
+		self.startedAt = startedAt
+		self.duration = duration
+		self.attemptNumber = attemptNumber
+		self.stringResult = String(data: data, encoding: .utf8) ?? ""
+	}
 
 	public func decoding<T: Decodable & Sendable>(using decoder: JSONDecoder) throws -> ServerResponse<T> {
 		
@@ -42,8 +58,19 @@ public extension DownloadingTask {
 	}
 	
 	func downloadData() async throws -> ServerResponse<Data> {
-		let session = try await server.session(for: self)
+		let session: ConveySession
 		var info = RequestTrackingInfo(self)
+
+		do {
+			session = try await server.session(for: self)
+		} catch {
+			info.error = error.localizedDescription
+			echo(info)
+			await didFail(with: error)
+			await info.save()
+
+			throw error
+		}
 
 		do {
 			info.urlRequest = session.request

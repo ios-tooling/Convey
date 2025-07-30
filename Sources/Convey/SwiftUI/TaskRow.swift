@@ -17,6 +17,7 @@ extension RecordedTasksScreen.TaskList {
 			VStack(alignment: .leading) {
 				HStack {
 					let isDelete = task.method == "DELETE"
+										
 					Text(task.method)
 						.padding(2)
 						.padding(.horizontal, 4)
@@ -25,6 +26,7 @@ extension RecordedTasksScreen.TaskList {
 					Text(task.name).bold()
 						.font(.system(size: 13))
 					Spacer()
+					if task.error != nil { Text("⚠️") }
 					if let size = task.data?.count {
 						Text(Self.formatter.string(fromByteCount: Int64(size)))
 							.padding(2)

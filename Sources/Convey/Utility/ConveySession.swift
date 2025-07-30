@@ -26,22 +26,26 @@ import Foundation
 	static var activeSessions: Set<ConveySession> = []
 	
 	init<Task: DownloadingTask>(server: ConveyServerable, task: Task) async throws {
-		self.server = server
-		self.task = task
-		self.request = try await task.request
-		self.ungzippedRequest = task.shouldGZIPUploads ? try await task.gzipped(false).request : nil
-
-		let configuration = URLSessionConfiguration.default
-		let taskConfig = task.configuration
-		
-		if let expensive = task.allowsExpensiveNetworkAccess { configuration.allowsExpensiveNetworkAccess = expensive }
-		if let constrained = task.allowsConstrainedNetworkAccess { configuration.allowsConstrainedNetworkAccess = constrained }
-		configuration.timeoutIntervalForRequest = task.timeoutIntervalForRequest ?? taskConfig?.timeout ?? server.configuration.defaultTimeout
-		
-		configuration.timeoutIntervalForResource = task.timeoutIntervalForResource ?? taskConfig?.timeout ?? server.configuration.defaultTimeout
-
-		super.init()
-		self.session = URLSession(configuration: configuration, delegate: self, delegateQueue: server.downloadQueue)
+		do {
+			self.server = server
+			self.task = task
+			self.request = try await task.request
+			self.ungzippedRequest = task.shouldGZIPUploads ? try await task.gzipped(false).request : nil
+			
+			let configuration = URLSessionConfiguration.default
+			let taskConfig = task.configuration
+			
+			if let expensive = task.allowsExpensiveNetworkAccess { configuration.allowsExpensiveNetworkAccess = expensive }
+			if let constrained = task.allowsConstrainedNetworkAccess { configuration.allowsConstrainedNetworkAccess = constrained }
+			configuration.timeoutIntervalForRequest = task.timeoutIntervalForRequest ?? taskConfig?.timeout ?? server.configuration.defaultTimeout
+			
+			configuration.timeoutIntervalForResource = task.timeoutIntervalForResource ?? taskConfig?.timeout ?? server.configuration.defaultTimeout
+			
+			super.init()
+			self.session = URLSession(configuration: configuration, delegate: self, delegateQueue: server.downloadQueue)
+		} catch {
+			throw error
+		}
 	}
 	
 	func cancel() {

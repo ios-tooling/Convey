@@ -36,6 +36,10 @@ struct RecordedTaskDetailScreen: View {
 					if task.isGzipped { result += "\n(gzipped)" }
 				}
 				
+				if let error = task.error {
+					result += "\nFailed: \(error)"
+				}
+				
 				if let response = task.data?.prettyJSON {
 					if !result.isEmpty {
 						result += "\n\n====== RESPONSE ==================================\n\n"
