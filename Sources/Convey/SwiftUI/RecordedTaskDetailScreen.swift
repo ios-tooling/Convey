@@ -12,12 +12,21 @@ struct RecordedTaskDetailScreen: View {
 	let task: RecordedTask
 	@Environment(\.dismiss) var dismiss
 	@State var json = "no data"
+	@State var attributedJSON = AttributedString("")
+	@State var tempFileURL = URL.temporaryDirectory.appendingPathComponent("task.json")
 	
 	var body: some View {
-		TextEditor(text: .constant(json))
+		VStack {
+			if #available(iOS 26.0, *) {
+				TextEditor(text: .constant(attributedJSON))
+					.disabled(true)
+			} else {
+				TextEditor(text: .constant(json))
+			}
+			
+		}
 			.font(.system(size: 10))
 			.lineLimit(nil)
-//			.fixedSize(horizontal: false, vertical: true)
 			.multilineTextAlignment(.leading)
 			.monospaced()
 			.safeAreaInset(edge: .bottom) {
@@ -26,29 +35,66 @@ struct RecordedTaskDetailScreen: View {
 						task.modelContext?.delete(task)
 						dismiss()
 					}
+					
+					ShareLink(item: tempFileURL, subject: Text(task.name))
+						.padding(.horizontal)
 				}
 			}
 			.navigationTitle(task.name)
 			.onAppear {
-				var result = ""
-				if let request = task.request {
-					result = request.description
-					if task.isGzipped { result += "\n(gzipped)" }
-				}
-				
-				if let error = task.error {
-					result += "\nFailed: \(error)"
-				}
-				
-				if let response = task.data?.prettyJSON {
-					if !result.isEmpty {
-						result += "\n\n====== RESPONSE ==================================\n\n"
-					}
-					result += response
-					result += "\n"
-				}
-				self.json = result
+				self.attributedJSON = buildAttributedJSON()
+				self.json = buildRawJSON()
+				tempFileURL = URL.temporaryDirectory.appendingPathComponent(task.suggestedFilename)
+				try? self.json.write(to: tempFileURL, atomically: true, encoding: .utf8)
 			}
+	}
+	
+	func buildAttributedJSON() -> AttributedString {
+		var result = AttributedString("")
+		if let request = task.request {
+			result += AttributedString("     ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ REQUEST ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ \n\n")
+
+			result += request.attributedDescription
+			if task.isGzipped { result += AttributedString("\n(gzipped)") }
+		}
+		
+		if let error = task.error {
+			var err = AttributedString("\nFailed: \(error)")
+			err.foregroundColor = .red
+			result += err
+		}
+		
+		if let response = task.data?.prettyJSON {
+			result += AttributedString("\n\n     ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ RESPONSE ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ \n\n")
+			result += AttributedString(response)
+			result += AttributedString("\n")
+		}
+		
+		return result
+
+	}
+	
+	func buildRawJSON() -> String {
+		var result = ""
+		if let request = task.request {
+			result += "     ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ REQUEST ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n\n"
+			result += request.description
+			if task.isGzipped { result += "\n(gzipped)" }
+		}
+		
+		if let error = task.error {
+			result += "\nFailed: \(error)"
+		}
+		
+		if let response = task.data?.prettyJSON {
+			if !result.isEmpty {
+				result += "\n\n     ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ RESPONSE ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n\n"
+			}
+			result += response
+			result += "\n"
+		}
+		
+		return result
 	}
 }
 

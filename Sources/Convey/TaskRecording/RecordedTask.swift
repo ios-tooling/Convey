@@ -25,6 +25,10 @@ import Foundation
 	var isGzipped = false
 	var method: String
 	
+	var suggestedFilename: String {
+		name + "@" + startedAt.formatted().replacingOccurrences(of: "/", with: "∕").replacingOccurrences(of: ":", with: "˸") + ".json"
+	}
+	
 	var request: CodableURLRequest? {
 		guard let requestData else { return nil }
 		return try? JSONDecoder().decode(CodableURLRequest.self, from: requestData)

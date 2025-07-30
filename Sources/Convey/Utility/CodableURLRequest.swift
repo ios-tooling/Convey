@@ -5,7 +5,7 @@
 //  Created by Ben Gottlieb on 7/21/25.
 //
 
-import Foundation
+import SwiftUI
 
 public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 	public let url: URL?
@@ -27,10 +27,48 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 	public let cookiePartitionIdentifier: String?
 	public let httpShouldUsePipelining: Bool
 	
-	public var description: String {
-		var result = ""
+	@available(iOS 15, *)
+	public var attributedDescription: AttributedString {
+		var result = AttributedString(methodAndURL + "\n")
+		let standardFont = Font.system(size: 10).monospaced()
+		result.font = standardFont
 		
-		result += "[\(httpMethod ?? "MISSING")] \(url?.absoluteString ?? "NO URL")\n"
+		
+		if let timeoutInterval { result += AttributedString("Timeout: \(timeoutInterval)\n") }
+		if let main = mainDocumentURL {
+			result += AttributedString("Main Document URL: \(main.absoluteString)\n")
+		}
+		if let httpShouldHandleCookies { result += AttributedString("Handles cookies: \(httpShouldHandleCookies)\n") }
+		
+		if let headers = allHTTPHeaderFields {
+			result += AttributedString("Headers\n")
+			for key in headers.keys.sorted() {
+				var line = AttributedString("\t• \(key): ")
+				line.font = standardFont
+				line.foregroundColor = .primary.opacity(0.66)
+				
+				var value = AttributedString("\(headers[key] ?? "")")
+				value.font = standardFont.bold()
+
+				result += line + value + AttributedString("\n")
+			}
+		}
+		
+		if let data = httpBody, let string = data.reportedData(limit: 500) {
+			result += AttributedString("Body:\n")
+			var body = AttributedString("\n" + string)
+			body.font = standardFont
+			result += body
+		}
+
+		return result
+	}
+	
+	var methodAndURL: String { "[\(httpMethod ?? "MISSING")] \(url?.absoluteString ?? "NO URL")" }
+	
+	public var description: String {
+		var result = methodAndURL + "\n"
+		
 		if let timeoutInterval { result += "Timeout: \(timeoutInterval)\n" }
 		if let main = mainDocumentURL {
 			result += "Main Document URL: \(main.absoluteString)\n"
