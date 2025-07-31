@@ -18,8 +18,9 @@ struct RecordedTaskDetailScreen: View {
 	var body: some View {
 		VStack {
 			if #available(iOS 26.0, *) {
-				TextEditor(text: .constant(attributedJSON))
-					.disabled(true)
+				TextEditor(text: .constant(json))
+				//				TextEditor(text: .constant(attributedJSON))
+				//					.disabled(true)
 			} else {
 				TextEditor(text: .constant(json))
 			}
