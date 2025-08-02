@@ -46,6 +46,6 @@ extension TaskConfiguration {
 		if let gzip = other.gzip { result.gzip = gzip }
 		result.queryParameters = queryParameters + other.queryParameters
 
-		return other
+		return result
 	}
 }

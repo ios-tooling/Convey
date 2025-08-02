@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  DownloadingTask+Download.swift
 //  Convey
 //
 //  Created by Ben Gottlieb on 7/19/25.
@@ -63,6 +63,7 @@ public extension DownloadingTask {
 
 		do {
 			session = try await server.session(for: self)
+			defer { session.finish() }
 		} catch {
 			info.error = error.localizedDescription
 			echo(info)
@@ -88,7 +89,6 @@ public extension DownloadingTask {
 
 			try await didReceiveResponse(response: response, data: data)
 			let result = ServerResponse(payload: data, request: session.request, response: response, data: data, startedAt: info.startedAt, duration: info.duration!, attemptNumber: attemptNumber)
-			session.finish()
 			await info.save()
 			return result
 		} catch {
@@ -96,7 +96,6 @@ public extension DownloadingTask {
 			info.error = error.localizedDescription
 			echo(info)
 			await didFail(with: error)
-			session.finish()
 			await info.save()
 			throw error
 		}

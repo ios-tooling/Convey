@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Error.swift
 //  Convey
 //
 //  Created by Ben Gottlieb on 7/20/25.

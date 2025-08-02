@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  URL+Images.swift
 //  Convey
 //
 //  Created by Ben Gottlieb on 7/20/25.

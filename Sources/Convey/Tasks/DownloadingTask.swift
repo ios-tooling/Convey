@@ -1,5 +1,5 @@
 //
-//  ServerTask.swift
+//  DownloadingTask.swift
 //  Convey
 //
 //  Created by Ben Gottlieb on 7/19/25.

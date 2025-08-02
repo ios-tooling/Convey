@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  CodableURLResponse.swift
 //  Convey
 //
 //  Created by Ben Gottlieb on 7/21/25.

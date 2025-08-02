@@ -22,9 +22,11 @@ import Convey
 }
 
 struct SampleHTTPBinPOST: DataUploadingTask {
+	var configuration: Convey.TaskConfiguration?
+	
 	var contentType: String?
 	
-	var path: String = "post"
+	var path = "post"
 	var uploadPayload: Data?
 	var server: ConveyServerable { HTTPBinServer.instance }
 	var threadName: String? = "httpBinPost"
