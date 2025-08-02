@@ -63,6 +63,7 @@ public extension DownloadingTask {
 
 		do {
 			session = try await server.session(for: self)
+			session.start()
 			defer { session.finish() }
 		} catch {
 			info.error = error.localizedDescription

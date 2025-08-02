@@ -48,8 +48,13 @@ import Foundation
 		}
 	}
 	
+	func start() {
+		Self.activeSessions.insert(self)
+	}
+	
 	func cancel() {
 		session.invalidateAndCancel()
+		finish()
 	}
 	
 	func finish() {
