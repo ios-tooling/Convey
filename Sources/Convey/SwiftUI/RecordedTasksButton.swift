@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-@available(iOS 17, macOS 15, *)
+@available(iOS 17, watchOS 10, macOS 15, *)
 public struct RecordedTasksButton: View {
 	@State private var showRecordedTasks = false
 	public init() { }

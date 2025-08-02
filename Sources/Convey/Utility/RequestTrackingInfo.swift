@@ -49,7 +49,7 @@ import Foundation
 	}
 	
 	func save() async {
-		if #available(iOS 17, *) {
+		if #available(iOS 17, macOS 14, watchOS 10, *) {
 			await TaskRecorder.instance.record(info: self)
 		}
 	}
