@@ -15,15 +15,23 @@ struct ContentView: View {
 	@State var index = 0
 	@State var totalSize = 0
 	@State var fetching = false
-//	let imageCache = ImageCache.instance
+	let imageCache = ImageCache.instance
 	
 	init() {
-//		Task { await ImageCache.instance.setCacheLimit(1_000_000 / 3) }
+		Task { await ImageCache.instance.setCacheLimit(1_000_000 / 3) }
 	}
 	
 	var body: some View {
 		VStack() {
 			NetworkIndicator()
+			
+			if #available(iOS 15.0, *) {
+				AsyncButton(action: { await fetchNewImage() }) {
+					Text("Fetch Image")
+				}
+				.buttonStyle(.bordered)
+			}
+			
 			Text("Hello, world!")
 			if let image = image {
 				Image(uxImage: image)
@@ -37,12 +45,9 @@ struct ContentView: View {
 			}
 			
 			AsyncButton("Clear Cache") {
-//				await ImageCache.instance.prune(location: .grouped("images", nil))
-//				totalSize = await imageCache.fetchTotalSize()
+				await ImageCache.instance.prune(maxSize: 100)
+				totalSize = await imageCache.fetchTotalSize()
 			}
-		}
-		.onTapGesture() {
-			Task { await fetchNewImage() }
 		}
 		.onAppear {
 			Task {
@@ -63,13 +68,13 @@ struct ContentView: View {
 	
 	func fetchNewImage() async {
 		fetching = true
-		//let key = "\(index)"
+//		let key = "\(index)"
 		index += 1
-		let url = URL("https://picsum.photos/500")
-		//image = try? await imageCache.fetch(from: imageCache.provision(url: url), caching: .localFirst, location: .grouped("images", key))
+		let url = URL(string: "https://picsum.photos/\(Int.random(to: 1000))")!
+		image = try? await imageCache.fetch(from: imageCache.provision(url: url), caching: .localFirst)//, location: .grouped("images", key))
 		do {
-//			image = try await imageCache.fetch(from: imageCache.provision(url: url))
-//			totalSize = await imageCache.fetchTotalSize()
+			image = try await imageCache.fetch(from: imageCache.provision(url: url))
+			totalSize = await imageCache.fetchTotalSize()
 		} catch {
 			print("Failed to fetch image: \(error)")
 		}
