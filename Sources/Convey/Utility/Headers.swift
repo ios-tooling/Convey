@@ -32,7 +32,7 @@ extension Headers {
 
 extension [Header] {
 	init(_ dict: [String: String]) {
-		self = dict.keys.map { Header(name: $0, value: dict[$0]!) }
+		self = dict.keys.map { Header(name: $0, value: dict[$0] ?? "") }
 	}
 	
 	public var headersArray: [Header] { self }

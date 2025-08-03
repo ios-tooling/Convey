@@ -27,6 +27,33 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 	public let cookiePartitionIdentifier: String?
 	public let httpShouldUsePipelining: Bool
 	
+	public var request: URLRequest? {
+		guard let url else { return nil }
+		var request = URLRequest(url: url)
+		if let cachePolicy, let policy = URLRequest.CachePolicy(rawValue: cachePolicy.rawValue) { request.cachePolicy = policy }
+		if let timeoutInterval { request.timeoutInterval = timeoutInterval }
+		request.mainDocumentURL = mainDocumentURL
+		if let networkServiceType, let type = URLRequest.NetworkServiceType(rawValue: networkServiceType.rawValue) { request.networkServiceType = type }
+		request.allowsCellularAccess = allowsCellularAccess
+		request.allowsExpensiveNetworkAccess = allowsExpensiveNetworkAccess
+		request.allowsConstrainedNetworkAccess = allowsConstrainedNetworkAccess
+		if #available(iOS 14.5, macOS 13, watchOS 9, *), let assumesHTTP3Capable {
+			request.assumesHTTP3Capable = assumesHTTP3Capable
+		}
+		if #available(iOS 15, macOS 13, watchOS 9, *), let attribution, let new = URLRequest.Attribution(rawValue: attribution.rawValue) { request.attribution = new }
+		if #available(iOS 16.1, macOS 14, watchOS 9, *), let requiresDNSSECValidation { request.requiresDNSSECValidation = requiresDNSSECValidation }
+		if let httpShouldHandleCookies { request.httpShouldHandleCookies = httpShouldHandleCookies }
+		
+		request.httpMethod = httpMethod
+		request.httpBody = httpBody
+		if #available(iOS 18.2, macOS 15, watchOS 11, *) {
+			request.cookiePartitionIdentifier = cookiePartitionIdentifier
+		}
+		request.httpShouldUsePipelining = httpShouldUsePipelining
+		
+		return request
+	}
+	
 	@available(iOS 15, *)
 	public var attributedDescription: AttributedString {
 		var result = AttributedString(methodAndURL + "\n")

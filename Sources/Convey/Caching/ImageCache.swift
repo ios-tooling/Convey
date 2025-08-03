@@ -181,8 +181,11 @@ public actor ImageCache {
 			var total = 0
 			
 			for image in all {
-				if total > size { cache.removeValue(forKey: image.key) }
-				total += image.size
+				if total + image.size > size { 
+					cache.removeValue(forKey: image.key) 
+				} else {
+					total += image.size
+				}
 			}
 		}
 		inMemoryImages.set(cache)

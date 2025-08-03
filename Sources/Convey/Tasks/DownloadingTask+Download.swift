@@ -49,8 +49,8 @@ public extension DownloadingTask {
 	func download() async throws -> ServerResponse<DownloadPayload> {
 		let result = try await downloadData()
 		
-		if DownloadPayload.self == Data.self {
-			return .init(payload: result.data as! DownloadPayload, request: result.request, response: result.response, data: result.data, startedAt: result.startedAt, duration: result.duration, attemptNumber: result.attemptNumber)
+		if DownloadPayload.self == Data.self, let payload = result.data as? DownloadPayload {
+			return .init(payload: payload, request: result.request, response: result.response, data: result.data, startedAt: result.startedAt, duration: result.duration, attemptNumber: result.attemptNumber)
 		}
 		
 		let decoded: ServerResponse<DownloadPayload> = try result.decoding(using: decoder)
@@ -89,7 +89,7 @@ public extension DownloadingTask {
 			echo(info)
 
 			try await didReceiveResponse(response: response, data: data)
-			let result = ServerResponse(payload: data, request: session.request, response: response, data: data, startedAt: info.startedAt, duration: info.duration!, attemptNumber: attemptNumber)
+			let result = ServerResponse(payload: data, request: session.request, response: response, data: data, startedAt: info.startedAt, duration: info.duration ?? 0, attemptNumber: attemptNumber)
 			await info.save()
 			return result
 		} catch {

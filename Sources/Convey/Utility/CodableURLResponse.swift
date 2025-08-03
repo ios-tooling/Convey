@@ -16,6 +16,12 @@ public struct CodableURLResponse: Codable, Sendable, CustomStringConvertible {
 	public let statusCode: Int?
 	public let allHeaderFields: [String: String]?
 	
+	public var response: URLResponse? {
+		guard let url, let statusCode else { return nil }
+		var response = HTTPURLResponse(url: url, statusCode: statusCode, httpVersion: "HTTP/1.1", headerFields: allHeaderFields)
+		
+		return response
+	}
 	
 	public var description: String {
 		""
@@ -27,7 +33,6 @@ public struct CodableURLResponse: Codable, Sendable, CustomStringConvertible {
 		expectedContentLength = response.expectedContentLength
 		textEncodingName = response.textEncodingName
 		suggestedFilename = response.suggestedFilename
-		
 		statusCode = (response as? HTTPURLResponse)?.statusCode
 		allHeaderFields = (response as? HTTPURLResponse)?.allHeaderFields as? [String: String]
 	}

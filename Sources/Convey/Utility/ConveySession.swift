@@ -9,7 +9,7 @@ import Foundation
 
 @ConveyActor public class ConveySession: NSObject {
 	let server: ConveyServerable
-	var session: URLSession!
+	var session: URLSession = .shared
 	let task: any DownloadingTask
 	let request: URLRequest
 	let ungzippedRequest: URLRequest?

@@ -28,7 +28,7 @@ import Foundation
 	}
 
 	var ungzippedRequest: URLRequest? {
-		get { nil }
+		get { request?.request }
 		set { if let newValue {
 			isGzipped = true
 			request = .init(newValue)
@@ -36,7 +36,7 @@ import Foundation
 	}
 
 	var urlResponse: URLResponse? {
-		get { nil }
+		get { response?.response }
 		set { if let newValue { response = .init(newValue) }}
 	}
 
