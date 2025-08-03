@@ -100,7 +100,9 @@ public actor ImageCache {
 		
 		if let image = PlatformImage(data: data.data) {
 			let resized = size?.resize(image) ?? image
-			updateCache(for: key, with: InMemoryImage(image: resized, size: data.data.count, createdAt: Date(), key: key, group: provision.group))
+			Task {
+				await updateCache(for: key, with: InMemoryImage(image: resized, size: data.data.count, createdAt: Date(), key: key, group: provision.group))
+			}
 			return .init(image: resized, localURL: localURL, remoteURL: remoteURL)
 		}
 		return .init(image: nil, localURL: localURL, remoteURL: remoteURL)
@@ -125,32 +127,8 @@ public actor ImageCache {
 		return DataCache.instance.hasCachedValue(for: provision, newerThan: newerThan)
 	}
 	
-	nonisolated func updateCache(for key: String, with image: InMemoryImage) {
-		var cache = inMemoryImages.value
-		cache[key] = image
-		inMemoryImages.set(cache)
-
-	}
-
-	nonisolated func location(for url: URL) -> DataCache.CacheKind {
-		location(for: provision(url: url, ext: url.cachePathExtension))
-	}
-	
-	nonisolated func location(for provision: DataCache.Provision) -> DataCache.CacheKind {
-		let pathExtension = provision.ext ?? "jpeg"
-		switch provision.kind {
-		case .default:
-			return .fixed(parentDirectory.value.appendingPathComponent(provision.url.cacheKey + "." + pathExtension))
-
-		case .keyed(let key):
-			return .fixed(parentDirectory.value.appendingPathComponent(key))
-			
-		case .fixed:
-			return provision.kind
-			
-		case .grouped(let group, let key):
-			return .fixed(parentDirectory.value.appendingPathComponent(group).appendingPathComponent(key ?? (provision.url.cacheKey + "." + pathExtension)))
-		}
+	func updateCache(for key: String, with image: InMemoryImage) {
+		inMemoryImages.value[key] = image
 	}
 	
 	public func fetch(from provision: DataCache.Provision, caching: DataCache.Caching = .localFirst, size: ImageSize? = nil) async throws -> PlatformImage? {

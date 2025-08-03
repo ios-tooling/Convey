@@ -41,16 +41,17 @@ public extension ConveyServerable {
 	func url(for task: any DownloadingTask) async -> URL {
 		let base = await baseURL.appendingPathComponent(task.path)
 		
-		if let parameters = await task.queryParameters, !parameters.isEmpty {
-			var components = URLComponents(url: base, resolvingAgainstBaseURL: true)
+		if let parameters = await task.queryParameters, !parameters.isEmpty, var components = URLComponents(url: base, resolvingAgainstBaseURL: true) {
+			var queryItems: [URLQueryItem] = []
 			
 			if let params = parameters as? [String: String] {
-				components?.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }.sorted { $0.name < $1.name }
+				queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
 			} else if let params = parameters as? [URLQueryItem] {
-				components?.queryItems = params.sorted { $0.name < $1.name }
+				queryItems = params
 			}
 
-			if let newURL = components?.url { return newURL }
+			components.queryItems = queryItems.sorted { $0.name < $1.name }
+			if let newURL = components.url { return newURL }
 		}
 		return base
 	}

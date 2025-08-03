@@ -20,8 +20,8 @@ public actor DataCache {
 	public func setCacheRoot(_ root: URL) { cachesDirectory = root }
 
 	public func fetch(from url: URL? = nil, caching: Caching = .localFirst, provision: Provision? = nil) async throws -> Data? {
-		guard provision != nil || url != nil else { return nil }
-		return try await fetch(using: provision ?? self.provision(url: url!), caching: caching)
+		guard let url else { return nil }
+		return try await fetch(using: provision ?? self.provision(url: url), caching: caching)
 	}
 	
 	public func fetch(using provision: Provision, caching: Caching = .localFirst) async throws -> Data? {
