@@ -16,14 +16,14 @@ import Foundation
 	var tag: String? { task.requestTag }
 	
 	static func session(for tag: String) -> ConveySession? {
-		activeSessions.first { $0.tag == tag }
+		activeSessions.value.first { $0.tag == tag }
 	}
 	
 	static func cancel(sessionWithTag tag: String) {
 		session(for: tag)?.cancel()
 	}
 	
-	static var activeSessions: Set<ConveySession> = []
+	static let activeSessions = ThreadsafeMutex<Set<ConveySession>>([])
 	
 	init<Task: DownloadingTask>(server: ConveyServerable, task: Task) async throws {
 		do {
@@ -49,7 +49,9 @@ import Foundation
 	}
 	
 	func start() {
-		Self.activeSessions.insert(self)
+		var sessions = Self.activeSessions.value
+		sessions.insert(self)
+		Self.activeSessions.set(sessions)
 	}
 	
 	func cancel() {
@@ -58,7 +60,9 @@ import Foundation
 	}
 	
 	func finish() {
-		Self.activeSessions.remove(self)
+		var sessions = Self.activeSessions.value
+		sessions.remove(self)
+		Self.activeSessions.set(sessions)
 	}
 }
 

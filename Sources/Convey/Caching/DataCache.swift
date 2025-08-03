@@ -8,15 +8,13 @@
 import Foundation
 import Combine
 
-extension CurrentValueSubject: @retroactive @unchecked Sendable { }
-
 public actor DataCache {
 	public static let instance = DataCache()
 	
-	let _cachesDirectory: CurrentValueSubject<URL, Never> = .init(URL.systemDirectoryURL(which: .cachesDirectory)!)
+	let _cachesDirectory: ThreadsafeMutex<URL> = .init(URL.systemDirectoryURL(which: .cachesDirectory)!)
 	public nonisolated var cachesDirectory: URL {
 		get { _cachesDirectory.value }
-		set { _cachesDirectory.send(newValue) }
+		set { _cachesDirectory.set(newValue) }
 	}
 
 	public func setCacheRoot(_ root: URL) { cachesDirectory = root }

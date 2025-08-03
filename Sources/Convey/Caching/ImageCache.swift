@@ -16,11 +16,11 @@ import Combine
 public actor ImageCache {
 	public static let instance = ImageCache()
 	public var cachesDirectory = ImageCache.defaultDirectory { didSet {
-		parentDirectory.send(cachesDirectory)
+		parentDirectory.set(cachesDirectory)
 	}}
 	
-	nonisolated let inMemoryImages = CurrentValueSubject<[String: InMemoryImage], Never>([:])
-	nonisolated let parentDirectory = CurrentValueSubject<URL, Never>(ImageCache.defaultDirectory)
+	nonisolated let inMemoryImages = ThreadsafeMutex<[String: InMemoryImage]>([:])
+	nonisolated let parentDirectory = ThreadsafeMutex<URL>(ImageCache.defaultDirectory)
 	
 	public struct ImageInfo: Sendable {
 		public let image: PlatformImage?
@@ -37,7 +37,7 @@ public actor ImageCache {
 	}
 
 	public func clear(inMemory: Bool, onDisk: Bool) {
-		if inMemory { inMemoryImages.value = [:] }
+		if inMemory { inMemoryImages.set([:]) }
 		if onDisk {
 			try? FileManager.default.removeItemIfExists(at: parentDirectory.value)
 			try? FileManager.default.createDirectory(at: parentDirectory.value, withIntermediateDirectories: true)
@@ -128,7 +128,7 @@ public actor ImageCache {
 	nonisolated func updateCache(for key: String, with image: InMemoryImage) {
 		var cache = inMemoryImages.value
 		cache[key] = image
-		inMemoryImages.send(cache)
+		inMemoryImages.set(cache)
 
 	}
 
@@ -166,7 +166,7 @@ public actor ImageCache {
 		for image in inMemoryImages.value.values.filter({ $0.group == location.group }) {
 			cache.removeValue(forKey: image.key)
 		}
-		inMemoryImages.send(cache)
+		inMemoryImages.set(cache)
 	}
 	
 	public func prune(maxSize: Int? = nil, maxAge: TimeInterval? = nil) {
@@ -185,7 +185,7 @@ public actor ImageCache {
 				total += image.size
 			}
 		}
-		inMemoryImages.send(cache)
+		inMemoryImages.set(cache)
 	}
 
 }
