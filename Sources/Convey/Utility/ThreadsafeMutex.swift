@@ -19,8 +19,9 @@ final public class ThreadsafeMutex<T>: @unchecked Sendable {
 	nonisolated public var value: T {
 		get {
 			os_unfair_lock_lock(&lock)
-			defer { os_unfair_lock_unlock(&lock) } // Ensure unlock happens
-			return _value
+			let value = _value
+			os_unfair_lock_unlock(&lock)
+			return value
 		}
 		
 		set {
@@ -30,7 +31,13 @@ final public class ThreadsafeMutex<T>: @unchecked Sendable {
 	
 	nonisolated public func set(_ value: T) {
 		os_unfair_lock_lock(&lock)
-		defer { os_unfair_lock_unlock(&lock) } // Ensure unlock happens
 		_value = value
+		os_unfair_lock_unlock(&lock)
+	}
+	
+	func perform(block: (inout T) -> Void) {
+		os_unfair_lock_lock(&lock)
+		block(&_value)
+		os_unfair_lock_unlock(&lock)
 	}
 }

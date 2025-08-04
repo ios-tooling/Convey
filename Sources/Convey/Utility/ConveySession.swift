@@ -7,13 +7,22 @@
 
 import Foundation
 
-@ConveyActor public class ConveySession: NSObject {
+@ConveyActor final public class ConveySession: Hashable, Equatable {
+	nonisolated let id = UUID()
 	let server: ConveyServerable
 	var session: URLSession = .shared
 	let task: any DownloadingTask
 	let request: URLRequest
 	let ungzippedRequest: URLRequest?
 	var tag: String? { task.requestTag }
+	
+	nonisolated public func hash(into hasher: inout Hasher) {
+		hasher.combine(id)
+	}
+	
+	nonisolated public static func ==(lhs: ConveySession, rhs: ConveySession) -> Bool {
+		lhs.id == rhs.id
+	}
 	
 	static func session(for tag: String) -> ConveySession? {
 		activeSessions.value.first { $0.tag == tag }
@@ -41,17 +50,19 @@ import Foundation
 			
 			configuration.timeoutIntervalForResource = task.timeoutIntervalForResource ?? taskConfig?.timeout ?? server.configuration.defaultTimeout
 			
-			super.init()
-			self.session = URLSession(configuration: configuration, delegate: self, delegateQueue: server.downloadQueue)
+			if let session = Self.activeSessions.value.first(where: { $0.session.hasSameConfiguration(as: configuration)}) {
+				self.session = session.session
+				return
+			}
+
+			self.session = URLSession(configuration: configuration, delegate: SharedURLSessionDelegate.instance, delegateQueue: server.downloadQueue)
 		} catch {
 			throw error
 		}
 	}
 	
 	func start() {
-		var sessions = Self.activeSessions.value
-		sessions.insert(self)
-		Self.activeSessions.set(sessions)
+		Self.activeSessions.perform { $0.insert(self) }
 	}
 	
 	func cancel() {
@@ -60,9 +71,7 @@ import Foundation
 	}
 	
 	func finish() {
-		var sessions = Self.activeSessions.value
-		sessions.remove(self)
-		Self.activeSessions.set(sessions)
+		Self.activeSessions.perform { $0.remove(self) }
 	}
 }
 
@@ -91,6 +100,6 @@ extension ConveySession {
 	}
 }
 
-extension ConveySession: URLSessionDelegate {
-	
+final class SharedURLSessionDelegate: NSObject, URLSessionDelegate {
+	static let instance = SharedURLSessionDelegate()
 }

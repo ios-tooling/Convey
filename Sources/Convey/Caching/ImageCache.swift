@@ -70,7 +70,9 @@ public actor ImageCache {
 	public func removeItem(for provision: DataCache.Provision) async {
 		let key = provision.key
 		await DataCache.instance.removeItem(for: provision)
-		inMemoryImages.value.removeValue(forKey: key)
+		inMemoryImages.perform {
+			$0.removeValue(forKey: key)
+		}
 	}
 
 	public nonisolated func fetchLocalImage(for url: URL?, kind: DataCache.CacheKind = .default, size: ImageSize? = nil, extension ext: String? = nil) -> PlatformImage? {
@@ -128,7 +130,7 @@ public actor ImageCache {
 	}
 	
 	func updateCache(for key: String, with image: InMemoryImage) {
-		inMemoryImages.value[key] = image
+		inMemoryImages.perform { $0[key] = image }
 	}
 	
 	public func fetch(from provision: DataCache.Provision, caching: DataCache.Caching = .localFirst, size: ImageSize? = nil) async throws -> PlatformImage? {
@@ -140,33 +142,33 @@ public actor ImageCache {
 	}
 
 	public func prune(location: DataCache.CacheKind) {
-		var cache = inMemoryImages.value
-		for image in inMemoryImages.value.values.filter({ $0.group == location.group }) {
-			cache.removeValue(forKey: image.key)
+		inMemoryImages.perform { images in
+			for image in images.values.filter({ $0.group == location.group }) {
+				images.removeValue(forKey: image.key)
+			}
 		}
-		inMemoryImages.set(cache)
 	}
 	
 	public func prune(maxSize: Int? = nil, maxAge: TimeInterval? = nil) {
-		var cache = inMemoryImages.value
-		let all = cache.values.sorted { $0.createdAt > $1.createdAt }
-		
-		if let age = maxAge {
-			for image in all {
-				if image.age > age { cache.removeValue(forKey: image.key) }
-			}
-		} else if let size = maxSize ?? currentSizeLimit {
-			var total = 0
+		inMemoryImages.perform { cache in
+			let all = cache.values.sorted { $0.createdAt > $1.createdAt }
 			
-			for image in all {
-				if total + image.size > size { 
-					cache.removeValue(forKey: image.key) 
-				} else {
-					total += image.size
+			if let age = maxAge {
+				for image in all {
+					if image.age > age { cache.removeValue(forKey: image.key) }
+				}
+			} else if let size = maxSize ?? currentSizeLimit {
+				var total = 0
+				
+				for image in all {
+					if total + image.size > size {
+						cache.removeValue(forKey: image.key)
+					} else {
+						total += image.size
+					}
 				}
 			}
 		}
-		inMemoryImages.set(cache)
 	}
 
 }
