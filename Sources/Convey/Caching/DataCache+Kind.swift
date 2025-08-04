@@ -30,6 +30,7 @@ extension DataCache {
 
 extension URL {
 	var creationDate: Date? {
+		// we're going to ignore any errors here. If we can't fetch the attributes, assume there are none
 		guard
 			isFileURL,
 			let attributes = try? FileManager.default.attributesOfItem(atPath: path),
@@ -39,6 +40,7 @@ extension URL {
 	}
 	
 	var size: UInt64? {
+		// we're going to ignore any errors here. If we can't fetch the attributes, assume there are none
 		guard
 			isFileURL,
 			let attributes = try? FileManager.default.attributesOfItem(atPath: path),

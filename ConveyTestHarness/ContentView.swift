@@ -71,7 +71,7 @@ struct ContentView: View {
 //		let key = "\(index)"
 		index += 1
 		let url = URL(string: "https://picsum.photos/\(Int.random(to: 1000))")!
-		image = try? await imageCache.fetch(from: imageCache.provision(url: url), caching: .localFirst)//, location: .grouped("images", key))
+//		image = try? await imageCache.fetch(from: imageCache.provision(url: url), caching: .localFirst)//, location: .grouped("images", key))
 		do {
 			image = try await imageCache.fetch(from: imageCache.provision(url: url))
 			totalSize = await imageCache.fetchTotalSize()

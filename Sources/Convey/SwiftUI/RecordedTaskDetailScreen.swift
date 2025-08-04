@@ -46,7 +46,11 @@ struct RecordedTaskDetailScreen: View {
 				self.attributedJSON = buildAttributedJSON()
 				self.json = buildRawJSON()
 				tempFileURL = URL.temporaryDirectory.appendingPathComponent(task.suggestedFilename)
-				try? self.json.write(to: tempFileURL, atomically: true, encoding: .utf8)
+				do {
+					try self.json.write(to: tempFileURL, atomically: true, encoding: .utf8)
+				} catch {
+					print("Failed to write JSON to \(tempFileURL): \(error)")
+				}
 			}
 	}
 	
@@ -102,6 +106,8 @@ struct RecordedTaskDetailScreen: View {
 extension Data {
 	var prettyJSON: String? {
 		var data = self
+		// we're going to ignore any errors here. If we can't convert it to JSON, just ignore it.
+
 		if let expanded = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
 			data = (try? JSONSerialization.data(withJSONObject: expanded, options: .prettyPrinted)) ?? data
 		}

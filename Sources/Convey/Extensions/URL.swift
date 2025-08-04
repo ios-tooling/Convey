@@ -17,7 +17,8 @@ extension URL {
 	static func systemDirectoryURL(which: FileManager.SearchPathDirectory) -> URL? {
 		guard let path = NSSearchPathForDirectoriesInDomains(which, [.userDomainMask], true).first else { return nil }
 		let url = URL(fileURLWithPath: path)
-		  if !FileManager.default.fileExists(atPath: url.path) { try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil) }
+		// we're going to ignore any errors here. If we can't create the directory, assume it already exists
+		if !FileManager.default.fileExists(atPath: url.path) { try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil) }
 		return url
 	}
 	

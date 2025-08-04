@@ -31,6 +31,7 @@ import Foundation
 	
 	var request: CodableURLRequest? {
 		guard let requestData else { return nil }
+		
 		return try? JSONDecoder().decode(CodableURLRequest.self, from: requestData)
 	}
 	

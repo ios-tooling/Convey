@@ -39,6 +39,7 @@ public actor ImageCache {
 	public func clear(inMemory: Bool, onDisk: Bool) {
 		if inMemory { inMemoryImages.set([:]) }
 		if onDisk {
+			// we're going to ignore any errors here. If we can't clear the data, not much we can do
 			try? FileManager.default.removeItemIfExists(at: parentDirectory.value)
 			try? FileManager.default.createDirectory(at: parentDirectory.value, withIntermediateDirectories: true)
 		}
@@ -54,7 +55,11 @@ public actor ImageCache {
 
 	public func store(image: PlatformImage, for url: URL) async {
 		if let data = image.data {
-			try? await DataCache.instance.replace(data: data, for: provision(url: url, ext: "jpeg"))
+			do {
+				try await DataCache.instance.replace(data: data, for: provision(url: url, ext: "jpeg"))
+			} catch {
+				print("Failed to store \(data.count) bytes at \(url.path): \(error)")
+			}
 		}
 	}
 	

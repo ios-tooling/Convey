@@ -61,7 +61,12 @@ extension RecordedTasksScreen {
 							let task = tasks[index]
 							modelContext.delete(task)
 						}
-						try? modelContext.save()
+						
+						do {
+							try modelContext.save()
+						} catch {
+							print("Failed to save recorded tasks context: \(error)")
+						}
 					}
 				}
 				.listStyle(.plain)

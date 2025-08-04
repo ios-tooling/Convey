@@ -34,12 +34,14 @@ public actor DataCache {
 	}
 	
 	public func clear() {
+		// we're going to ignore any errors here. If it doesn't clear, there's not a lot we can do.
 		try? FileManager.default.removeItemIfExists(at: cachesDirectory)
 		try? FileManager.default.createDirectory(at: cachesDirectory, withIntermediateDirectories: true)
 	}
 	
 	public func prune(kind: CacheKind) {
 		if let url = kind.container(relativeTo: cachesDirectory) {
+			// we're going to ignore any errors here. If it doesn't remove, there's not a lot we can do.
 			try? FileManager.default.removeItemIfExists(at: url)
 		}
 	}
@@ -49,6 +51,7 @@ public actor DataCache {
 	}
 	
 	public func removeItem(for provision: Provision) {
+		// we're going to ignore any errors here. If it doesn't remove, there's not a lot we can do.
 		try? FileManager.default.removeItemIfExists(at: provision.localURL)
 	}
 
@@ -57,6 +60,7 @@ public actor DataCache {
 	}
 
 	@discardableResult func cache(data: Data, for provision: Provision) -> URL {
+		// we're going to ignore any errors here. If it doesn't create the directory, chances are it already exists (or never will).
 		let localURL = provision.localURL //location.location(of: task.url, relativeTo: cachesDirectory)
 		try? FileManager.default.createDirectory(at: localURL.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
 		try? data.write(to: localURL)
@@ -72,9 +76,12 @@ public actor DataCache {
 	}
 
 	public func replace(data: Data, for provision: Provision) throws {
+		// we're going to ignore any errors here. If it doesn't move, there's not a lot we can do.
 		let localURL = provision.localURL
 		try? FileManager.default.removeItemIfExists(at: localURL)
 		try? FileManager.default.createDirectory(at: localURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+		
+		// this is the only error that matters, so we'll make it throw
 		try data.write(to: localURL)
 	}
 
@@ -98,6 +105,7 @@ public actor DataCache {
 	}
 		
 	nonisolated public func fetchLocal(for provision: Provision, newerThan: Date? = nil) -> DataAndLocalCache? {
+		// we're going to ignore any errors here. If it doesn't exist or won't load, we just return nil
 		if provision.isLocal {
 			let localURL = provision.localURL
 			if let data = try? Data(contentsOf: localURL) {

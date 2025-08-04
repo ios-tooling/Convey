@@ -25,7 +25,11 @@ public struct FileWatcher {
 		}
 		
 		source.setCancelHandler {
-			try? fileHandle.close()
+			do {
+				try fileHandle.close()
+			} catch {
+				print("Failed to close file handle for FileWatcher: \(error)")
+			}
 		}
 		
 		source.resume()
