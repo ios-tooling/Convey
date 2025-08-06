@@ -13,4 +13,13 @@ public extension Error {
 		
 		return urlError.errorCode
 	}
+	
+	var isOffline: Bool {
+		return (self as NSError).code == -1009
+	}
+	
+	var isTimeOut: Bool {
+		if let urlError = self as? URLError, urlError.code == .timedOut { return true }
+		return (self as NSError).domain == NSURLErrorDomain && (self as NSError).code == -1001
+	}
 }
