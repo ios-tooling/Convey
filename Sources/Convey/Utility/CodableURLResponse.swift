@@ -18,7 +18,7 @@ public struct CodableURLResponse: Codable, Sendable, CustomStringConvertible {
 	
 	public var response: URLResponse? {
 		guard let url, let statusCode else { return nil }
-		var response = HTTPURLResponse(url: url, statusCode: statusCode, httpVersion: "HTTP/1.1", headerFields: allHeaderFields)
+		let response = HTTPURLResponse(url: url, statusCode: statusCode, httpVersion: "HTTP/1.1", headerFields: allHeaderFields)
 		
 		return response
 	}
