@@ -39,6 +39,12 @@ struct RecordedTaskDetailScreen: View {
 					
 					ShareLink(item: tempFileURL, subject: Text(task.name))
 						.padding(.horizontal)
+					
+					if isatty(STDERR_FILENO) != 0 {
+						Button("Log") {
+							print(json)
+						}
+					}
 				}
 			}
 			.navigationTitle(task.name)

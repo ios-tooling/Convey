@@ -86,7 +86,7 @@ extension ConveySession {
 			} catch let error as URLError {
 				if error.code != .timedOut { throw error }
 				attemptNumber += 1
-				guard let delay = task.retryInterval(afterCount: attemptNumber) else { break }
+				guard let delay = task.retryInterval(afterError: error, count: attemptNumber) else { break }
 				if #available(iOS 16.0, *) {
 					try await Task.sleep(for: .seconds(delay))
 				} else {

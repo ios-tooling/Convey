@@ -26,7 +26,7 @@ public typealias ServerTask = DataDownloadingTask
 	var queryParameters: (any TaskQueryParameters)? { get async }
 	var requestTag: String? { get }
 	var server: ConveyServerable { get }
-	func retryInterval(afterCount: Int) -> TimeInterval?
+	func retryInterval(afterError error: any Error, count: Int) -> TimeInterval?
 
 	func willSendRequest(request: URLRequest) async throws
 	func didReceiveResponse(response: URLResponse, data: Data) async throws
@@ -62,7 +62,7 @@ public extension DownloadingTask {
 	var headers: Headers { get async throws { try await server.headers(for: self) }}
 	var queryParameters: (any TaskQueryParameters)? { nil }
 	var requestTag: String? { nil }
-	func retryInterval(afterCount: Int) -> TimeInterval? { nil }
+	func retryInterval(afterError error: any Error, count: Int) -> TimeInterval? { nil }
 
 	func willSendRequest(request: URLRequest) async throws { }
 	func didReceiveResponse(response: URLResponse, data: Data) async throws { }
