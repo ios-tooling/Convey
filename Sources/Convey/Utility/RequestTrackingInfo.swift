@@ -14,6 +14,7 @@ import Foundation
 	var url: URL?
 	var startedAt = Date()
 	var request: CodableURLRequest?
+	var httpBody: Data?
 	var isGzipped = false
 	var response: CodableURLResponse?
 	var duration: TimeInterval?
@@ -24,14 +25,18 @@ import Foundation
 
 	var urlRequest: URLRequest? {
 		get { nil }
-		set { if let newValue { request = .init(newValue) }}
+		set { if let newValue {
+			request = .init(newValue, includingBody: false)
+			httpBody = newValue.httpBody
+		}}
 	}
 
 	var ungzippedRequest: URLRequest? {
-		get { request?.request }
+		get { request?.request(withData: httpBody) }
 		set { if let newValue {
 			isGzipped = true
-			request = .init(newValue)
+			request = .init(newValue, includingBody: false)
+			httpBody = newValue.httpBody
 		}}
 	}
 

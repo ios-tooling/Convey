@@ -26,8 +26,9 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 	public let httpShouldHandleCookies: Bool?
 	public let cookiePartitionIdentifier: String?
 	public let httpShouldUsePipelining: Bool
-	
-	public var request: URLRequest? {
+	public var truncateHeaders = true
+
+	public func request(withData data: Data?) -> URLRequest? {
 		guard let url else { return nil }
 		var request = URLRequest(url: url)
 		if let cachePolicy, let policy = URLRequest.CachePolicy(rawValue: cachePolicy.rawValue) { request.cachePolicy = policy }
@@ -45,13 +46,23 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 		if let httpShouldHandleCookies { request.httpShouldHandleCookies = httpShouldHandleCookies }
 		
 		request.httpMethod = httpMethod
-		request.httpBody = httpBody
+		request.httpBody = data ?? httpBody
 		if #available(iOS 18.2, macOS 15, watchOS 11, *) {
 			request.cookiePartitionIdentifier = cookiePartitionIdentifier
 		}
 		request.httpShouldUsePipelining = httpShouldUsePipelining
 		
 		return request
+	}
+	
+	func header(for key: String) -> String {
+		guard let raw = allHTTPHeaderFields?[key] else { return "" }
+		let truncateLength = 50
+		
+		if truncateHeaders, raw.count > truncateLength {
+			return raw.prefix(truncateLength) + "…"
+		}
+		return raw
 	}
 	
 	@available(iOS 15, *)
@@ -74,7 +85,7 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 				line.font = standardFont
 				line.foregroundColor = .primary.opacity(0.66)
 				
-				var value = AttributedString("\(headers[key] ?? "")")
+				var value = AttributedString(header(for: key))
 				value.font = standardFont.bold()
 
 				result += line + value + AttributedString("\n")
@@ -105,7 +116,7 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 		if let headers = allHTTPHeaderFields {
 			result += "Headers\n"
 			for key in headers.keys.sorted() {
-				result += "\t• \(key): \(headers[key] ?? "")\n"
+				result += "\t• \(key): \(header(for: key))\n"
 			}
 		}
 		
@@ -137,7 +148,7 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 		}
 	}
 	
-	public init(_ request: URLRequest) {
+	public init(_ request: URLRequest, includingBody: Bool = false) {
 		url = request.url
 		cachePolicy = .init(request.cachePolicy)
 		timeoutInterval = request.timeoutInterval
@@ -173,7 +184,7 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 
 		httpMethod = request.httpMethod
 		allHTTPHeaderFields = request.allHTTPHeaderFields
-		httpBody = request.httpBody
+		httpBody = includingBody ? request.httpBody : nil
 		httpShouldHandleCookies = request.httpShouldHandleCookies
 		if #available(iOS 18.2, *) {
 			cookiePartitionIdentifier = request.cookiePartitionIdentifier

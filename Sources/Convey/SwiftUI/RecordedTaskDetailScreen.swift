@@ -11,6 +11,7 @@ import SwiftUI
 struct RecordedTaskDetailScreen: View {
 	let task: RecordedTask
 	@Environment(\.dismiss) var dismiss
+	@State var isShowingUpload = false
 	@State var json = "no data"
 	@State var attributedJSON = AttributedString("")
 	@State var tempFileURL = URL.temporaryDirectory.appendingPathComponent("task.json")
@@ -20,8 +21,7 @@ struct RecordedTaskDetailScreen: View {
 			if #available(iOS 26.0, *) {
 				TextEditor(text: .constant(json))
 				//				TextEditor(text: .constant(attributedJSON))
-				//					.disabled(true)
-			} else {
+							} else {
 				TextEditor(text: .constant(json))
 			}
 			
@@ -48,16 +48,30 @@ struct RecordedTaskDetailScreen: View {
 				}
 			}
 			.navigationTitle(task.name)
-			.onAppear {
-				self.attributedJSON = buildAttributedJSON()
-				self.json = buildRawJSON()
-				tempFileURL = URL.temporaryDirectory.appendingPathComponent(task.suggestedFilename)
-				do {
-					try self.json.write(to: tempFileURL, atomically: true, encoding: .utf8)
-				} catch {
-					print("Failed to write JSON to \(tempFileURL): \(error)")
+			.toolbar {
+				if let upsize = task.uploadSize, upsize > 0 {
+					ToolbarItem(placement: .primaryAction) {
+						Button(action: {
+							isShowingUpload.toggle()
+							setupDisplay()
+						}) {
+							Image(systemName: isShowingUpload ? "arrow.up.document.fill" : "arrow.up.document")
+						}
+					}
 				}
 			}
+			.onAppear { setupDisplay() }
+	}
+	
+	func setupDisplay() {
+		self.attributedJSON = buildAttributedJSON()
+		self.json = buildRawJSON()
+		tempFileURL = URL.temporaryDirectory.appendingPathComponent(task.suggestedFilename)
+		do {
+			try self.json.write(to: tempFileURL, atomically: true, encoding: .utf8)
+		} catch {
+			print("Failed to write JSON to \(tempFileURL): \(error)")
+		}
 	}
 	
 	func buildAttributedJSON() -> AttributedString {
@@ -67,6 +81,13 @@ struct RecordedTaskDetailScreen: View {
 
 			result += request.attributedDescription
 			if task.isGzipped { result += AttributedString("\n(gzipped)") }
+			
+			if isShowingUpload, let upload = task.httpBody?.prettyJSON {
+				result += AttributedString(upload)
+				result += AttributedString("\n")
+			} else if let size = task.uploadSize, size > 0 {
+				result += AttributedString("\nUpload size: \(size.bytesString)")
+			}
 		}
 		
 		if let error = task.error {
@@ -91,6 +112,13 @@ struct RecordedTaskDetailScreen: View {
 			result += "     ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ REQUEST ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n\n"
 			result += request.description
 			if task.isGzipped { result += "\n(gzipped)" }
+
+			if isShowingUpload, let upload = task.httpBody?.prettyJSON {
+				result += upload
+				result += "\n"
+			} else if let size = task.uploadSize, size > 0 {
+				result += "\nUpload size: \(size.bytesString)"
+			}
 		}
 		
 		if let error = task.error {

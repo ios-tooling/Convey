@@ -14,12 +14,14 @@ import Foundation
 	var name: String
 	var blurb: String
 	var requestData: Data?
-	var responseData: Data?
-	var data: Data?
+	@Attribute(.externalStorage) var responseData: Data?
+	@Attribute(.externalStorage) var httpBody: Data?
+	@Attribute(.externalStorage) var data: Data?
+	var uploadSize: Int?
+	var downloadSize: Int?
 	var startedAt: Date
 	var duration: TimeInterval?
 	var error: String?
-	var downloadSize: Int?
 	var appLaunchedAt: TimeInterval
 	var sessionStartedAt: TimeInterval?
 	var isGzipped = false
@@ -50,7 +52,9 @@ import Foundation
 		data = info.data
 		method = info.method
 		appLaunchedAt = launchedAt.timeIntervalSinceReferenceDate
-		
+		httpBody = info.httpBody
+		uploadSize = httpBody?.count
+
 		if let request = info.request {
 			requestData = try? JSONEncoder().encode(request)
 			isGzipped = info.isGzipped
