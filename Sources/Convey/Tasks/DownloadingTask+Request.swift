@@ -17,11 +17,20 @@ public extension DownloadingTask {
 		return false
 	}
 	
+	var computedTimeout: TimeInterval {
+		let config = configuration?.timeout ?? server.configuration.defaultTimeout
+		let resource = self.timeoutIntervalForResource ?? 0
+		let request = self.timeoutIntervalForRequest ?? 0
+		
+		return max(config, max(resource, request))
+	}
+	
 	var request: URLRequest {
 		get async throws {
 			let url = await url
 			var request = URLRequest(url: url)
 			request.httpMethod = method.rawValue.uppercased()
+			request.timeoutInterval = computedTimeout
 			
 			let allHeaders: [Header] = try await (configuration.headers?.headersArray ?? []) + headers.headersArray
 			
@@ -39,8 +48,12 @@ public extension DownloadingTask {
 					request.addValue("gzip", forHTTPHeaderField: Constants.Headers.contentEncoding)
 				}
 			}
-			if request.allHTTPHeaderFields?[Constants.Headers.contentType] == nil, let type = (self as? any UploadingTask)?.contentType {
-				request.addValue(type, forHTTPHeaderField: Constants.Headers.contentType)
+			if request.allHTTPHeaderFields?[Constants.Headers.contentType] == nil {
+				if let type = (self as? any UploadingTask)?.contentType {
+					request.addValue(type, forHTTPHeaderField: Constants.Headers.contentType)
+				} else if let data = request.httpBody, (try? JSONSerialization.jsonObject(with: data, options: [])) != nil {
+					request.addValue(Constants.applicationJson, forHTTPHeaderField: Constants.Headers.contentType)
+				}
 			}
 			
 			if let cookies = configuration.cookies {
@@ -50,7 +63,7 @@ public extension DownloadingTask {
 				}
 			}
 			
-			request.timeoutInterval = configuration.timeout ?? server.configuration.defaultTimeout
+			request.timeoutInterval = computedTimeout
 
 			return request
 		}
