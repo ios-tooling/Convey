@@ -1,5 +1,5 @@
 //
-//  ThreadsafeMutex.swift
+//  ConveyThreadsafeMutex.swift
 //  Convey
 //
 //  Created by Ben Gottlieb on 8/2/25.
@@ -8,7 +8,7 @@
 import Foundation
 import os.lock
 
-final public class ThreadsafeMutex<T>: @unchecked Sendable {
+final public class ConveyThreadsafeMutex<T>: @unchecked Sendable {
 	private var _value: T
 	private var lock = os_unfair_lock_s()
 	

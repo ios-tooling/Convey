@@ -19,8 +19,8 @@ public actor ImageCache {
 		parentDirectory.set(cachesDirectory)
 	}}
 	
-	nonisolated let inMemoryImages = ThreadsafeMutex<[String: InMemoryImage]>([:])
-	nonisolated let parentDirectory = ThreadsafeMutex<URL>(ImageCache.defaultDirectory)
+	nonisolated let inMemoryImages = ConveyThreadsafeMutex<[String: InMemoryImage]>([:])
+	nonisolated let parentDirectory = ConveyThreadsafeMutex<URL>(ImageCache.defaultDirectory)
 	
 	public struct ImageInfo: Sendable {
 		public let image: PlatformImage?

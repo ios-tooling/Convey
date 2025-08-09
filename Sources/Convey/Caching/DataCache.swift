@@ -11,7 +11,7 @@ import Combine
 public actor DataCache {
 	public static let instance = DataCache()
 	
-	let _cachesDirectory: ThreadsafeMutex<URL> = .init(URL.systemDirectoryURL(which: .cachesDirectory)!)
+	let _cachesDirectory: ConveyThreadsafeMutex<URL> = .init(URL.systemDirectoryURL(which: .cachesDirectory)!)
 	public nonisolated var cachesDirectory: URL {
 		get { _cachesDirectory.value }
 		set { _cachesDirectory.set(newValue) }

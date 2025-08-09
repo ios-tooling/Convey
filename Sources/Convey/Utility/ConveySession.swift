@@ -32,9 +32,9 @@ import Foundation
 		session(for: tag)?.cancel()
 	}
 	
-	static let activeSessions = ThreadsafeMutex<Set<ConveySession>>([])
+	static let activeSessions = ConveyThreadsafeMutex<Set<ConveySession>>([])
 	
-	init<Task: DownloadingTask>(server: ConveyServerable, task: Task) async throws {
+	public init<Task: DownloadingTask>(server: ConveyServerable, task: Task) async throws {
 		do {
 			self.server = server
 			self.task = task
