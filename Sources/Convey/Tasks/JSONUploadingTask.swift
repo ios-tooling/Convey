@@ -12,7 +12,7 @@ public protocol JSONUploadingTask: UploadingTask where UploadPayload == Data {
 }
 
 public extension JSONUploadingTask {
-	var contentType: String? { "application/json" }
+	var contentType: String? { Constants.applicationJson }
 	var json: [String: Sendable]? { nil }
 	var uploadPayload: Data? { nil }
 	var uploadData: Data? { get throws {

@@ -49,11 +49,13 @@ public extension DownloadingTask {
 	func download() async throws -> ServerResponse<DownloadPayload> {
 		let result = try await downloadData()
 		
-		if DownloadPayload.self == Data.self, let payload = result.data as? DownloadPayload {
+		if DownloadPayload.self == Data.self, let result = result as? ServerResponse<DownloadPayload>, let payload = result.data as? DownloadPayload {
+			await didFinish(with: result)
 			return .init(payload: payload, request: result.request, response: result.response, data: result.data, startedAt: result.startedAt, duration: result.duration, attemptNumber: result.attemptNumber)
 		}
 		
 		let decoded: ServerResponse<DownloadPayload> = try result.decoding(using: decoder)
+		await didFinish(with: decoded)
 		return decoded
 	}
 	
@@ -76,6 +78,7 @@ public extension DownloadingTask {
 
 		do {
 			info.urlRequest = session.request
+			let request = session.request
 			info.ungzippedRequest = session.ungzippedRequest
 			info.url = session.request.url
 			
@@ -91,6 +94,8 @@ public extension DownloadingTask {
 			try await didReceiveResponse(response: response, data: data)
 			let result = ServerResponse(payload: data, request: session.request, response: response, data: data, startedAt: info.startedAt, duration: info.duration ?? 0, attemptNumber: attemptNumber)
 			await info.save()
+			await server.didFinish(task: self, response: result, error: nil)
+			
 			return result
 		} catch {
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
@@ -98,6 +103,7 @@ public extension DownloadingTask {
 			echo(info)
 			await didFail(with: error)
 			await info.save()
+			await server.didFinish(task: self, response: nil, error: error)
 			throw error
 		}
 	}

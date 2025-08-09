@@ -18,6 +18,7 @@ import Foundation
 	func url(for task: any DownloadingTask) async -> URL
 	func session(for task: any DownloadingTask) async throws -> ConveySession
 	func headers(for task: any DownloadingTask) async throws -> Headers
+	func didFinish<T: DownloadingTask>(task: T, response: ServerResponse<Data>?, error: (any Error)?) async
 }
 
 public extension ConveyServerable {
@@ -37,8 +38,12 @@ public extension ConveyServerable {
 		if let userAgent = configuration.userAgent { headers.append(Header(name: Constants.Headers.userAgent, value: userAgent)) }
 		return headers
 	}
-	
+
 	func url(for task: any DownloadingTask) async -> URL {
+		await baseURL(for: task)
+	}
+	
+	func baseURL(for task: any DownloadingTask) async -> URL {
 		let base = await baseURL.appendingPathComponent(task.path)
 		
 		if let parameters = await task.queryParameters, !parameters.isEmpty, var components = URLComponents(url: base, resolvingAgainstBaseURL: true) {
@@ -62,6 +67,10 @@ public extension ConveyServerable {
 	
 	func headers(for task: any DownloadingTask) async throws -> Headers {
 		configuration.defaultHeaders
+	}
+	
+	func didFinish<T: DownloadingTask>(task: T, response: ServerResponse<Data>?, error: (any Error)?) async {
+		
 	}
 }
 

@@ -31,6 +31,7 @@ public typealias ServerTask = DataDownloadingTask
 	func willSendRequest(request: URLRequest) async throws
 	func didReceiveResponse(response: URLResponse, data: Data) async throws
 	func didFail(with error: any Error) async
+	func didFinish(with response: ServerResponse<DownloadPayload>) async
 }
 
 public protocol DataDownloadingTask: DownloadingTask where DownloadPayload == Data { }
@@ -67,4 +68,5 @@ public extension DownloadingTask {
 	func willSendRequest(request: URLRequest) async throws { }
 	func didReceiveResponse(response: URLResponse, data: Data) async throws { }
 	func didFail(with error: any Error) async { }
+	func didFinish(with response: ServerResponse<DownloadPayload>) async { }
 }
