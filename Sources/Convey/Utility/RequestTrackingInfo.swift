@@ -19,6 +19,7 @@ import Foundation
 	var response: CodableURLResponse?
 	var duration: TimeInterval?
 	var error: String?
+	var shouldNotEcho: Bool
 	
 	var separator = 		"\n##============================================================##\n"
 	var endSeparator = 	"\n################################################################\n"
@@ -51,9 +52,12 @@ import Foundation
 		taskName = String(describing: type(of: task))
 		taskDescription = String(describing: task)
 		method = task.method.rawValue.uppercased()
+		shouldNotEcho = task is any NonEchoingTask
 	}
 	
 	func save() async {
+		if shouldNotEcho { return }
+		
 		if #available(iOS 17, macOS 14, watchOS 10, *) {
 			await TaskRecorder.instance.record(info: self)
 		}
@@ -79,6 +83,14 @@ import Foundation
 
 		if let request {
 			result += "\(request.description)"
+			
+			if let httpBody {
+				if httpBody.count < 2048 {
+					result += "\n\(String(data: httpBody, encoding: .utf8) ?? "[binary data]")\n"
+				} else {
+					result += "\nPayload: \(httpBody.count) bytes\n"
+				}
+			}
 			result += separator
 		}
 		

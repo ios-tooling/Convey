@@ -11,6 +11,7 @@ public enum TaskEchoStyle { case none, minimal, all, up, down }
 
 public extension DownloadingTask {
 	var echoStyle: TaskEchoStyle {
+		if self is any NonEchoingTask { return .none }
 		if self is any EchoingTask { return .all }
 		
 		return .none
@@ -33,3 +34,4 @@ public extension DownloadingTask {
 }
 
 public protocol EchoingTask: DownloadingTask { }
+public protocol NonEchoingTask: DownloadingTask { }
