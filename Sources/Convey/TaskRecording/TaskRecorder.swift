@@ -30,10 +30,14 @@ public actor TaskRecorder {
 		#endif
 	}
 	
-	public func setSaveTasks(_ saveTasks: Bool) {
+	nonisolated public func setSaveTasks(_ saveTasks: Bool = true) {
+		Task { await self._setSaveTasks(saveTasks) }
+	}
+
+	func _setSaveTasks(_ saveTasks: Bool = true) {
 		self.saveTasks = saveTasks
 	}
-	
+
 	nonisolated let _container: ModelContainer?
 	var notificationTokens: [Any] = []
 	

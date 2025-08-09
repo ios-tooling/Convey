@@ -71,13 +71,17 @@ extension RecordedTasksScreen {
 				}
 				.listStyle(.plain)
 			}
-			HStack {
-				Button("Clear Old") {
-					Task { await TaskRecorder.instance.clearOld() }
+			.toolbar {
+				ToolbarItem(placement: .bottomBar) {
+					Button("Clear Old") {
+						Task { await TaskRecorder.instance.clearOld() }
+					}
 				}
-				
-				Button("Clear All") {
-					Task { await TaskRecorder.instance.clearAll() }
+
+				ToolbarItem(placement: .bottomBar) {
+					Button("Clear All") {
+						Task { await TaskRecorder.instance.clearAll() }
+					}
 				}
 			}
 			.buttonStyle(.bordered)

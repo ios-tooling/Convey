@@ -30,23 +30,6 @@ struct RecordedTaskDetailScreen: View {
 			.lineLimit(nil)
 			.multilineTextAlignment(.leading)
 			.monospaced()
-			.safeAreaInset(edge: .bottom) {
-				HStack {
-					Button("Delete", role: .destructive) {
-						task.modelContext?.delete(task)
-						dismiss()
-					}
-					
-					ShareLink(item: tempFileURL, subject: Text(task.name))
-						.padding(.horizontal)
-					
-					if isatty(STDERR_FILENO) != 0 {
-						Button("Log") {
-							print(json)
-						}
-					}
-				}
-			}
 			.navigationTitle(task.name)
 			.toolbar {
 				if let upsize = task.uploadSize, upsize > 0 {
@@ -56,6 +39,29 @@ struct RecordedTaskDetailScreen: View {
 							setupDisplay()
 						}) {
 							Image(systemName: isShowingUpload ? "arrow.up.document.fill" : "arrow.up.document")
+						}
+					}
+				}
+				
+				ToolbarItem(placement: .bottomBar) {
+					Button("Delete", role: .destructive) {
+						task.modelContext?.delete(task)
+						dismiss()
+					}
+				}
+
+				ToolbarItem(placement: .bottomBar) {
+					Spacer()
+				}
+
+				ToolbarItem(placement: .bottomBar) {
+					ShareLink(item: tempFileURL, subject: Text(task.name))
+				}
+
+				if isatty(STDERR_FILENO) != 0 {
+					ToolbarItem(placement: .bottomBar) {
+						Button("Log") {
+							print(json)
 						}
 					}
 				}
@@ -108,6 +114,12 @@ struct RecordedTaskDetailScreen: View {
 	
 	func buildRawJSON() -> String {
 		var result = ""
+		result += "Started at \(task.startedAt.formatted())"
+		if let duration = task.duration {
+			result += ", duration: \(duration.formatted()) seconds"
+		}
+		result += "\n"
+
 		if let request = task.request {
 			result += "     ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ REQUEST ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n\n"
 			result += request.description

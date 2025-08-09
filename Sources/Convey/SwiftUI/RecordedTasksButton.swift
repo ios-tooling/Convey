@@ -18,6 +18,10 @@ public struct RecordedTasksButton: View {
 			.sheet(isPresented: $showRecordedTasks) {
 				RecordedTasksScreen()
 			}
-		
+			.task {
+				if await !TaskRecorder.instance.saveTasks {
+					print("⛔️ Tasks are not currently saved. Use TaskRecorder.instance.setSaveTasks() to enable.")
+				}
+			}
 	}
 }
