@@ -163,7 +163,7 @@ extension ModelContext {
 		guard let all = try? fetch(request), all.count > count else { return }
 		
 		do {
-			for i in 0..<(all.count - count) {
+			for i in 0...(all.count - count) {
 				delete(all[i])
 			}
 			try save()
