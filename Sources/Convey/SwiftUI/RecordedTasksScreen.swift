@@ -40,15 +40,17 @@ extension RecordedTasksScreen {
 	struct TaskList: View {
 		var currentAppLaunchDate: Date?
 		var currentSessionStartDate: Date?
-		
+		var counter = TaskRecorderCount.instance
+
 		@Environment(\.modelContext) var modelContext
 		@Query(sort: \RecordedTask.startedAt, order: .reverse) var tasks: [RecordedTask]
 		
 		
 		var body: some View {
 			VStack {
-				Text("Recorded Tasks (\(tasks.count))")
+				Text("Recorded Tasks (\(counter.count))")
 					.font(.title)
+					.padding()
 				List {
 					ForEach(tasks) { task in
 						NavigationLink(destination: { RecordedTaskDetailScreen(task: task) }) {
