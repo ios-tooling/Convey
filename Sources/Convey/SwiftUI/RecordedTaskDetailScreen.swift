@@ -43,23 +43,23 @@ struct RecordedTaskDetailScreen: View {
 					}
 				}
 				
-				ToolbarItem(placement: .bottomBar) {
+				ToolbarItem(placement: toolbarPlacement) {
 					Button("Delete", role: .destructive) {
 						task.modelContext?.delete(task)
 						dismiss()
 					}
 				}
 
-				ToolbarItem(placement: .bottomBar) {
+				ToolbarItem(placement: toolbarPlacement) {
 					Spacer()
 				}
 
-				ToolbarItem(placement: .bottomBar) {
+				ToolbarItem(placement: toolbarPlacement) {
 					ShareLink(item: tempFileURL, subject: Text(task.name))
 				}
 
 				if isatty(STDERR_FILENO) != 0 {
-					ToolbarItem(placement: .bottomBar) {
+					ToolbarItem(placement: toolbarPlacement) {
 						Button("Log") {
 							print(json)
 						}
@@ -67,6 +67,14 @@ struct RecordedTaskDetailScreen: View {
 				}
 			}
 			.onAppear { setupDisplay() }
+	}
+	
+	var toolbarPlacement: ToolbarItemPlacement {
+		#if os(macOS)
+			.automatic
+		#else
+			.bottomBar
+		#endif
 	}
 	
 	func setupDisplay() {
