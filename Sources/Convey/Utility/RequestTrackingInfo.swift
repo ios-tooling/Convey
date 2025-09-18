@@ -94,6 +94,10 @@ import Foundation
 			result += separator
 		}
 		
+		if let status = response?.statusCode {
+			result += "Status: \(status)\n"
+		}
+		
 		if let headers = response?.allHeaderFields as? Headers {
 			result += headers.description
 			result += separator

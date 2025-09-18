@@ -102,6 +102,9 @@ struct RecordedTaskDetailScreen: View {
 			result += err
 		}
 		
+		if let code = task.statusCode {
+			result += AttributedString("\nStatus Code: \(code)")
+		}
 		if let response = task.data?.prettyJSON {
 			result += AttributedString("\n\n     ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ RESPONSE ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ \n\n")
 			result += AttributedString(response)
@@ -137,6 +140,9 @@ struct RecordedTaskDetailScreen: View {
 			result += "\nFailed: \(error)"
 		}
 		
+		if let code = task.statusCode {
+			result += "\nStatus Code: \(code)"
+		}
 		if let response = task.data?.prettyJSON {
 			if !result.isEmpty {
 				result += "\n\n     ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ RESPONSE ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯\n\n"

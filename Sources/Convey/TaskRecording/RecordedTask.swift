@@ -26,6 +26,7 @@ import Foundation
 	var sessionStartedAt: TimeInterval?
 	var isGzipped = false
 	var method: String
+	var statusCode: Int?
 	
 	var suggestedFilename: String {
 		name + "@" + startedAt.formatted().replacingOccurrences(of: "/", with: "∕").replacingOccurrences(of: ":", with: "˸") + ".json"
@@ -62,6 +63,7 @@ import Foundation
 
 		if let response = info.response {
 			responseData = try? JSONEncoder().encode(response)
+			statusCode = response.statusCode
 		}
 	}
 }
