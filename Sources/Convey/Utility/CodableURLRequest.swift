@@ -47,7 +47,7 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 		
 		request.httpMethod = httpMethod
 		request.httpBody = data ?? httpBody
-		if #available(iOS 18.2, macOS 15, watchOS 11, *) {
+		if #available(iOS 18.2, macOS 15.2, watchOS 11, *) {
 			request.cookiePartitionIdentifier = cookiePartitionIdentifier
 		}
 		request.httpShouldUsePipelining = httpShouldUsePipelining
@@ -65,7 +65,7 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 		return raw
 	}
 	
-	@available(iOS 15, *)
+	@available(iOS 15, macOS 12, *)
 	public var attributedDescription: AttributedString {
 		var result = AttributedString(methodAndURL + "\n")
 		let standardFont = Font.system(size: 10).monospaced()
@@ -129,7 +129,7 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 	}
 	
 	public enum Attribution : UInt, Sendable, Codable { case developer, user
-		@available(iOS 15, *)
+		@available(iOS 15, macOS 12, *)
 		init?(_ attribution: URLRequest.Attribution?) {
 			guard let attr = Attribution(rawValue: attribution?.rawValue ?? 65000) else { return nil }
 			self = attr
@@ -158,25 +158,25 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 		allowsExpensiveNetworkAccess = request.allowsExpensiveNetworkAccess
 		allowsConstrainedNetworkAccess = request.allowsConstrainedNetworkAccess
 
-		if #available(iOS 14.5, *) {
+		if #available(iOS 14.5, macOS 11.3, *) {
 			assumesHTTP3Capable = request.assumesHTTP3Capable
 		} else {
 			assumesHTTP3Capable = nil
 		}
 		
-		if #available(iOS 15, *) {
+		if #available(iOS 15, macOS 12, *) {
 			attribution = .init(request.attribution)
 		} else {
 			attribution = nil
 		}
 
-		if #available(iOS 16.1, *) {
+		if #available(iOS 16.1, macOS 13, *) {
 			requiresDNSSECValidation = request.requiresDNSSECValidation
 		} else {
 			requiresDNSSECValidation = nil
 		}
 
-		if #available(iOS 18.0, *) {
+		if #available(iOS 18.0, macOS 15, *) {
 			allowsPersistentDNS = request.allowsPersistentDNS
 		} else {
 			allowsPersistentDNS = nil
@@ -186,7 +186,7 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 		allHTTPHeaderFields = request.allHTTPHeaderFields
 		httpBody = includingBody ? request.httpBody : nil
 		httpShouldHandleCookies = request.httpShouldHandleCookies
-		if #available(iOS 18.2, *) {
+		if #available(iOS 18.2, macOS 15.2, *) {
 			cookiePartitionIdentifier = request.cookiePartitionIdentifier
 		} else {
 			cookiePartitionIdentifier = nil

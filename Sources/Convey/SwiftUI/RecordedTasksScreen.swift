@@ -74,19 +74,27 @@ extension RecordedTasksScreen {
 				.listStyle(.plain)
 			}
 			.toolbar {
-				ToolbarItem(placement: .bottomBar) {
+				ToolbarItem(placement: toolbarPlacement) {
 					Button("Clear Old") {
 						Task { await TaskRecorder.instance.clearOld() }
 					}
 				}
 
-				ToolbarItem(placement: .bottomBar) {
+				ToolbarItem(placement: toolbarPlacement) {
 					Button("Clear All") {
 						Task { await TaskRecorder.instance.clearAll() }
 					}
 				}
 			}
 			.buttonStyle(.bordered)
+		}
+
+		var toolbarPlacement: ToolbarItemPlacement {
+			#if os(macOS)
+				.automatic
+			#else
+				.bottomBar
+			#endif
 		}
 	}
 }
