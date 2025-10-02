@@ -27,10 +27,12 @@ Convey is a Swift Package Manager library for iOS, macOS, tvOS, visionOS, and wa
 - **ConveyServerable**: Protocol that defines server behavior for handling remote connections and configuration.
 
 ### Key Patterns
-- **Actor-based concurrency**: Uses `@ConveyActor` for thread-safe operations
-- **Protocol composition**: Tasks combine multiple protocols (e.g., `UploadingTask`, `EchoingTask`) to define behavior
+- **Actor-based concurrency**: Uses `@ConveyActor` global actor for thread-safe operations
+- **Protocol composition**: Tasks combine multiple protocols (e.g., `UploadingTask`, `DataUploadingTask`) to define behavior
 - **Configuration via Remote**: Environment switching through `Remote` objects for different endpoints
 - **HTTP method specification**: Tasks define their HTTP method via the `method` property (defaults to `.get`)
+- **Server-task architecture**: `ConveyServerable` protocol defines server behavior, tasks implement `DownloadingTask`
+- **Type safety**: Strong typing with associated types for upload/download payloads
 
 ### Caching System
 - **DataCache**: Actor-based caching with local-first, remote-first, and skip-local strategies
@@ -59,3 +61,30 @@ Convey is a Swift Package Manager library for iOS, macOS, tvOS, visionOS, and wa
 - Test harness app provides integration testing with HTTPBin
 - Test assets include image resources for caching tests
 - Uses Swift Testing framework (not XCTest)
+- Test files include: `TaskTests.swift`, `GZipTests.swift`, `StringTests.swift`
+
+## Important Implementation Details
+
+### Error Handling
+- **HTTPError**: Handles HTTP-specific errors from server responses
+- **ServerError**: General server communication errors
+- Tasks can implement `didFail(with:)` for custom error handling
+
+### Network Configuration
+- **ConveySession**: Manages individual network sessions and URLSession instances
+- **TaskConfiguration**: Per-task configuration overrides for timeouts, network access policies
+- **ServerConfiguration**: Global server settings including timeouts, user agent, headers
+
+### Task Lifecycle Hooks
+Tasks can implement these optional lifecycle methods:
+- `willSendRequest(request:)` - Called before sending request
+- `didReceiveResponse(response:data:)` - Called when response received
+- `didFail(with:)` - Called on task failure
+- `didFinish(with:)` - Called on successful completion
+
+### Protocol Hierarchy
+- `DownloadingTask` - Base protocol for all network tasks
+- `DataDownloadingTask` - For tasks that download raw Data
+- `UploadingTask` - Adds upload capabilities with associated type
+- `DataUploadingTask` - For tasks that upload raw Data
+- `JSONUploadingTask` - For JSON-based uploads

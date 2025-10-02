@@ -23,6 +23,7 @@ public struct ServerConfiguration: Sendable {
 	public var userAgent: String? = Self.defaultUserAgent
 	public var pinExpiredToleranceInDays = 0.0
 	public var enableTaskLoggingAtLaunch = false
+	public var throwingStatusCategories = [500]
 		
 	public static let defaultUserAgent = "\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)/\(Device.rawDeviceType)/CFNetwork/1325.0.1 Darwin/21.1.0"
 	

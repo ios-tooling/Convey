@@ -96,6 +96,10 @@ public extension DownloadingTask {
 			await info.save()
 			await server.didFinish(task: self, response: result, error: nil)
 			
+			if let error = HTTPError.withStatusCode(result.statusCode, data: result.data, throwingStatusCategories: server.configuration.throwingStatusCategories) {
+				throw error
+			}
+			
 			return result
 		} catch {
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
