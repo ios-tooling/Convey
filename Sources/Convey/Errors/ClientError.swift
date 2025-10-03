@@ -142,7 +142,7 @@ extension HTTPError {
 			}
 		}
 
-		public var errorDescription: String? {
+		public var rawDescription: String? {
 			switch self {
 			case .badRequest: "Bad Request"
 			case .unauthorized: "Unauthorized"

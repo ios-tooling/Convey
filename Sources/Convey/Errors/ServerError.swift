@@ -70,16 +70,6 @@ extension HTTPError {
 			}
 		}
 
-		public var errorDescription: String? {
-			if let data, let string = String(data: data, encoding: .utf8) {
-				guard let rawDescription else { return string }
-				
-				return rawDescription + "\n" + string
-			}
-			
-			return rawDescription
-		}
-		
 		public var rawDescription: String? {
 			switch self {
 			case .internalServer: "Internal Server Error"
