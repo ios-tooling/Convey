@@ -78,12 +78,14 @@ extension RecordedTasksScreen {
 					Button("Clear Old") {
 						Task { await TaskRecorder.instance.clearOld() }
 					}
+					.fixedSize()
 				}
 
 				ToolbarItem(placement: toolbarPlacement) {
 					Button("Clear All") {
 						Task { await TaskRecorder.instance.clearAll() }
 					}
+					.fixedSize()
 				}
 			}
 			.buttonStyle(.bordered)
