@@ -45,7 +45,8 @@ extension RecordedTasksScreen.TaskList {
 					Text(task.startedAt.formatted(date: .abbreviated, time: .complete))
 					Spacer()
 					if let duration = task.duration {
-						Text("\(duration.formatted())s")
+						Text("\(duration.formatted(.number.precision(.fractionLength(2))))s")
+							.bold()
 					}
 				}
 				.font(.system(size: 10))
