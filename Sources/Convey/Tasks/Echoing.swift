@@ -7,10 +7,11 @@
 
 import Foundation
 
-public enum TaskEchoStyle { case none, minimal, all, up, down }
+public enum TaskEchoStyle: String, Codable, Sendable { case none, minimal, all, up, down }
 
 public extension DownloadingTask {
 	var echoStyle: TaskEchoStyle {
+		if let style = configuration?.echoStyle { return style }
 		if self is any NonEchoingTask { return .none }
 		if self is any EchoingTask { return .all }
 		

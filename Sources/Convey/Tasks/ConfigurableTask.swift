@@ -36,7 +36,7 @@ public extension DownloadingTask {
 		return task
 	}
 	
-	func echoStyle(_ value: TaskConfiguration.EchoStyle) -> Self {
+	func echoStyle(_ value: TaskEchoStyle) -> Self {
 		var task = self
 		if task.configuration == nil { task.configuration = .default }
 		task.configuration?.echoStyle = value

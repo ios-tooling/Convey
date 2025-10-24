@@ -12,13 +12,13 @@ public struct TaskConfiguration: Sendable {
 	public var headers: Headers?
 	public var cookies: [HTTPCookie]?
 	public var localSourceURL: URL?
-	public var echoStyle: EchoStyle?
+	public var echoStyle: TaskEchoStyle?
 	public var gzip: Bool?
 	public var queryParameters: (any TaskQueryParameters)?
 	
 	public static let `default` = TaskConfiguration(gzip: true)
 	
-	public init(timeout: TimeInterval? = nil, headers: Headers? = nil, cookies: [HTTPCookie]? = nil, localSourceURL: URL? = nil, echoStyle: EchoStyle? = nil, gzip: Bool? = nil, queryParameters: (any TaskQueryParameters)? = nil) {
+	public init(timeout: TimeInterval? = nil, headers: Headers? = nil, cookies: [HTTPCookie]? = nil, localSourceURL: URL? = nil, echoStyle: TaskEchoStyle? = nil, gzip: Bool? = nil, queryParameters: (any TaskQueryParameters)? = nil) {
 		
 		self.timeout = timeout
 		self.headers = headers
@@ -28,10 +28,6 @@ public struct TaskConfiguration: Sendable {
 		self.gzip = gzip
 		self.queryParameters = queryParameters
 	}
-}
-
-extension TaskConfiguration {
-	public enum EchoStyle: Sendable { case minimal, full }
 }
 
 extension TaskConfiguration {
