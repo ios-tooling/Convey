@@ -9,7 +9,7 @@ import Foundation
 
 extension Data {
 
-	func reportedData(limit: Int) -> String? {
+	func reportedData(limit: UInt64) -> String? {
 		// we're going to ignore any errors here. If we can't convert the file to JSON, that's fine
 		if count < limit {
 			if let json = try? JSONSerialization.jsonObject(with: self) as? [String: Any], let data = try? JSONSerialization.data(withJSONObject: json, options: [.prettyPrinted]), let string = String(data: data, encoding: .utf8) {

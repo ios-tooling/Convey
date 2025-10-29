@@ -74,6 +74,10 @@ import Foundation
 	}
 	
 	var fullDescription: String {
+		fullDescription(limit: 1024)
+	}
+	
+	func fullDescription(limit: UInt64) -> String {
 		var result = endSeparator + minimalDescription
 		
 		if let error {
@@ -85,7 +89,7 @@ import Foundation
 			result += "\(request.description)"
 			
 			if let httpBody {
-				if httpBody.count < 2048 {
+				if httpBody.count < limit {
 					result += "\n\(String(data: httpBody, encoding: .utf8) ?? "[binary data]")\n"
 				} else {
 					result += "\nPayload: \(httpBody.count) bytes\n"
@@ -103,7 +107,7 @@ import Foundation
 			result += separator
 		}
 		
-		if let data, let visible = data.reportedData(limit: 2048) {
+		if let data, let visible = data.reportedData(limit: limit) {
 			result += "\(visible.debugDescription)"
 		}
 		

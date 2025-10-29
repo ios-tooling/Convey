@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum TaskEchoStyle: String, Codable, Sendable { case none, minimal, all, up, down }
+public enum TaskEchoStyle: Sendable { case none, minimal, all, up, down, limit(UInt64?) }
 
 public extension DownloadingTask {
 	var echoStyle: TaskEchoStyle {
@@ -30,6 +30,8 @@ public extension DownloadingTask {
 			print(info.minimalDescription)
 		case .down:
 			print(info.minimalDescription)
+		case .limit(let limit):
+			print(info.fullDescription(limit: limit ?? UInt64.max))
 		}
 	}
 }
