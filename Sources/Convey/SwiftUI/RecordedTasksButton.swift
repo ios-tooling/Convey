@@ -24,7 +24,10 @@ public struct RecordedTasksButton: View {
 	}
 	
 	public var body: some View {
-		Button(action: { showRecordedTasks.toggle() }) {
+		Button(action: {
+			Task { await showWarningIfNeeded() }
+			showRecordedTasks.toggle()
+		}) {
 			HStack {
 				Text("Tasks")
 				if showTaskCount, counter.count > 0 {
@@ -37,10 +40,12 @@ public struct RecordedTasksButton: View {
 			.sheet(isPresented: $showRecordedTasks) {
 				RecordedTasksScreen()
 			}
-			.task {
-				if await TaskRecorder.instance.limit == TaskRecorder.Limit.none {
-					print("⛔️ Tasks are not currently saved. Use TaskRecorder.instance.setSaveTaskLimit() to enable.")
-				}
-			}
+			.task { await showWarningIfNeeded() }
+	}
+	
+	func showWarningIfNeeded() async {
+		if await TaskRecorder.instance.limit == TaskRecorder.Limit.none {
+			print("⛔️ Tasks are not currently saved. Use TaskRecorder.instance.setSaveTaskLimit() to enable.")
+		}
 	}
 }
