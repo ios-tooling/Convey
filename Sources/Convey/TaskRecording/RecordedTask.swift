@@ -27,6 +27,7 @@ import Foundation
 	var isGzipped = false
 	var method: String
 	var statusCode: Int?
+	var echoStyle: TaskEchoStyle?
 	
 	var suggestedFilename: String {
 		name + "@" + startedAt.formatted().replacingOccurrences(of: "/", with: "∕").replacingOccurrences(of: ":", with: "˸") + ".json"
@@ -55,6 +56,7 @@ import Foundation
 		appLaunchedAt = launchedAt.timeIntervalSinceReferenceDate
 		httpBody = info.httpBody
 		uploadSize = httpBody?.count
+		echoStyle = info.echoStyle
 
 		if let request = info.request {
 			requestData = try? JSONEncoder().encode(request)

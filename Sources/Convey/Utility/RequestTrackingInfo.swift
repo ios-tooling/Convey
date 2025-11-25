@@ -19,7 +19,7 @@ import Foundation
 	var response: CodableURLResponse?
 	var duration: TimeInterval?
 	var error: String?
-	var shouldNotEcho: Bool
+	var echoStyle: TaskEchoStyle
 	
 	var separator = 		"\n##============================================================##\n"
 	var endSeparator = 	"\n################################################################\n"
@@ -52,11 +52,12 @@ import Foundation
 		taskName = String(describing: type(of: task))
 		taskDescription = String(describing: task)
 		method = task.method.rawValue.uppercased()
-		shouldNotEcho = task is any NonEchoingTask
+		echoStyle = task is any NonEchoingTask ? .hiddenUnlessError : task.echoStyle
 	}
 	
 	func save() async {
-		if shouldNotEcho { return }
+		if echoStyle == .hidden { return }
+		if echoStyle == .hiddenUnlessError, error == nil { return }
 		
 		if #available(iOS 17, macOS 14, watchOS 10, *) {
 			await TaskRecorder.instance.record(info: self)

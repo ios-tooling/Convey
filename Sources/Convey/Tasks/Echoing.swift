@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum TaskEchoStyle: Sendable { case none, minimal, all, up, down, limit(UInt64?) }
+public enum TaskEchoStyle: Sendable, Codable, Hashable { case none, hidden, hiddenUnlessError, minimal, all, up, down, limit(UInt64?) }
 
 public extension DownloadingTask {
 	var echoStyle: TaskEchoStyle {
@@ -24,6 +24,8 @@ public extension DownloadingTask {
 			
 		case .minimal:
 			print(info.minimalDescription)
+		case .hidden, .hiddenUnlessError:
+			break
 		case .all:
 			print(info.fullDescription)
 		case .up:
