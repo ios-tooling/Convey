@@ -32,6 +32,7 @@ public typealias ServerTask = DataDownloadingTask
 	func didReceiveResponse(response: URLResponse, data: Data) async throws
 	func didFail(with error: any Error) async
 	func didFinish(with response: ServerResponse<DownloadPayload>) async
+	var echoStyle: TaskEchoStyle { get }
 }
 
 public protocol DataDownloadingTask: DownloadingTask where DownloadPayload == Data { }
