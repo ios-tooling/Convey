@@ -52,14 +52,14 @@ import Foundation
 		taskName = String(describing: type(of: task))
 		taskDescription = String(describing: task)
 		method = task.method.rawValue.uppercased()
-		echoStyle = task is any NonEchoingTask ? .hiddenUnlessError : task.echoStyle
+		echoStyle = task.echoStyle
 	}
 	
 	func save() async {
-		if echoStyle == .hidden { return }
-		if echoStyle == .hiddenUnlessError, error == nil { return }
-		
 		if #available(iOS 17, macOS 14, watchOS 10, *) {
+			if echoStyle.contains(.onlyIfError), error == nil { return }
+			if !echoStyle.contains(.recorded) { return }
+		
 			await TaskRecorder.instance.record(info: self)
 		}
 	}
