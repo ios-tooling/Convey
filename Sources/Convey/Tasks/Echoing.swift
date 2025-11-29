@@ -35,22 +35,25 @@ public extension DownloadingTask {
 		return [.recorded]
 	}
 	
-	func echo(_ info: RequestTrackingInfo) {
-		if echoStyle.contains(.onlyIfError), info.error == nil { return }
+	func echoStyle(for data: Data?) -> TaskEchoStyle { echoStyle }
+	
+	func echo(_ info: RequestTrackingInfo, data: Data?) {
+		let style = echoStyle(for: data)
+		if style.contains(.onlyIfError), info.error == nil { return }
 		
-		if echoStyle.contains(.consoleFull) {
+		if style.contains(.consoleFull) {
 			print(info.fullDescription)
-		} else if echoStyle.contains(.console100k) {
+		} else if style.contains(.console100k) {
 			print(info.fullDescription(limit: 100 * 1024))
-		} else if echoStyle.contains(.console30k) {
+		} else if style.contains(.console30k) {
 			print(info.fullDescription(limit: 30 * 1024))
-		} else if echoStyle.contains(.console10k) {
+		} else if style.contains(.console10k) {
 			print(info.fullDescription(limit: 10 * 1024))
-		} else if echoStyle.contains(.console5k) {
+		} else if style.contains(.console5k) {
 			print(info.fullDescription(limit: 5 * 1024))
-		} else if echoStyle.contains(.consoleRequest) {
+		} else if style.contains(.consoleRequest) {
 			print(info.request.debugDescription)
-		} else if echoStyle.contains(.consoleMinimum) {
+		} else if style.contains(.consoleMinimum) {
 			print(info.minimalDescription)
 		}
 	}

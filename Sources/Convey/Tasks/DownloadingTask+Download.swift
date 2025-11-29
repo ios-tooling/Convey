@@ -70,7 +70,7 @@ public extension DownloadingTask {
 		} catch {
 			info.urlRequest = try? await self.request
 			info.error = error.localizedDescription
-			echo(info)
+			echo(info, data: nil)
 			await didFail(with: error)
 			await info.save()
 
@@ -90,7 +90,7 @@ public extension DownloadingTask {
 			info.data = data
 			
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
-			echo(info)
+			echo(info, data: data)
 
 			try await didReceiveResponse(response: response, data: data)
 			let result = ServerResponse(payload: data, request: session.request, response: response, data: data, startedAt: info.startedAt, duration: info.duration ?? 0, attemptNumber: attemptNumber)
@@ -105,7 +105,7 @@ public extension DownloadingTask {
 		} catch {
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
 			info.error = error.localizedDescription
-			echo(info)
+			echo(info, data: nil)
 			await didFail(with: error)
 			await info.save()
 			await server.didFinish(task: self, response: nil, error: error)
