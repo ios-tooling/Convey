@@ -90,6 +90,7 @@ public extension DownloadingTask {
 			info.data = data
 			
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
+			info.echoStyle = echoStyle(for: data)
 			echo(info, data: data)
 
 			try await didReceiveResponse(response: response, data: data)
