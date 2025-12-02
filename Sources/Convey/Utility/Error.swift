@@ -22,4 +22,12 @@ public extension Error {
 		if let urlError = self as? URLError, urlError.code == .timedOut { return true }
 		return (self as NSError).domain == NSURLErrorDomain && (self as NSError).code == -1001
 	}
+	
+	var prettyDescription: String {
+		if isTimeOut { return "timed out" }
+		if isOffline { return "offline" }
+
+		return localizedDescription
+	}
+
 }

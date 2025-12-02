@@ -30,7 +30,12 @@ extension RecordedTasksScreen.TaskList {
 					Text(task.name).bold()
 						.font(.system(size: 13))
 					Spacer()
-					if task.error != nil { Text("⚠️") }
+					
+					if task.timedOut {
+						Text("⏰ \(task.timeoutDuration.formatted())")
+					} else if task.error != nil {
+						Text("⚠️")
+					}
 					sizeWidget
 				}
 				

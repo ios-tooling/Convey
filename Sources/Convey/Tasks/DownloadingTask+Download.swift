@@ -82,6 +82,7 @@ public extension DownloadingTask {
 			let request = session.request
 			info.ungzippedRequest = session.ungzippedRequest
 			info.url = session.request.url
+			info.timeoutDuration = request.timeoutInterval
 			
 			try await willSendRequest(request: request)
 			
@@ -105,8 +106,10 @@ public extension DownloadingTask {
 			return result
 		} catch {
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
-			info.error = error.localizedDescription
+			info.error = error.prettyDescription
+			info.timedOut = (error as NSError).code == 1001
 			echo(info, data: nil)
+
 			await didFail(with: error)
 			await info.save()
 			await server.didFinish(task: self, response: nil, error: error)

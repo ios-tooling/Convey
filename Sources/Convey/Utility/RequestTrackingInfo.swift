@@ -19,7 +19,9 @@ import Foundation
 	var response: CodableURLResponse?
 	var duration: TimeInterval?
 	var error: String?
+	var timedOut = false
 	var echoStyle: TaskEchoStyle
+	var timeoutDuration = 30.0
 	
 	var separator = 		"\n##============================================================##\n"
 	var endSeparator = 	"\n################################################################\n"
