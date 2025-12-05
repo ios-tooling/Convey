@@ -28,6 +28,7 @@ import Foundation
 	var method: String
 	var statusCode: Int?
 	var timedOut = false
+	var wasCancelled = false
 	var echoStyle: TaskEchoStyle?
 	var timeoutDuration = 0.0
 	
@@ -60,6 +61,7 @@ import Foundation
 		uploadSize = httpBody?.count
 		echoStyle = info.echoStyle
 		timedOut = info.timedOut
+		wasCancelled = info.wasCancelled
 		timeoutDuration = info.timeoutDuration
 
 		if let request = info.request {

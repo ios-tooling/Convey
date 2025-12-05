@@ -107,12 +107,18 @@ public extension DownloadingTask {
 		} catch {
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
 			info.error = error.prettyDescription
-			info.timedOut = (error as NSError).code == 1001
+			info.timedOut = error.isTimeOut
+			info.wasCancelled = error.isCancellation
 			echo(info, data: nil)
 
 			await didFail(with: error)
 			await info.save()
 			await server.didFinish(task: self, response: nil, error: error)
+
+			if error.isCancellation {
+				print("Was cancelled")
+			}
+
 			throw error
 		}
 	}

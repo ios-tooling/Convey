@@ -20,6 +20,7 @@ import Foundation
 	var duration: TimeInterval?
 	var error: String?
 	var timedOut = false
+	var wasCancelled = false
 	var echoStyle: TaskEchoStyle
 	var timeoutDuration = 30.0
 	

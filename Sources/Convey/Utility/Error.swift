@@ -14,6 +14,15 @@ public extension Error {
 		return urlError.errorCode
 	}
 	
+	var prettyDescription: String {
+		if isTimeOut { return "timed out" }
+		if isOffline { return "offline" }
+		
+		return localizedDescription
+	}
+}
+
+extension Error {
 	var isOffline: Bool {
 		return (self as NSError).code == -1009
 	}
@@ -23,11 +32,11 @@ public extension Error {
 		return (self as NSError).domain == NSURLErrorDomain && (self as NSError).code == -1001
 	}
 	
-	var prettyDescription: String {
-		if isTimeOut { return "timed out" }
-		if isOffline { return "offline" }
-
-		return localizedDescription
+	var isCancellation: Bool {
+		if self is CancellationError { return true }
+		  
+		let error = self as NSError
+		
+		return abs(error.code) == 999
 	}
-
 }
