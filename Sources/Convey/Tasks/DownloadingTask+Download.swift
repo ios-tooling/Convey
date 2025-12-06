@@ -115,10 +115,6 @@ public extension DownloadingTask {
 			await info.save()
 			await server.didFinish(task: self, response: nil, error: error)
 
-			if error.isCancellation {
-				print("Was cancelled")
-			}
-
 			throw error
 		}
 	}
