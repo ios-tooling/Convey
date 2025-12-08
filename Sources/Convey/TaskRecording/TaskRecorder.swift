@@ -51,6 +51,9 @@ public actor TaskRecorder {
 	nonisolated var container: ModelContainer? { _container }
 	
 	init() {
+		if CommandLine.failAllRequests {
+			print("### ALL REQUEST WILL FAIL - COMMAND LINE OPTION SET ###")
+		}
 		let storeURL = URL.libraryDirectory.appending(path: "convey_tasks.db")
 		let configuration = ModelConfiguration(url: storeURL)
 		_container = try? ModelContainer(for: RecordedTask.self, configurations: configuration)
