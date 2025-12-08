@@ -62,6 +62,10 @@ public extension DownloadingTask {
 	func downloadData() async throws -> ServerResponse<Data> {
 		let session: ConveySession
 		var info = RequestTrackingInfo(self)
+		
+		if CommandLine.failAllRequests {
+			throw FaillAllRequestsError(target: String(describing: type(of: self)))
+		}
 
 		do {
 			session = try await server.session(for: self)
@@ -107,4 +111,9 @@ public extension DownloadingTask {
 			throw error
 		}
 	}
+}
+
+struct FaillAllRequestsError: LocalizedError {
+	let target: String
+	var errorDescription: String? { "CommandLine.failAllRequests is set to true, so \(target) was not sent." }
 }
