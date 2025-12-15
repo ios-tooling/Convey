@@ -32,7 +32,10 @@ public extension DownloadingTask {
 			request.httpMethod = method.rawValue.uppercased()
 			request.timeoutInterval = computedTimeout
 			
-			let allHeaders: [Header] = try await (configuration.headers?.headersArray ?? []) + headers.headersArray
+			var allHeaders = try await server.headers(for: self).headersArray
+			let taskHeaders: [Header] = try await (configuration.headers?.headersArray ?? []) + headers.headersArray
+			
+			allHeaders += taskHeaders
 			
 			for header in allHeaders {
 				request.addValue(header.value, forHTTPHeaderField: header.name)

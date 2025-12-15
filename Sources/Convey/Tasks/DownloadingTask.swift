@@ -62,7 +62,7 @@ public extension DownloadingTask {
 	var allowsExpensiveNetworkAccess: Bool? { nil }
 	var timeoutIntervalForRequest: TimeInterval? { server.configuration.defaultTimeout }
 	var timeoutIntervalForResource: TimeInterval? { nil }
-	var headers: Headers { get async throws { try await server.headers(for: self) }}
+	var headers: Headers { get async throws { [] }}
 	var queryParameters: (any TaskQueryParameters)? { nil }
 	var requestTag: String? { nil }
 	func retryInterval(afterError error: any Error, count: Int) -> TimeInterval? { nil }
