@@ -19,6 +19,11 @@ struct ErrorHandlingTests {
 		var configuration = ServerConfiguration()
 		var statusCodeToReturn: Int = 200
 		var responseData: Data = Data()
+		
+		func setThrowingStatusCategories(_ categories: [Int]) {
+			configuration.throwingStatusCategories = categories
+			print("Categories set to \(categories)")
+		}
 
 		static let shared = MockServer()
 
@@ -33,16 +38,15 @@ struct ErrorHandlingTests {
 
 	struct TestTask: DataDownloadingTask {
 		var path: String
-		var server: ConveyServerable { MockServer.shared }
+		var server: ConveyServerable
 		var configuration: TaskConfiguration?
-
-		nonisolated init(path: String = "") {
-			self.path = path
-		}
 	}
 
 	@Test("4xx Client Errors are recognized")
-	func testClientErrors() async throws {
+	@ConveyActor func testClientErrors() async throws {
+		let server = MockServer()
+		server.setThrowingStatusCategories([400, 500])
+
 		let testCases: [(Int, String)] = [
 			(400, "badRequest"),
 			(401, "unauthorized"),
@@ -56,11 +60,13 @@ struct ErrorHandlingTests {
 		]
 
 		for (statusCode, _) in testCases {
-			let task = TestTask(path: "status/\(statusCode)")
+			let task = TestTask(path: "status/\(statusCode)", server: server)
 
 			do {
-				_ = try await task.downloadData()
-				Issue.record("Expected HTTPError for status code \(statusCode)")
+				let result = try await task.downloadData()
+				if result.statusCode % 100 != 5 {
+					Issue.record("Expected HTTPError for status code \(statusCode), got \(result.statusCode)")
+				}
 			} catch let error as any HTTPErrorType {
 				#expect(error.statusCode == statusCode, "Expected status code \(statusCode), got \(error.statusCode)")
 			} catch {
@@ -70,7 +76,8 @@ struct ErrorHandlingTests {
 	}
 
 	@Test("5xx Server Errors are recognized")
-	func testServerErrors() async throws {
+	@ConveyActor func testServerErrors() async throws {
+		let server = MockServer()
 		let testCases: [(Int, String)] = [
 			(500, "internalServer"),
 			(501, "notImplemented"),
@@ -80,7 +87,7 @@ struct ErrorHandlingTests {
 		]
 
 		for (statusCode, _) in testCases {
-			let task = TestTask(path: "status/\(statusCode)")
+			let task = TestTask(path: "status/\(statusCode)", server: server)
 
 			do {
 				_ = try await task.downloadData()
@@ -94,11 +101,12 @@ struct ErrorHandlingTests {
 	}
 
 	@Test("2xx Success codes do not throw")
-	func testSuccessCodes() async throws {
+	@ConveyActor func testSuccessCodes() async throws {
+		let server = MockServer()
 		let successCodes = [200, 201, 202, 204, 206]
 
 		for statusCode in successCodes {
-			let task = TestTask(path: "status/\(statusCode)")
+			let task = TestTask(path: "status/\(statusCode)", server: server)
 
 			do {
 				let response = try await task.downloadData()
@@ -110,14 +118,13 @@ struct ErrorHandlingTests {
 	}
 
 	@Test("throwingStatusCategories configuration is respected")
-	func testThrowingStatusCategories() async throws {
+	@ConveyActor func testThrowingStatusCategories() async throws {
 		// Configure server to only throw on 500 errors
-		await Task { @ConveyActor in
-			MockServer.shared.configuration.throwingStatusCategories = [500]
-		}.value
+		let server = MockServer()
+		server.setThrowingStatusCategories([500])
 
 		// 400 errors should not throw
-		let task400 = TestTask(path: "status/404")
+		let task400 = TestTask(path: "status/404", server: server)
 		do {
 			let response = try await task400.downloadData()
 			#expect(response.statusCode == 404, "Should receive 404 without throwing")
@@ -126,7 +133,7 @@ struct ErrorHandlingTests {
 		}
 
 		// 500 errors should throw
-		let task500 = TestTask(path: "status/500")
+		let task500 = TestTask(path: "status/500", server: server)
 		do {
 			_ = try await task500.downloadData()
 			Issue.record("Should throw for 500 when configured")
@@ -136,8 +143,9 @@ struct ErrorHandlingTests {
 	}
 
 	@Test("Error contains response data")
-	func testErrorContainsResponseData() async throws {
-		let task = TestTask(path: "status/404")
+	@ConveyActor func testErrorContainsResponseData() async throws {
+		let server = MockServer()
+		let task = TestTask(path: "status/404", server: server)
 
 		do {
 			_ = try await task.downloadData()

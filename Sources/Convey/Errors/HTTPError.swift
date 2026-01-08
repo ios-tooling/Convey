@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  HTTPError.swift
 //  Convey
 //
 //  Created by Ben Gottlieb on 10/2/25.
@@ -18,22 +18,23 @@ struct HTTPError {
 		let statusCode: Int
 		let data: Data?
 		let rawDescription: String? = "Unknown error"
+		let underlyingError: Error?
 	}
 	
-	static func withStatusCode(_ code: Int, data: Data?, throwingStatusCategories: [Int]) -> (any HTTPErrorType)? {
+	static func withStatusCode(_ code: Int, data: Data?, throwingStatusCategories: [Int], underlyingError: Error?) -> (any HTTPErrorType)? {
 		let statusFamily = (code / 100) * 100
 		if !throwingStatusCategories.contains(statusFamily) { return nil }
 		
 		switch statusFamily {
 		case 200: return Optional<UnknownError>.none
 			
-		case 400: return ClientError(statusCode: code, data: data)
-		case 500: return ServerError(statusCode: code, data: data)
+		case 400: return ClientError(statusCode: code, data: data, error: underlyingError)
+		case 500: return ServerError(statusCode: code, data: data, error: underlyingError)
 			
 		default: break
 		}
 		
-		return UnknownError(statusCode: code, data: data)
+		return UnknownError(statusCode: code, data: data, underlyingError: underlyingError)
 	}
 }
 

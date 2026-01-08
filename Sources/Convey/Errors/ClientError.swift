@@ -9,67 +9,67 @@ import Foundation
 
 extension HTTPError {
 	enum ClientError: HTTPErrorType {
-		case badRequest(Data?)
-		case unauthorized(Data?)
-		case paymentRequired(Data?)
-		case forbidden(Data?)
-		case notFound(Data?)
-		case methodNotAllowed(Data?)
-		case notAcceptable(Data?)
-		case proxyAuthenticationRequired(Data?)
-		case requestTimeout(Data?)
-		case conflict(Data?)
-		case gone(Data?)
-		case lengthRequired(Data?)
-		case preconditionFailed(Data?)
-		case contentTooLarge(Data?)
-		case uriTooLong(Data?)
-		case unsupportedMediaType(Data?)
-		case rangeNotSatisfiable(Data?)
-		case expectationFailed(Data?)
-		case imATeapot(Data?)
-		case misdirectedRequest(Data?)
-		case unprocessableContent(Data?)
-		case locked(Data?)
-		case failedDependency(Data?)
-		case tooEarly(Data?)
-		case upgradeRequired(Data?)
-		case preconditionRequired(Data?)
-		case tooManyRequests(Data?)
-		case requestHeaderFieldsTooLarge(Data?)
-		case unavailableForLegalReasons(Data?)
+		case badRequest(Data?, Error?)
+		case unauthorized(Data?, Error?)
+		case paymentRequired(Data?, Error?)
+		case forbidden(Data?, Error?)
+		case notFound(Data?, Error?)
+		case methodNotAllowed(Data?, Error?)
+		case notAcceptable(Data?, Error?)
+		case proxyAuthenticationRequired(Data?, Error?)
+		case requestTimeout(Data?, Error?)
+		case conflict(Data?, Error?)
+		case gone(Data?, Error?)
+		case lengthRequired(Data?, Error?)
+		case preconditionFailed(Data?, Error?)
+		case contentTooLarge(Data?, Error?)
+		case uriTooLong(Data?, Error?)
+		case unsupportedMediaType(Data?, Error?)
+		case rangeNotSatisfiable(Data?, Error?)
+		case expectationFailed(Data?, Error?)
+		case imATeapot(Data?, Error?)
+		case misdirectedRequest(Data?, Error?)
+		case unprocessableContent(Data?, Error?)
+		case locked(Data?, Error?)
+		case failedDependency(Data?, Error?)
+		case tooEarly(Data?, Error?)
+		case upgradeRequired(Data?, Error?)
+		case preconditionRequired(Data?, Error?)
+		case tooManyRequests(Data?, Error?)
+		case requestHeaderFieldsTooLarge(Data?, Error?)
+		case unavailableForLegalReasons(Data?, Error?)
 
-		init?(statusCode: Int, data: Data?) {
+		init?(statusCode: Int, data: Data?, error: Error?) {
 			switch statusCode {
-			case 400: self = .badRequest(data)
-			case 401: self = .unauthorized(data)
-			case 402: self = .paymentRequired(data)
-			case 403: self = .forbidden(data)
-			case 404: self = .notFound(data)
-			case 405: self = .methodNotAllowed(data)
-			case 406: self = .notAcceptable(data)
-			case 407: self = .proxyAuthenticationRequired(data)
-			case 408: self = .requestTimeout(data)
-			case 409: self = .conflict(data)
-			case 410: self = .gone(data)
-			case 411: self = .lengthRequired(data)
-			case 412: self = .preconditionFailed(data)
-			case 413: self = .contentTooLarge(data)
-			case 414: self = .uriTooLong(data)
-			case 415: self = .unsupportedMediaType(data)
-			case 416: self = .rangeNotSatisfiable(data)
-			case 417: self = .expectationFailed(data)
-			case 418: self = .imATeapot(data)
-			case 421: self = .misdirectedRequest(data)
-			case 422: self = .unprocessableContent(data)
-			case 423: self = .locked(data)
-			case 424: self = .failedDependency(data)
-			case 425: self = .tooEarly(data)
-			case 426: self = .upgradeRequired(data)
-			case 428: self = .preconditionRequired(data)
-			case 429: self = .tooManyRequests(data)
-			case 431: self = .requestHeaderFieldsTooLarge(data)
-			case 451: self = .unavailableForLegalReasons(data)
+			case 400: self = .badRequest(data, error)
+			case 401: self = .unauthorized(data, error)
+			case 402: self = .paymentRequired(data, error)
+			case 403: self = .forbidden(data, error)
+			case 404: self = .notFound(data, error)
+			case 405: self = .methodNotAllowed(data, error)
+			case 406: self = .notAcceptable(data, error)
+			case 407: self = .proxyAuthenticationRequired(data, error)
+			case 408: self = .requestTimeout(data, error)
+			case 409: self = .conflict(data, error)
+			case 410: self = .gone(data, error)
+			case 411: self = .lengthRequired(data, error)
+			case 412: self = .preconditionFailed(data, error)
+			case 413: self = .contentTooLarge(data, error)
+			case 414: self = .uriTooLong(data, error)
+			case 415: self = .unsupportedMediaType(data, error)
+			case 416: self = .rangeNotSatisfiable(data, error)
+			case 417: self = .expectationFailed(data, error)
+			case 418: self = .imATeapot(data, error)
+			case 421: self = .misdirectedRequest(data, error)
+			case 422: self = .unprocessableContent(data, error)
+			case 423: self = .locked(data, error)
+			case 424: self = .failedDependency(data, error)
+			case 425: self = .tooEarly(data, error)
+			case 426: self = .upgradeRequired(data, error)
+			case 428: self = .preconditionRequired(data, error)
+			case 429: self = .tooManyRequests(data, error)
+			case 431: self = .requestHeaderFieldsTooLarge(data, error)
+			case 451: self = .unavailableForLegalReasons(data, error)
 			default: return nil
 			}
 		}
@@ -110,35 +110,35 @@ extension HTTPError {
 
 		public var data: Data? {
 			switch self {
-			case .badRequest(let data): data
-			case .unauthorized(let data): data
-			case .paymentRequired(let data): data
-			case .forbidden(let data): data
-			case .notFound(let data): data
-			case .methodNotAllowed(let data): data
-			case .notAcceptable(let data): data
-			case .proxyAuthenticationRequired(let data): data
-			case .requestTimeout(let data): data
-			case .conflict(let data): data
-			case .gone(let data): data
-			case .lengthRequired(let data): data
-			case .preconditionFailed(let data): data
-			case .contentTooLarge(let data): data
-			case .uriTooLong(let data): data
-			case .unsupportedMediaType(let data): data
-			case .rangeNotSatisfiable(let data): data
-			case .expectationFailed(let data): data
-			case .imATeapot(let data): data
-			case .misdirectedRequest(let data): data
-			case .unprocessableContent(let data): data
-			case .locked(let data): data
-			case .failedDependency(let data): data
-			case .tooEarly(let data): data
-			case .upgradeRequired(let data): data
-			case .preconditionRequired(let data): data
-			case .tooManyRequests(let data): data
-			case .requestHeaderFieldsTooLarge(let data): data
-			case .unavailableForLegalReasons(let data): data
+			case .badRequest(let data, _): data
+			case .unauthorized(let data, _): data
+			case .paymentRequired(let data, _): data
+			case .forbidden(let data, _): data
+			case .notFound(let data, _): data
+			case .methodNotAllowed(let data, _): data
+			case .notAcceptable(let data, _): data
+			case .proxyAuthenticationRequired(let data, _): data
+			case .requestTimeout(let data, _): data
+			case .conflict(let data, _): data
+			case .gone(let data, _): data
+			case .lengthRequired(let data, _): data
+			case .preconditionFailed(let data, _): data
+			case .contentTooLarge(let data, _): data
+			case .uriTooLong(let data, _): data
+			case .unsupportedMediaType(let data, _): data
+			case .rangeNotSatisfiable(let data, _): data
+			case .expectationFailed(let data, _): data
+			case .imATeapot(let data, _): data
+			case .misdirectedRequest(let data, _): data
+			case .unprocessableContent(let data, _): data
+			case .locked(let data, _): data
+			case .failedDependency(let data, _): data
+			case .tooEarly(let data, _): data
+			case .upgradeRequired(let data, _): data
+			case .preconditionRequired(let data, _): data
+			case .tooManyRequests(let data, _): data
+			case .requestHeaderFieldsTooLarge(let data, _): data
+			case .unavailableForLegalReasons(let data, _): data
 			}
 		}
 

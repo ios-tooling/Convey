@@ -9,31 +9,31 @@ import Foundation
 
 extension HTTPError {
 	enum ServerError: HTTPErrorType {
-		case internalServer(Data?)
-		case notImplemented(Data?)
-		case badGateway(Data?)
-		case serviceUnavailable(Data?)
-		case gatewayTimeout(Data?)
-		case versionNotSupported(Data?)
-		case variantAlsoNegotiates(Data?)
-		case insufficientStorage(Data?)
-		case loopDetected(Data?)
-		case notExtended(Data?)
-		case networkAuthenticationRequired(Data?)
+		case internalServer(Data?, Error?)
+		case notImplemented(Data?, Error?)
+		case badGateway(Data?, Error?)
+		case serviceUnavailable(Data?, Error?)
+		case gatewayTimeout(Data?, Error?)
+		case versionNotSupported(Data?, Error?)
+		case variantAlsoNegotiates(Data?, Error?)
+		case insufficientStorage(Data?, Error?)
+		case loopDetected(Data?, Error?)
+		case notExtended(Data?, Error?)
+		case networkAuthenticationRequired(Data?, Error?)
 		
-		init?(statusCode: Int, data: Data?) {
+		init?(statusCode: Int, data: Data?, error: Error?) {
 			switch statusCode {
-			case 500: self = .internalServer(data)
-			case 501: self = .notImplemented(data)
-			case 502: self = .badGateway(data)
-			case 503: self = .serviceUnavailable(data)
-			case 504: self = .gatewayTimeout(data)
-			case 505: self = .versionNotSupported(data)
-			case 506: self = .variantAlsoNegotiates(data)
-			case 507: self = .insufficientStorage(data)
-			case 508: self = .loopDetected(data)
-			case 510: self = .notExtended(data)
-			case 511: self = .networkAuthenticationRequired(data)
+			case 500: self = .internalServer(data, error)
+			case 501: self = .notImplemented(data, error)
+			case 502: self = .badGateway(data, error)
+			case 503: self = .serviceUnavailable(data, error)
+			case 504: self = .gatewayTimeout(data, error)
+			case 505: self = .versionNotSupported(data, error)
+			case 506: self = .variantAlsoNegotiates(data, error)
+			case 507: self = .insufficientStorage(data, error)
+			case 508: self = .loopDetected(data, error)
+			case 510: self = .notExtended(data, error)
+			case 511: self = .networkAuthenticationRequired(data, error)
 			default: return nil
 			}
 		}
@@ -56,17 +56,17 @@ extension HTTPError {
 		
 		public var data: Data? {
 			switch self {
-			case .internalServer(let data): data
-			case .notImplemented(let data): data
-			case .badGateway(let data): data
-			case .serviceUnavailable(let data): data
-			case .gatewayTimeout(let data): data
-			case .versionNotSupported(let data): data
-			case .variantAlsoNegotiates(let data): data
-			case .insufficientStorage(let data): data
-			case .loopDetected(let data): data
-			case .notExtended(let data): data
-			case .networkAuthenticationRequired(let data): data
+			case .internalServer(let data, _): data
+			case .notImplemented(let data, _): data
+			case .badGateway(let data, _): data
+			case .serviceUnavailable(let data, _): data
+			case .gatewayTimeout(let data, _): data
+			case .versionNotSupported(let data, _): data
+			case .variantAlsoNegotiates(let data, _): data
+			case .insufficientStorage(let data, _): data
+			case .loopDetected(let data, _): data
+			case .notExtended(let data, _): data
+			case .networkAuthenticationRequired(let data, _): data
 			}
 		}
 

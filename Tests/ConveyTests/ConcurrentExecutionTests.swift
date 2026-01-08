@@ -37,16 +37,24 @@ struct ConcurrentExecutionTests {
 		}
 	}
 
+	struct IndexedTask: DataDownloadingTask {
+		var path: String = "get"
+		let index: Int
+		var server: ConveyServerable { TestServer.shared }
+		var configuration: TaskConfiguration?
+		var queryParameters: (any TaskQueryParameters)? { ["index": "\(index)"] }
+	}
+
 	@Test("Multiple tasks can execute concurrently")
 	func testConcurrentExecution() async throws {
-		let taskCount = 5
+		let taskCount = 10
 		let startTime = Date()
 
 		// Execute multiple tasks concurrently
 		await withTaskGroup(of: Result<ServerResponse<Data>, Error>.self) { group in
-			for i in 0..<taskCount {
+			for _ in 0..<taskCount {
 				group.addTask {
-					let task = SimpleTask(path: "delay/1")
+					let task = SimpleTask(path: "delay/2")
 					do {
 						let response = try await task.downloadData()
 						return .success(response)
@@ -65,7 +73,7 @@ struct ConcurrentExecutionTests {
 
 			// If truly concurrent, 5 tasks with 1 second delay each
 			// should complete in ~2-3 seconds, not 5+ seconds
-			#expect(elapsed < 4.0, "Tasks should execute concurrently, took \(elapsed) seconds")
+			#expect(elapsed < 10.0, "Tasks should execute concurrently, took \(elapsed) seconds")
 			#expect(results.count == taskCount, "All tasks should complete")
 		}
 	}
@@ -77,7 +85,8 @@ struct ConcurrentExecutionTests {
 		await withTaskGroup(of: (Int, Result<ServerResponse<Data>, Error>).self) { group in
 			for i in 0..<taskCount {
 				group.addTask {
-					let task = SimpleTask(path: "get?index=\(i)")
+					let task = IndexedTask(index: i)
+					print(await task.url)
 					do {
 						let response = try await task.downloadData()
 						return (i, .success(response))
@@ -277,7 +286,7 @@ struct ConcurrentExecutionTests {
 		let startTime = Date()
 
 		await withTaskGroup(of: Result<Int, Error>.self) { group in
-			for i in 0..<taskCount {
+			for _ in 0..<taskCount {
 				group.addTask {
 					let task = SimpleTask(path: "get")
 					do {
@@ -315,7 +324,7 @@ struct ConcurrentExecutionTests {
 	func testSequentialExecution() async throws {
 		var results: [Int] = []
 
-		for i in 0..<3 {
+		for _ in 0..<3 {
 			let task = SimpleTask(path: "get")
 			do {
 				let response = try await task.downloadData()

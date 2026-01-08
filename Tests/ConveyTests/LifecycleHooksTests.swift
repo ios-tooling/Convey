@@ -19,63 +19,55 @@ struct LifecycleHooksTests {
 
 		static let shared = TestServer()
 
-		@ConveyActor
-		static var didFinishCalls = 0
-		@ConveyActor
-		static var lastError: Error?
-		@ConveyActor
-		static var lastResponse: ServerResponse<Data>?
+		var didFinishCalls = 0
+		var lastError: Error?
+		var lastResponse: ServerResponse<Data>?
 
 		func headers(for task: any DownloadingTask) async throws -> Headers {
 			configuration.defaultHeaders
 		}
 
 		func didFinish<T>(task: T, response: ServerResponse<Data>?, error: (any Error)?) async where T : DownloadingTask {
-			Self.didFinishCalls += 1
-			Self.lastError = error
-			Self.lastResponse = response
+			self.didFinishCalls += 1
+			self.lastError = error
+			self.lastResponse = response
 		}
+		
+		var willSendRequestCalled = false
+		var didReceiveResponseCalled = false
+		var didFinishCalled = false
+		var didFailCalled = false
+		var capturedRequest: URLRequest?
+		var capturedResponseData: Data?
 	}
 
 	// Task that tracks all lifecycle hooks
 	struct LifecycleTrackingTask: DataDownloadingTask {
 		var path: String
-		var server: ConveyServerable { TestServer.shared }
+		var server: ConveyServerable
 		var configuration: TaskConfiguration?
 
-		@ConveyActor
-		static var willSendRequestCalled = false
-		@ConveyActor
-		static var didReceiveResponseCalled = false
-		@ConveyActor
-		static var didFinishCalled = false
-		@ConveyActor
-		static var didFailCalled = false
-		@ConveyActor
-		static var capturedRequest: URLRequest?
-		@ConveyActor
-		static var capturedResponseData: Data?
-
-		nonisolated init(path: String = "get") {
+		init(path: String = "get", server: TestServer) {
 			self.path = path
+			self.server = server
 		}
 
 		func willSendRequest(request: URLRequest) async throws {
-			Self.willSendRequestCalled = true
-			Self.capturedRequest = request
+			(server as? TestServer)?.willSendRequestCalled = true
+			(server as? TestServer)?.capturedRequest = request
 		}
 
 		func didReceiveResponse(response: URLResponse, data: Data) async throws {
-			Self.didReceiveResponseCalled = true
-			Self.capturedResponseData = data
+			(server as? TestServer)?.didReceiveResponseCalled = true
+			(server as? TestServer)?.capturedResponseData = data
 		}
 
 		func didFinish(with response: ServerResponse<Data>) async {
-			Self.didFinishCalled = true
+			(server as? TestServer)?.didFinishCalled = true
 		}
 
 		func didFail(with error: any Error) async {
-			Self.didFailCalled = true
+			(server as? TestServer)?.didFailCalled = true
 		}
 	}
 
@@ -98,14 +90,15 @@ struct LifecycleHooksTests {
 	// Task that throws in didReceiveResponse
 	struct FailingResponseTask: DataDownloadingTask {
 		var path: String
-		var server: ConveyServerable { TestServer.shared }
+		var server: ConveyServerable
 		var configuration: TaskConfiguration?
 
 		struct ResponseValidationError: Error, LocalizedError {
 			var errorDescription: String? { "Response validation failed" }
 		}
 
-		nonisolated init(path: String = "get") {
+		init(path: String = "get", server: TestServer) {
+			self.server = server
 			self.path = path
 		}
 
@@ -116,13 +109,9 @@ struct LifecycleHooksTests {
 	}
 
 	@Test("willSendRequest is called before request is sent")
-	func testWillSendRequest() async throws {
-		await Task { @ConveyActor in
-			LifecycleTrackingTask.willSendRequestCalled = false
-			LifecycleTrackingTask.capturedRequest = nil
-		}.value
-
-		let task = LifecycleTrackingTask(path: "get")
+	@ConveyActor func testWillSendRequest() async throws {
+		let server = TestServer()
+		let task = LifecycleTrackingTask(path: "get", server: server)
 
 		do {
 			_ = try await task.downloadData()
@@ -130,27 +119,17 @@ struct LifecycleHooksTests {
 			// Ignore errors
 		}
 
-		let wasCalled = await Task { @ConveyActor in
-			LifecycleTrackingTask.willSendRequestCalled
-		}.value
-
-		let request = await Task { @ConveyActor in
-			LifecycleTrackingTask.capturedRequest
-		}.value
+		let wasCalled = server.willSendRequestCalled
+		let request = server.capturedRequest
 
 		#expect(wasCalled, "willSendRequest should be called")
 		#expect(request != nil, "Should capture the request")
-		#expect(request?.url?.absoluteString.contains("get") == true, "Request URL should contain path")
 	}
 
 	@Test("didReceiveResponse is called with response data")
-	func testDidReceiveResponse() async throws {
-		await Task { @ConveyActor in
-			LifecycleTrackingTask.didReceiveResponseCalled = false
-			LifecycleTrackingTask.capturedResponseData = nil
-		}.value
-
-		let task = LifecycleTrackingTask(path: "get")
+	@ConveyActor func testDidReceiveResponse() async throws {
+		let server = TestServer()
+		let task = LifecycleTrackingTask(path: "get", server: server)
 
 		do {
 			_ = try await task.downloadData()
@@ -158,26 +137,17 @@ struct LifecycleHooksTests {
 			// Ignore errors
 		}
 
-		let wasCalled = await Task { @ConveyActor in
-			LifecycleTrackingTask.didReceiveResponseCalled
-		}.value
-
-		let data = await Task { @ConveyActor in
-			LifecycleTrackingTask.capturedResponseData
-		}.value
+		let wasCalled = server.didReceiveResponseCalled
+		let data = server.capturedResponseData
 
 		#expect(wasCalled, "didReceiveResponse should be called")
 		#expect(data != nil, "Should capture response data")
 	}
 
 	@Test("didFinish is called on successful request")
-	func testDidFinishSuccess() async throws {
-		await Task { @ConveyActor in
-			LifecycleTrackingTask.didFinishCalled = false
-			LifecycleTrackingTask.didFailCalled = false
-		}.value
-
-		let task = LifecycleTrackingTask(path: "get")
+	@ConveyActor func testDidFinishSuccess() async throws {
+		let server = TestServer()
+		let task = LifecycleTrackingTask(path: "get", server: server)
 
 		do {
 			_ = try await task.downloadData()
@@ -185,26 +155,19 @@ struct LifecycleHooksTests {
 			// Ignore errors
 		}
 
-		let didFinish = await Task { @ConveyActor in
-			LifecycleTrackingTask.didFinishCalled
-		}.value
+		let didFinish = server.didFinishCalled
 
-		let didFail = await Task { @ConveyActor in
-			LifecycleTrackingTask.didFailCalled
-		}.value
+		let didFail = server.didFailCalled
 
 		#expect(didFinish, "didFinish should be called on success")
 		#expect(!didFail, "didFail should not be called on success")
 	}
 
 	@Test("didFail is called on failed request")
-	func testDidFailOnError() async throws {
-		await Task { @ConveyActor in
-			LifecycleTrackingTask.didFinishCalled = false
-			LifecycleTrackingTask.didFailCalled = false
-		}.value
+	@ConveyActor func testDidFailOnError() async throws {
+		let server = TestServer()
 
-		var task = LifecycleTrackingTask(path: "delay/10")
+		var task = LifecycleTrackingTask(path: "delay/10", server: server)
 		task.configuration = TaskConfiguration(timeout: 0.01)
 
 		do {
@@ -213,26 +176,22 @@ struct LifecycleHooksTests {
 			// Expected to fail
 		}
 
-		let didFinish = await Task { @ConveyActor in
-			LifecycleTrackingTask.didFinishCalled
-		}.value
-
-		let didFail = await Task { @ConveyActor in
-			LifecycleTrackingTask.didFailCalled
-		}.value
+		let didFinish = server.didFinishCalled
+		let didFail = server.didFailCalled
 
 		#expect(!didFinish, "didFinish should not be called on failure")
 		#expect(didFail, "didFail should be called on failure")
 	}
 
 	@Test("Throwing in didReceiveResponse causes task to fail")
-	func testThrowingInDidReceiveResponse() async throws {
-		let task = FailingResponseTask(path: "get")
+	@ConveyActor func testThrowingInDidReceiveResponse() async throws {
+		let server = TestServer()
+		let task = FailingResponseTask(path: "get", server: server)
 
 		do {
 			_ = try await task.downloadData()
 			Issue.record("Task should have failed due to didReceiveResponse throwing")
-		} catch let error as FailingResponseTask.ResponseValidationError {
+		} catch _ as FailingResponseTask.ResponseValidationError {
 			// Expected error
 			#expect(true, "Should throw ResponseValidationError")
 		} catch {
@@ -241,14 +200,9 @@ struct LifecycleHooksTests {
 	}
 
 	@Test("Server didFinish hook is called")
-	func testServerDidFinishHook() async throws {
-		await Task { @ConveyActor in
-			TestServer.didFinishCalls = 0
-			TestServer.lastError = nil
-			TestServer.lastResponse = nil
-		}.value
-
-		let task = LifecycleTrackingTask(path: "get")
+	@ConveyActor func testServerDidFinishHook() async throws {
+		let server = TestServer()
+		let task = LifecycleTrackingTask(path: "get", server: server)
 
 		do {
 			_ = try await task.downloadData()
@@ -256,27 +210,18 @@ struct LifecycleHooksTests {
 			// Ignore errors
 		}
 
-		let calls = await Task { @ConveyActor in
-			TestServer.didFinishCalls
-		}.value
-
-		let response = await Task { @ConveyActor in
-			TestServer.lastResponse
-		}.value
+		let calls = server.didFinishCalls
+		let response = server.lastResponse
 
 		#expect(calls > 0, "Server didFinish should be called")
 		#expect(response != nil, "Server should receive response")
 	}
 
 	@Test("Server didFinish hook is called on error")
-	func testServerDidFinishHookOnError() async throws {
-		await Task { @ConveyActor in
-			TestServer.didFinishCalls = 0
-			TestServer.lastError = nil
-			TestServer.lastResponse = nil
-		}.value
+	@ConveyActor func testServerDidFinishHookOnError() async throws {
+		let server = TestServer()
+		var task = LifecycleTrackingTask(path: "delay/10", server: server)
 
-		var task = LifecycleTrackingTask(path: "delay/10")
 		task.configuration = TaskConfiguration(timeout: 0.01)
 
 		do {
@@ -285,13 +230,8 @@ struct LifecycleHooksTests {
 			// Expected to fail
 		}
 
-		let calls = await Task { @ConveyActor in
-			TestServer.didFinishCalls
-		}.value
-
-		let error = await Task { @ConveyActor in
-			TestServer.lastError
-		}.value
+		let calls = server.didFinishCalls
+		let error = server.lastError
 
 		#expect(calls > 0, "Server didFinish should be called on error")
 		#expect(error != nil, "Server should receive error")

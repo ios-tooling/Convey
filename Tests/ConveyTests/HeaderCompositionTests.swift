@@ -31,12 +31,13 @@ struct HeaderCompositionTests {
 
 	struct TaskWithHeaders: DataDownloadingTask {
 		var path: String = "headers"
-		var server: ConveyServerable { TestServer.shared }
+		var server: ConveyServerable
 		var configuration: TaskConfiguration?
 		var customHeaders: [Header]
 
-		nonisolated init(headers: [Header] = []) {
+		init(headers: [Header] = [], server: any ConveyServerable) {
 			self.customHeaders = headers
+			self.server = server
 		}
 
 		var headers: Headers {
@@ -104,12 +105,11 @@ struct HeaderCompositionTests {
 	}
 
 	@Test("Server headers are included in requests")
-	func testServerHeaders() async throws {
-		await Task { @ConveyActor in
-			TestServer.shared.configuration.defaultHeaders = ["X-Default": "default-value"]
-		}.value
+	@ConveyActor func testServerHeaders() async throws {
+		let server = TestServer()
+		server.configuration.defaultHeaders = ["X-Default": "default-value"]
 
-		let task = TaskWithHeaders()
+		let task = TaskWithHeaders(server: server)
 
 		let headers = try await task.headers
 
@@ -120,12 +120,11 @@ struct HeaderCompositionTests {
 	}
 
 	@Test("Task headers override server headers")
-	func testHeaderOverride() async throws {
-		await Task { @ConveyActor in
-			TestServer.shared.configuration.defaultHeaders = ["X-Default": "default-value"]
-		}.value
+	@ConveyActor func testHeaderOverride() async throws {
+		let server = TestServer()
+		server.configuration.defaultHeaders = ["X-Default": "default-value"]
 
-		let task = TaskWithHeaders(headers: [Header(name: "X-Custom", value: "custom-value")])
+		let task = TaskWithHeaders(headers: [Header(name: "X-Custom", value: "custom-value")], server: server)
 
 		let headers = try await task.headers
 		let array = headers.headersArray
@@ -137,15 +136,14 @@ struct HeaderCompositionTests {
 	}
 
 	@Test("Default headers are applied")
-	func testDefaultHeaders() async throws {
-		await Task { @ConveyActor in
-			TestServer.shared.configuration.defaultHeaders = [
+	@ConveyActor func testDefaultHeaders() async throws {
+		let server = TestServer()
+		server.configuration.defaultHeaders = [
 				"X-API-Key": "test-key",
 				"X-Client-Version": "1.0.0"
 			]
-		}.value
 
-		let task = TaskWithHeaders()
+		let task = TaskWithHeaders(server: server)
 		let headers = try await task.headers
 		let array = headers.headersArray
 
@@ -154,12 +152,11 @@ struct HeaderCompositionTests {
 	}
 
 	@Test("User-Agent header is set")
-	func testUserAgentHeader() async throws {
-		await Task { @ConveyActor in
-			TestServer.shared.configuration.userAgent = "TestClient/1.0"
-		}.value
+	@ConveyActor func testUserAgentHeader() async throws {
+		let server = TestServer()
+		server.configuration.userAgent = "TestClient/1.0"
 
-		let task = TaskWithHeaders()
+		let task = TaskWithHeaders(server: server)
 		let headers = try await task.headers
 		let array = headers.headersArray
 
@@ -170,8 +167,9 @@ struct HeaderCompositionTests {
 	}
 
 	@Test("Accept header is set by default")
-	func testAcceptHeader() async throws {
-		let task = TaskWithHeaders()
+	@ConveyActor func testAcceptHeader() async throws {
+		let server = TestServer()
+		let task = TaskWithHeaders(server: server)
 		let headers = try await task.headers
 		let array = headers.headersArray
 
@@ -207,10 +205,11 @@ struct HeaderCompositionTests {
 	}
 
 	@Test("Headers are sent in actual HTTP request")
-	func testHeadersInHttpRequest() async throws {
+	@ConveyActor func testHeadersInHttpRequest() async throws {
+		let server = TestServer()
 		let task = TaskWithHeaders(headers: [
 			Header(name: "X-Test-Header", value: "test-value-123")
-		])
+		], server: server)
 
 		do {
 			let response = try await task.downloadData()

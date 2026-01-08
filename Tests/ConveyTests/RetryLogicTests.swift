@@ -97,13 +97,9 @@ struct RetryLogicTests {
 	}
 
 	@Test("Task with retry logic attempts multiple times")
-	func testRetryLogic() async throws {
+	@ConveyActor func testRetryLogic() async throws {
 		// Reset attempt counter
-		await MainActor.run {
-			Task { @ConveyActor in
-				RetryTrackingTask.attemptCount = 0
-			}
-		}
+		RetryTrackingTask.attemptCount = 0
 
 		// Create task with short timeout to trigger retry
 		var task = RetryTrackingTask(path: "delay/10", maxRetries: 2, retryDelay: 0.05)
@@ -119,9 +115,7 @@ struct RetryLogicTests {
 		try await Task.sleep(nanoseconds: 100_000_000)
 
 		// Should have attempted at least 1 retry
-		let attempts = await Task { @ConveyActor in
-			RetryTrackingTask.attemptCount
-		}.value
+		let attempts = RetryTrackingTask.attemptCount
 
 		#expect(attempts >= 1, "Should have attempted at least 1 retry, got \(attempts)")
 	}
@@ -146,13 +140,9 @@ struct RetryLogicTests {
 	}
 
 	@Test("Exponential backoff increases delay between retries")
-	func testExponentialBackoff() async throws {
+	@ConveyActor func testExponentialBackoff() async throws {
 		// Reset intervals
-		await MainActor.run {
-			Task { @ConveyActor in
-				ExponentialBackoffTask.retryIntervals = []
-			}
-		}
+		ExponentialBackoffTask.retryIntervals = []
 
 		var task = ExponentialBackoffTask(path: "delay/10", maxRetries: 3, baseDelay: 0.1)
 		task.configuration = TaskConfiguration(timeout: 0.01)
@@ -166,9 +156,7 @@ struct RetryLogicTests {
 		// Wait for async updates
 		try await Task.sleep(nanoseconds: 100_000_000)
 
-		let intervals = await Task { @ConveyActor in
-			ExponentialBackoffTask.retryIntervals
-		}.value
+		let intervals = ExponentialBackoffTask.retryIntervals
 
 		// Should have recorded intervals
 		if intervals.count >= 2 {
@@ -211,12 +199,8 @@ struct RetryLogicTests {
 	}
 
 	@Test("Retry respects maxRetries limit")
-	func testMaxRetriesLimit() async throws {
-		await MainActor.run {
-			Task { @ConveyActor in
-				RetryTrackingTask.attemptCount = 0
-			}
-		}
+	@ConveyActor func testMaxRetriesLimit() async throws {
+		RetryTrackingTask.attemptCount = 0
 
 		var task = RetryTrackingTask(path: "delay/10", maxRetries: 2, retryDelay: 0.05)
 		task.configuration = TaskConfiguration(timeout: 0.01)
@@ -229,9 +213,7 @@ struct RetryLogicTests {
 
 		try await Task.sleep(nanoseconds: 200_000_000)
 
-		let attempts = await Task { @ConveyActor in
-			RetryTrackingTask.attemptCount
-		}.value
+		let attempts = RetryTrackingTask.attemptCount
 
 		// Should not exceed maxRetries
 		#expect(attempts <= 2, "Should not exceed maxRetries of 2, got \(attempts)")
