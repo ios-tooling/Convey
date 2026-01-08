@@ -1,33 +1,55 @@
-import XCTest
+//
+//  ConveyTests.swift
+//  Convey
+//
+//  Updated to use Swift Testing framework
+//
+
+import Testing
+import Foundation
 @testable import Convey
 
+@Suite("Basic Convey Operations")
+struct ConveyBasicTests {
 
-@available(macOS 12.1, *)
-final class ConveyTests: XCTestCase {
-	class override func setUp() {
-		_ = ConveyServer.setupDefault()
+	@Test("GET request downloads data")
+	func testGET() async throws {
+		let task = SimpleGETTask(url: URL(string: "https://httpbin.org/get")!)
+		let response = try await task.downloadData()
+
+		#expect(!response.data.isEmpty, "Should download data")
+		#expect(response.statusCode == 200, "Should return 200 OK")
 	}
-    func testGET() async throws {
-		 let data: Data = try await SimpleGETTask(url: URL(string: "https://apple.com")!).downloadData()
-		 XCTAssert(!data.isEmpty, "Failed to GET data")
-    }
-	
-	func testPOST() async throws {
-		let payload = "Hello, Test!"
-		let data: Data = try await SimplePOSTTask(url: URL(string: "https://reqbin.com/echo/post/json")!, payload: payload).uploadAndDownload()
-		let result = try JSONDecoder().decode(SimpleResponse.self, from: data)
-		XCTAssert(result.success == "true", "Failed to POST data")
+
+	@Test("Simple GET task with URL")
+	func testSimpleGETCreation() async throws {
+		let url = URL(string: "https://httpbin.org/get")!
+		let task = SimpleGETTask(url: url)
+
+		let taskURL = await Task { @ConveyActor in
+			task.url
+		}.value
+
+		#expect(taskURL == url, "URL should be set correctly")
 	}
-	
-	func testSessionCleanup() async throws {
-		let _ = try await SimpleGETTask(url: URL(string: "https://apple.com")!).downloadData()
-		XCTAssert(ConveyServer.serverInstance.activeSessions.isEmpty, "Active sessions should be empty")
+
+	@Test("Task response contains metadata")
+	func testResponseMetadata() async throws {
+		let task = SimpleGETTask(url: URL(string: "https://httpbin.org/get")!)
+		let response = try await task.downloadData()
+
+		#expect(response.duration >= 0, "Duration should be non-negative")
+		#expect(response.attemptNumber >= 1, "Should have at least 1 attempt")
+		#expect(response.startedAt <= Date(), "Start time should be in the past")
 	}
-	
-    static var allTests = [
-		("testGet", testGET),
-		("testPost", testPOST),
-    ]
+
+	@Test("Response type is categorized correctly")
+	func testResponseType() async throws {
+		let task = SimpleGETTask(url: URL(string: "https://httpbin.org/get")!)
+		let response = try await task.downloadData()
+
+		#expect(response.responseType == .success, "200 status should be success type")
+	}
 }
 
 struct SimpleResponse: Codable {

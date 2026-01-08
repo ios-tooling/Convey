@@ -11,13 +11,13 @@ public struct SimpleGETTask: DataDownloadingTask, Sendable {
 	public var url: URL
 	public var request: URLRequest
 	public var configuration: TaskConfiguration?
-		
-	public init(request: URLRequest) {
+
+	nonisolated public init(request: URLRequest) {
 		self.request = request
 		self.url = request.url ?? URL(string: "about:blank")!
 	}
-	
-	public init(url: URL) {
+
+	nonisolated public init(url: URL) {
 		self.request = URLRequest(url: url)
 		self.url = url
 	}
