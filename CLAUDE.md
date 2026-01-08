@@ -10,14 +10,16 @@ Convey is a Swift Package Manager library for iOS, macOS, tvOS, visionOS, and wa
 
 ### Building and Testing
 - **Build**: `swift build`
-- **Test**: `swift test` 
+- **Test**: `swift test`
 - **Single test**: `swift test --filter <TestName>`
+- **Debug mode fail-all flag**: Run with `-fail-all-requests` command line argument to make all network requests fail immediately (useful for testing error handling)
 
 ### Project Structure
 - **Main library**: `Sources/Convey/` - Core framework code
-- **Test harness app**: `ConveyTestHarness/` - SwiftUI test application
-- **Tests**: `Tests/ConveyTests/` - Unit tests
+- **Test harness app**: `ConveyTestHarness/` - SwiftUI test application (open in Xcode and run ConveyTestHarness target)
+- **Tests**: `Tests/ConveyTests/` - Unit tests using Swift Testing framework (not XCTest)
 - **Package definition**: `Package.swift` - SPM configuration
+- **Dependencies**: JohnnyCache (https://github.com/ios-tooling/JohnnyCache.git) for caching implementation
 
 ## Architecture
 
@@ -35,19 +37,26 @@ Convey is a Swift Package Manager library for iOS, macOS, tvOS, visionOS, and wa
 - **Type safety**: Strong typing with associated types for upload/download payloads. `DownloadPayload` and `UploadPayload` are defined via associated types on protocols.
 - **Default server pattern**: When creating a `ConveyServer` with `init(asDefault: true)`, tasks without an explicit `server` property will use this default server automatically.
 
+### Response Handling
+- **ServerResponse<Payload>**: Generic response wrapper containing the decoded payload, raw data, HTTP response, request, timing info, and attempt number
+- Responses include `statusCode`, `httpResponse`, `responseType` (info/success/redirect/clientError/serverError), `duration`, and `stringResult` properties
+- Can re-decode response to different type via `decoding(using:)` method
+
 ### Caching System
 - **DataCache**: Actor-based caching with local-first, remote-first, and skip-local strategies
 - **ImageCache**: Specialized image caching with SwiftUI integration via `CachedURLImage`
 - **ETagStore**: HTTP ETag support for cache validation
+- Backed by JohnnyCache library for underlying cache implementation
 
 ### SwiftUI Integration
 - **CachedURLImage**: Drop-in replacement for AsyncImage with caching
 - **RecordedTasksScreen**: UI for viewing recorded network tasks
 - **RecordedTaskDetailScreen**: Detailed view for individual recorded tasks
 - **TaskRow**: Row component for displaying task information
+- **RecordedTasksButton**: Button component to trigger display of recorded tasks
 
 ### Platform Support
-- Minimum versions: iOS 14+, macOS 10.15+, watchOS 7+
+- Minimum versions: iOS 14+, macOS 14+, watchOS 7+
 - Swift 6.0+ required for concurrency features
 - Uses system-zlib for compression
 
@@ -57,32 +66,39 @@ Convey is a Swift Package Manager library for iOS, macOS, tvOS, visionOS, and wa
 - Tasks can be recorded to disk for later review and debugging
 - RecordedTasksScreen provides UI for browsing recorded network activities
 
-### Testing
-- Unit tests focus on core functionality in `Tests/ConveyTests/`
-- Test harness app (`ConveyTestHarness/`) provides integration testing with HTTPBin service for real-world network operations
-- Test assets include image resources for caching tests in `test_assets.xcassets`
-- Uses Swift Testing framework (not XCTest)
-- To run the test harness app, open the project in Xcode and run the ConveyTestHarness target
-
 ## Important Implementation Details
 
 ### Error Handling
-- **HTTPError**: Handles HTTP-specific errors from server responses
-- **ServerError**: General server communication errors
+- **HTTPError**: Handles HTTP-specific errors from server responses with detailed status code enums
+  - **HTTPError.ClientError**: 4xx errors (badRequest, unauthorized, forbidden, notFound, etc.)
+  - **HTTPError.ServerError**: 5xx errors (internalServer, badGateway, serviceUnavailable, etc.)
 - Tasks can implement `didFail(with:)` for custom error handling
+- Tasks can implement `retryInterval(afterError:count:)` to enable automatic retry with custom intervals
 
 ### Network Configuration
-- **ConveySession**: Manages individual network sessions and URLSession instances
-- **TaskConfiguration**: Per-task configuration overrides for timeouts, network access policies
-- **ServerConfiguration**: Global server settings including timeouts, user agent, headers
+- **ConveySession**: Manages individual network sessions and URLSession instances. Can be cancelled by tag via `ConveySession.cancel(sessionWithTag:)`
+- **TaskConfiguration**: Per-task configuration overrides for timeouts, network access policies, echo styles
+- **ServerConfiguration**: Global server settings including:
+  - `defaultEncoder`/`defaultDecoder` for JSON serialization
+  - `reportBadHTTPStatusAsError` to control error throwing for non-200 status codes
+  - `enableGZipDownloads` for compression
+  - `defaultTimeout`, `allowsExpensiveNetworkAccess`, `allowsConstrainedNetworkAccess`, `waitsForConnectivity`
+  - `userAgent` and `defaultHeaders` for request customization
+- **Remote**: Represents an environment (dev/staging/prod) with URL and common path prefixes
 
 ### Task Lifecycle Hooks
-Tasks can implement these optional lifecycle methods:
-- `willSendRequest(request:)` - Called before sending request, can modify the request
-- `didReceiveResponse(response:data:)` - Called when response received, before decoding
-- `didFail(with:)` - Called on task failure, for custom error handling
-- `didFinish(with:)` - Called on successful completion with the decoded response
-- `retryInterval(afterError:count:)` - Return a `TimeInterval` to automatically retry failed requests. Return `nil` to not retry.
+Tasks can implement these optional lifecycle methods (all have default empty implementations):
+- `willSendRequest(request:)` - Called before sending request, can be used to modify the request
+- `didReceiveResponse(response:data:)` - Called when response received, before decoding. Can throw to fail the task
+- `didFail(with:)` - Called on task failure, for custom error handling or logging
+- `didFinish(with:)` - Called on successful completion with the decoded `ServerResponse<DownloadPayload>`
+- `retryInterval(afterError:count:)` - Return a `TimeInterval` to automatically retry failed requests. Return `nil` to not retry. Receives error and attempt count.
+
+### Server Customization Hooks
+Subclass `ConveyServer` and override these methods to customize behavior:
+- `headers(for:)` - Return custom headers for a task (combines with `defaultHeaders`)
+- `didFinish(task:response:error:)` - Called after every task completes (success or failure)
+- Can be disabled via `server.disabled = true` to fail all tasks immediately
 
 ### Protocol Hierarchy
 - `DownloadingTask<DownloadPayload>` - Base protocol for all network tasks. All tasks must conform to this.
@@ -154,5 +170,40 @@ struct SearchTask: ServerTask {
     let query: String
     var path: String { "search" }
     var queryParameters: [String: String]? { ["q": query, "limit": "10"] }
+}
+```
+
+### Task Execution
+```swift
+// Execute task and get decoded response
+let response = try await task.download()
+let payload = response.payload
+let statusCode = response.statusCode
+let duration = response.duration
+
+// Execute task without caring about response
+try await task.send()
+```
+
+### Form Upload
+```swift
+struct FormUploadTask: FormUploadingTask {
+    var path: String { "submit" }
+    var method: HTTPMethod { .post }
+    var uploadPayload: [String: String]? { ["field1": "value1", "field2": "value2"] }
+}
+```
+
+### Multipart MIME Upload
+```swift
+struct FileUploadTask: MIMEUploadingTask {
+    var path: String { "upload" }
+    var method: HTTPMethod { .post }
+    var uploadPayload: MIMEPayload? {
+        MIMEPayload(parts: [
+            MIMEPart(name: "file", data: fileData, filename: "photo.jpg", mimeType: "image/jpeg"),
+            MIMEPart(name: "description", stringValue: "My photo")
+        ])
+    }
 }
 ```
