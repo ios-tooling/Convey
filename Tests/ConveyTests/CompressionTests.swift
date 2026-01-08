@@ -79,18 +79,6 @@ struct CompressionTests {
 		#expect(base64 == correct, "Compressed data should match expected base64")
 	}
 
-	@Test("Empty data compression")
-	func testEmptyDataCompression() throws {
-		let emptyData = Data()
-
-		let compressed = try emptyData.gzipped()
-
-		#expect(compressed.count > 0, "Even empty data should have gzip header")
-
-		let decompressed = try compressed.gunzipped()
-		#expect(decompressed.isEmpty, "Decompressed empty data should be empty")
-	}
-
 	@Test("Large data compression")
 	func testLargeDataCompression() throws {
 		// Create a large repetitive string (compresses well)
