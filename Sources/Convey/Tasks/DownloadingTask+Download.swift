@@ -47,7 +47,7 @@ public extension DownloadingTask {
 	}
 
 	func download() async throws -> ServerResponse<DownloadPayload> {
-		let result = try await downloadData()
+		let result = try await performDownload()
 		
 		if DownloadPayload.self == Data.self, let result = result as? ServerResponse<DownloadPayload>, let payload = result.data as? DownloadPayload {
 			await didFinish(with: result)
@@ -60,6 +60,16 @@ public extension DownloadingTask {
 	}
 	
 	func downloadData() async throws -> ServerResponse<Data> {
+		let result = try await performDownload()
+		
+		if DownloadPayload.self == Data.self, let downloadedResult = result as? ServerResponse<DownloadPayload> {
+			await didFinish(with: downloadedResult)
+		}
+		
+		return result
+	}
+	
+	func performDownload() async throws -> ServerResponse<Data> {
 		let session: ConveySession
 		var info = RequestTrackingInfo(self)
 		
