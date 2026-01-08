@@ -7,6 +7,7 @@
 
 
 import SwiftUI
+import JohnnyCache
 
 #if os(macOS)
 extension NSImage: @unchecked @retroactive Sendable { }
@@ -21,12 +22,10 @@ public struct CachedURLImage: View {
 	let imageURL: URL?
 	let contentMode: ContentMode
 	var showURLs = false
-	let kind: DataCache.CacheKind
 	let imageSize: ImageSize?
 	let deferredUntil: Date?
 	let renderingMode: Image.TemplateRenderingMode
 	
-	@State var cacheInfo: ImageCache.ImageInfo?
 	@State var cachedImage: PlatformImage?
 	@State var fetchedURL: URL?
 	
@@ -38,18 +37,15 @@ public struct CachedURLImage: View {
 #endif
 	}
 	
-	public init(url: URL?, contentMode: ContentMode = .fit, placeholder: Image? = nil, showURLs: Bool = false, size: ImageSize? = nil, kind: DataCache.CacheKind = .default, error: Binding<Error?>? = nil, deferredUntil date: Date? = nil, renderingMode: Image.TemplateRenderingMode = .original) {
+	public init(url: URL?, contentMode: ContentMode = .fit, placeholder: Image? = nil, showURLs: Bool = false, size: ImageSize? = nil, error: Binding<Error?>? = nil, deferredUntil date: Date? = nil, renderingMode: Image.TemplateRenderingMode = .original) {
 		imageURL = url
 		_error = error ?? .constant(nil)
-		self.kind = kind
 		imageSize = size
 		deferredUntil = date
 		self.contentMode = contentMode
 		self.placeholder = placeholder
 		self.showURLs = showURLs
 		self.renderingMode = renderingMode
-
-		_cacheInfo = State(initialValue: ImageCache.instance.fetchLocalInfo(for: url, kind: kind, size: size))
 	}
 	
 	var imageView: Image? {
@@ -57,17 +53,13 @@ public struct CachedURLImage: View {
 	}
 	
 	var platformImage: PlatformImage? {
-		if cacheInfo?.remoteURL != imageURL {
-			Task { @MainActor in updateCache() }
-			return nil
-		}
-		
-		if let image = cacheInfo?.image ?? cachedImage { return image }
+		if let cachedImage { return cachedImage }
 		
 		if cachedImage == nil, let imageURL {
 			Task { @MainActor in
 				do {
-					let image = try await ImageCache.instance.fetch(from: ImageCache.instance.provision(url: imageURL, kind: kind), size: imageSize)
+					let image = try await sharedImagesCache[async: imageURL]
+
 					if #available(iOS 16.0, *) {
 						if let end = deferredUntil, end > Date() {
 							let interval = end.timeIntervalSinceNow
@@ -84,11 +76,6 @@ public struct CachedURLImage: View {
 		}
 		
 		return nil
-	}
-	
-	func updateCache() {
-		cacheInfo = ImageCache.instance.fetchLocalInfo(for: imageURL, kind: kind, size: imageSize)
-		cachedImage = cacheInfo?.image
 	}
 	
 	public var body: some View {

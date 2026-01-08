@@ -9,16 +9,15 @@ import SwiftUI
 import Suite
 import CrossPlatformKit
 import Convey
+import JohnnyCache
 
 struct ContentView: View {
 	@State var image: UXImage?
 	@State var index = 0
 	@State var totalSize = 0
 	@State var fetching = false
-	let imageCache = ImageCache.instance
 	
 	init() {
-		Task { await ImageCache.instance.setCacheLimit(1_000_000 / 3) }
 	}
 	
 	var body: some View {
@@ -45,8 +44,8 @@ struct ContentView: View {
 			}
 			
 			AsyncButton("Clear Cache") {
-				await ImageCache.instance.prune(maxSize: 100)
-				totalSize = await imageCache.fetchTotalSize()
+				sharedImagesCache.clearAll()
+				totalSize = Int(sharedImagesCache.inMemoryCost)
 			}
 		}
 		.onAppear {
@@ -73,8 +72,9 @@ struct ContentView: View {
 		let url = URL(string: "https://picsum.photos/\(Int.random(to: 1000))")!
 //		image = try? await imageCache.fetch(from: imageCache.provision(url: url), caching: .localFirst)//, location: .grouped("images", key))
 		do {
-			image = try await imageCache.fetch(from: imageCache.provision(url: url))
-			totalSize = await imageCache.fetchTotalSize()
+			image = try await sharedImagesCache[async: url]
+			print("Fetched \(image, default: "none")")
+			totalSize = Int(sharedImagesCache.inMemoryCost)
 		} catch {
 			print("Failed to fetch image: \(error)")
 		}

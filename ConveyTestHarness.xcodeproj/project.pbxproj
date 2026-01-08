@@ -30,6 +30,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B50382A62F0FE81F00D41D08 /* JohnnyCache */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = JohnnyCache; path = ../JohnnyCache; sourceTree = SOURCE_ROOT; };
 		B54E090C2CF1EEDC00D78EE2 /* ConveyTestHarness.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ConveyTestHarness.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B54E091D2CF1EEDD00D78EE2 /* ConveyTestHarnessTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ConveyTestHarnessTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B54E09272CF1EEDD00D78EE2 /* ConveyTestHarnessUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ConveyTestHarnessUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -84,6 +85,7 @@
 		B54E09032CF1EEDC00D78EE2 = {
 			isa = PBXGroup;
 			children = (
+				B50382A62F0FE81F00D41D08 /* JohnnyCache */,
 				B54E090E2CF1EEDC00D78EE2 /* ConveyTestHarness */,
 				B54E09202CF1EEDD00D78EE2 /* ConveyTestHarnessTests */,
 				B54E092A2CF1EEDD00D78EE2 /* ConveyTestHarnessUITests */,
@@ -430,7 +432,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 11;
+				MACOSX_DEPLOYMENT_TARGET = 14;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.standalone.ConveyTestHarness;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -468,7 +470,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 11;
+				MACOSX_DEPLOYMENT_TARGET = 14;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.standalone.ConveyTestHarness;
 				PRODUCT_NAME = "$(TARGET_NAME)";
