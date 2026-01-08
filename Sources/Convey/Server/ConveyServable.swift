@@ -33,9 +33,11 @@ public extension ConveyServerable {
 		}
 	}
 	
-	func defaultHeaders() async -> Headers {
+	func defaultHeaders(for task: any DownloadingTask) async -> Headers {
 		var headers = configuration.defaultHeaders.headersArray
-		if let userAgent = configuration.userAgent { headers.append(Header(name: Constants.Headers.userAgent, value: userAgent)) }
+		if let userAgent = configuration.userAgent {
+			headers.append(header: Constants.Headers.userAgent, value: userAgent) }
+		headers.append(header: Constants.Headers.accept, value: task.acceptType)
 		return headers
 	}
 
@@ -66,7 +68,7 @@ public extension ConveyServerable {
 	}
 	
 	func headers(for task: any DownloadingTask) async throws -> Headers {
-		configuration.defaultHeaders
+		await defaultHeaders(for: task)
 	}
 	
 	func didFinish<T: DownloadingTask>(task: T, response: ServerResponse<Data>?, error: (any Error)?) async {

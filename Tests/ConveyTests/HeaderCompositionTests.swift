@@ -20,8 +20,8 @@ struct HeaderCompositionTests {
 		static let shared = TestServer()
 
 		func headers(for task: any DownloadingTask) async throws -> Headers {
-			var headers = configuration.defaultHeaders.headersArray
-			headers.append(Header(name: "X-Server-Header", value: "from-server"))
+			var headers = await defaultHeaders(for: task)
+			headers.append(header: Header(name: "X-Server-Header", value: "from-server"))
 			return headers
 		}
 
@@ -175,7 +175,7 @@ struct HeaderCompositionTests {
 		let headers = try await task.headers
 		let array = headers.headersArray
 
-		let hasAccept = array.contains(where: { $0.name == "accept" })
+		let hasAccept = array.contains(where: { $0.name.lowercased() == "accept" })
 		#expect(hasAccept, "Should include accept header")
 	}
 

@@ -26,6 +26,7 @@ public typealias ServerTask = DataDownloadingTask
 	var queryParameters: (any TaskQueryParameters)? { get async }
 	var requestTag: String? { get }
 	var server: ConveyServerable { get }
+	var acceptType: String { get }
 	func retryInterval(afterError error: any Error, count: Int) -> TimeInterval?
 
 	func willSendRequest(request: URLRequest) async throws
@@ -71,4 +72,7 @@ public extension DownloadingTask {
 	func didReceiveResponse(response: URLResponse, data: Data) async throws { }
 	func didFail(with error: any Error) async { }
 	func didFinish(with response: ServerResponse<DownloadPayload>) async { }
+	
+	var acceptType: String { "*/*" }
+
 }

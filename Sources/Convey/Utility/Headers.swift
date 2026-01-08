@@ -20,13 +20,26 @@ public struct Header: Codable, Hashable, CustomStringConvertible, Sendable {
 }
 public protocol Headers: Sendable {
 	var headersArray: [Header] { get }
+	mutating func append(header: String, value: String)
 }
-extension [String: String]: Headers { }
-extension [Header]: Headers { }
+extension [String: String]: Headers {
+	public mutating func append(header: String, value: String) {
+		self[header] = value
+	}
+}
+extension [Header]: Headers {
+	public mutating func append(header: String, value: String) {
+		self.append(.init(name: header, value: value))
+	}
+}
 
 extension Headers {
 	public var description: String {
 		headersArray.map(\.description).joined(separator: "\n")
+	}
+	
+	public mutating func append(header: Header) {
+		append(header: header.name, value: header.value)
 	}
 }
 

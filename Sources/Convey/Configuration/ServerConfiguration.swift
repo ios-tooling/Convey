@@ -19,7 +19,7 @@ public struct ServerConfiguration: Sendable {
 	public var waitsForConnectivity = true
 	public var maxLoggedDownloadSize = 1024 * 1024 * 10
 	public var maxLoggedUploadSize = 1024 * 4
-	public var defaultHeaders: Headers = [ Constants.Headers.accept: "*/*" ]
+	public var defaultHeaders: Headers = [:]
 	public var userAgent: String? = Self.defaultUserAgent
 	public var pinExpiredToleranceInDays = 0.0
 	public var enableTaskLoggingAtLaunch = false
