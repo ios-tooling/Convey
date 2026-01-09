@@ -64,7 +64,7 @@ public extension ConveyServerable {
 	}
 	
 	func session(for task: any DownloadingTask) async throws -> ConveySession {
-		try await .init(server: self, task: task)
+		try await ConveySession(server: self, task: task)
 	}
 	
 	func headers(for task: any DownloadingTask) async throws -> Headers {

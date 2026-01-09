@@ -34,7 +34,7 @@ import Foundation
 	
 	static let activeSessions = ConveyThreadsafeMutex<Set<ConveySession>>([])
 	
-	public init<Task: DownloadingTask>(server: ConveyServerable, task: Task) async throws {
+	@ConveyActor public init<Task: DownloadingTask>(server: ConveyServerable, task: Task) async throws {
 		do {
 			self.server = server
 			self.task = task
@@ -73,6 +73,7 @@ import Foundation
 	func finish() {
 		Self.activeSessions.perform { $0.remove(self) }
 	}
+	
 }
 
 extension ConveySession {

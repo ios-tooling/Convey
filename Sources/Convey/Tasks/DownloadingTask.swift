@@ -7,8 +7,6 @@
 
 import Foundation
 
-public typealias ServerTask = DataDownloadingTask
-
 @ConveyActor public protocol DownloadingTask<DownloadPayload>: Sendable {
 	associatedtype DownloadPayload: Decodable & Sendable
 	
