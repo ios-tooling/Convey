@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-@available(iOS 17, watchOS 10, macOS 15, *)
+@available(iOS 18, watchOS 10, macOS 15, *)
 public struct RecordedTasksButton: View {
 	let showTaskCount: Bool
 	var counter = TaskRecorderCount.instance

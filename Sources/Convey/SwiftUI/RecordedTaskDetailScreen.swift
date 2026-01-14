@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-@available(iOS 17, macOS 14, watchOS 10, *)
+@available(iOS 18, macOS 14, watchOS 10, *)
 struct RecordedTaskDetailScreen: View {
 	let task: RecordedTask
 	@Environment(\.dismiss) var dismiss
@@ -67,6 +67,8 @@ struct RecordedTaskDetailScreen: View {
 				}
 			}
 			.onAppear { setupDisplay() }
+			.toolbar(.hidden, for: .tabBar)
+			.navigationBarTitleDisplayMode(.inline)
 	}
 	
 	var toolbarPlacement: ToolbarItemPlacement {

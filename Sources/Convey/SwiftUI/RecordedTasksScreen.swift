@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-@available(iOS 17, macOS 14, watchOS 10, *)
+@available(iOS 18, macOS 14, watchOS 10, *)
 public struct RecordedTasksScreen: View {
 	public init() { }
 	@State var context: ModelContext?
@@ -17,12 +17,10 @@ public struct RecordedTasksScreen: View {
 	
 	
 	public var body: some View {
-		NavigationStack {
-			VStack {
-				if let context {
-					TaskList(currentAppLaunchDate: currentAppLaunchDate, currentSessionStartDate: currentSessionStartDate)
-						.modelContext(context)
-				}
+		VStack {
+			if let context {
+				TaskTabs(currentAppLaunchDate: currentAppLaunchDate, currentSessionStartDate: currentSessionStartDate)
+					.modelContext(context)
 			}
 		}
 		.task {
@@ -35,60 +33,57 @@ public struct RecordedTasksScreen: View {
 	}
 }
 
-@available(iOS 17, macOS 14, watchOS 10, *)
+@available(iOS 18, macOS 14, watchOS 10, *)
 extension RecordedTasksScreen {
-	struct TaskList: View {
+	struct TaskTabs: View {
 		var currentAppLaunchDate: Date?
 		var currentSessionStartDate: Date?
 		var counter = TaskRecorderCount.instance
+		@State private var searchText = ""
 
 		@Environment(\.modelContext) var modelContext
 		@Query(sort: \RecordedTask.startedAt, order: .reverse) var tasks: [RecordedTask]
 		
-		
 		var body: some View {
-			VStack {
-				Text("Recorded Tasks (\(counter.count))")
-					.font(.title)
-					.padding()
-				List {
-					ForEach(tasks) { task in
-						NavigationLink(destination: { RecordedTaskDetailScreen(task: task) }) {
-							TaskRow(task: task)
-								.opacity(currentSessionStartDate != task.sessionStartedAtDate ? 0.3 : 1)
-						}
+			TabView {
+				Tab("Recent", systemImage: "clock") {
+					NavigationStack {
+						RecentTasksTab(date: currentSessionStartDate ?? .now)
 					}
-					.onDelete { indices in
-						for index in indices.reversed() {
-							let task = tasks[index]
-							modelContext.delete(task)
-						}
-						
-						do {
-							try modelContext.save()
-						} catch {
-							print("Failed to save recorded tasks context: \(error)")
-						}
-					}
-				}
-				.listStyle(.plain)
-			}
-			.toolbar {
-				ToolbarItem(placement: toolbarPlacement) {
-					Button("Clear Old") {
-						Task { await TaskRecorder.instance.clearOld() }
-					}
-					.fixedSize()
 				}
 
-				ToolbarItem(placement: toolbarPlacement) {
-					Button("Clear All") {
-						Task { await TaskRecorder.instance.clearAll() }
+				Tab("All", systemImage: "list.triangle") {
+					NavigationStack {
+						AllTasksTab()
 					}
-					.fixedSize()
+				}
+				
+				Tab("Search", systemImage: "magnifyingglass", role: .search) {
+					NavigationStack {
+						SearchTasksTab(text: searchText)
+							.searchable(text: $searchText)
+							.font(.body)
+					}
 				}
 			}
-			.buttonStyle(.bordered)
+
+			
+//			.toolbar {
+//				ToolbarItem(placement: toolbarPlacement) {
+//					Button("Clear Old") {
+//						Task { await TaskRecorder.instance.clearOld() }
+//					}
+//					.fixedSize()
+//				}
+//
+//				ToolbarItem(placement: toolbarPlacement) {
+//					Button("Clear All") {
+//						Task { await TaskRecorder.instance.clearAll() }
+//					}
+//					.fixedSize()
+//				}
+//			}
+//			.buttonStyle(.bordered)
 		}
 
 		var toolbarPlacement: ToolbarItemPlacement {

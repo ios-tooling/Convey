@@ -95,14 +95,11 @@ public actor TaskRecorder {
 		updateTaskCount()
 	}
 	
-	func clearOld() {
+	func clear(predicate: Predicate<RecordedTask>) {
 		guard let container else { return }
 		let ctx = ModelContext(container)
 		
-		let launchTime = appLaunchedAt.timeIntervalSinceReferenceDate
-		try? ctx.delete(model: RecordedTask.self, where: #Predicate { task in
-			task.appLaunchedAt < launchTime
-		})
+		try? ctx.delete(model: RecordedTask.self, where: predicate)
 		
 		reportedSave(ctx)
 		updateTaskCount()
