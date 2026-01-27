@@ -17,7 +17,7 @@ let package = Package(
 				targets: ["Convey"]),
 	 ],
 	 dependencies: [
-		.package(url: "https://github.com/ios-tooling/JohnnyCache.git", from: "1.0.4"),
+		.package(url: "https://github.com/ios-tooling/JohnnyCache.git", from: "1.0.8"),
 	 ],
 	 targets: [
 		  // Targets are the basic building blocks of a package. A target can define a module or a test suite.
