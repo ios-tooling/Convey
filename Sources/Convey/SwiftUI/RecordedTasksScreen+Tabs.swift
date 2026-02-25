@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-@available(iOS 18, macOS 14, watchOS 10, *)
+@available(iOS 18, macOS 15, watchOS 10, *)
 extension RecordedTasksScreen {
 	struct TaskList: View {
 		let tasks: [RecordedTask]
@@ -39,7 +39,9 @@ extension RecordedTasksScreen {
 				}
 				.listStyle(.plain)
 				.navigationTitle("Recorded Tasks (\(tasks.count))")
-				.navigationBarTitleDisplayMode(.inline)
+				#if os(iOS)
+					.navigationBarTitleDisplayMode(.inline)
+				#endif
 				.toolbar {
 					ToolbarItem(id: "clear", placement: .destructiveAction) {
 						Button("Delete", systemImage: "trash") {

@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-@available(iOS 18, macOS 14, watchOS 10, *)
+@available(iOS 18, macOS 15, watchOS 10, *)
 public struct RecordedTasksScreen: View {
 	public init() { }
 	@State var context: ModelContext?
@@ -33,7 +33,7 @@ public struct RecordedTasksScreen: View {
 	}
 }
 
-@available(iOS 18, macOS 14, watchOS 10, *)
+@available(iOS 18, macOS 15, watchOS 10, *)
 extension RecordedTasksScreen {
 	struct TaskTabs: View {
 		var currentAppLaunchDate: Date?
