@@ -86,6 +86,9 @@ public struct CachedURLImage: View {
 					.aspectRatio(contentMode: contentMode)
 			}
 		}
+		.onChange(of: imageURL) { url in
+			cachedImage = nil
+		}
 	}
 }
 
