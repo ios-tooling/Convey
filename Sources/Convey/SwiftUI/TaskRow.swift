@@ -27,6 +27,15 @@ extension RecordedTasksScreen.TaskList {
 						.padding(.horizontal, 4)
 						.font(.system(size: 12))
 						.background { RoundedRectangle(cornerRadius: 4).fill((isDelete ? Color.red : Color.gray).opacity(0.4)) }
+					
+					if let statusCode = task.statusCode, statusCode / 100 != 2 {
+						Text("\(statusCode)")
+							.foregroundStyle(.black)
+							.padding(.horizontal, 4)
+							.font(.system(size: 12))
+							.background { RoundedRectangle(cornerRadius: 4).fill(.orange) }
+					}
+					
 					Text(task.name).bold()
 						.font(.system(size: 13))
 					Spacer()

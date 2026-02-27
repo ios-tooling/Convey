@@ -13,7 +13,7 @@ public struct Remote: Identifiable, Hashable, Equatable, Codable, Sendable {
 	public var id: URL { url }
 	public let shortName: String
 	
-	public static let empty = Remote(URL(string: "about://")!, name: "Empty")
+	public static let empty = Remote(.empty, name: "Empty")
 	
 	public init(_ url: URL, name: String, shortName: String? = nil) {
 		self.name = name

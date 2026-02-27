@@ -8,6 +8,7 @@
 import Foundation
 
 extension URL {
+	static var empty: URL { URL(string: "about://")! }
 	var cachePathExtension: String? {
 		let ext = pathExtension
 		if !ext.isEmpty { return ext }

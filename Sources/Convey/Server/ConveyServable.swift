@@ -21,6 +21,14 @@ import Foundation
 	func didFinish<T: DownloadingTask>(task: T, response: ServerResponse<Data>?, error: (any Error)?) async
 }
 
+public enum ConveyServableError: LocalizedError { case serverNotConfigured
+	public var errorDescription: String? {
+		switch self {
+		case .serverNotConfigured: return "The server was not configured with a remote."
+		}
+	}
+}
+
 public extension ConveyServerable {
 	var baseURL: URL { remote.url }
 	var defaultTaskConfiguration: TaskConfiguration { .default }
@@ -64,11 +72,13 @@ public extension ConveyServerable {
 	}
 	
 	func session(for task: any DownloadingTask) async throws -> ConveySession {
-		try await ConveySession(server: self, task: task)
+		if remote.url == .empty { throw ConveyServableError.serverNotConfigured }
+		return try await ConveySession(server: self, task: task)
 	}
 	
 	func headers(for task: any DownloadingTask) async throws -> Headers {
-		await defaultHeaders(for: task)
+		if remote.url == .empty { throw ConveyServableError.serverNotConfigured }
+		return await defaultHeaders(for: task)
 	}
 	
 	func didFinish<T: DownloadingTask>(task: T, response: ServerResponse<Data>?, error: (any Error)?) async {
