@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-@available(iOS 18, macOS 14, watchOS 10, *)
+@available(iOS 18, macOS 15, watchOS 10, *)
 extension RecordedTasksScreen.TaskList {
 	struct TaskRow: View {
 		let task: RecordedTask

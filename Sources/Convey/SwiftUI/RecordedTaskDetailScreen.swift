@@ -67,8 +67,10 @@ struct RecordedTaskDetailScreen: View {
 				}
 			}
 			.onAppear { setupDisplay() }
-			.toolbar(.hidden, for: .tabBar)
-			.navigationBarTitleDisplayMode(.inline)
+			#if os(iOS)
+				.toolbar(.hidden, for: .tabBar)
+				.navigationBarTitleDisplayMode(.inline)
+			#endif
 	}
 	
 	var toolbarPlacement: ToolbarItemPlacement {

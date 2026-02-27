@@ -10,7 +10,7 @@ import SwiftUI
 import JohnnyCache
 
 #if os(macOS)
-extension NSImage: @unchecked @retroactive Sendable { }
+//extension NSImage: @unchecked @retroactive Sendable { }
 #endif
 
 @available(iOS 15.0, watchOS 8.0, macOS 12.0, *)
