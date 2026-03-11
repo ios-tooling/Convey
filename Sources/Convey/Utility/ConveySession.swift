@@ -83,21 +83,23 @@ extension ConveySession {
 		while true {
 			do {
 				let (data, response) = try await session.data(for: request)
+				if let error = HTTPError.withResponse(response, data: data, throwingStatusCategories: server.configuration.throwingStatusCategories) { throw error }
 				return (data, response, attemptNumber + 1)
-			} catch let error as URLError {
-				if error.code != .timedOut { throw error }
+			} catch let error {
 				attemptNumber += 1
-				guard let delay = task.retryInterval(afterError: error, count: attemptNumber) else { break }
-				if #available(iOS 16.0, macOS 13, *) {
-					try await Task.sleep(for: .seconds(delay))
-				} else {
-					try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+				if let delay = task.retryInterval(afterError: error, count: attemptNumber) {
+					if #available(iOS 16.0, macOS 13, *) {
+						try await Task.sleep(for: .seconds(delay))
+					} else {
+						try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+					}
+					continue
 				}
-			} catch {
-				throw error
+				guard let urlError = error as? URLError else { throw error }
+				guard urlError.code == .timedOut else { throw error }
+				throw URLError(.timedOut)
 			}
 		}
-		throw URLError(.timedOut)
 	}
 }
 

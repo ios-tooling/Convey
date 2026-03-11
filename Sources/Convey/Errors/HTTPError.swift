@@ -21,6 +21,11 @@ struct HTTPError {
 		let underlyingError: Error?
 	}
 	
+	static func withResponse(_ response: URLResponse, data: Data?, throwingStatusCategories: [Int]) -> (any HTTPErrorType)? {
+		guard let response = response as? HTTPURLResponse else { return nil }
+		return withStatusCode(response.statusCode, data: data, throwingStatusCategories: throwingStatusCategories, underlyingError: nil)
+	}
+	
 	static func withStatusCode(_ code: Int, data: Data?, throwingStatusCategories: [Int], underlyingError: Error?) -> (any HTTPErrorType)? {
 		let statusFamily = (code / 100) * 100
 		if !throwingStatusCategories.contains(statusFamily) { return nil }
