@@ -8,6 +8,8 @@
 import Foundation
 
 public struct TaskConfiguration: Sendable {
+	enum CodingKeys: String, CodingKey { case timeout, headers, localSourceURL, echoStyle, gzip, throwingStatusCategories }
+	
 	public var timeout: TimeInterval?
 	public var headers: Headers?
 	public var cookies: [HTTPCookie]?
@@ -29,6 +31,40 @@ public struct TaskConfiguration: Sendable {
 		self.gzip = gzip
 		self.queryParameters = queryParameters
 		self.throwingStatusCategories = throwingStatusCategories
+	}
+}
+
+extension TaskConfiguration: Codable {
+	public func encode(to encoder: any Encoder) throws {
+		var container = encoder.container(keyedBy: CodingKeys.self)
+		
+		try container.encode(timeout, forKey: .timeout)
+		if let dict = headers as? [String: String] {
+			try container.encode(dict, forKey: .headers)
+		} else if let array = headers as? [Header] {
+			try container.encode(array, forKey: .headers)
+		}
+		try container.encode(localSourceURL, forKey: .localSourceURL)
+		try container.encode(echoStyle, forKey: .echoStyle)
+		try container.encode(gzip, forKey: .gzip)
+		try container.encode(throwingStatusCategories, forKey: .throwingStatusCategories)
+	}
+	
+	public init(from decoder: any Decoder) throws {
+		let container = try decoder.container(keyedBy: CodingKeys.self)
+		
+		timeout = try container.decodeIfPresent(TimeInterval.self, forKey: .timeout)
+		
+		if let array = try? container.decode([Header].self, forKey: .headers) {
+			headers = array
+		} else if let dict = try? container.decode([String: String].self, forKey: .headers) {
+			headers = dict
+		}
+		
+		localSourceURL = try container.decodeIfPresent(URL.self, forKey: .localSourceURL)
+		echoStyle = try container.decodeIfPresent(TaskEchoStyle.self, forKey: .echoStyle)
+		gzip = try container.decodeIfPresent(Bool.self, forKey: .gzip)
+		throwingStatusCategories = try container.decodeIfPresent([Int].self, forKey: .throwingStatusCategories)
 	}
 }
 

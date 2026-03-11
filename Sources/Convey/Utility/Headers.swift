@@ -18,7 +18,7 @@ public struct Header: Codable, Hashable, CustomStringConvertible, Sendable {
 		self.value = value
 	}
 }
-public protocol Headers: Sendable {
+public protocol Headers: Sendable, Codable {
 	var headersArray: [Header] { get }
 	mutating func append(header: String, value: String)
 }
