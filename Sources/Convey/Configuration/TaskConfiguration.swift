@@ -15,10 +15,11 @@ public struct TaskConfiguration: Sendable {
 	public var echoStyle: TaskEchoStyle?
 	public var gzip: Bool?
 	public var queryParameters: (any TaskQueryParameters)?
-	
+	public var throwingStatusCategories: [Int]?
+
 	public static let `default` = TaskConfiguration(gzip: true)
 	
-	public init(timeout: TimeInterval? = nil, headers: Headers? = nil, cookies: [HTTPCookie]? = nil, localSourceURL: URL? = nil, echoStyle: TaskEchoStyle? = nil, gzip: Bool? = nil, queryParameters: (any TaskQueryParameters)? = nil) {
+	public init(timeout: TimeInterval? = nil, headers: Headers? = nil, cookies: [HTTPCookie]? = nil, localSourceURL: URL? = nil, echoStyle: TaskEchoStyle? = nil, gzip: Bool? = nil, queryParameters: (any TaskQueryParameters)? = nil, throwingStatusCategories: [Int]? = nil) {
 		
 		self.timeout = timeout
 		self.headers = headers
@@ -27,6 +28,7 @@ public struct TaskConfiguration: Sendable {
 		self.echoStyle = echoStyle
 		self.gzip = gzip
 		self.queryParameters = queryParameters
+		self.throwingStatusCategories = throwingStatusCategories
 	}
 }
 
@@ -40,6 +42,7 @@ extension TaskConfiguration {
 		if let sourceURL = other.localSourceURL { result.localSourceURL = sourceURL }
 		if let echoStyle = other.echoStyle { result.echoStyle = echoStyle }
 		if let gzip = other.gzip { result.gzip = gzip }
+		result.throwingStatusCategories = (throwingStatusCategories ?? []) + (other.throwingStatusCategories ?? [])
 		result.queryParameters = queryParameters + other.queryParameters
 
 		return result

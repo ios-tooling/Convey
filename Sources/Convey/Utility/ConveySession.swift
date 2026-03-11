@@ -83,7 +83,7 @@ extension ConveySession {
 		while true {
 			do {
 				let (data, response) = try await session.data(for: request)
-				if let error = HTTPError.withResponse(response, data: data, throwingStatusCategories: server.configuration.throwingStatusCategories) { throw error }
+				if let error = HTTPError.withResponse(response, data: data, throwingStatusCategories: task.throwingStatusCategories) { throw error }
 				return (data, response, attemptNumber + 1)
 			} catch let error {
 				attemptNumber += 1

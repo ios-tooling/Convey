@@ -25,6 +25,7 @@ import Foundation
 	var requestTag: String? { get }
 	var server: ConveyServerable { get }
 	var acceptType: String { get }
+	var throwingStatusCategories: [Int] { get }
 	func retryInterval(afterError error: any Error, count: Int) -> TimeInterval?
 
 	func willSendRequest(request: URLRequest) async throws
@@ -52,7 +53,6 @@ public protocol DataUploadingTask: UploadingTask where UploadPayload == Data, Do
 
 public extension DownloadingTask {
 	var server: ConveyServerable { ConveyServer.default }
-	var configuration: TaskConfiguration { server.defaultTaskConfiguration }
 	var url: URL { get async { await server.url(for: self) }}
 	var method: HTTPMethod { .get }
 	var path: String { "" }
@@ -65,6 +65,7 @@ public extension DownloadingTask {
 	var queryParameters: (any TaskQueryParameters)? { nil }
 	var requestTag: String? { nil }
 	func retryInterval(afterError error: any Error, count: Int) -> TimeInterval? { nil }
+	var throwingStatusCategories: [Int] { configuration?.throwingStatusCategories ?? server.configuration.throwingStatusCategories }
 
 	func willSendRequest(request: URLRequest) async throws { }
 	func didReceiveResponse(response: URLResponse, data: Data) async throws { }

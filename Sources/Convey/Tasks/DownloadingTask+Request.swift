@@ -33,7 +33,7 @@ public extension DownloadingTask {
 			request.timeoutInterval = computedTimeout
 			
 			var allHeaders = try await server.headers(for: self).headersArray
-			let taskHeaders: [Header] = try await (configuration.headers?.headersArray ?? []) + headers.headersArray
+			let taskHeaders: [Header] = try await (configuration?.headers?.headersArray ?? []) + headers.headersArray
 			
 			allHeaders += taskHeaders
 			
@@ -46,7 +46,7 @@ public extension DownloadingTask {
 
 				request.httpBody = uploadData
 				
-				if server.configuration.enableGZipUploads, configuration.gzip ?? uploader.gzip {
+				if server.configuration.enableGZipUploads, configuration?.gzip ?? uploader.gzip {
 					request.addValue("\(uploadData.count)", forHTTPHeaderField: Constants.Headers.contentLength)
 					request.addValue("gzip", forHTTPHeaderField: Constants.Headers.contentEncoding)
 				}
@@ -59,7 +59,7 @@ public extension DownloadingTask {
 				}
 			}
 			
-			if let cookies = configuration.cookies {
+			if let cookies = configuration?.cookies {
 				let fields = HTTPCookie.requestHeaderFields(with: cookies)
 				for (key, value) in fields {
 					request.addValue(value, forHTTPHeaderField: key)

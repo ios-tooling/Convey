@@ -113,7 +113,7 @@ public extension DownloadingTask {
 			await info.save()
 			await server.didFinish(task: self, response: result, error: nil)
 			
-			if let error = HTTPError.withStatusCode(result.statusCode, data: result.data, throwingStatusCategories: server.configuration.throwingStatusCategories, underlyingError: nil) {
+			if let error = HTTPError.withStatusCode(result.statusCode, data: result.data, throwingStatusCategories: throwingStatusCategories, underlyingError: nil) {
 				throw error
 			}
 			
@@ -126,7 +126,7 @@ public extension DownloadingTask {
 			echo(info, data: nil)
 			var thrownError = error
 			
-			if let statusCode = info.response?.statusCode, let newError = HTTPError.withStatusCode(statusCode, data: info.data, throwingStatusCategories: server.configuration.throwingStatusCategories, underlyingError: error) {
+			if let statusCode = info.response?.statusCode, let newError = HTTPError.withStatusCode(statusCode, data: info.data, throwingStatusCategories: throwingStatusCategories, underlyingError: error) {
 				thrownError = newError
 			}
 
