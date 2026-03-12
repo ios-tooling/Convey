@@ -119,6 +119,9 @@ public extension DownloadingTask {
 			
 			info.isComplete = true
 			await info.save()
+			if #available(iOS 17, macOS 14, watchOS 10, *) {
+				await TaskObserver.instance.didComplete(self)
+			}
 			return result
 		} catch {
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
@@ -135,6 +138,9 @@ public extension DownloadingTask {
 			await didFail(with: thrownError)
 			await info.save()
 			await server.didFinish(task: self, response: nil, error: thrownError)
+			if #available(iOS 17, macOS 14, watchOS 10, *) {
+				await TaskObserver.instance.didFail(self, with: thrownError)
+			}
 
 			throw thrownError
 		}

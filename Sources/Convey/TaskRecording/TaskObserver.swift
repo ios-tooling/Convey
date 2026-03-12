@@ -41,7 +41,11 @@ import SwiftUI
 		
 		init<Target: DownloadingTask>(type: Target.Type, callback: @MainActor @escaping @Sendable (Target, Error?) -> Void, filename: String, function: String, line: Int) {
 			self.type = type
-			self.callback = callback as! @MainActor (any DownloadingTask, Error?) -> Void
+			self.callback = { task, error in
+				if let t2 = task as? Target {
+					callback(t2, error)
+				}
+			}
 			self.filename = filename
 			self.function = function
 			self.line = line
