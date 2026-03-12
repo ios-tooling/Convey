@@ -13,11 +13,11 @@ import SwiftUI
 	
 	private var tasks: [ObservedTask] = []
 	
-	func didComplete(_ task: any DownloadingTask) {
+	func didComplete<Target: DownloadingTask>(_ task: Target, payload: Target.DownloadPayload) {
 		let type = type(of: task)
 		for observed in tasks {
 			if observed.type == type {
-				observed.callback(task, nil)
+				observed.callback(task, payload, nil)
 			}
 		}
 	}
@@ -26,7 +26,7 @@ import SwiftUI
 		let type = type(of: task)
 		for observed in tasks {
 			if observed.type == type {
-				observed.callback(task, error)
+				observed.callback(task, nil, error)
 			}
 		}
 	}
@@ -34,16 +34,32 @@ import SwiftUI
 	struct ObservedTask {
 		let id = UUID().uuidString
 		let type: any DownloadingTask.Type
-		let callback: @MainActor (any DownloadingTask, Error?) -> Void
+		let callback: @MainActor (any DownloadingTask, Any?, Error?) -> Void
 		let filename: String
 		let function: String
 		let line: Int
 		
 		init<Target: DownloadingTask>(type: Target.Type, callback: @MainActor @escaping @Sendable (Target, Error?) -> Void, filename: String, function: String, line: Int) {
 			self.type = type
-			self.callback = { task, error in
+			self.callback = { task, _, error in
 				if let t2 = task as? Target {
 					callback(t2, error)
+				}
+			}
+			self.filename = filename
+			self.function = function
+			self.line = line
+		}
+
+		init<Target: DownloadingTask>(type: Target.Type, callback: @MainActor @escaping @Sendable (Target, Target.DownloadPayload?, Error?) -> Void, filename: String, function: String, line: Int) {
+			self.type = type
+			self.callback = { task, payload, error in
+				if let t2 = task as? Target {
+					if let p2 = payload as? Target.DownloadPayload {
+						callback(t2, p2, error)
+					} else {
+						callback(t2, nil, error)
+					}
 				}
 			}
 			self.filename = filename
@@ -53,6 +69,19 @@ import SwiftUI
 	}
 	
 	public func register<Target: DownloadingTask>(_ task: Target.Type, filename: String = #file, function: String = #function, line: Int = #line, callback: @MainActor @escaping (Target, Error?) -> Void) -> String {
+		let taskType = Target.self
+		
+		if let index = tasks.firstIndex(where: { $0.filename == filename && $0.function == function && $0.line == line }) {
+			tasks[index] = ObservedTask(type: taskType, callback: callback, filename: filename, function: function, line: line)
+			return tasks[index].id
+		} else {
+			let newTask = ObservedTask(type: taskType, callback: callback, filename: filename, function: function, line: line)
+			tasks.append(newTask)
+			return newTask.id
+		}
+	}
+	
+	public func register<Target: DownloadingTask>(_ task: Target.Type, filename: String = #file, function: String = #function, line: Int = #line, callback: @MainActor @escaping (Target, Target.DownloadPayload?, Error?) -> Void) -> String {
 		let taskType = Target.self
 		
 		if let index = tasks.firstIndex(where: { $0.filename == filename && $0.function == function && $0.line == line }) {

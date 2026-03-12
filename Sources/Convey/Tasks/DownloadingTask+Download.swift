@@ -50,12 +50,19 @@ public extension DownloadingTask {
 		let result = try await performDownload()
 		
 		if DownloadPayload.self == Data.self, let result = result as? ServerResponse<DownloadPayload>, let payload = result.data as? DownloadPayload {
+			if #available(iOS 17, macOS 14, watchOS 10, *) {
+				await TaskObserver.instance.didComplete(self, payload: payload)
+			}
 			await didFinish(with: result)
 			return .init(payload: payload, request: result.request, response: result.response, data: result.data, startedAt: result.startedAt, duration: result.duration, attemptNumber: result.attemptNumber)
 		}
 		
 		let decoded: ServerResponse<DownloadPayload> = try result.decoding(using: decoder)
 		await didFinish(with: decoded)
+
+		if #available(iOS 17, macOS 14, watchOS 10, *) {
+			await TaskObserver.instance.didComplete(self, payload: decoded.payload)
+		}
 		return decoded
 	}
 	
@@ -119,9 +126,6 @@ public extension DownloadingTask {
 			
 			info.isComplete = true
 			await info.save()
-			if #available(iOS 17, macOS 14, watchOS 10, *) {
-				await TaskObserver.instance.didComplete(self)
-			}
 			return result
 		} catch {
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
