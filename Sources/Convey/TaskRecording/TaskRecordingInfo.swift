@@ -1,5 +1,5 @@
 //
-//  RequestTrackingInfo.swift
+//  TaskRecordingInfo.swift
 //  Convey
 //
 //  Created by Ben Gottlieb on 7/21/25.
@@ -7,7 +7,8 @@
 
 import Foundation
 
-@ConveyActor public struct RequestTrackingInfo: Sendable, Codable {
+@ConveyActor public struct TaskRecordingInfo: Sendable, Codable {
+	var uniqueID = UUID().uuidString
 	let taskName: String
 	let taskDescription: String
 	let method: String
@@ -23,6 +24,8 @@ import Foundation
 	var wasCancelled = false
 	var echoStyle: TaskEchoStyle
 	var timeoutDuration = 30.0
+	var storedTaskData: Data?
+	var isComplete = false
 	
 	var separator = 		"\n##============================================================##\n"
 	var endSeparator = 	"\n################################################################\n"
@@ -56,6 +59,9 @@ import Foundation
 		taskDescription = String(describing: task)
 		method = task.method.rawValue.uppercased()
 		echoStyle = task.echoStyle
+		if let storable = task as? any StorableTask {
+			storedTaskData = try? JSONEncoder().encode(storable)
+		}
 	}
 	
 	func save() async {

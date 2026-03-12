@@ -77,14 +77,13 @@ import Foundation
 }
 
 extension ConveySession {
-	func fetchData() async throws -> (Data, URLResponse, Int) {
+	func fetchData() async throws -> (Data, URLResponse, Int, Error?) {
 		var attemptNumber = 0
 		
 		while true {
 			do {
 				let (data, response) = try await session.data(for: request)
-				if let error = HTTPError.withResponse(response, data: data, throwingStatusCategories: task.throwingStatusCategories) { throw error }
-				return (data, response, attemptNumber + 1)
+				return (data, response, attemptNumber + 1, HTTPError.withResponse(response, data: data, throwingStatusCategories: task.throwingStatusCategories))
 			} catch let error {
 				attemptNumber += 1
 				if let delay = task.retryInterval(afterError: error, count: attemptNumber) {

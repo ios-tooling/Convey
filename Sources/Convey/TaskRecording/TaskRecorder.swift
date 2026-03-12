@@ -28,6 +28,8 @@ public actor TaskRecorder {
 	var appLaunchedAt = Date()
 	var sessionStartedAt: Date?
 	
+	var storableTaskTypes: [String: any StorableTask.Type] = [:]
+	
 	public func setup() {
 		#if os(iOS) || os(visionOS)
 			notificationTokens.append(NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main, using: { _ in
@@ -105,18 +107,22 @@ public actor TaskRecorder {
 		updateTaskCount()
 	}
 	
-	func record(info: RequestTrackingInfo) async {
+	func record(info: TaskRecordingInfo) async {
 		guard let container = _container else {
 			print("No Convey model container available.")
 			return
 		}
 		let context = ModelContext(container)
 		defer { updateTaskCount() }
-		if !context.shouldSaveTask(limit: limit) { return }
-		let record = RecordedTask(info: info, launchedAt: appLaunchedAt)
-		record.appLaunchedAt = appLaunchedAt.timeIntervalSinceReferenceDate
-		record.sessionStartedAt = (sessionStartedAt ?? appLaunchedAt).timeIntervalSinceReferenceDate
-		context.insert(record)
+		
+		if let existing = context.fetch(taskID: info.uniqueID) {
+			existing.load(info: info)
+		} else {
+			if !context.shouldSaveTask(limit: limit) { return }
+			let record = RecordedTask(info: info, launchedAt: appLaunchedAt)
+			record.sessionStartedAt = (sessionStartedAt ?? appLaunchedAt).timeIntervalSinceReferenceDate
+			context.insert(record)
+		}
 		reportedSave(context)
 	}
 }
@@ -124,51 +130,4 @@ public actor TaskRecorder {
 @available(iOS 17, macOS 14, watchOS 10, *)
 public extension TaskRecorder {
 	enum Limit: Sendable, Equatable { case none, after(Date), days(Int), count(Int), all }
-}
-
-@available(iOS 17, macOS 14, watchOS 10, *)
-extension ModelContext {
-	func shouldSaveTask(limit: TaskRecorder.Limit) -> Bool {
-		switch limit {
-		case .none: return false
-		case .after(let date):
-			if date > .now { return false }
-			removeTasks(before: date)
-			
-		case .days(let days):
-			let date = Date.now.addingTimeInterval(-1440 * 60 * Double(days))
-			if date > .now { return false }
-			removeTasks(before: date)
-
-		case .count(let count):
-			removeTasks(greaterThan: count)
-		case .all: break
-		}
-		
-		return true
-	}
-	
-	func removeTasks(before date: Date) {
-		let pred = #Predicate<RecordedTask> { $0.startedAt < date }
-		do {
-			try delete(model: RecordedTask.self, where: pred)
-			try save()
-		} catch {
-			print("Failed to remove old tasks: \(error)")
-		}
-	}
-	
-	func removeTasks(greaterThan count: Int) {
-		let request = FetchDescriptor<RecordedTask>(sortBy: [SortDescriptor(\.startedAt)])
-		guard let all = try? fetch(request), all.count > count else { return }
-		
-		do {
-			for i in 0...(all.count - count) {
-				delete(all[i])
-			}
-			try save()
-		} catch {
-			print("Failed to remove old tasks: \(error)")
-		}
-	}
 }

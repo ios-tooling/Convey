@@ -10,27 +10,47 @@ import Foundation
 
 @available(iOS 17, macOS 14, watchOS 10, *)
 @Model class RecordedTask {
+	var uniqueID = ""
 	var url: URL?
-	var name: String
-	var blurb: String
+	var name: String = ""
+	var blurb: String = ""
 	var requestData: Data?
 	@Attribute(.externalStorage) var responseData: Data?
 	@Attribute(.externalStorage) var httpBody: Data?
 	@Attribute(.externalStorage) var data: Data?
 	var uploadSize: Int?
 	var downloadSize: Int?
-	var startedAt: Date
+	var startedAt = Date.now
 	var duration: TimeInterval?
 	var error: String?
-	var appLaunchedAt: TimeInterval
+	var appLaunchedAt: TimeInterval = 0
 	var sessionStartedAt: TimeInterval?
 	var isGzipped = false
-	var method: String
+	var method: String = ""
 	var statusCode: Int?
 	var timedOut = false
 	var wasCancelled = false
 	var echoStyle: TaskEchoStyle?
 	var timeoutDuration = 0.0
+	var storableTaskData: Data?
+	var isComplete = false
+	
+	func storableTask<T: StorableTask>(_ type: T.Type) -> T? {
+		guard let storableTaskData else { return nil }
+		
+		return try? JSONDecoder().decode(T.self, from: storableTaskData)
+	}
+	
+	var storableTask: (any StorableTask)? {
+		get async {
+			await TaskRecorder.instance.rebuildTask(data: storableTaskData, name: name)
+		}
+	}
+	
+	func storeTask(_ task: any StorableTask) throws {
+		storableTaskData = try JSONEncoder().encode(task)
+		name = String(describing: type(of: self))
+	}
 	
 	var suggestedFilename: String {
 		name + "@" + startedAt.formatted().replacingOccurrences(of: "/", with: "∕").replacingOccurrences(of: ":", with: "˸") + ".json"
@@ -46,7 +66,13 @@ import Foundation
 	var appLaunchedAtDate: Date { Date(timeIntervalSinceReferenceDate: appLaunchedAt) }
 
 	
-	init(info: RequestTrackingInfo, launchedAt: Date) {
+	init(info: TaskRecordingInfo, launchedAt: Date) {
+		uniqueID = info.uniqueID
+		appLaunchedAt = launchedAt.timeIntervalSinceReferenceDate
+		load(info: info)
+	}
+	
+	func load(info: TaskRecordingInfo) {
 		url = info.url
 		name = info.taskName
 		blurb = info.taskDescription
@@ -56,13 +82,14 @@ import Foundation
 		downloadSize = info.data?.count
 		data = info.data
 		method = info.method
-		appLaunchedAt = launchedAt.timeIntervalSinceReferenceDate
 		httpBody = info.httpBody
 		uploadSize = httpBody?.count
 		echoStyle = info.echoStyle
 		timedOut = info.timedOut
 		wasCancelled = info.wasCancelled
 		timeoutDuration = info.timeoutDuration
+		storableTaskData = info.storedTaskData
+		isComplete = info.isComplete
 
 		if let request = info.request {
 			requestData = try? JSONEncoder().encode(request)

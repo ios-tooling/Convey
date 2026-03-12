@@ -71,7 +71,7 @@ public extension DownloadingTask {
 	
 	func performDownload() async throws -> ServerResponse<Data> {
 		let session: ConveySession
-		var info = RequestTrackingInfo(self)
+		var info = TaskRecordingInfo(self)
 		
 		if CommandLine.failAllRequests {
 			throw FaillAllRequestsError(target: String(describing: type(of: self)))
@@ -100,14 +100,14 @@ public extension DownloadingTask {
 			
 			try await willSendRequest(request: request)
 			
-			let (data, response, attemptNumber) = try await session.fetchData()
+			let (data, response, attemptNumber, error) = try await session.fetchData()
 			info.urlResponse = response
 			info.data = data
 			
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
 			info.echoStyle = echoStyle(for: data)
 			echo(info, data: data)
-
+			if let error { throw error }
 			try await didReceiveResponse(response: response, data: data)
 			let result = ServerResponse(payload: data, request: session.request, response: response, data: data, startedAt: info.startedAt, duration: info.duration ?? 0, attemptNumber: attemptNumber)
 			await info.save()
@@ -117,6 +117,8 @@ public extension DownloadingTask {
 				throw error
 			}
 			
+			info.isComplete = true
+			await info.save()
 			return result
 		} catch {
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)

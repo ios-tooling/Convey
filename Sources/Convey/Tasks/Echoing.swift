@@ -37,7 +37,7 @@ public extension DownloadingTask {
 	
 	func echoStyle(for data: Data?) -> TaskEchoStyle { echoStyle }
 	
-	func echo(_ info: RequestTrackingInfo, data: Data?) {
+	func echo(_ info: TaskRecordingInfo, data: Data?) {
 		let style = echoStyle(for: data)
 		if style.contains(.onlyIfError), info.error == nil { return }
 		
