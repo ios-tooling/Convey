@@ -43,11 +43,21 @@ public struct ServerResponse<Payload: Decodable & Sendable>: Sendable {
 
 public extension DownloadingTask {
 	func send() async throws {
-		let _ = try await download()
+		let _ = try await download(usingRecordedTaskID: nil)
 	}
 
 	func download() async throws -> ServerResponse<DownloadPayload> {
-		let result = try await performDownload()
+		try await download(usingRecordedTaskID: nil)
+	}
+	
+	func downloadData() async throws -> ServerResponse<Data> {
+		try await downloadData(usingRecordedTaskID: nil)
+	}
+}
+
+extension DownloadingTask {
+	func download(usingRecordedTaskID id: String?) async throws -> ServerResponse<DownloadPayload> {
+		let result = try await performDownload(usingRecordedTaskID: id)
 		
 		if DownloadPayload.self == Data.self, let result = result as? ServerResponse<DownloadPayload>, let payload = result.data as? DownloadPayload {
 			if #available(iOS 17, macOS 14, watchOS 10, *) {
@@ -66,8 +76,8 @@ public extension DownloadingTask {
 		return decoded
 	}
 	
-	func downloadData() async throws -> ServerResponse<Data> {
-		let result = try await performDownload()
+	func downloadData(usingRecordedTaskID id: String?) async throws -> ServerResponse<Data> {
+		let result = try await performDownload(usingRecordedTaskID: id)
 		
 		if DownloadPayload.self == Data.self, let downloadedResult = result as? ServerResponse<DownloadPayload> {
 			await didFinish(with: downloadedResult)
@@ -76,9 +86,9 @@ public extension DownloadingTask {
 		return result
 	}
 	
-	func performDownload() async throws -> ServerResponse<Data> {
+	func performDownload(usingRecordedTaskID id: String?) async throws -> ServerResponse<Data> {
 		let session: ConveySession
-		var info = TaskRecordingInfo(self)
+		var info = TaskRecordingInfo(self, id: id)
 		
 		if CommandLine.failAllRequests {
 			throw FaillAllRequestsError(target: String(describing: type(of: self)))

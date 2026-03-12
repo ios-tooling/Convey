@@ -8,7 +8,7 @@
 import Foundation
 
 @ConveyActor public struct TaskRecordingInfo: Sendable, Codable {
-	var uniqueID = UUID().uuidString
+	var uniqueID: String
 	let taskName: String
 	let taskDescription: String
 	let method: String
@@ -54,7 +54,8 @@ import Foundation
 
 	var data: Data?
 	
-	init<T: DownloadingTask>(_ task: T) {
+	init<T: DownloadingTask>(_ task: T, id: String? = nil) {
+		uniqueID = id ?? UUID().uuidString
 		taskName = String(describing: type(of: task))
 		taskDescription = String(describing: task)
 		method = task.method.rawValue.uppercased()

@@ -34,6 +34,8 @@ import Foundation
 	var timeoutDuration = 0.0
 	var storableTaskData: Data?
 	var isComplete = false
+	var retryCount = 0
+	var retrySuccessfulAt: Date?
 	
 	func storableTask<T: StorableTask>(_ type: T.Type) -> T? {
 		guard let storableTaskData else { return nil }
@@ -49,7 +51,7 @@ import Foundation
 	
 	func storeTask(_ task: any StorableTask) throws {
 		storableTaskData = try JSONEncoder().encode(task)
-		name = String(describing: type(of: self))
+		name = String(describing: type(of: task))
 	}
 	
 	var suggestedFilename: String {
