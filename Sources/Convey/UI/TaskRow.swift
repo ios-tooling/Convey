@@ -28,14 +28,6 @@ extension RecordedTasksScreen.TaskList {
 						.font(.system(size: 12))
 						.background { RoundedRectangle(cornerRadius: 4).fill((isDelete ? Color.red : Color.gray).opacity(0.4)) }
 					
-					if let statusCode = task.statusCode, statusCode / 100 != 2 {
-						Text("\(statusCode)")
-							.foregroundStyle(.black)
-							.padding(.horizontal, 4)
-							.font(.system(size: 12))
-							.background { RoundedRectangle(cornerRadius: 4).fill(.orange) }
-					}
-					
 					Text(task.name).bold()
 						.font(.system(size: 13))
 					Spacer()
@@ -50,6 +42,21 @@ extension RecordedTasksScreen.TaskList {
 					sizeWidget
 				}
 				
+				if let statusCode = task.statusCode, statusCode / 100 != 2 {
+					HStack {
+						Text("\(statusCode)")
+							.foregroundStyle(.black)
+							.padding(.horizontal, 4)
+							.font(.system(size: 12))
+							.background { RoundedRectangle(cornerRadius: 4).fill(.orange) }
+						
+						if task.retryCount > 1 {
+							Text("x \(task.retryCount)")
+						}
+					}
+					.font(.system(size: 12))
+				}
+
 				if let url = task.url {
 					let prefix = (url.scheme ?? "") + "://" + (url.host() ?? "")
 					

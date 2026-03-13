@@ -13,6 +13,7 @@ extension RecordedTasksScreen {
 	struct TaskList: View {
 		let tasks: [RecordedTask]
 		let predicate: Predicate<RecordedTask>
+		let deletePredicate: Predicate<RecordedTask>
 		@Environment(\.modelContext) var modelContext
 		
 		var body: some View {
@@ -45,7 +46,7 @@ extension RecordedTasksScreen {
 				.toolbar {
 					ToolbarItem(id: "clear", placement: .destructiveAction) {
 						Button("Delete", systemImage: "trash") {
-							Task { await TaskRecorder.instance.clear(predicate: predicate) }
+							Task { await TaskRecorder.instance.clear(predicate: deletePredicate) }
 						}
 					}
 				}
@@ -60,14 +61,16 @@ extension RecordedTasksScreen {
 		init(date: Date) {
 			sessionStartedAt = date.timeIntervalSinceReferenceDate
 			let sec = date.timeIntervalSinceReferenceDate
-			let pred = #Predicate<RecordedTask> { task in sec == task.sessionStartedAt }
+			let pred = #Predicate<RecordedTask> { task in sec == task.sessionStartedAt || task.isComplete == false }
 			_tasks = Query(filter: pred, sort: \RecordedTask.startedAt, order: .reverse)
 		}
 		
 		var body: some View {
 			TaskList(tasks: tasks, predicate:  #Predicate { task in
 				task.appLaunchedAt == sessionStartedAt
-		 })
+			}, deletePredicate: #Predicate { task in
+				task.appLaunchedAt == sessionStartedAt && task.isComplete == true
+			})
 		}
 	}
 	
@@ -84,7 +87,7 @@ extension RecordedTasksScreen {
 		}
 		
 		var body: some View {
-			TaskList(tasks: tasks, predicate: #Predicate<RecordedTask> { task in task.name.localizedStandardContains(search) })
+			TaskList(tasks: tasks, predicate: #Predicate<RecordedTask> { task in task.name.localizedStandardContains(search) }, deletePredicate: #Predicate<RecordedTask> { task in task.name.localizedStandardContains(search) && task.isComplete == true })
 		}
 	}
 	
@@ -92,7 +95,7 @@ extension RecordedTasksScreen {
 		@Query( sort: \RecordedTask.startedAt, order: .reverse) var tasks: [RecordedTask]
 		
 		var body: some View {
-			TaskList(tasks: tasks, predicate: #Predicate<RecordedTask> { _ in true })
+			TaskList(tasks: tasks, predicate: #Predicate<RecordedTask> { _ in true }, deletePredicate: #Predicate<RecordedTask> { task in task.isComplete == true })
 		}
 	}
 

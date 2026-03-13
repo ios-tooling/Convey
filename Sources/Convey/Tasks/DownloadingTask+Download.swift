@@ -43,6 +43,7 @@ public struct ServerResponse<Payload: Decodable & Sendable>: Sendable {
 
 public extension DownloadingTask {
 	func send() async throws {
+		if !server.isSetup { return }
 		let _ = try await download(usingRecordedTaskID: nil)
 	}
 

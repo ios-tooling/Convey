@@ -41,6 +41,8 @@ public extension ConveyServerable {
 		}
 	}
 	
+	var isSetup: Bool { remote.url != .empty }
+	
 	func defaultHeaders(for task: any DownloadingTask) async -> Headers {
 		var headers = configuration.defaultHeaders.headersArray
 		if let userAgent = configuration.userAgent {
@@ -72,7 +74,9 @@ public extension ConveyServerable {
 	}
 	
 	func session(for task: any DownloadingTask) async throws -> ConveySession {
-		if remote.url == .empty { throw ConveyServableError.serverNotConfigured }
+		if !isSetup {
+			throw ConveyServableError.serverNotConfigured
+		}
 		return try await ConveySession(server: self, task: task)
 	}
 	
