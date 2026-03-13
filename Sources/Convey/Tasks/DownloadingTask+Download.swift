@@ -127,6 +127,7 @@ extension DownloadingTask {
 			if let error { throw error }
 			try await didReceiveResponse(response: response, data: data)
 			let result = ServerResponse(payload: data, request: session.request, response: response, data: data, startedAt: info.startedAt, duration: info.duration ?? 0, attemptNumber: attemptNumber)
+			info.isComplete = true
 			await info.save()
 			await server.didFinish(task: self, response: result, error: nil)
 			
@@ -134,8 +135,6 @@ extension DownloadingTask {
 				throw error
 			}
 			
-			info.isComplete = true
-			await info.save()
 			return result
 		} catch {
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)

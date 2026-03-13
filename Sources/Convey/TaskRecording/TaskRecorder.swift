@@ -33,6 +33,7 @@ public actor TaskRecorder {
 	
 	public func setup() {
 		#if os(iOS) || os(visionOS)
+			if !notificationTokens.isEmpty { return }
 			notificationTokens.append(NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main, using: { _ in
 				Task {
 					await self.startNewSession()

@@ -11,7 +11,7 @@ import SwiftData
 @available(iOS 17, macOS 14, watchOS 10, *)
 extension RecordedTask {
 	func retry<TaskType: StorableTask>(for type: TaskType.Type) async {
-		guard let task = await storableTask as? TaskType else { return }
+		guard let task = await storableTask as? TaskType, let modelContext else { return }
 		
 		do {
 			print("Retrying \(TaskType.self), #\(retryCount + 1)")
@@ -21,7 +21,8 @@ extension RecordedTask {
 		} catch {
 			retryCount += 1
 		}
-		try? modelContext?.save()
+		
+		try? modelContext.save()
 	}
 }
 
