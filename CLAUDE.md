@@ -17,9 +17,20 @@ Convey is a Swift Package Manager library for iOS, macOS, tvOS, visionOS, and wa
 ### Project Structure
 - **Main library**: `Sources/Convey/` - Core framework code
 - **Test harness app**: `ConveyTestHarness/` - SwiftUI test application (open in Xcode and run ConveyTestHarness target)
-- **Tests**: `Tests/ConveyTests/` - Unit tests using Swift Testing framework (not XCTest)
+- **Tests**: `Tests/ConveyTests/` - Unit tests using Swift Testing framework (not XCTest). Some test files are `.disabled` (e.g., `MIMETests.swift.disabled`) — these are intentionally excluded from compilation.
 - **Package definition**: `Package.swift` - SPM configuration
-- **Dependencies**: JohnnyCache (https://github.com/ios-tooling/JohnnyCache.git) for caching implementation
+- **Dependencies**: JohnnyCache (https://github.com/ios-tooling/JohnnyCache.git) for caching, Chronicle (https://github.com/ios-tooling/Chronicle/) for logging
+
+### Source Directory Organization
+- `Caching/` - ETag store, file watching, image sizing
+- `Configuration/` - Remote environments, server/task configuration, command line options
+- `Errors/` - HTTPError with ClientError (4xx) and ServerError (5xx) enums
+- `Extensions/` - Helpers for Bundle, Data, FileManager, URL, URLSession, MD5
+- `Server/` - ConveyServer class and ConveyServerable protocol
+- `TaskRecording/` - SwiftData-based task recording for debugging (RecordedTask model, TaskRecorder, TaskObserver)
+- `Tasks/` - All task protocols and implementations (DownloadingTask, uploading variants, echoing)
+- `UI/` - SwiftUI views (CachedURLImage, RecordedTasksScreen, TaskRow, etc.)
+- `Utility/` - ConveyActor, ConveySession, Headers, HTTPMethod, threading primitives
 
 ## Architecture
 
@@ -37,6 +48,18 @@ Convey is a Swift Package Manager library for iOS, macOS, tvOS, visionOS, and wa
 - **Type safety**: Strong typing with associated types for upload/download payloads. `DownloadPayload` and `UploadPayload` are defined via associated types on protocols.
 - **Default server pattern**: When creating a `ConveyServer` with `init(asDefault: true)`, tasks without an explicit `server` property will use this default server automatically.
 
+### Protocol Hierarchy
+- `DownloadingTask<DownloadPayload>` - Base protocol for all network tasks
+- `DataDownloadingTask` - Convenience for tasks that download raw `Data`. `ServerTask` is a typealias for this.
+- `UploadingTask<UploadPayload>` - Adds upload capabilities with associated type
+- `DataUploadingTask` - Upload and download raw `Data`
+- `JSONUploadingTask` - JSON-based uploads with automatic encoding
+- `FormUploadingTask` - Form-encoded uploads
+- `MIMEUploadingTask` - Multipart MIME uploads
+- `EchoingTask` - Marker protocol enabling full console logging and recording
+- `NonEchoingTask` - Marker protocol disabling all logging
+- `IgnoredResultsTask` - For tasks where the response data is not needed
+
 ### Response Handling
 - **ServerResponse<Payload>**: Generic response wrapper containing the decoded payload, raw data, HTTP response, request, timing info, and attempt number
 - Responses include `statusCode`, `httpResponse`, `responseType` (info/success/redirect/clientError/serverError), `duration`, and `stringResult` properties
@@ -48,162 +71,47 @@ Convey is a Swift Package Manager library for iOS, macOS, tvOS, visionOS, and wa
 - **ETagStore**: HTTP ETag support for cache validation
 - Backed by JohnnyCache library for underlying cache implementation
 
-### SwiftUI Integration
-- **CachedURLImage**: Drop-in replacement for AsyncImage with caching
-- **RecordedTasksScreen**: UI for viewing recorded network tasks
-- **RecordedTaskDetailScreen**: Detailed view for individual recorded tasks
-- **TaskRow**: Row component for displaying task information
-- **RecordedTasksButton**: Button component to trigger display of recorded tasks
+### Task Recording System
+- **RecordedTask**: SwiftData model for persisting network task execution details
+- **TaskRecorder**: Handles recording of task execution for debugging and analysis
+- **TaskObserver**: Observes task execution events
+- SwiftUI screens for browsing recorded tasks: `RecordedTasksScreen`, `RecordedTaskDetailScreen`, `RecordedTasksButton`
 
 ### Platform Support
 - Minimum versions: iOS 14+, macOS 14+, watchOS 7+
 - Swift 6.0+ required for concurrency features
-- Uses system-zlib for compression
-
-### Task Recording System
-- **RecordedTask**: SwiftData model for persisting network task execution details
-- **TaskRecorder**: Handles recording of task execution for debugging and analysis
-- Tasks can be recorded to disk for later review and debugging
-- RecordedTasksScreen provides UI for browsing recorded network activities
+- Uses system-zlib for compression (separate target in Package.swift)
 
 ## Important Implementation Details
 
 ### Error Handling
-- **HTTPError**: Handles HTTP-specific errors from server responses with detailed status code enums
-  - **HTTPError.ClientError**: 4xx errors (badRequest, unauthorized, forbidden, notFound, etc.)
-  - **HTTPError.ServerError**: 5xx errors (internalServer, badGateway, serviceUnavailable, etc.)
+- **HTTPError**: Handles HTTP-specific errors with `ClientError` (4xx) and `ServerError` (5xx) sub-enums
 - Tasks can implement `didFail(with:)` for custom error handling
 - Tasks can implement `retryInterval(afterError:count:)` to enable automatic retry with custom intervals
 
 ### Network Configuration
 - **ConveySession**: Manages individual network sessions and URLSession instances. Can be cancelled by tag via `ConveySession.cancel(sessionWithTag:)`
 - **TaskConfiguration**: Per-task configuration overrides for timeouts, network access policies, echo styles
-- **ServerConfiguration**: Global server settings including:
-  - `defaultEncoder`/`defaultDecoder` for JSON serialization
-  - `reportBadHTTPStatusAsError` to control error throwing for non-200 status codes
-  - `enableGZipDownloads` for compression
-  - `defaultTimeout`, `allowsExpensiveNetworkAccess`, `allowsConstrainedNetworkAccess`, `waitsForConnectivity`
-  - `userAgent` and `defaultHeaders` for request customization
+- **ServerConfiguration**: Global server settings (encoder/decoder, timeout, headers, user agent, gzip, network access policies)
 - **Remote**: Represents an environment (dev/staging/prod) with URL and common path prefixes
 
 ### Task Lifecycle Hooks
 Tasks can implement these optional lifecycle methods (all have default empty implementations):
-- `willSendRequest(request:)` - Called before sending request, can be used to modify the request
-- `didReceiveResponse(response:data:)` - Called when response received, before decoding. Can throw to fail the task
-- `didFail(with:)` - Called on task failure, for custom error handling or logging
-- `didFinish(with:)` - Called on successful completion with the decoded `ServerResponse<DownloadPayload>`
-- `retryInterval(afterError:count:)` - Return a `TimeInterval` to automatically retry failed requests. Return `nil` to not retry. Receives error and attempt count.
+- `willSendRequest(request:)` - Modify request before sending
+- `didReceiveResponse(response:data:)` - Validate response before decoding (can throw)
+- `didFail(with:)` - Custom error handling
+- `didFinish(with:)` - Handle successful completion
+- `retryInterval(afterError:count:)` - Return `TimeInterval` to retry, or `nil` to stop
 
 ### Server Customization Hooks
-Subclass `ConveyServer` and override these methods to customize behavior:
-- `headers(for:)` - Return custom headers for a task (combines with `defaultHeaders`)
-- `didFinish(task:response:error:)` - Called after every task completes (success or failure)
-- Can be disabled via `server.disabled = true` to fail all tasks immediately
-
-### Protocol Hierarchy
-- `DownloadingTask<DownloadPayload>` - Base protocol for all network tasks. All tasks must conform to this.
-- `DataDownloadingTask` - Convenience for tasks that download raw `Data` (most common). `ServerTask` is a typealias for this.
-- `UploadingTask<UploadPayload>` - Adds upload capabilities with associated type. Extends `DownloadingTask`.
-- `DataUploadingTask` - For tasks that upload and download raw `Data`
-- `JSONUploadingTask` - For JSON-based uploads with automatic encoding
-- `FormUploadingTask` - For form-encoded uploads
-- `MIMEUploadingTask` - For multipart MIME uploads
-- `EchoingTask` - Marker protocol that enables full console logging and recording for a task
-- `NonEchoingTask` - Marker protocol that disables logging for a task (useful for sensitive operations)
-- `IgnoredResultsTask` - For tasks where the response data is not needed
+Override in `ConveyServer` subclass:
+- `headers(for:)` - Custom headers per task (combines with `defaultHeaders`)
+- `didFinish(task:response:error:)` - Called after every task completion
+- `server.disabled = true` - Fail all tasks immediately
 
 ### Echo/Logging System
-- Tasks can control logging via `echoStyle` property which returns a `TaskEchoStyle` option set
-- Echo styles: `.consoleMinimum`, `.consoleRequest`, `.consoleFull`, `.console5k`/`.console10k`/`.console30k`/`.console100k` (limited output), `.recorded` (persist to disk), `.onlyIfError`
-- By default, tasks have `.recorded` style
-- Conforming to `EchoingTask` enables `[.consoleFull, .recorded]`
-- Conforming to `NonEchoingTask` disables all logging
-- Can override `echoStyle(for data: Data?)` to conditionally control logging based on response data
-
-## Common Task Patterns
-
-### Basic GET Request
-```swift
-struct FetchUserTask: ServerTask {
-    let userId: String
-    var path: String { "users/\(userId)" }
-}
-
-// Usage:
-let task = FetchUserTask(userId: "123")
-let data = try await task.download()
-```
-
-### POST with JSON
-```swift
-struct CreateUserTask: JSONUploadingTask {
-    struct Payload: Codable { let name: String, email: String }
-
-    var path: String { "users" }
-    var method: HTTPMethod { .post }
-    var uploadPayload: Payload?
-
-    init(name: String, email: String) {
-        self.uploadPayload = Payload(name: name, email: email)
-    }
-}
-```
-
-### Task with Custom Headers
-```swift
-struct AuthenticatedTask: ServerTask {
-    var path: String { "profile" }
-
-    var headers: Headers {
-        get async throws {
-            var headers = try await server.headers(for: self)
-            headers.append(Header(name: "Authorization", value: "Bearer \(token)"))
-            return headers
-        }
-    }
-}
-```
-
-### Query Parameters
-```swift
-struct SearchTask: ServerTask {
-    let query: String
-    var path: String { "search" }
-    var queryParameters: [String: String]? { ["q": query, "limit": "10"] }
-}
-```
-
-### Task Execution
-```swift
-// Execute task and get decoded response
-let response = try await task.download()
-let payload = response.payload
-let statusCode = response.statusCode
-let duration = response.duration
-
-// Execute task without caring about response
-try await task.send()
-```
-
-### Form Upload
-```swift
-struct FormUploadTask: FormUploadingTask {
-    var path: String { "submit" }
-    var method: HTTPMethod { .post }
-    var uploadPayload: [String: String]? { ["field1": "value1", "field2": "value2"] }
-}
-```
-
-### Multipart MIME Upload
-```swift
-struct FileUploadTask: MIMEUploadingTask {
-    var path: String { "upload" }
-    var method: HTTPMethod { .post }
-    var uploadPayload: MIMEPayload? {
-        MIMEPayload(parts: [
-            MIMEPart(name: "file", data: fileData, filename: "photo.jpg", mimeType: "image/jpeg"),
-            MIMEPart(name: "description", stringValue: "My photo")
-        ])
-    }
-}
-```
+- Tasks control logging via `echoStyle` property returning a `TaskEchoStyle` option set
+- Styles: `.consoleMinimum`, `.consoleRequest`, `.consoleFull`, `.console5k`/`.console10k`/`.console30k`/`.console100k`, `.recorded`, `.onlyIfError`
+- Default style is `.recorded`
+- `EchoingTask` enables `[.consoleFull, .recorded]`; `NonEchoingTask` disables all
+- `echoStyle(for data: Data?)` allows conditional logging based on response data

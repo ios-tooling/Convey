@@ -66,10 +66,11 @@ import Foundation
 	}
 	
 	func save() async {
+		if echoStyle.contains(.onlyIfError), error == nil { return }
+		if !echoStyle.contains(.recorded) { return }
+
+		logToChronicle()
 		if #available(iOS 17, macOS 14, watchOS 10, *) {
-			if echoStyle.contains(.onlyIfError), error == nil { return }
-			if !echoStyle.contains(.recorded) { return }
-		
 			await TaskRecorder.instance.record(info: self)
 		}
 	}
