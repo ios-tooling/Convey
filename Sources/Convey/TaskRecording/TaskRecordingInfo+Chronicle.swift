@@ -16,8 +16,12 @@ extension TaskRecordingInfo {
 		let statusCode = response?.statusCode
 
 		var errorMessage = error
-		if errorMessage == nil, let statusCode, statusCode >= 400 {
-			errorMessage = "HTTP \(statusCode)"
+		if errorMessage == nil, let statusCode {
+			let throwingCategories = ConveyServer.default.configuration.throwingStatusCategories
+			let statusFamily = (statusCode / 100) * 100
+			if throwingCategories.contains(statusFamily) {
+				errorMessage = "HTTP \(statusCode)"
+			}
 		}
 
 		if let errorMessage {
