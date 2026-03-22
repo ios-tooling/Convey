@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
 	 name: "Convey",
 	  platforms: [
-		.iOS(.v17),
+		.iOS(.v14),
 		.macOS(.v14),
 		.watchOS(.v7)
 	  ],

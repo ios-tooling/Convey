@@ -10,7 +10,7 @@ import Chronicle
 
 extension TaskRecordingInfo {
 	func logToChronicle() {
-		guard Chronicle.instance.isConfigured else { return }
+		guard #available(iOS 17, macOS 14, *), Chronicle.instance.isConfigured else { return }
 
 		let endTime = duration.map { startedAt.addingTimeInterval($0) }
 		let statusCode = response?.statusCode
