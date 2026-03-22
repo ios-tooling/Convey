@@ -24,7 +24,7 @@ extension TaskRecordingInfo {
 			}
 		}
 
-		if let errorMessage {
+		if let errorMessage, !wasCancelled {
 			let severity: ErrorSeverity = (statusCode ?? 0) >= 500 ? .error : .warning
 			Chronicle.error(
 				ConveyTaskError(message: errorMessage, statusCode: statusCode),

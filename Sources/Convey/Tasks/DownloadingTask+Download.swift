@@ -100,6 +100,7 @@ extension DownloadingTask {
 			defer { session.finish() }
 			session.start()
 		} catch {
+			info.wasCancelled = error.isCancellation
 			info.urlRequest = try? await self.request
 			info.error = error.localizedDescription
 			echo(info, data: nil)
@@ -140,6 +141,7 @@ extension DownloadingTask {
 		} catch {
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
 			info.error = error.prettyDescription
+			info.wasCancelled = error.isCancellation
 			info.timedOut = error.isTimeOut
 			info.wasCancelled = error.isCancellation
 			echo(info, data: nil)
