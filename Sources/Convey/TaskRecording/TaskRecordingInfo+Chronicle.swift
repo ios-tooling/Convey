@@ -9,7 +9,7 @@ import Foundation
 import Chronicle
 
 extension TaskRecordingInfo {
-	func logToChronicle() {
+	func logToChronicle(file: String = #file, function: String = #function, line: Int = #line) {
 		guard #available(iOS 17, macOS 14, *), Chronicle.instance.isConfigured else { return }
 
 		let endTime = duration.map { startedAt.addingTimeInterval($0) }

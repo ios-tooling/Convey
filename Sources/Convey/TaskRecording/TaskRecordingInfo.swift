@@ -65,11 +65,11 @@ import Foundation
 		}
 	}
 	
-	func save() async {
+	func save(file: String = #file, function: String = #function, line: Int = #line) async {
 		if echoStyle.contains(.onlyIfError), error == nil { return }
 		if !echoStyle.contains(.recorded) { return }
 
-		logToChronicle()
+		logToChronicle(file: file, function: function, line: line)
 		if #available(iOS 17, macOS 14, watchOS 10, *) {
 			await TaskRecorder.instance.record(info: self)
 		}

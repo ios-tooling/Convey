@@ -42,23 +42,23 @@ public struct ServerResponse<Payload: Decodable & Sendable>: Sendable {
 }
 
 public extension DownloadingTask {
-	func send() async throws {
+	func send(file: String = #file, function: String = #function, line: Int = #line) async throws {
 		if !server.isSetup { return }
-		let _ = try await download(usingRecordedTaskID: nil)
+		let _ = try await download(usingRecordedTaskID: nil, file: file, function: function, line: line)
 	}
 
-	func download() async throws -> ServerResponse<DownloadPayload> {
-		try await download(usingRecordedTaskID: nil)
+	func download(file: String = #file, function: String = #function, line: Int = #line) async throws -> ServerResponse<DownloadPayload> {
+		try await download(usingRecordedTaskID: nil, file: file, function: function, line: line)
 	}
 	
-	func downloadData() async throws -> ServerResponse<Data> {
-		try await downloadData(usingRecordedTaskID: nil)
+	func downloadData(file: String = #file, function: String = #function, line: Int = #line) async throws -> ServerResponse<Data> {
+		try await downloadData(usingRecordedTaskID: nil, file: file, function: function, line: line)
 	}
 }
 
 extension DownloadingTask {
-	func download(usingRecordedTaskID id: String?) async throws -> ServerResponse<DownloadPayload> {
-		let result = try await performDownload(usingRecordedTaskID: id)
+	func download(usingRecordedTaskID id: String?, file: String = #file, function: String = #function, line: Int = #line) async throws -> ServerResponse<DownloadPayload> {
+		let result = try await performDownload(usingRecordedTaskID: id, file: file, function: function, line: line)
 		
 		if DownloadPayload.self == Data.self, let result = result as? ServerResponse<DownloadPayload>, let payload = result.data as? DownloadPayload {
 			if #available(iOS 17, macOS 14, watchOS 10, *) {
@@ -77,8 +77,8 @@ extension DownloadingTask {
 		return decoded
 	}
 	
-	func downloadData(usingRecordedTaskID id: String?) async throws -> ServerResponse<Data> {
-		let result = try await performDownload(usingRecordedTaskID: id)
+	func downloadData(usingRecordedTaskID id: String?, file: String = #file, function: String = #function, line: Int = #line) async throws -> ServerResponse<Data> {
+		let result = try await performDownload(usingRecordedTaskID: id, file: file, function: function, line: line)
 		
 		if DownloadPayload.self == Data.self, let downloadedResult = result as? ServerResponse<DownloadPayload> {
 			await didFinish(with: downloadedResult)
@@ -87,7 +87,7 @@ extension DownloadingTask {
 		return result
 	}
 	
-	func performDownload(usingRecordedTaskID id: String?) async throws -> ServerResponse<Data> {
+	func performDownload(usingRecordedTaskID id: String?, file: String = #file, function: String = #function, line: Int = #line) async throws -> ServerResponse<Data> {
 		let session: ConveySession
 		var info = TaskRecordingInfo(self, id: id)
 		
@@ -105,7 +105,7 @@ extension DownloadingTask {
 			info.error = error.localizedDescription
 			echo(info, data: nil)
 			await didFail(with: error)
-			await info.save()
+			await info.save(file: file, function: function, line:line)
 
 			throw error
 		}
@@ -130,7 +130,7 @@ extension DownloadingTask {
 			try await didReceiveResponse(response: response, data: data)
 			let result = ServerResponse(payload: data, request: session.request, response: response, data: data, startedAt: info.startedAt, duration: info.duration ?? 0, attemptNumber: attemptNumber)
 			info.isComplete = true
-			await info.save()
+			await info.save(file: file, function: function, line: line)
 			await server.didFinish(task: self, response: result, error: nil)
 			
 			if let error = HTTPError.withStatusCode(result.statusCode, data: result.data, throwingStatusCategories: throwingStatusCategories, underlyingError: nil) {
@@ -152,7 +152,7 @@ extension DownloadingTask {
 			}
 
 			await didFail(with: thrownError)
-			await info.save()
+			await info.save(file: file, function: function, line:line)
 			await server.didFinish(task: self, response: nil, error: thrownError)
 			if #available(iOS 17, macOS 14, watchOS 10, *) {
 				await TaskObserver.instance.didFail(self, with: thrownError)
