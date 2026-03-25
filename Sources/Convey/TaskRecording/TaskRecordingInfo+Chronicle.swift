@@ -11,10 +11,10 @@ import Chronicle
 extension TaskRecordingInfo {
 	func logToChronicle(file: String = #file, function: String = #function, line: Int = #line) {
 		guard #available(iOS 17, macOS 14, *), Chronicle.instance.isConfigured else { return }
-
+		
 		let endTime = duration.map { startedAt.addingTimeInterval($0) }
 		let statusCode = response?.statusCode
-
+		
 		var errorMessage = error
 		if errorMessage == nil, let statusCode {
 			let throwingCategories = ConveyServer.default.configuration.throwingStatusCategories
@@ -23,33 +23,29 @@ extension TaskRecordingInfo {
 				errorMessage = "HTTP \(statusCode)"
 			}
 		}
-
-		if let errorMessage, !wasCancelled {
-			let severity: ErrorSeverity = (statusCode ?? 0) >= 500 ? .error : .warning
-			Chronicle.error(
-				ConveyTaskError(message: errorMessage, statusCode: statusCode),
-				severity: severity
+		
+		if let url {
+			Chronicle.network(
+				url: url,
+				method: method,
+				requestHeaders: request?.allHTTPHeaderFields,
+				requestBody: httpBody,
+				statusCode: statusCode,
+				responseHeaders: response?.allHeaderFields,
+				responseBody: data,
+				error: errorMessage,
+				wasCancelled: wasCancelled,
+				metrics: NetworkMetrics(
+					startTime: startedAt,
+					endTime: endTime ?? startedAt,
+					bytesSent: Int64(httpBody?.count ?? 0),
+					bytesReceived: Int64(data?.count ?? 0)
+				),
+				file: file,
+				function: function,
+				line: line
 			)
 		}
-
-		let networkLog = NetworkLog(
-			url: url ?? URL(string: "https://unknown")!,
-			method: method,
-			requestHeaders: request?.allHTTPHeaderFields,
-			requestBody: httpBody,
-			statusCode: statusCode,
-			responseHeaders: response?.allHeaderFields,
-			responseBody: data,
-			error: errorMessage,
-			metrics: NetworkMetrics(
-				startTime: startedAt,
-				endTime: endTime,
-				bytesSent: Int64(httpBody?.count ?? 0),
-				bytesReceived: Int64(data?.count ?? 0)
-			)
-		)
-
-		Chronicle.instance.network.log(networkLog)
 	}
 }
 
