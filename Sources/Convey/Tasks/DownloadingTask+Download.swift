@@ -103,6 +103,7 @@ extension DownloadingTask {
 			info.wasCancelled = error.isCancellation
 			info.urlRequest = try? await self.request
 			info.error = error.localizedDescription
+			info.url = info.urlRequest?.url
 			echo(info, data: nil)
 			await didFail(with: error)
 			await info.save(file: file, function: function, line:line)
@@ -147,8 +148,10 @@ extension DownloadingTask {
 			echo(info, data: nil)
 			var thrownError = error
 			
-			if let statusCode = info.response?.statusCode, let newError = HTTPError.withStatusCode(statusCode, data: info.data, throwingStatusCategories: throwingStatusCategories, underlyingError: error) {
-				thrownError = newError
+			if let statusCode = info.response?.statusCode {
+				if let newError = HTTPError.withStatusCode(statusCode, data: info.data, throwingStatusCategories: throwingStatusCategories, underlyingError: error) {	thrownError = newError }
+				let statusFamily = (statusCode / 100) * 100
+				if !server.configuration.incompleteCategories.contains(statusFamily) { info.isComplete = true }
 			}
 
 			await didFail(with: thrownError)

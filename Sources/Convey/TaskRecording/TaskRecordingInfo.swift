@@ -26,6 +26,7 @@ import Foundation
 	var timeoutDuration = 30.0
 	var storedTaskData: Data?
 	var isComplete = false
+	var shouldPersist = false
 	
 	var separator = 		"\n##============================================================##\n"
 	var endSeparator = 	"\n################################################################\n"
@@ -61,15 +62,18 @@ import Foundation
 		method = task.method.rawValue.uppercased()
 		echoStyle = task.echoStyle
 		if let storable = task as? any StorableTask {
+			shouldPersist = true
 			storedTaskData = try? JSONEncoder().encode(storable)
 		}
 	}
 	
 	func save(file: String = #file, function: String = #function, line: Int = #line) async {
 		if echoStyle.contains(.onlyIfError), error == nil { return }
-		if !echoStyle.contains(.recorded) { return }
+		if url == nil || !echoStyle.contains(.recorded) { return }
 
-		logToChronicle(file: file, function: function, line: line)
+		if logToChronicle(file: file, function: function, line: line) {			// successfully logged
+			if isComplete || !shouldPersist { return }					// if we're complete, or we're not storable, we're done
+		}
 		if #available(iOS 17, macOS 14, watchOS 10, *) {
 			await TaskRecorder.instance.record(info: self)
 		}

@@ -35,6 +35,7 @@ import Foundation
 	var storableTaskData: Data?
 	var isComplete = false
 	var retryCount = 0
+	var lastRetriedAt: Date?
 	var retrySuccessfulAt: Date?
 	
 	func storableTask<T: StorableTask>(_ type: T.Type) -> T? {

@@ -53,6 +53,9 @@ extension RecordedTasksScreen.TaskList {
 						if task.retryCount > 1 {
 							Text("x \(task.retryCount)")
 						}
+						if let lastRetriedAt = task.lastRetriedAt {
+							Text("Last @ \(lastRetriedAt.formatted(date: .abbreviated, time: .complete))")
+						}
 					}
 					.font(.system(size: 12))
 				}

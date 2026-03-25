@@ -9,8 +9,8 @@ import Foundation
 import Chronicle
 
 extension TaskRecordingInfo {
-	func logToChronicle(file: String = #file, function: String = #function, line: Int = #line) {
-		guard #available(iOS 17, macOS 14, *), Chronicle.instance.isConfigured else { return }
+	func logToChronicle(file: String = #file, function: String = #function, line: Int = #line) -> Bool {
+		guard #available(iOS 17, macOS 14, *), Chronicle.instance.isConfigured, let url else { return false }
 		
 		let endTime = duration.map { startedAt.addingTimeInterval($0) }
 		let statusCode = response?.statusCode
@@ -24,28 +24,27 @@ extension TaskRecordingInfo {
 			}
 		}
 		
-		if let url {
-			Chronicle.network(
-				url: url,
-				method: method,
-				requestHeaders: request?.allHTTPHeaderFields,
-				requestBody: httpBody,
-				statusCode: statusCode,
-				responseHeaders: response?.allHeaderFields,
-				responseBody: data,
-				error: errorMessage,
-				wasCancelled: wasCancelled,
-				metrics: NetworkMetrics(
-					startTime: startedAt,
-					endTime: endTime ?? startedAt,
-					bytesSent: Int64(httpBody?.count ?? 0),
-					bytesReceived: Int64(data?.count ?? 0)
-				),
-				file: file,
-				function: function,
-				line: line
-			)
-		}
+		Chronicle.network(
+			url: url,
+			method: method,
+			requestHeaders: request?.allHTTPHeaderFields,
+			requestBody: httpBody,
+			statusCode: statusCode,
+			responseHeaders: response?.allHeaderFields,
+			responseBody: data,
+			error: errorMessage,
+			wasCancelled: wasCancelled,
+			metrics: NetworkMetrics(
+				startTime: startedAt,
+				endTime: endTime ?? startedAt,
+				bytesSent: Int64(httpBody?.count ?? 0),
+				bytesReceived: Int64(data?.count ?? 0)
+			),
+			file: file,
+			function: function,
+			line: line
+		)
+		return true
 	}
 }
 

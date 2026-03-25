@@ -21,6 +21,7 @@ extension TaskRecorder {
 			guard let task = record.storableTask(TaskType.self) else { continue }
 
 			do {
+				record.lastRetriedAt = .now
 				let _ = try await task.download(usingRecordedTaskID: record.uniqueID)
 				record.retrySuccessfulAt = .now
 				record.isComplete = true

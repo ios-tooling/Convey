@@ -24,6 +24,7 @@ public struct ServerConfiguration: Sendable {
 	public var pinExpiredToleranceInDays = 0.0
 	public var enableTaskLoggingAtLaunch = false
 	public var throwingStatusCategories = [400, 500]
+	public var incompleteCategories = [500]					// if a connection returns an incomplete status, it will be saved and retried (if it's a StorableTask)
 		
 	public static let defaultUserAgent = "\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)/\(Device.rawDeviceType)/CFNetwork/1325.0.1 Darwin/21.1.0"
 	
