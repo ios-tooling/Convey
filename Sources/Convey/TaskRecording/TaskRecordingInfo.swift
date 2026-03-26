@@ -69,7 +69,7 @@ import Foundation
 	
 	func save(file: String = #file, function: String = #function, line: Int = #line) async {
 		if echoStyle.contains(.onlyIfError), error == nil { return }
-		if url == nil || !echoStyle.contains(.recorded) { return }
+		if !echoStyle.contains(.recorded) { return }
 
 		if logToChronicle(file: file, function: function, line: line) {			// successfully logged
 			if isComplete || !shouldPersist { return }					// if we're complete, or we're not storable, we're done

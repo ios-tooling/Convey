@@ -12,8 +12,6 @@ import SwiftData
 extension RecordedTasksScreen {
 	struct TaskList: View {
 		let tasks: [RecordedTask]
-		let predicate: Predicate<RecordedTask>
-		let deletePredicate: Predicate<RecordedTask>
 		@Environment(\.modelContext) var modelContext
 		
 		var body: some View {
@@ -46,7 +44,14 @@ extension RecordedTasksScreen {
 				.toolbar {
 					ToolbarItem(id: "clear", placement: .destructiveAction) {
 						Button("Delete", systemImage: "trash") {
-							Task { await TaskRecorder.instance.clear(predicate: deletePredicate) }
+							for task in tasks where task.isComplete {
+								modelContext.delete(task)
+							}
+							do {
+								try modelContext.save()
+							} catch {
+								print("Failed to delete recorded tasks: \(error)")
+							}
 						}
 					}
 				}
@@ -66,11 +71,7 @@ extension RecordedTasksScreen {
 		}
 		
 		var body: some View {
-			TaskList(tasks: tasks, predicate:  #Predicate { task in
-				task.appLaunchedAt == sessionStartedAt
-			}, deletePredicate: #Predicate { task in
-				task.appLaunchedAt == sessionStartedAt && task.isComplete == true
-			})
+			TaskList(tasks: tasks)
 		}
 	}
 	
@@ -87,7 +88,7 @@ extension RecordedTasksScreen {
 		}
 		
 		var body: some View {
-			TaskList(tasks: tasks, predicate: #Predicate<RecordedTask> { task in task.name.localizedStandardContains(search) }, deletePredicate: #Predicate<RecordedTask> { task in task.name.localizedStandardContains(search) && task.isComplete == true })
+			TaskList(tasks: tasks)
 		}
 	}
 	
@@ -95,7 +96,7 @@ extension RecordedTasksScreen {
 		@Query( sort: \RecordedTask.startedAt, order: .reverse) var tasks: [RecordedTask]
 		
 		var body: some View {
-			TaskList(tasks: tasks, predicate: #Predicate<RecordedTask> { _ in true }, deletePredicate: #Predicate<RecordedTask> { task in task.isComplete == true })
+			TaskList(tasks: tasks)
 		}
 	}
 

@@ -101,9 +101,9 @@ extension DownloadingTask {
 			session.start()
 		} catch {
 			info.wasCancelled = error.isCancellation
-			info.urlRequest = try? await self.request
+			//info.urlRequest = try? await self.request
 			info.error = error.localizedDescription
-			info.url = info.urlRequest?.url
+			info.url = await self.url
 			echo(info, data: nil)
 			await didFail(with: error)
 			await info.save(file: file, function: function, line:line)
