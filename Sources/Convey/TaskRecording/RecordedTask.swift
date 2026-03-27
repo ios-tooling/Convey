@@ -7,6 +7,7 @@
 
 import SwiftData
 import Foundation
+import Chronicle
 
 @available(iOS 17, macOS 14, watchOS 10, *)
 @Model class RecordedTask {
@@ -41,7 +42,12 @@ import Foundation
 	func storableTask<T: StorableTask>(_ type: T.Type) -> T? {
 		guard let storableTaskData else { return nil }
 		
-		return try? JSONDecoder().decode(T.self, from: storableTaskData)
+		do {
+			return try JSONDecoder().decode(T.self, from: storableTaskData)
+		} catch {
+			Chronicle.error(error, severity: .error, context: ["entity": .string(String(describing: T.self))])
+			return nil
+		}
 	}
 	
 	var storableTask: (any StorableTask)? {

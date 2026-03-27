@@ -37,7 +37,11 @@ extension RecordedTasksScreen.TaskList {
 					} else if task.timedOut {
 						Text("⏰ \(task.timeoutDuration.formatted())")
 					} else if task.error != nil {
-						Text("⚠️")
+						if task.isComplete {
+							Text("✅")
+						} else {
+							Text("⚠️")
+						}
 					}
 					sizeWidget
 				}

@@ -82,7 +82,7 @@ struct RecordedTaskDetailScreen: View {
 	}
 	
 	func setupDisplay() {
-		self.attributedJSON = buildAttributedJSON()
+		self.attributedJSON = task.buildAttributedJSON(showingUpload: isShowingUpload)
 		self.json = buildRawJSON()
 		tempFileURL = URL.temporaryDirectory.appendingPathComponent(task.suggestedFilename)
 		do {
@@ -90,41 +90,6 @@ struct RecordedTaskDetailScreen: View {
 		} catch {
 			print("Failed to write JSON to \(tempFileURL): \(error)")
 		}
-	}
-	
-	func buildAttributedJSON() -> AttributedString {
-		var result = AttributedString("")
-		if let request = task.request {
-			result += AttributedString("     ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ REQUEST ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ \n\n")
-
-			result += request.attributedDescription
-			if task.isGzipped { result += AttributedString("\n(gzipped)") }
-			
-			if isShowingUpload, let upload = task.httpBody?.prettyJSON {
-				result += AttributedString(upload)
-				result += AttributedString("\n")
-			} else if let size = task.uploadSize, size > 0 {
-				result += AttributedString("\nUpload size: \(size.bytesString)")
-			}
-		}
-		
-		if let error = task.error {
-			var err = AttributedString("\nFailed: \(error)")
-			err.foregroundColor = .red
-			result += err
-		}
-		
-		if let code = task.statusCode {
-			result += AttributedString("\nStatus Code: \(code)")
-		}
-		if let response = task.data?.prettyJSON {
-			result += AttributedString("\n\n     ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ RESPONSE ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ \n\n")
-			result += AttributedString(response)
-			result += AttributedString("\n")
-		}
-		
-		return result
-
 	}
 	
 	func buildRawJSON() -> String {

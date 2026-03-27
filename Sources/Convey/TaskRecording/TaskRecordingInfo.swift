@@ -24,6 +24,7 @@ import Foundation
 	var wasCancelled = false
 	var echoStyle: TaskEchoStyle
 	var timeoutDuration = 30.0
+	var isRetry = false
 	var storedTaskData: Data?
 	var isComplete = false
 	var shouldPersist = false
@@ -61,6 +62,7 @@ import Foundation
 		taskDescription = String(describing: task)
 		method = task.method.rawValue.uppercased()
 		echoStyle = task.echoStyle
+		if id != nil { isRetry = true }
 		if let storable = task as? any StorableTask {
 			shouldPersist = true
 			storedTaskData = try? JSONEncoder().encode(storable)
@@ -72,7 +74,8 @@ import Foundation
 		if !echoStyle.contains(.recorded) { return }
 
 		if logToChronicle(file: file, function: function, line: line) {			// successfully logged
-			if isComplete || !shouldPersist { return }					// if we're complete, or we're not storable, we're done
+			if !shouldPersist { return }					// if we're complete, we're done
+			if isComplete, !isRetry { return }			// it's complete, and it's not a retry, we're also done
 		}
 		if #available(iOS 17, macOS 14, watchOS 10, *) {
 			await TaskRecorder.instance.record(info: self)
