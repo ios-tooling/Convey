@@ -14,7 +14,8 @@ import Foundation
 	let task: any DownloadingTask
 	let request: URLRequest
 	let ungzippedRequest: URLRequest?
-	var tag: String? { task.requestTag }
+	var requestID: String? { task.requestID }
+	var taskType: any DownloadingTask.Type { type(of: task) }
 	
 	nonisolated public func hash(into hasher: inout Hasher) {
 		hasher.combine(id)
@@ -24,12 +25,16 @@ import Foundation
 		lhs.id == rhs.id
 	}
 	
-	static func session(for tag: String) -> ConveySession? {
-		activeSessions.value.first { $0.tag == tag }
+	static func session(for requestID: String) -> ConveySession? {
+		activeSessions.value.first { $0.requestID == requestID }
 	}
 	
-	static func cancel(sessionWithTag tag: String) {
-		session(for: tag)?.cancel()
+	static func cancel(sessionWithRequestID requestID: String) {
+		session(for: requestID)?.cancel()
+	}
+	
+	static func sessions(withType type: any DownloadingTask.Type) -> [ConveySession] {
+		activeSessions.value.filter { $0.taskType == type }
 	}
 	
 	static let activeSessions = ConveyThreadsafeMutex<Set<ConveySession>>([])

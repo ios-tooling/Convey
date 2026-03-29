@@ -15,7 +15,7 @@ public struct Constants {
 		public static let contentEncoding = "Content-Encoding"
 		public static let contentLength = "Content-Length"
 		public static let acceptEncoding = "Accept-Encoding"
-		public static let tag = "X-Convey-RequestTag"
+		public static let requestID = "X-Convey-RequestID"
 		public static let userAgent = "User-Agent"
 		public static let ifNoneMatch = "If-None-Match"
 	}

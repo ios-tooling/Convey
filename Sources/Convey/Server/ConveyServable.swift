@@ -35,9 +35,15 @@ public extension ConveyServerable {
 	var defaultDecoder: JSONDecoder { configuration.defaultDecoder }
 	var downloadQueue: OperationQueue? { nil }
 	
-	func cancelTasks(with tags: [String]) async {
-		for tag in tags {
-			ConveySession.cancel(sessionWithTag: tag)
+	func cancelTasks(with requestIDs: [String]) async {
+		for requestID in requestIDs {
+			ConveySession.cancel(sessionWithRequestID: requestID)
+		}
+	}
+	
+	func cancelTasks(ofType type: any DownloadingTask.Type) async {
+		for session in ConveySession.sessions(withType: type) {
+			session.cancel()
 		}
 	}
 	

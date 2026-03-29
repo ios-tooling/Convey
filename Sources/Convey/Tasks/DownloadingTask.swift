@@ -22,7 +22,7 @@ import Foundation
 	var timeoutIntervalForResource: TimeInterval? { get }
 	var headers: Headers { get async throws }
 	var queryParameters: (any TaskQueryParameters)? { get async }
-	var requestTag: String? { get }
+	var requestID: String? { get }
 	var server: ConveyServerable { get }
 	var acceptType: String { get }
 	var throwingStatusCategories: [Int] { get }
@@ -63,7 +63,7 @@ public extension DownloadingTask {
 	var timeoutIntervalForResource: TimeInterval? { nil }
 	var headers: Headers { get async throws { [] }}
 	var queryParameters: (any TaskQueryParameters)? { nil }
-	var requestTag: String? { nil }
+	var requestID: String? { nil }
 	func retryInterval(afterError error: any Error, count: Int) -> TimeInterval? { nil }
 	var throwingStatusCategories: [Int] { configuration?.throwingStatusCategories ?? server.configuration.throwingStatusCategories }
 
