@@ -134,7 +134,7 @@ public actor TaskRecorder {
 		if let existing = context.fetch(taskID: info.uniqueID) {
 			existing.load(info: info)
 		} else {
-			if !context.shouldSaveTask(limit: limit) { return }
+			if !info.shouldPersist, !context.shouldSaveTask(limit: limit) { return }
 			let record = RecordedTask(info: info, launchedAt: appLaunchedAt)
 			record.sessionStartedAt = (sessionStartedAt ?? appLaunchedAt).timeIntervalSinceReferenceDate
 			context.insert(record)
