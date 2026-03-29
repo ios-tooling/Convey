@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import TagAlong
 
 public struct TaskConfiguration: Sendable {
-	enum CodingKeys: String, CodingKey { case timeout, headers, localSourceURL, echoStyle, gzip, throwingStatusCategories }
+	enum CodingKeys: String, CodingKey { case timeout, headers, localSourceURL, echoStyle, gzip, throwingStatusCategories, tags }
 	
 	public var timeout: TimeInterval?
 	public var headers: Headers?
@@ -18,10 +19,11 @@ public struct TaskConfiguration: Sendable {
 	public var gzip: Bool?
 	public var queryParameters: (any TaskQueryParameters)?
 	public var throwingStatusCategories: [Int]?
+	public var tags: TagCollection?
 
 	public static let `default` = TaskConfiguration(gzip: true)
 	
-	public init(timeout: TimeInterval? = nil, headers: Headers? = nil, cookies: [HTTPCookie]? = nil, localSourceURL: URL? = nil, echoStyle: TaskEchoStyle? = nil, gzip: Bool? = nil, queryParameters: (any TaskQueryParameters)? = nil, throwingStatusCategories: [Int]? = nil) {
+	public init(timeout: TimeInterval? = nil, headers: Headers? = nil, cookies: [HTTPCookie]? = nil, localSourceURL: URL? = nil, echoStyle: TaskEchoStyle? = nil, gzip: Bool? = nil, queryParameters: (any TaskQueryParameters)? = nil, throwingStatusCategories: [Int]? = nil, tags: TagCollection? = nil) {
 		
 		self.timeout = timeout
 		self.headers = headers
@@ -31,6 +33,7 @@ public struct TaskConfiguration: Sendable {
 		self.gzip = gzip
 		self.queryParameters = queryParameters
 		self.throwingStatusCategories = throwingStatusCategories
+		self.tags = tags
 	}
 }
 
@@ -48,6 +51,9 @@ extension TaskConfiguration: Codable {
 		try container.encode(echoStyle, forKey: .echoStyle)
 		try container.encode(gzip, forKey: .gzip)
 		try container.encode(throwingStatusCategories, forKey: .throwingStatusCategories)
+		if let tagArray = tags?.tags {
+			try container.encode(tagArray, forKey: .tags)
+		}
 	}
 	
 	public init(from decoder: any Decoder) throws {
@@ -65,6 +71,7 @@ extension TaskConfiguration: Codable {
 		echoStyle = try container.decodeIfPresent(TaskEchoStyle.self, forKey: .echoStyle)
 		gzip = try container.decodeIfPresent(Bool.self, forKey: .gzip)
 		throwingStatusCategories = try container.decodeIfPresent([Int].self, forKey: .throwingStatusCategories)
+		tags = try container.decodeIfPresent([Tag].self, forKey: .tags)
 	}
 }
 
@@ -78,6 +85,7 @@ extension TaskConfiguration {
 		if let sourceURL = other.localSourceURL { result.localSourceURL = sourceURL }
 		if let echoStyle = other.echoStyle { result.echoStyle = echoStyle }
 		if let gzip = other.gzip { result.gzip = gzip }
+		if let tags = other.tags { result.tags = (self.tags?.tags ?? []) + tags.tags }
 		result.throwingStatusCategories = (throwingStatusCategories ?? []) + (other.throwingStatusCategories ?? [])
 		result.queryParameters = queryParameters + other.queryParameters
 

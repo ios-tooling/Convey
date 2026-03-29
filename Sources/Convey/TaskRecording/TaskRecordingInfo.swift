@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import TagAlong
 
 @ConveyActor public struct TaskRecordingInfo: Sendable, Codable {
 	var uniqueID: String
@@ -28,6 +29,7 @@ import Foundation
 	var storedTaskData: Data?
 	var isComplete = false
 	var shouldPersist = false
+	var tags: [Tag]?
 	
 	var separator = 		"\n##============================================================##\n"
 	var endSeparator = 	"\n################################################################\n"
@@ -62,6 +64,7 @@ import Foundation
 		taskDescription = String(describing: task)
 		method = task.method.rawValue.uppercased()
 		echoStyle = task.echoStyle
+		tags = task.allTags
 		if id != nil { isRetry = true }
 		if let storable = task as? any StorableTask {
 			shouldPersist = true

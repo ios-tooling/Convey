@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import TagAlong
 
 public extension DownloadingTask {
 	func timeout(_ value: TimeInterval) -> Self {
@@ -61,6 +62,13 @@ public extension DownloadingTask {
 		var task = self
 		if task.configuration == nil { task.configuration = .default }
 		task.configuration?.queryParameters = value
+		return task
+	}
+	
+	func tags(_ value: TagCollection?) -> Self {
+		var task = self
+		if task.configuration == nil { task.configuration = .default }
+		task.configuration?.tags = value
 		return task
 	}
 }

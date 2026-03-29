@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import TagAlong
 
 @ConveyActor public protocol DownloadingTask<DownloadPayload>: Sendable {
 	associatedtype DownloadPayload: Decodable & Sendable
@@ -34,6 +35,7 @@ import Foundation
 	func didFinish(with response: ServerResponse<DownloadPayload>) async
 	var echoStyle: TaskEchoStyle { get }
 	func echoStyle(for data: Data?) -> TaskEchoStyle
+	var tags: TagCollection? { get }
 }
 
 public protocol DataDownloadingTask: DownloadingTask where DownloadPayload == Data { }
@@ -64,14 +66,18 @@ public extension DownloadingTask {
 	var headers: Headers { get async throws { [] }}
 	var queryParameters: (any TaskQueryParameters)? { nil }
 	var requestID: String? { nil }
+	var tags: TagCollection? { nil }
 	func retryInterval(afterError error: any Error, count: Int) -> TimeInterval? { nil }
 	var throwingStatusCategories: [Int] { configuration?.throwingStatusCategories ?? server.configuration.throwingStatusCategories }
-
+	
 	func willSendRequest(request: URLRequest) async throws { }
 	func didReceiveResponse(response: URLResponse, data: Data) async throws { }
 	func didFail(with error: any Error) async { }
 	func didFinish(with response: ServerResponse<DownloadPayload>) async { }
 	
 	var acceptType: String { "*/*" }
-
+	var allTags: [Tag]? {
+		let all = (tags?.tags ?? []) + (configuration?.tags?.tags ?? [])
+		return all.isEmpty ? nil : all
+	}
 }

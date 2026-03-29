@@ -40,6 +40,7 @@ extension TaskRecordingInfo {
 				bytesSent: Int64(httpBody?.count ?? 0),
 				bytesReceived: Int64(data?.count ?? 0)
 			),
+			tags: tags,
 			file: file,
 			function: function,
 			line: line

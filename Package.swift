@@ -18,12 +18,13 @@ let package = Package(
 	 ],
 	 dependencies: [
 		.package(url: "https://github.com/ios-tooling/JohnnyCache.git", from: "1.0.14"),
-		.package(url: "https://github.com/ios-tooling/Chronicle/", from: "0.0.7"),
+		.package(url: "https://github.com/ios-tooling/Chronicle/", from: "0.0.11"),
+		.package(url: "https://github.com/ios-tooling/TagAlong/", from: "0.0.3"),
 	 ],
 	 targets: [
 		  // Targets are the basic building blocks of a package. A target can define a module or a test suite.
 		  // Targets can depend on other targets in this package, and on products in packages which this package depends on.
-		  .target(name: "Convey", dependencies: ["system-zlib", "JohnnyCache", "Chronicle"]),
+		  .target(name: "Convey", dependencies: ["system-zlib", "JohnnyCache", "Chronicle", "TagAlong"]),
 		  .target(name: "system-zlib"),
 		  .testTarget(name: "ConveyTests", dependencies: ["Convey"], resources: [.copy("test_assets.xcassets")]),
 	 ]
