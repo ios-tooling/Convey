@@ -60,21 +60,28 @@ extension DownloadingTask {
 	func download(usingRecordedTaskID id: String?, file: String = #file, function: String = #function, line: Int = #line) async throws -> ServerResponse<DownloadPayload> {
 		let result = try await performDownload(usingRecordedTaskID: id, file: file, function: function, line: line)
 		
-		if DownloadPayload.self == Data.self, let result = result as? ServerResponse<DownloadPayload>, let payload = result.data as? DownloadPayload {
-			if #available(iOS 17, macOS 14, watchOS 10, *) {
-				await TaskObserver.instance.didComplete(self, payload: payload)
+		do {
+			if DownloadPayload.self == Data.self, let result = result as? ServerResponse<DownloadPayload>, let payload = result.data as? DownloadPayload {
+				if #available(iOS 17, macOS 14, watchOS 10, *) {
+					await TaskObserver.instance.didComplete(self, payload: payload)
+				}
+				await didFinish(with: result)
+				return .init(payload: payload, request: result.request, response: result.response, data: result.data, startedAt: result.startedAt, duration: result.duration, attemptNumber: result.attemptNumber)
 			}
-			await didFinish(with: result)
-			return .init(payload: payload, request: result.request, response: result.response, data: result.data, startedAt: result.startedAt, duration: result.duration, attemptNumber: result.attemptNumber)
+			
+			let decoded: ServerResponse<DownloadPayload> = try result.decoding(using: decoder)
+			await didFinish(with: decoded)
+			
+			if #available(iOS 17, macOS 14, watchOS 10, *) {
+				await TaskObserver.instance.didComplete(self, payload: decoded.payload)
+			}
+			return decoded
+		} catch {
+			if #available(iOS 17, macOS 14, watchOS 10, *) {
+				await TaskObserver.instance.didFail(self, with: error)
+			}
+			throw error
 		}
-		
-		let decoded: ServerResponse<DownloadPayload> = try result.decoding(using: decoder)
-		await didFinish(with: decoded)
-
-		if #available(iOS 17, macOS 14, watchOS 10, *) {
-			await TaskObserver.instance.didComplete(self, payload: decoded.payload)
-		}
-		return decoded
 	}
 	
 	func downloadData(usingRecordedTaskID id: String?, file: String = #file, function: String = #function, line: Int = #line) async throws -> ServerResponse<Data> {
