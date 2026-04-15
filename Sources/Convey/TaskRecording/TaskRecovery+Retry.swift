@@ -1,5 +1,5 @@
 //
-//  RecordedTask+Retry.swift
+//  TaskRecovery+Retry.swift
 //  Convey
 //
 //  Created by Ben Gottlieb on 3/12/26.
@@ -9,9 +9,9 @@ import Foundation
 import SwiftData
 
 @available(iOS 17, macOS 14, watchOS 10, *)
-extension TaskRecorder {
+extension TaskRecovery {
 	public func pendingTaskCount<TaskType: StorableTask>(ofType: TaskType.Type) -> Int {
-		guard let container else { return 0 }
+		guard let container = TaskRecorder.instance.container else { return 0 }
 		let ctx = ModelContext(container)
 		let name = String(describing: TaskType.self)
 		let predicate = #Predicate<RecordedTask> { $0.isComplete == false && $0.name == name }
@@ -19,7 +19,7 @@ extension TaskRecorder {
 	}
 
 	public func printPendingTaskSummary() {
-		guard let container else { return }
+		guard let container = TaskRecorder.instance.container else { return }
 		let ctx = ModelContext(container)
 
 		for (name, _) in storableTaskTypes {
@@ -32,7 +32,7 @@ extension TaskRecorder {
 	}
 
 	public func retryAllTasks<TaskType: StorableTask>(ofType: TaskType.Type) async {
-		guard let container else { return }
+		guard let container = TaskRecorder.instance.container else { return }
 		let ctx = ModelContext(container)
 		let name = String(describing: TaskType.self)
 		let predicate = #Predicate<RecordedTask> { $0.isComplete == false && $0.name == name }

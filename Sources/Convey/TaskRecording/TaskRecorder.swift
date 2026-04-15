@@ -27,9 +27,7 @@ public actor TaskRecorder {
 	
 	var appLaunchedAt = Date()
 	var sessionStartedAt: Date?
-	var retryCallback: (() async -> Void)?
 	
-	var storableTaskTypes: [String: any StorableTask.Type] = [:]
 	
 	public func setup() {
 		#if os(iOS) || os(visionOS)
@@ -37,24 +35,13 @@ public actor TaskRecorder {
 			notificationTokens.append(NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main, using: { _ in
 				Task {
 					await self.startNewSession()
-					await self.retryAllFailedTasks()
+					await TaskRecovery.instance.retryAllFailedTasks()
 				}
 			}))
 			updateTaskCount()
 		#endif
 	}
-	
-	public func setRetryCallback(_ callback: @escaping () async -> Void) {
-		retryCallback = callback
-		Task {
-			await self.retryAllFailedTasks()
-		}
-	}
-	
-	public func retryAllFailedTasks() async {
-		await retryCallback?()
-	}
-	
+
 	nonisolated public func setSaveTaskLimit(_ limit: Limit = .days(7)) {
 		Task { await self._setSaveTaskLimit(limit) }
 	}

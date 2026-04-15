@@ -52,7 +52,7 @@ import Chronicle
 	
 	var storableTask: (any StorableTask)? {
 		get async {
-			await TaskRecorder.instance.rebuildTask(data: storableTaskData, name: name)
+			await TaskRecovery.instance.rebuildTask(data: storableTaskData, name: name)
 		}
 	}
 	
