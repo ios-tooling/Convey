@@ -8,5 +8,5 @@
 import Foundation
 
 public enum HTTPMethod: String, Sendable, Codable {
-	case get, post, put, patch, delete
+	case get, post, put, patch, delete, head
 }
