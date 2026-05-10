@@ -111,10 +111,12 @@ extension DownloadingTask {
 			//info.urlRequest = try? await self.request
 			info.error = error.localizedDescription
 			info.url = await self.url
-			echo(info, data: nil)
 			await didFail(with: error)
-			await info.save(file: file, function: function, line:line)
-
+			if server.configuration.logCancelledTasks || !info.wasCancelled {
+				echo(info, data: nil)
+				await info.save(file: file, function: function, line:line)
+			}
+			
 			throw error
 		}
 
@@ -151,8 +153,7 @@ extension DownloadingTask {
 			info.error = error.prettyDescription
 			info.wasCancelled = error.isCancellation
 			info.timedOut = error.isTimeOut
-			info.wasCancelled = error.isCancellation
-			echo(info, data: nil)
+			if server.configuration.logCancelledTasks || !info.wasCancelled { echo(info, data: nil) }
 			var thrownError = error
 			
 			if let statusCode = info.response?.statusCode {
@@ -162,7 +163,9 @@ extension DownloadingTask {
 			}
 
 			await didFail(with: thrownError)
-			await info.save(file: file, function: function, line:line)
+			if server.configuration.logCancelledTasks || !info.wasCancelled {
+				await info.save(file: file, function: function, line:line)
+			}
 			await server.didFinish(task: self, response: nil, error: thrownError)
 			if #available(iOS 17, macOS 14, watchOS 10, *) {
 				await TaskObserver.instance.didFail(self, with: thrownError)

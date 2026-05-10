@@ -13,6 +13,7 @@ public struct ServerConfiguration: Sendable {
 	public var urlSessionConfiguration = URLSessionConfiguration.default
 	public var enableGZipDownloads = true
 	public var enableGZipUploads = false
+	public var logCancelledTasks = false
 	public var defaultTimeout = 30.0
 	public var allowsExpensiveNetworkAccess = true
 	public var allowsConstrainedNetworkAccess = true
