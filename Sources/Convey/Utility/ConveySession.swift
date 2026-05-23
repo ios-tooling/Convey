@@ -46,7 +46,12 @@ import Foundation
 			self.request = try await task.request
 			self.ungzippedRequest = task.shouldGZIPUploads ? try await task.gzipped(false).request : nil
 			
-			let configuration = URLSessionConfiguration.default
+			// Copy the server-provided configuration so per-task tweaks
+			// (timeouts, expensive-network policy) don't mutate the shared
+			// template. Callers can plug in `.ephemeral` or any other variant
+			// via `server.configuration.urlSessionConfiguration`.
+			let baseConfig = server.configuration.urlSessionConfiguration
+			let configuration = (baseConfig.copy() as? URLSessionConfiguration) ?? URLSessionConfiguration.default
 			let taskConfig = task.configuration
 			
 			if let expensive = task.allowsExpensiveNetworkAccess { configuration.allowsExpensiveNetworkAccess = expensive }
