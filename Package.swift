@@ -6,9 +6,9 @@ import PackageDescription
 let package = Package(
 	 name: "Convey",
 	  platforms: [
-		.iOS(.v14),
+		.iOS(.v17),
 		.macOS(.v14),
-		.watchOS(.v7)
+		.watchOS(.v10)
 	  ],
 	 products: [
 		  // Products define the executables and libraries produced by a package, and make them visible to other packages.
