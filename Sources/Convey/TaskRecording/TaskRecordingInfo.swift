@@ -30,6 +30,7 @@ import TagAlong
 	var isComplete = false
 	var shouldPersist = false
 	var tags: [Tag]?
+	var redactedHeaderNames: Set<String> = []
 	
 	var separator = 		"\n##============================================================##\n"
 	var endSeparator = 	"\n################################################################\n"
@@ -37,7 +38,9 @@ import TagAlong
 	var urlRequest: URLRequest? {
 		get { nil }
 		set { if let newValue {
-			request = .init(newValue, includingBody: false)
+			var recorded = CodableURLRequest(newValue, includingBody: false)
+			recorded.redact(headersNamed: redactedHeaderNames)
+			request = recorded
 			httpBody = newValue.httpBody
 		}}
 	}
@@ -46,14 +49,20 @@ import TagAlong
 		get { request?.request(withData: httpBody) }
 		set { if let newValue {
 			isGzipped = true
-			request = .init(newValue, includingBody: false)
+			var recorded = CodableURLRequest(newValue, includingBody: false)
+			recorded.redact(headersNamed: redactedHeaderNames)
+			request = recorded
 			httpBody = newValue.httpBody
 		}}
 	}
 
 	var urlResponse: URLResponse? {
 		get { response?.response }
-		set { if let newValue { response = .init(newValue) }}
+		set { if let newValue {
+			var recorded = CodableURLResponse(newValue)
+			recorded.redact(headersNamed: redactedHeaderNames)
+			response = recorded
+		}}
 	}
 
 	var data: Data?
@@ -65,6 +74,7 @@ import TagAlong
 		method = task.method.rawValue.uppercased()
 		echoStyle = task.echoStyle
 		tags = task.allTags
+		redactedHeaderNames = task.allRedactedHeaderNames
 		if id != nil { isRetry = true }
 		if let storable = task as? any StorableTask {
 			shouldPersist = true

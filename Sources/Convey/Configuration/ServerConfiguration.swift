@@ -21,6 +21,7 @@ public struct ServerConfiguration: Sendable {
 	public var maxLoggedDownloadSize = 1024 * 1024 * 10
 	public var maxLoggedUploadSize = 1024 * 4
 	public var defaultHeaders: Headers = [:]
+	public var redactedHeaders: Set<String> = ["Authorization", "Proxy-Authorization", "Cookie", "Set-Cookie", "X-API-Key"]
 	public var userAgent: String? = Self.defaultUserAgent
 	public var pinExpiredToleranceInDays = 0.0
 	public var enableTaskLoggingAtLaunch = false

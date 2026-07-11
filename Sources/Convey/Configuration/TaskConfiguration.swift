@@ -9,10 +9,11 @@ import Foundation
 import TagAlong
 
 public struct TaskConfiguration: Sendable {
-	enum CodingKeys: String, CodingKey { case timeout, headers, localSourceURL, echoStyle, gzip, throwingStatusCategories, tags }
-	
+	enum CodingKeys: String, CodingKey { case timeout, headers, localSourceURL, echoStyle, gzip, throwingStatusCategories, tags, redactedHeaders }
+
 	public var timeout: TimeInterval?
 	public var headers: Headers?
+	public var redactedHeaders: Set<String>?
 	public var cookies: [HTTPCookie]?
 	public var localSourceURL: URL?
 	public var echoStyle: TaskEchoStyle?
@@ -22,11 +23,12 @@ public struct TaskConfiguration: Sendable {
 	public var tags: TagCollection?
 
 	public static let `default` = TaskConfiguration(gzip: true)
-	
-	public init(timeout: TimeInterval? = nil, headers: Headers? = nil, cookies: [HTTPCookie]? = nil, localSourceURL: URL? = nil, echoStyle: TaskEchoStyle? = nil, gzip: Bool? = nil, queryParameters: (any TaskQueryParameters)? = nil, throwingStatusCategories: [Int]? = nil, tags: TagCollection? = nil) {
-		
+
+	public init(timeout: TimeInterval? = nil, headers: Headers? = nil, cookies: [HTTPCookie]? = nil, localSourceURL: URL? = nil, echoStyle: TaskEchoStyle? = nil, gzip: Bool? = nil, queryParameters: (any TaskQueryParameters)? = nil, throwingStatusCategories: [Int]? = nil, tags: TagCollection? = nil, redactedHeaders: Set<String>? = nil) {
+
 		self.timeout = timeout
 		self.headers = headers
+		self.redactedHeaders = redactedHeaders
 		self.cookies = cookies
 		self.localSourceURL = localSourceURL
 		self.echoStyle = echoStyle
@@ -51,6 +53,7 @@ extension TaskConfiguration: Codable {
 		try container.encode(echoStyle, forKey: .echoStyle)
 		try container.encode(gzip, forKey: .gzip)
 		try container.encode(throwingStatusCategories, forKey: .throwingStatusCategories)
+		try container.encode(redactedHeaders, forKey: .redactedHeaders)
 		if let tagArray = tags?.tags {
 			try container.encode(tagArray, forKey: .tags)
 		}
@@ -71,6 +74,7 @@ extension TaskConfiguration: Codable {
 		echoStyle = try container.decodeIfPresent(TaskEchoStyle.self, forKey: .echoStyle)
 		gzip = try container.decodeIfPresent(Bool.self, forKey: .gzip)
 		throwingStatusCategories = try container.decodeIfPresent([Int].self, forKey: .throwingStatusCategories)
+		redactedHeaders = try container.decodeIfPresent(Set<String>.self, forKey: .redactedHeaders)
 		tags = try container.decodeIfPresent([Tag].self, forKey: .tags)
 	}
 }
@@ -81,6 +85,7 @@ extension TaskConfiguration {
 		
 		if let timeout = other.timeout { result.timeout = timeout }
 		if let headers = other.headers { result.headers = headers + (self.headers ?? []) }
+		if let redacted = other.redactedHeaders { result.redactedHeaders = (self.redactedHeaders ?? []).union(redacted) }
 		if let cookies = other.cookies { result.cookies = cookies + (self.cookies ?? []) }
 		if let sourceURL = other.localSourceURL { result.localSourceURL = sourceURL }
 		if let echoStyle = other.echoStyle { result.echoStyle = echoStyle }

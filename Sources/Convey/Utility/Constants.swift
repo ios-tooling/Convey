@@ -9,6 +9,7 @@ import Foundation
 
 public struct Constants {
 	public static let applicationJson = "application/json"
+	public static let redactedValue = "<redacted>"
 	public struct Headers {
 		public static let contentType = "Content-Type"
 		public static let accept = "Accept"

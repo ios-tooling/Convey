@@ -21,7 +21,7 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 	public let requiresDNSSECValidation: Bool?
 	public let allowsPersistentDNS: Bool?
 	public let httpMethod: String?
-	public let allHTTPHeaderFields: [String: String]?
+	public private(set) var allHTTPHeaderFields: [String: String]?
 	public let httpBody: Data?
 	public let httpShouldHandleCookies: Bool?
 	public let cookiePartitionIdentifier: String?
@@ -55,6 +55,15 @@ public struct CodableURLRequest: Codable, Sendable, CustomStringConvertible {
 		return request
 	}
 	
+	mutating func redact(headersNamed names: Set<String>) {
+		guard let headers = allHTTPHeaderFields, !names.isEmpty else { return }
+		let lowercased = Set(names.map { $0.lowercased() })
+
+		allHTTPHeaderFields = headers.reduce(into: [:]) { result, header in
+			result[header.key] = lowercased.contains(header.key.lowercased()) ? Constants.redactedValue : header.value
+		}
+	}
+
 	func header(for key: String) -> String {
 		guard let raw = allHTTPHeaderFields?[key] else { return "" }
 		let truncateLength = 50

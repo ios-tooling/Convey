@@ -14,7 +14,16 @@ public struct CodableURLResponse: Codable, Sendable, CustomStringConvertible {
 	public let textEncodingName: String?
 	public let suggestedFilename: String?
 	public let statusCode: Int?
-	public let allHeaderFields: [String: String]?
+	public private(set) var allHeaderFields: [String: String]?
+
+	mutating func redact(headersNamed names: Set<String>) {
+		guard let headers = allHeaderFields, !names.isEmpty else { return }
+		let lowercased = Set(names.map { $0.lowercased() })
+
+		allHeaderFields = headers.reduce(into: [:]) { result, header in
+			result[header.key] = lowercased.contains(header.key.lowercased()) ? Constants.redactedValue : header.value
+		}
+	}
 	
 	public var response: URLResponse? {
 		guard let url, let statusCode else { return nil }

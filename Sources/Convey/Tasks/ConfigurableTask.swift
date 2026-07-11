@@ -22,6 +22,13 @@ public extension DownloadingTask {
 		task.configuration?.headers = value
 		return task
 	}
+
+	func redactedHeaders(_ value: Set<String>) -> Self {
+		var task = self
+		if task.configuration == nil { task.configuration = .default }
+		task.configuration?.redactedHeaders = value
+		return task
+	}
 	
 	func cookies(_ value: [HTTPCookie]) -> Self {
 		var task = self

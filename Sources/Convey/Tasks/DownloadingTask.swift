@@ -22,6 +22,7 @@ import TagAlong
 	var timeoutIntervalForRequest: TimeInterval? { get }
 	var timeoutIntervalForResource: TimeInterval? { get }
 	var headers: Headers { get async throws }
+	var redactedHeaders: Set<String> { get }
 	var queryParameters: (any TaskQueryParameters)? { get async }
 	var requestID: String? { get }
 	var server: ConveyServerable { get }
@@ -64,6 +65,7 @@ public extension DownloadingTask {
 	var timeoutIntervalForRequest: TimeInterval? { server.configuration.defaultTimeout }
 	var timeoutIntervalForResource: TimeInterval? { nil }
 	var headers: Headers { get async throws { [] }}
+	var redactedHeaders: Set<String> { [] }
 	var queryParameters: (any TaskQueryParameters)? { nil }
 	var requestID: String? { nil }
 	var tags: TagCollection? { nil }
@@ -76,6 +78,11 @@ public extension DownloadingTask {
 	func didFinish(with response: ServerResponse<DownloadPayload>) async { }
 	
 	var acceptType: String { "*/*" }
+	var allRedactedHeaderNames: Set<String> {
+		server.configuration.redactedHeaders
+			.union(configuration?.redactedHeaders ?? [])
+			.union(redactedHeaders)
+	}
 	var allTags: [Tag]? {
 		let all = (tags?.tags ?? []) + (configuration?.tags?.tags ?? [])
 		return all.isEmpty ? nil : all
