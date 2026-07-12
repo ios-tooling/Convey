@@ -28,7 +28,21 @@ public struct ServerConfiguration: Sendable {
 	public var throwingStatusCategories = [400, 500]
 	public var incompleteCategories = [500]					// if a connection returns an incomplete status, it will be saved and retried (if it's a StorableTask)
 		
-	public static let defaultUserAgent = "\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)/\(Device.rawDeviceType)/CFNetwork/1325.0.1 Darwin/21.1.0"
+	public static let defaultUserAgent: String = {
+		var components: [String] = []
+		if !Bundle.main.name.isEmpty {
+			components.append("\(Bundle.main.name)/\(Bundle.main.version).\(Bundle.main.buildNumber)")
+		}
+		if !Device.rawDeviceType.isEmpty { components.append(Device.rawDeviceType) }
+		if let cfNetworkVersion = Bundle(identifier: "com.apple.CFNetwork")?.infoDictionary?["CFBundleVersion"] as? String {
+			components.append("CFNetwork/\(cfNetworkVersion)")
+		}
+		var systemInfo = utsname()
+		uname(&systemInfo)
+		let darwinVersion = withUnsafeBytes(of: systemInfo.release) { String(decoding: $0.prefix(while: { $0 != 0 }), as: UTF8.self) }
+		components.append("Darwin/\(darwinVersion)")
+		return components.joined(separator: " ")
+	}()
 	
 	public static let `default` = ServerConfiguration()
 

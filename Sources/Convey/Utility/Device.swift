@@ -16,7 +16,8 @@ enum Device {
 				let cfstr = "model" as CFString
 				if let model = IORegistryEntryCreateCFProperty(service, cfstr, kCFAllocatorDefault, 0).takeUnretainedValue() as? Data {
 				  if let nsstr =  String(data: model, encoding: .utf8) {
-						  return nsstr
+						  // the registry data is a NUL-terminated C string; strip the terminator and any other control characters so the value is safe in HTTP headers
+						  return nsstr.trimmingCharacters(in: .controlCharacters)
 					 }
 				}
 			}
