@@ -92,7 +92,12 @@ extension ConveySession {
 		
 		while true {
 			do {
-				let (data, response) = try await session.data(for: request)
+				let (data, response): (Data, URLResponse)
+				if let requiredInterface = server.configuration.requiredNetworkInterface {
+					(data, response) = try await NetworkInterfaceHTTPClient(requiredInterface: requiredInterface).data(for: request)
+				} else {
+					(data, response) = try await session.data(for: request)
+				}
 				return (data, response, attemptNumber + 1, HTTPError.withResponse(response, data: data, throwingStatusCategories: task.throwingStatusCategories))
 			} catch let error {
 				attemptNumber += 1

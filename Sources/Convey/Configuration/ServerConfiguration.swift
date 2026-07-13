@@ -7,6 +7,17 @@
 
 import Foundation
 
+/// Constrains Convey requests to a specific network interface when the system's
+/// normal route selection is not appropriate (for example, cellular cloud traffic
+/// while Wi-Fi remains connected to a local instrument).
+public enum ConveyNetworkInterface: String, Codable, CaseIterable, Sendable {
+	case cellular
+	case wifi
+	case wiredEthernet
+	case loopback
+	case other
+}
+
 public struct ServerConfiguration: Sendable {
 	public var defaultEncoder = JSONEncoder()
 	public var defaultDecoder = JSONDecoder()
@@ -18,6 +29,7 @@ public struct ServerConfiguration: Sendable {
 	public var allowsExpensiveNetworkAccess = true
 	public var allowsConstrainedNetworkAccess = true
 	public var waitsForConnectivity = true
+	public var requiredNetworkInterface: ConveyNetworkInterface?
 	public var maxLoggedDownloadSize = 1024 * 1024 * 10
 	public var maxLoggedUploadSize = 1024 * 4
 	public var defaultHeaders: Headers = [:]
