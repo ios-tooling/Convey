@@ -28,6 +28,11 @@ import TagAlong
 	var server: ConveyServerable { get }
 	var acceptType: String { get }
 	var throwingStatusCategories: [Int] { get }
+	/// Return a delay to retry after `error`, or nil to give up (the
+	/// default). Consulted for transport errors and for throwing HTTP
+	/// statuses (an `HTTPErrorType` carrying the status code and body —
+	/// check it to retry, say, 429/5xx but not 404). `count` starts at 1
+	/// and increments per retry; the final error is surfaced when nil.
 	func retryInterval(afterError error: any Error, count: Int) -> TimeInterval?
 
 	func willSendRequest(request: URLRequest) async throws

@@ -89,7 +89,7 @@ import Foundation
 extension ConveySession {
 	func fetchData() async throws -> (Data, URLResponse, Int, Error?) {
 		var attemptNumber = 0
-		
+
 		while true {
 			do {
 				let (data, response): (Data, URLResponse)
@@ -98,21 +98,36 @@ extension ConveySession {
 				} else {
 					(data, response) = try await session.data(for: request)
 				}
-				return (data, response, attemptNumber + 1, HTTPError.withResponse(response, data: data, throwingStatusCategories: task.throwingStatusCategories))
+				// A throwing HTTP status (4xx/5xx by default) consults the task's
+				// retryInterval just like a transport error, so rate limits and
+				// server hiccups back off and retry in one place.
+				if let httpError = HTTPError.withResponse(response, data: data, throwingStatusCategories: task.throwingStatusCategories) {
+					attemptNumber += 1
+					if let delay = task.retryInterval(afterError: httpError, count: attemptNumber) {
+						try await retryDelay(delay)
+						continue
+					}
+					return (data, response, attemptNumber, httpError)
+				}
+				return (data, response, attemptNumber + 1, nil)
 			} catch let error {
 				attemptNumber += 1
 				if let delay = task.retryInterval(afterError: error, count: attemptNumber) {
-					if #available(iOS 16.0, macOS 13, *) {
-						try await Task.sleep(for: .seconds(delay))
-					} else {
-						try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-					}
+					try await retryDelay(delay)
 					continue
 				}
 				guard let urlError = error as? URLError else { throw error }
 				guard urlError.code == .timedOut else { throw error }
 				throw URLError(.timedOut)
 			}
+		}
+	}
+
+	private func retryDelay(_ delay: TimeInterval) async throws {
+		if #available(iOS 16.0, macOS 13, *) {
+			try await Task.sleep(for: .seconds(delay))
+		} else {
+			try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
 		}
 	}
 }
