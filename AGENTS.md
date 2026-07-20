@@ -1,4 +1,4 @@
-# CLAUDE.md
+# Convey Repository Guide
 
 This file provides guidance to coding agents working in this repository. Keep `AGENTS.md` and `CLAUDE.md` identical so every agent receives the same project instructions.
 
