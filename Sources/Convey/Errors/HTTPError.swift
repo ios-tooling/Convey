@@ -33,8 +33,12 @@ struct HTTPError {
 		switch statusFamily {
 		case 200: return Optional<UnknownError>.none
 			
-		case 400: return ClientError(statusCode: code, data: data, error: underlyingError)
-		case 500: return ServerError(statusCode: code, data: data, error: underlyingError)
+		case 400:
+			return ClientError(statusCode: code, data: data, error: underlyingError)
+				?? UnknownError(statusCode: code, data: data, underlyingError: underlyingError)
+		case 500:
+			return ServerError(statusCode: code, data: data, error: underlyingError)
+				?? UnknownError(statusCode: code, data: data, underlyingError: underlyingError)
 			
 		default: break
 		}
@@ -55,4 +59,3 @@ extension HTTPErrorType {
 		return "HTTP Error (\(statusCode))"
 	}
 }
-

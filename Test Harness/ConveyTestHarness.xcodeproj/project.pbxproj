@@ -614,7 +614,7 @@
 /* Begin XCLocalSwiftPackageReference section */
 		B5528B2C2E2C372A002F9728 /* XCLocalSwiftPackageReference "../Convey" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ../Convey;
+			relativePath = ..;
 		};
 /* End XCLocalSwiftPackageReference section */
 

@@ -22,8 +22,8 @@ public extension DownloadingTask {
 			session.start()
 		} catch {
 			info.wasCancelled = error.isCancellation
-			info.error = error.localizedDescription
-			info.url = await self.url
+			info.record(error: error)
+			info.record(url: await self.url)
 			await didFail(with: error)
 			if server.configuration.logCancelledTasks || !info.wasCancelled {
 				echo(info, data: nil)
@@ -33,11 +33,11 @@ public extension DownloadingTask {
 		}
 
 		do {
+			session.request = try await willSendRequest(session.request)
 			info.urlRequest = session.request
-			info.url = session.request.url
+			info.record(url: session.request.url)
 			info.timeoutDuration = session.request.timeoutInterval
 
-			try await willSendRequest(request: session.request)
 			let (bytes, response) = try await session.openByteStream()
 			info.urlResponse = response
 
@@ -48,7 +48,7 @@ public extension DownloadingTask {
 			let statusFamily = (httpResponse.statusCode / 100) * 100
 			if throwingStatusCategories.contains(statusFamily) {
 				let body = try? await bytes.collect(upTo: 100_000)
-				info.data = body
+				info.record(responseData: body)
 				if let error = HTTPError.withStatusCode(httpResponse.statusCode, data: body, throwingStatusCategories: throwingStatusCategories, underlyingError: nil) {
 					throw error
 				}
@@ -59,7 +59,7 @@ public extension DownloadingTask {
 		} catch {
 			session.finish()
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
-			info.error = error.prettyDescription
+			info.record(error: error)
 			info.wasCancelled = error.isCancellation
 			info.timedOut = error.isTimeOut
 			await didFail(with: error)
@@ -95,18 +95,18 @@ extension DownloadingTask {
 				info.isComplete = true
 			} catch {
 				streamError = error
-				info.error = error.prettyDescription
+				info.record(error: error)
 				info.wasCancelled = error.isCancellation
 				info.timedOut = error.isTimeOut
 				await didFail(with: error)
 			}
 
 			session.finish()
-			info.data = recorded
+			info.record(responseData: recorded)
 			info.duration = abs(info.startedAt.timeIntervalSinceNow)
-			info.echoStyle = echoStyle(for: info.data)
+			info.echoStyle = echoStyle(for: recorded)
 			if server.configuration.logCancelledTasks || !info.wasCancelled {
-				echo(info, data: info.data)
+				echo(info, data: recorded)
 				await info.save(file: file, function: function, line: line)
 			}
 			await server.didFinish(task: self, response: nil, error: streamError)

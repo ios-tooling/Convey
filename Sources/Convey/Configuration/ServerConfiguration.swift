@@ -34,6 +34,12 @@ public struct ServerConfiguration: Sendable {
 	public var maxLoggedUploadSize = 1024 * 4
 	public var defaultHeaders: Headers = [:]
 	public var redactedHeaders: Set<String> = ["Authorization", "Proxy-Authorization", "Cookie", "Set-Cookie", "X-API-Key"]
+	/// Recording is metadata-only by default. Enable these selectively when
+	/// persisted payloads are required and known not to contain secrets.
+	public var recordsRequestBodies = false
+	public var recordsResponseBodies = false
+	public var recordsURLQueries = false
+	public var recordsErrorDescriptions = false
 	public var userAgent: String? = Self.defaultUserAgent
 	public var pinExpiredToleranceInDays = 0.0
 	public var enableTaskLoggingAtLaunch = false

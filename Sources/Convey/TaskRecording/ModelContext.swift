@@ -49,11 +49,12 @@ extension ModelContext {
 	
 	func removeTasks(greaterThan count: Int) {
 		let request = FetchDescriptor<RecordedTask>(sortBy: [SortDescriptor(\.startedAt)])
-		guard let all = try? fetch(request), all.count > count else { return }
+		let retainedCount = max(0, count)
+		guard let all = try? fetch(request), all.count > retainedCount else { return }
 		
 		do {
-			for i in 0...(all.count - count) {
-				delete(all[i])
+			for task in all.prefix(all.count - retainedCount) {
+				delete(task)
 			}
 			try save()
 		} catch {

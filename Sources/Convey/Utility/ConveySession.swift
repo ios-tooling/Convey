@@ -12,8 +12,9 @@ import Foundation
 	let server: ConveyServerable
 	var session: URLSession = .shared
 	let task: any DownloadingTask
-	let request: URLRequest
+	var request: URLRequest
 	let ungzippedRequest: URLRequest?
+	private var isFinished = false
 	var requestID: String? { task.requestID }
 	var taskType: any DownloadingTask.Type { type(of: task) }
 	
@@ -60,11 +61,6 @@ import Foundation
 			
 			configuration.timeoutIntervalForResource = task.timeoutIntervalForResource ?? taskConfig?.timeout ?? server.configuration.defaultTimeout
 			
-			if let session = Self.activeSessions.value.first(where: { $0.session.hasSameConfiguration(as: configuration)}) {
-				self.session = session.session
-				return
-			}
-
 			self.session = URLSession(configuration: configuration, delegate: SharedURLSessionDelegate.instance, delegateQueue: server.downloadQueue)
 		} catch {
 			throw error
@@ -76,12 +72,17 @@ import Foundation
 	}
 	
 	func cancel() {
+		guard !isFinished else { return }
+		isFinished = true
 		session.invalidateAndCancel()
-		finish()
+		Self.activeSessions.perform { $0.remove(self) }
 	}
 	
 	func finish() {
+		guard !isFinished else { return }
+		isFinished = true
 		Self.activeSessions.perform { $0.remove(self) }
+		session.finishTasksAndInvalidate()
 	}
 	
 }

@@ -26,19 +26,10 @@ public extension CGSize {
 extension CGSize {
 	var aspectRatio: CGFloat { width / height }
 	func scaled(within parent: CGSize, toFit: Bool) -> CGSize {
-		if toFit {
-			let scale = min(parent.width / self.width, parent.height / self.height)
-			let width = self.width * scale
-			let height = self.height * scale
-			return CGSize(width: width, height: height)
-		}
-		if aspectRatio < parent.aspectRatio {
-			return CGSize(width: parent.width * (aspectRatio / parent.aspectRatio), height: parent.height)
-		} else if aspectRatio < parent.aspectRatio {
-			return CGSize(width: parent.width, height: parent.height * (parent.aspectRatio / aspectRatio))
-		} else {
-			return parent
-		}
+		guard width > 0, height > 0, parent.width > 0, parent.height > 0 else { return .zero }
+		guard toFit else { return parent }
+		let scale = min(parent.width / width, parent.height / height)
+		return CGSize(width: width * scale, height: height * scale)
 	}
 }
 
@@ -121,17 +112,18 @@ public struct ImageSize: CustomStringConvertible, Sendable {
 	
 	func matches(size check: CGSize) -> Bool {
 		if let aspectRatio {
-			return check.width / check.height == aspectRatio
+			guard check.height > 0 else { return false }
+			return abs(check.width / check.height - aspectRatio) <= tolerance
 		}
 
 		if isMaxSize {
-			if let width, width > check.width + tolerance { return false }
-			if let height, height > check.height + tolerance { return false }
+			if let width, check.width > width + tolerance { return false }
+			if let height, check.height > height + tolerance { return false }
 			return true
 		}
 		
-		if let width, width < check.width - tolerance { return false }
-		if let height, height < check.width - tolerance { return false }
+		if let width, abs(check.width - width) > tolerance { return false }
+		if let height, abs(check.height - height) > tolerance { return false }
 
 		return true
 	}
@@ -142,15 +134,14 @@ extension ImageSize {
 	func resize(_ image: UIImage) -> UIImage? {
 		if matches(size: image.size) { return image }
 		if let limit = size(basedOn: image.size) {
-			let scaled = image.size.scaled(within: limit, toFit: toFit)
+			let outputSize = image.size.scaled(within: limit, toFit: toFit)
+			let scale = toFit ? min(outputSize.width / image.size.width, outputSize.height / image.size.height) : max(outputSize.width / image.size.width, outputSize.height / image.size.height)
+			let drawnSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+			let drawnRect = CGRect(x: (outputSize.width - drawnSize.width) / 2, y: (outputSize.height - drawnSize.height) / 2, width: drawnSize.width, height: drawnSize.height)
 			let format = UIGraphicsImageRendererFormat()
 			format.scale = 1
-			return UIGraphicsImageRenderer(size: scaled, format: format).image { ctx in
-				if toFit {
-					image.draw(in: CGRect(x: 0, y: 0, width: scaled.width, height: scaled.height))
-				} else {
-					image.draw(in: CGRect(x: (scaled.width - image.size.width) / 2, y: (scaled.height - image.size.height) / 2, width: image.size.width, height: image.size.height))
-				}
+			return UIGraphicsImageRenderer(size: outputSize, format: format).image { _ in
+				image.draw(in: drawnRect)
 			}
 		}
 		return image
@@ -159,7 +150,17 @@ extension ImageSize {
 #elseif os(macOS)
 extension ImageSize {
 	func resize(_ image: NSImage) -> NSImage? {
-		return image
+		if matches(size: image.size) { return image }
+		guard let limit = size(basedOn: image.size) else { return image }
+		let outputSize = image.size.scaled(within: limit, toFit: toFit)
+		let scale = toFit ? min(outputSize.width / image.size.width, outputSize.height / image.size.height) : max(outputSize.width / image.size.width, outputSize.height / image.size.height)
+		let drawnSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+		let drawnRect = CGRect(x: (outputSize.width - drawnSize.width) / 2, y: (outputSize.height - drawnSize.height) / 2, width: drawnSize.width, height: drawnSize.height)
+		let resized = NSImage(size: outputSize)
+		resized.lockFocus()
+		image.draw(in: drawnRect, from: .zero, operation: .copy, fraction: 1)
+		resized.unlockFocus()
+		return resized
 	}
 }
 #else

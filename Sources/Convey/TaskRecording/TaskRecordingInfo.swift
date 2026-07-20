@@ -31,6 +31,10 @@ import TagAlong
 	var shouldPersist = false
 	var tags: [Tag]?
 	var redactedHeaderNames: Set<String> = []
+	var recordsRequestBodies: Bool?
+	var recordsResponseBodies: Bool?
+	var recordsURLQueries: Bool?
+	var recordsErrorDescriptions: Bool?
 	
 	var separator = 		"\n##============================================================##\n"
 	var endSeparator = 	"\n################################################################\n"
@@ -38,10 +42,10 @@ import TagAlong
 	var urlRequest: URLRequest? {
 		get { nil }
 		set { if let newValue {
-			var recorded = CodableURLRequest(newValue, includingBody: false)
+			var recorded = CodableURLRequest(requestForRecording(newValue), includingBody: false)
 			recorded.redact(headersNamed: redactedHeaderNames)
 			request = recorded
-			httpBody = newValue.httpBody
+			httpBody = recordsRequestBodies == true ? newValue.httpBody : nil
 		}}
 	}
 
@@ -49,10 +53,10 @@ import TagAlong
 		get { request?.request(withData: httpBody) }
 		set { if let newValue {
 			isGzipped = true
-			var recorded = CodableURLRequest(newValue, includingBody: false)
+			var recorded = CodableURLRequest(requestForRecording(newValue), includingBody: false)
 			recorded.redact(headersNamed: redactedHeaderNames)
 			request = recorded
-			httpBody = newValue.httpBody
+			httpBody = recordsRequestBodies == true ? newValue.httpBody : nil
 		}}
 	}
 
@@ -66,6 +70,38 @@ import TagAlong
 	}
 
 	var data: Data?
+
+	mutating func record(url: URL?) {
+		guard recordsURLQueries != true, let url,
+			var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+			self.url = url
+			return
+		}
+		components.query = nil
+		components.fragment = nil
+		self.url = components.url
+	}
+
+	mutating func record(responseData: Data?) {
+		data = recordsResponseBodies == true ? responseData : nil
+	}
+
+	mutating func record(error: any Error) {
+		self.error = recordsErrorDescriptions == true
+			? error.prettyDescription
+			: String(describing: type(of: error))
+	}
+
+	private func requestForRecording(_ request: URLRequest) -> URLRequest {
+		guard recordsURLQueries != true else { return request }
+		var request = request
+		guard let url = request.url,
+			var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return request }
+		components.query = nil
+		components.fragment = nil
+		request.url = components.url
+		return request
+	}
 	
 	init<T: DownloadingTask>(_ task: T, id: String? = nil) {
 		uniqueID = id ?? UUID().uuidString
@@ -75,6 +111,10 @@ import TagAlong
 		echoStyle = task.echoStyle
 		tags = task.allTags
 		redactedHeaderNames = task.allRedactedHeaderNames
+		recordsRequestBodies = task.server.configuration.recordsRequestBodies
+		recordsResponseBodies = task.server.configuration.recordsResponseBodies
+		recordsURLQueries = task.server.configuration.recordsURLQueries
+		recordsErrorDescriptions = task.server.configuration.recordsErrorDescriptions
 		if id != nil { isRetry = true }
 		if let storable = task as? any StorableTask {
 			shouldPersist = true

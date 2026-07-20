@@ -36,6 +36,9 @@ import TagAlong
 	func retryInterval(afterError error: any Error, count: Int) -> TimeInterval?
 
 	func willSendRequest(request: URLRequest) async throws
+	/// Returns the final request that Convey will transmit. The labeled legacy
+	/// hook is invoked by the default implementation for source compatibility.
+	func willSendRequest(_ request: URLRequest) async throws -> URLRequest
 	func didReceiveResponse(response: URLResponse, data: Data) async throws
 	func didFail(with error: any Error) async
 	func didFinish(with response: ServerResponse<DownloadPayload>) async
@@ -78,6 +81,10 @@ public extension DownloadingTask {
 	var throwingStatusCategories: [Int] { configuration?.throwingStatusCategories ?? server.configuration.throwingStatusCategories }
 	
 	func willSendRequest(request: URLRequest) async throws { }
+	func willSendRequest(_ request: URLRequest) async throws -> URLRequest {
+		try await willSendRequest(request: request)
+		return request
+	}
 	func didReceiveResponse(response: URLResponse, data: Data) async throws { }
 	func didFail(with error: any Error) async { }
 	func didFinish(with response: ServerResponse<DownloadPayload>) async { }

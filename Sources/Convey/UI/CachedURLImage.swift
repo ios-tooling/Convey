@@ -27,7 +27,6 @@ public struct CachedURLImage: View {
 	let renderingMode: Image.TemplateRenderingMode
 	
 	@State var cachedImage: PlatformImage?
-	@State var fetchedURL: URL?
 	
 	func platformImage(named name: String) -> PlatformImage? {
 #if os(macOS)
@@ -49,45 +48,43 @@ public struct CachedURLImage: View {
 	}
 	
 	var imageView: Image? {
-		Image(platformImage: platformImage)?.renderingMode(renderingMode) ?? placeholder?.renderingMode(renderingMode)
-	}
-	
-	var platformImage: PlatformImage? {
-		if let cachedImage { return cachedImage }
-		
-		if cachedImage == nil, let imageURL {
-			Task { @MainActor in
-				do {
-					let image = try await sharedImagesCache[async: imageURL]
-
-					if #available(iOS 16.0, *) {
-						if let end = deferredUntil, end > Date() {
-							let interval = end.timeIntervalSinceNow
-							if interval > 0 {
-								try await Task.sleep(nanoseconds: UInt64(Double(1_000_000_000) * interval))
-							}
-						}
-					}
-					cachedImage = image
-				} catch {
-					self.error = error
-				}
-			}
-		}
-		
-		return nil
+		Image(platformImage: cachedImage)?.renderingMode(renderingMode) ?? placeholder?.renderingMode(renderingMode)
 	}
 	
 	public var body: some View {
-		ZStack() {
+		ZStack(alignment: .bottom) {
 			if let imageView {
 				imageView
 					.resizable()
 					.aspectRatio(contentMode: contentMode)
 			}
+			if showURLs, let imageURL {
+				Text(imageURL.absoluteString)
+					.font(.caption2)
+					.lineLimit(1)
+			}
 		}
-		.onChange(of: imageURL) { url in
-			cachedImage = nil
+		.task(id: imageURL) {
+			await loadImage()
+		}
+	}
+
+	private func loadImage() async {
+		cachedImage = nil
+		error = nil
+		guard let imageURL else { return }
+		do {
+			guard let image = try await sharedImagesCache[async: imageURL] else { return }
+			if let end = deferredUntil, end > Date() {
+				let delay = max(0, end.timeIntervalSinceNow)
+				try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+			}
+			try Task.checkCancellation()
+			cachedImage = imageSize?.resize(image) ?? image
+		} catch is CancellationError {
+			// A URL change cancels the previous load; no user-visible error.
+		} catch {
+			self.error = error
 		}
 	}
 }
