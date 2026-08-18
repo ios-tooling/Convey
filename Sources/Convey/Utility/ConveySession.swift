@@ -110,6 +110,14 @@ extension ConveySession {
 					}
 					return (data, response, attemptNumber, httpError)
 				}
+				if let operationError = try task.operationError(response: response, data: data) {
+					attemptNumber += 1
+					if let delay = task.retryInterval(afterError: operationError, count: attemptNumber) {
+						try await retryDelay(delay)
+						continue
+					}
+					return (data, response, attemptNumber, nil)
+				}
 				return (data, response, attemptNumber + 1, nil)
 			} catch let error {
 				attemptNumber += 1

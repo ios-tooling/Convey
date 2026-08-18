@@ -117,6 +117,99 @@ let data = try await FetchAvatarTask(userID: "123").downloadData().payload
 try await CreateUserTask(uploadPayload: .init(name: "Alice", email: "alice@example.com")).send()
 ```
 
+## GraphQL
+
+`GraphQLTask` uses the same server, headers, recording, and retry machinery as
+every other Convey task. Point the server's remote directly at the single
+GraphQL endpoint, declare the response under `data`, and provide the raw query:
+
+```swift
+struct RepositoryIssuesTask: PaginatedGraphQLTask {
+    typealias GraphQLPayload = Payload
+    typealias PageNode = Issue
+
+    struct Payload: Decodable, Sendable {
+        let repository: Repository
+    }
+
+    struct Repository: Decodable, Sendable {
+        let issues: GraphQLConnection<Issue>
+    }
+
+    struct Issue: Decodable, Sendable {
+        let number: Int
+        let title: String
+    }
+
+    var configuration: TaskConfiguration? = nil
+    let owner: String
+    let name: String
+    var cursor: String? = nil
+
+    var query: String {
+        """
+        query RepositoryIssues($owner: String!, $name: String!, $first: Int!, $after: String) {
+          repository(owner: $owner, name: $name) {
+            issues(first: $first, after: $after) {
+              nodes { number title }
+              pageInfo { hasNextPage hasPreviousPage endCursor }
+            }
+          }
+        }
+        """
+    }
+
+    var variables: GraphQLVariables? {
+        ["owner": .string(owner), "name": .string(name), "first": 50,
+         "after": cursor.map(GraphQLValue.string) ?? .null]
+    }
+
+    func withCursor(_ cursor: String?) -> Self {
+        var copy = self
+        copy.cursor = cursor
+        return copy
+    }
+
+    func connection(from payload: Payload) -> GraphQLConnection<Issue> {
+        payload.repository.issues
+    }
+}
+
+let payload = try await RepositoryIssuesTask(owner: "ios-tooling", name: "Convey").execute()
+let issues = payload.repository.issues.nodes
+```
+
+Variables support strings, integers, doubles, booleans, arrays, objects, and
+explicit `null`. Omitting a dictionary key omits the variable; assigning
+`.null` sends JSON null. For a hand-declared variables type, use
+`GraphQLVariables(encoding:)`. Request JSON is emitted with sorted keys.
+
+Queries may declare shared `GraphQLFragment` values through `fragments`;
+transitive dependencies are appended once in deterministic name order. Longer
+documents can live in processed package resources and be loaded with
+`GraphQLDocument.named(_:in:)`.
+
+For Relay-style pagination, refine the task to `PaginatedGraphQLTask`, implement
+`withCursor(_:)` and `connection(from:)`, then consume pages lazily or collect a
+bounded number of nodes:
+
+```swift
+for try await page in RepositoryIssuesTask(...).pages() {
+    render(page)
+}
+
+let firstHundred = try await RepositoryIssuesTask(...).allNodes(limit: 100)
+```
+
+GraphQL operation errors commonly arrive with HTTP 200. `execute()` throws a
+typed `GraphQLTaskError` for them (`notFound`, `forbidden`, `rateLimited`,
+`unauthenticated`, or `invalidQuery`), while `executeEnvelope()` exposes the
+full envelope when partial-result handling is needed. Partial data throws by
+default; set `allowsPartialResults` to `true` to return decoded data alongside
+server errors. Operation errors are passed to the same
+`retryInterval(afterError:count:)` hook as transport and HTTP errors, so a task
+can retry `.rateLimited` without retrying `.notFound`.
+
 ## Core Concepts
 
 ### Server Architecture

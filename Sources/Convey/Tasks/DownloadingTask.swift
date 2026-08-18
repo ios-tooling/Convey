@@ -34,6 +34,10 @@ import TagAlong
 	/// check it to retry, say, 429/5xx but not 404). `count` starts at 1
 	/// and increments per retry; the final error is surfaced when nil.
 	func retryInterval(afterError error: any Error, count: Int) -> TimeInterval?
+	/// Returns an operation-level error carried by an otherwise successful HTTP
+	/// response. Convey uses this only to consult `retryInterval`; the response
+	/// still proceeds through normal decoding when the task declines to retry.
+	func operationError(response: URLResponse, data: Data) throws -> (any Error)?
 
 	func willSendRequest(request: URLRequest) async throws
 	/// Returns the final request that Convey will transmit. The labeled legacy
@@ -44,6 +48,9 @@ import TagAlong
 	func didFinish(with response: ServerResponse<DownloadPayload>) async
 	var echoStyle: TaskEchoStyle { get }
 	func echoStyle(for data: Data?) -> TaskEchoStyle
+	/// A task-specific console representation of its request body. Returning nil
+	/// preserves Convey's standard byte-oriented echo output.
+	func formattedRequestEcho(responseData: Data?) -> String?
 	var tags: TagCollection? { get }
 }
 
@@ -78,6 +85,7 @@ public extension DownloadingTask {
 	var requestID: String? { nil }
 	var tags: TagCollection? { nil }
 	func retryInterval(afterError error: any Error, count: Int) -> TimeInterval? { nil }
+	func operationError(response: URLResponse, data: Data) throws -> (any Error)? { nil }
 	var throwingStatusCategories: [Int] { configuration?.throwingStatusCategories ?? server.configuration.throwingStatusCategories }
 	
 	func willSendRequest(request: URLRequest) async throws { }
@@ -88,6 +96,7 @@ public extension DownloadingTask {
 	func didReceiveResponse(response: URLResponse, data: Data) async throws { }
 	func didFail(with error: any Error) async { }
 	func didFinish(with response: ServerResponse<DownloadPayload>) async { }
+	func formattedRequestEcho(responseData: Data?) -> String? { nil }
 	
 	var acceptType: String { "*/*" }
 	var allRedactedHeaderNames: Set<String> {

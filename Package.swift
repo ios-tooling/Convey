@@ -26,6 +26,6 @@ let package = Package(
 		  // Targets can depend on other targets in this package, and on products in packages which this package depends on.
 		  .target(name: "Convey", dependencies: ["system-zlib", "JohnnyCache", "Chronicle", "TagAlong"]),
 		  .target(name: "system-zlib"),
-		  .testTarget(name: "ConveyTests", dependencies: ["Convey"], resources: [.copy("test_assets.xcassets")]),
+		  .testTarget(name: "ConveyTests", dependencies: ["Convey"], resources: [.copy("test_assets.xcassets"), .process("GraphQL/Fixtures")]),
 	 ]
 )

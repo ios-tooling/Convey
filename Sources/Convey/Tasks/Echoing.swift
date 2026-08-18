@@ -40,6 +40,11 @@ public extension DownloadingTask {
 	func echo(_ info: TaskRecordingInfo, data: Data?) {
 		let style = echoStyle(for: data)
 		if style.contains(.onlyIfError), info.error == nil { return }
+		if let formatted = formattedRequestEcho(responseData: data),
+			style.intersection([.consoleRequest, .consoleFull, .console5k, .console10k, .console30k, .console100k]).isEmpty == false {
+			print(formatted)
+			return
+		}
 		
 		if style.contains(.consoleFull) {
 			print(info.fullDescription)
