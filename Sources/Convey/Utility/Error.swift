@@ -9,9 +9,9 @@ import Foundation
 
 public extension Error {
 	var httpStatusCode: Int? {
-		guard let urlError = self as? URLError else { return nil }
-		
-		return urlError.errorCode
+		if let urlError = self as? URLError { return urlError.errorCode }
+		if let httpError = self as? HTTPError.ClientError { return httpError.statusCode }
+		return nil
 	}
 	
 	var prettyDescription: String {
