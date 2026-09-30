@@ -17,6 +17,10 @@ import TagAlong
 	var startedAt = Date()
 	var request: CodableURLRequest?
 	var httpBody: Data?
+	// the sizes are kept even when the bodies themselves aren't recorded, so a log can
+	// still say how much went over the wire
+	var requestBodySize: Int?
+	var responseBodySize: Int?
 	var isGzipped = false
 	var response: CodableURLResponse?
 	var duration: TimeInterval?
@@ -45,6 +49,7 @@ import TagAlong
 			var recorded = CodableURLRequest(requestForRecording(newValue), includingBody: false)
 			recorded.redact(headersNamed: redactedHeaderNames)
 			request = recorded
+			requestBodySize = newValue.httpBody?.count			// as sent: the gzipped form, when uploads are gzipped
 			httpBody = recordsRequestBodies == true ? newValue.httpBody : nil
 		}}
 	}
@@ -83,6 +88,7 @@ import TagAlong
 	}
 
 	mutating func record(responseData: Data?) {
+		responseBodySize = responseData?.count
 		data = recordsResponseBodies == true ? responseData : nil
 	}
 

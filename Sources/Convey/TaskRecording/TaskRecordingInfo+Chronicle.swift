@@ -29,16 +29,18 @@ extension TaskRecordingInfo {
 			method: method,
 			requestHeaders: request?.allHTTPHeaderFields,
 			requestBody: httpBody,
+			requestBodySize: requestBodySize,
 			statusCode: statusCode,
 			responseHeaders: response?.allHeaderFields,
 			responseBody: data,
+			responseBodySize: responseBodySize,
 			error: errorMessage,
 			wasCancelled: wasCancelled,
 			metrics: NetworkMetrics(
 				startTime: startedAt,
 				endTime: endTime ?? startedAt,
-				bytesSent: Int64(httpBody?.count ?? 0),
-				bytesReceived: Int64(data?.count ?? 0)
+				bytesSent: Int64(requestBodySize ?? 0),
+				bytesReceived: Int64(responseBodySize ?? 0)
 			),
 			tags: tags,
 			file: file,
