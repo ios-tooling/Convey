@@ -621,7 +621,7 @@
 /* Begin XCRemoteSwiftPackageReference section */
 		B54E0A642CF1EF9400D78EE2 /* XCRemoteSwiftPackageReference "suite" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ios-tooling/suite";
+			repositoryURL = "https://github.com/ios-tooling/Suite";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.1.16;
@@ -629,7 +629,7 @@
 		};
 		B54E0B2D2CF1F18600D78EE2 /* XCRemoteSwiftPackageReference "crossplatformkit" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ios-tooling/crossplatformkit";
+			repositoryURL = "https://github.com/ios-tooling/CrossPlatformKit";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.0.13;
