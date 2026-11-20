@@ -578,7 +578,7 @@ See [CLAUDE.md](CLAUDE.md) for comprehensive framework documentation and impleme
 
 ## License
 
-MIT License - see LICENSE file for details.
+This project is licensed under the [MIT License](license.md).
 
 ## Contributing
 
